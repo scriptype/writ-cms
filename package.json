@@ -1,0 +1,17 @@
+{
+  "name": "writ-cms",
+  "version": "1.0.0",
+  "description": "Site generator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scriptype/writ-cms.git"
+  },
+  "homepage": "https://github.com/scriptype/writ-cms#readme",
+  "devDependencies": {
+    "handlebars": "4.7.7"
+  }
+}
