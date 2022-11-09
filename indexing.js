@@ -7,7 +7,11 @@ const {
   shouldIncludeDirectory,
   removeExtension
 } = require('./helpers/fs')
-const { isSubfolderPost, getOutputPath } = require('./helpers/rendering')
+const {
+  isSubfolderPost,
+  getOutputPath,
+  getSubPageFileName
+} = require('./helpers/rendering')
 const { UNCATEGORIZED } = require('./constants')
 const { templateParser } = require('./rendering')
 const settings = require('./settings')
@@ -31,7 +35,7 @@ const fetchSubPages = (pagesPath, pages = []) => {
       if (isDirectory(path)) {
         return fetchSubPages(path)
       }
-      const name = removeExtension(path.replace(/pages\//, ''))
+      const name = removeExtension(getSubPageFileName(path))
       const slug = getSlug(name)
       const src = path
       const pageFile = {

@@ -1,4 +1,5 @@
 const { format, basename, extname } = require('path')
+const { paths } = require('../settings')
 
 const INDEX_TEMPLATE_FILE_NAME = format({ name: 'index', ext: '.hbs'})
 const SUBFOLDER_POST_FILE_NAME = format({ name: 'post', ext: '.hbs'})
@@ -16,9 +17,12 @@ const getOutputPath = (path) => {
 }
 
 const getSubPageOutputPath = (path) => {
-  return path
+  return getSubPageFileName(path)
     .replace(new RegExp(extname(path) + '\$'), '.html')
-    .replace(/^pages\//, '')
+}
+
+const getSubPageFileName = (path) => {
+  return path.replace(new RegExp(`^${paths.SUBPAGES}\/`), '')
 }
 
 module.exports = {
@@ -26,5 +30,6 @@ module.exports = {
   SUBFOLDER_POST_FILE_NAME,
   isSubfolderPost,
   getOutputPath,
-  getSubPageOutputPath
+  getSubPageOutputPath,
+  getSubPageFileName
 }
