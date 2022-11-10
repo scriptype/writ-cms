@@ -13,5 +13,8 @@
   "homepage": "https://github.com/scriptype/writ-cms#readme",
   "devDependencies": {
     "handlebars": "4.7.7"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }
