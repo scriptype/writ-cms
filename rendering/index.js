@@ -1,11 +1,11 @@
 const fs = require('fs')
-const { extname, join } = require('path')
+const { extname, join, resolve } = require('path')
 const Handlebars = require('handlebars')
 const templateParser = require('./handlebars/template-parser')
 const handlebarsHelpers = require('./handlebars/helpers')
 const { readFileContent } = require('../helpers/fs')
 
-const PARTIALS_PATH = join('_cms', 'core', 'rendering', 'handlebars', 'partials')
+const PARTIALS_PATH = resolve(join(__dirname, 'handlebars', 'partials'))
 
 const registerHelpers = () => {
   Object.keys(handlebarsHelpers).forEach((key) => {
