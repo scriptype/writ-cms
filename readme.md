@@ -149,14 +149,8 @@ you can:
 1) Create a folder named "assets"
 2) Put any static assets into this folder
 
-By default, the "assets" is recognized as a folder of static assets to copy.
-
-Writ-CMS treats any folders in your blog as categories. To avoid creating a category
-named "assets", when we just wanted to have a folder to keep assets, you should use
-the name "assets" for this folder. It's recognized by the cms as the assets folder,
-by default.
-
-But, you can tell the cms to use a different folder name by adding this to your `settings.json`:
+By default, the "assets" is recognized as a folder of static assets to copy. But,
+you can tell the cms to use a different folder name by adding this to your `settings.json`:
 
 ```
 "assetsDirectory": "static-stuff"
