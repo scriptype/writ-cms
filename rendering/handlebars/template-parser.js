@@ -4,11 +4,13 @@ const READ_MORE_DIVIDER = '{{seeMore}}'
 const EXTENSION = '.hbs'
 
 const getMetaBlock = (content) => {
-  return content.match(/\{\{.*\n.*=".*"\n\}\}/gs)[0]
+  const metaBlock = content.match(/\{\{.*\n.*=".*"\n\}\}/gs)
+  return metaBlock ? metaBlock[0] : ''
 }
 
 const getContent = (content) => {
-  return content.match(/\n\}\}\n(.*)\{\{\/.*\}\}\n$/s)[1]
+  const contentSection = content.match(/\n\}\}\n(.*)\{\{\/.*\}\}\n$/s)
+  return contentSection ? contentSection[1] : ''
 }
 
 const getSummary = (content) => {
@@ -20,13 +22,14 @@ const getSummary = (content) => {
 }
 
 const getPartialType = (content, metaBlock) => {
-  return (metaBlock || getMetaBlock(content)).match(/\{\{#>(.*)/)[1].trim()
+  const partialType = (metaBlock || getMetaBlock(content)).match(/\{\{#>(.*)/)
+  return partialType ? partialType[1].trim() : 'text-post'
 }
 
 const getMetadata = (content, metaBlock) => {
-  return (metaBlock || getMetaBlock(content))
-    .match(/.*=.*/g)
-    .map(s => s
+  const metadata = (metaBlock || getMetaBlock(content)).match(/.*=.*/g)
+  if (!metadata) return {}
+  return metadata.map(s => s
       .trim()
       .split('=')
       .map(k => k.replace(/"/g, ''))

@@ -21,7 +21,7 @@ const attachPaging = (post, postIndex, posts) => {
   }
 }
 
-const attachDates = ({ date, ...rest }) => {
+const attachDates = ({ date = '2022-11-12, 02:04', ...rest }) => {
   const locale = 'en-US'
   const publishedAt = new Date(date)
   const publishedAtFull = publishedAt.toLocaleString(locale, { dateStyle: 'full' })
@@ -66,7 +66,7 @@ const createPost = (postFile) => {
     ...post.metadata,
     title: postFile.name,
     type: post.type,
-    tags: post.metadata.tags.split(',').map(t => t.trim()),
+    tags: post.metadata.tags ? post.metadata.tags.split(',').map(t => t.trim()) : [],
     summary: post.summary,
     site: settings.site,
   }
