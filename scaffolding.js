@@ -54,6 +54,13 @@ const sluggifyTree = (directory = paths.SITE) => {
   })
 }
 
+const cleanSubPagesFolder = () => {
+  const pathToSubPagesFolder = join(paths.SITE, paths.SUBPAGES)
+  if (isDirectory(pathToSubPagesFolder)) {
+    fs.rmdirSync(pathToSubPagesFolder)
+  }
+}
+
 module.exports = {
   scaffoldSite() {
     createSiteDir()
@@ -63,5 +70,6 @@ module.exports = {
 
   finalizeSite() {
     sluggifyTree()
+    cleanSubPagesFolder()
   }
 }
