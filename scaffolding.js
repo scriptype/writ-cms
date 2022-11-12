@@ -31,6 +31,17 @@ const copyPaths = () => {
     })
 }
 
+const copyStaticAssets = () => {
+  const src = join(__dirname, 'rendering', 'assets')
+  const out = join(paths.SITE, paths.ASSETS, '_')
+  console.log('src', src)
+  console.log('out', out)
+  if (!isDirectory(join(paths.SITE, paths.ASSETS))) {
+    fs.mkdirSync(join(paths.SITE, paths.ASSETS))
+  }
+  execSync(`cp -R ${src} ${out}`)
+}
+
 const sluggifyTree = (directory = paths.SITE) => {
   const files = fs.readdirSync(directory)
   files.forEach(fileName => {
@@ -47,6 +58,7 @@ module.exports = {
   scaffoldSite() {
     createSiteDir()
     copyPaths()
+    copyStaticAssets()
   },
 
   finalizeSite() {
