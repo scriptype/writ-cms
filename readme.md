@@ -16,7 +16,7 @@ you create in a target folder will be treated as one of these:
 - A subpage
 - A static asset
 
-So, you can generate a full-fledged static blog using a single file in a single folder (TBD).
+So, you can generate a full-fledged static blog using a single file in a single folder.
 
 ***
 
@@ -70,35 +70,8 @@ one from scratch below.
 
 1) Create a new empty folder named "My blog" and enter it.
 2) Create a file named `Hello, world.hbs`
-3) Create a file named `settings.json` with following contents:
-```
-{
-  "site": {
-    "title": "My new blog",
-    "description": "Welcome to my new blog"
-  },
-  "ignorePaths": [
-    "_.*",
-    "settings.json",
-    "start.js"
-  ]
-}
-
-```
-
-4) Create a file named `start.js` with following content:
-
-```
-const settings = require('./settings.json')
-const compile = require('writ-cms')
-compile(settings)
-```
-
-To be able to run `require('writ-cms')`, you either need to wait until this
-becomes an npm package, or link a local clone of `writ-cms` to your blog project,
-using `npm link` (i.e. `npm link writ-cms ../writ-cms`)
-
-5) Run `node start`
+3) Run `node -e "require('../writ-cms')()"`
+4) Start a static web server by running `npx http-server _site`
 
 Now you should see:
 
