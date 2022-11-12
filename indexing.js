@@ -17,6 +17,9 @@ const { templateParser } = require('./rendering')
 const settings = require('./settings')
 
 const fetchAssets = (assetsPath) => {
+  if (!isDirectory(assetsPath)) {
+    return []
+  }
   return fs.readdirSync(assetsPath).map(path => {
     const slug = getSlug(path)
     return {
@@ -29,6 +32,9 @@ const fetchAssets = (assetsPath) => {
 }
 
 const fetchSubPages = (pagesPath, pages = []) => {
+  if (!isDirectory(pagesPath)) {
+    return []
+  }
   return fs.readdirSync(pagesPath)
     .map(path => join(pagesPath, path))
     .map(path => {

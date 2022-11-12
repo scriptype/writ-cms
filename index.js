@@ -1,5 +1,5 @@
 // We need to init Settings before everything.
-const setup = (settings) => {
+const setup = (settings = {}) => {
   const Settings = require('./settings')
   Settings.init(settings)
 

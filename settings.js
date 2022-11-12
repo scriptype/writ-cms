@@ -14,7 +14,11 @@ const Settings = {
     categoriesDirectory: '.',
     assetsDirectory: 'assets',
     pagesDirectory: 'pages',
-    ignorePaths: []
+    ignorePaths: [
+      "_.*",
+      "settings.json",
+      "start.js"
+    ]
   },
   get paths() { return this._paths },
 

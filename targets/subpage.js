@@ -1,6 +1,7 @@
 const fs = require('fs')
 const { join } = require('path')
 const { settings, paths } = require('../settings')
+const { isDirectory } = require('../helpers/fs')
 const { getSubPageOutputPath } = require('../helpers/rendering')
 const { render } = require('../rendering')
 
@@ -22,7 +23,10 @@ const compileSubPage = (subPage) => {
 }
 
 const cleanSubPagesFolder = () => {
-  fs.rmdirSync(join(paths.SITE, paths.SUBPAGES))
+  const pathToSubPagesFolder = join(paths.SITE, paths.SUBPAGES)
+  if (isDirectory(pathToSubPagesFolder)) {
+    fs.rmdirSync(pathToSubPagesFolder)
+  }
 }
 
 module.exports = {
