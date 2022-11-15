@@ -48,7 +48,7 @@ const createSubPage = (subPageFile) => {
   }
   const metadataResult = templateParser.parseTemplate(subPageFile.content)
   const { type, metadata } = metadataResult
-  const result = {
+  return {
     ...subPageFile,
     ...metadata,
     ...attachDates(metadata),
@@ -56,7 +56,6 @@ const createSubPage = (subPageFile) => {
     type,
     tags: metadata.tags.split(',').map(t => t.trim()),
   }
-  return result
 }
 
 const createPost = (postFile) => {
