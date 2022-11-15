@@ -8,6 +8,10 @@ const { paths } = require('./settings')
 const INDEX_TEMPLATE_FILE_NAME = format({ name: 'index', ext: '.hbs' })
 const SUBFOLDER_POST_FILE_NAME = format({ name: 'post', ext: '.hbs' })
 
+const isSubfolderPost = (path) => {
+  return new RegExp(`^${SUBFOLDER_POST_FILE_NAME}|${INDEX_TEMPLATE_FILE_NAME}$`).test(basename(path))
+}
+
 const removeExtension = (fileName) => {
   return fileName.replace(extname(fileName), '')
 }
@@ -17,10 +21,6 @@ const shouldIncludeDirectory = (path) => {
     !path.startsWith('_') &&
     !path.includes('.') &&
     !path.match(paths.IGNORE_REG_EXP)
-}
-
-const isSubfolderPost = (path) => {
-  return new RegExp(`^${SUBFOLDER_POST_FILE_NAME}|${INDEX_TEMPLATE_FILE_NAME}$`).test(basename(path))
 }
 
 const getOutputPath = (path) => {
