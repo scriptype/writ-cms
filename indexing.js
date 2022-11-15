@@ -1,20 +1,42 @@
 const { join } = require('path')
+const { format, basename, extname } = require('path')
 const fs = require('fs')
-const { getSlug } = require('./helpers/string')
-const {
-  readFileContent,
-  isDirectory,
-  shouldIncludeDirectory,
-  removeExtension
-} = require('./helpers/fs')
-const {
-  isSubfolderPost,
-  getOutputPath,
-  getSubPageFileName
-} = require('./helpers/rendering')
+const { readFileContent, isDirectory, getSlug } = require('./helpers')
 const { UNCATEGORIZED } = require('./constants')
 const { templateParser } = require('./rendering')
-const settings = require('./settings')
+const { paths } = require('./settings')
+
+const INDEX_TEMPLATE_FILE_NAME = format({ name: 'index', ext: '.hbs' })
+const SUBFOLDER_POST_FILE_NAME = format({ name: 'post', ext: '.hbs' })
+
+const removeExtension = (fileName) => {
+  return fileName.replace(extname(fileName), '')
+}
+
+const shouldIncludeDirectory = (path) => {
+  return isDirectory(path) &&
+    !path.startsWith('_') &&
+    !path.includes('.') &&
+    !path.match(paths.IGNORE_REG_EXP)
+}
+
+const isSubfolderPost = (path) => {
+  const extension = extname(path)
+  console.log('isSubfolderPost', path, extension)
+  return new RegExp(`^${SUBFOLDER_POST_FILE_NAME}|${INDEX_TEMPLATE_FILE_NAME}$`).test(basename(path))
+}
+
+const getOutputPath = (path) => {
+  let newPath = path
+  if (isSubfolderPost(path)) {
+    newPath = path.replace(new RegExp(basename(path)), 'index.html')
+  }
+  return newPath.replace(new RegExp(extname(path) + '\$'), '.html')
+}
+
+const getSubPageFileName = (path) => {
+  return path.replace(new RegExp(`^${paths.SUBPAGES}\/`), '')
+}
 
 const fetchAssets = (assetsPath) => {
   if (!isDirectory(assetsPath)) {
@@ -41,14 +63,20 @@ const fetchSubPages = (pagesPath, pages = []) => {
       if (isDirectory(path)) {
         return fetchSubPages(path)
       }
-      const name = removeExtension(getSubPageFileName(path))
+      const fileName = getSubPageFileName(path)
+      const name = removeExtension(fileName)
       const slug = getSlug(name)
       const src = path
+      const out = join(
+        paths.SITE,
+        fileName.replace(new RegExp(extname(path) + '\$'), '.html')
+      )
       const pageFile = {
         name,
         slug,
         permalink: `/${slug}`,
-        src
+        src,
+        out
       }
       if (templateParser.isTemplate(path)) {
         return {
@@ -137,6 +165,7 @@ const createPostFile = (fileName, category, folderName) => {
   const slug = getSlug(name)
   const permalink = getPostPermalink(fileNameSlug, categorySlug, folderSlug)
   const src = join(...getPostSrcPath(fileName, category, folderName))
+  const out = join(paths.SITE, getOutputPath(src))
   const content = readFileContent(src)
   return {
     name: removeExtension(folderName || fileName),
@@ -144,6 +173,7 @@ const createPostFile = (fileName, category, folderName) => {
     permalink: folderName ? permalink : getOutputPath(permalink),
     category,
     src,
+    out,
     content,
   }
 }
@@ -157,10 +187,10 @@ const fetchPostsOfCategory = (category) => {
 }
 
 const indexSite = () => {
-  const assets = fetchAssets(settings.paths.ASSETS)
-  const subPages = fetchSubPages(settings.paths.SUBPAGES)
-  const categories = fetchCategories(settings.paths.CATEGORIES, {
-    excludePaths: [settings.paths.ASSETS, settings.paths.SUBPAGES]
+  const assets = fetchAssets(paths.ASSETS)
+  const subPages = fetchSubPages(paths.SUBPAGES)
+  const categories = fetchCategories(paths.CATEGORIES, {
+    excludePaths: [paths.ASSETS, paths.SUBPAGES]
   })
   .map(category => ({
     ...category,

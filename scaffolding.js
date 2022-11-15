@@ -1,8 +1,7 @@
 const fs = require('fs')
 const { resolve, join } = require('path')
 const { execSync } = require('child_process')
-const { getSlug } = require('./helpers/string')
-const { isDirectory } = require('./helpers/fs')
+const { getSlug, isDirectory } = require('./helpers')
 const { paths, settings } = require('./settings')
 
 const createSiteDir = () => {

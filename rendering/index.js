@@ -3,7 +3,7 @@ const { extname, join, resolve } = require('path')
 const Handlebars = require('handlebars')
 const templateParser = require('./handlebars/template-parser')
 const handlebarsHelpers = require('./handlebars/helpers')
-const { readFileContent } = require('../helpers/fs')
+const { readFileContent } = require('../helpers')
 
 const PARTIALS_PATH = resolve(join(__dirname, 'handlebars', 'partials'))
 
