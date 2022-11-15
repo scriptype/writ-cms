@@ -1,6 +1,5 @@
-const { join } = require('path')
-const { format, basename, extname } = require('path')
 const fs = require('fs')
+const { join, format, basename, extname } = require('path')
 const { readFileContent, isDirectory, getSlug } = require('./helpers')
 const { UNCATEGORIZED } = require('./constants')
 const { templateParser } = require('./rendering')
