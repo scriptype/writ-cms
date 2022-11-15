@@ -5,11 +5,10 @@ const { UNCATEGORIZED } = require('./constants')
 const { templateParser } = require('./rendering')
 const { paths } = require('./settings')
 
-const INDEX_TEMPLATE_FILE_NAME = format({ name: 'index', ext: '.hbs' })
-const SUBFOLDER_POST_FILE_NAME = format({ name: 'post', ext: '.hbs' })
-
 const isSubfolderPost = (path) => {
-  return new RegExp(`^${SUBFOLDER_POST_FILE_NAME}|${INDEX_TEMPLATE_FILE_NAME}$`).test(basename(path))
+  const isTemplateFile = templateParser.isTemplate(path)
+  const fileNameMatches = /^(index|post)\..+$/.test(basename(path))
+  return isTemplateFile && fileNameMatches
 }
 
 const removeExtension = (fileName) => {
