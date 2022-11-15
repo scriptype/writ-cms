@@ -108,21 +108,17 @@ const fetchCategories = (parentPath, { excludePaths }) => {
     })
 }
 
-const fetchDirectoriesWithPosts = (parentPath) => {
-  const childPaths = fs.readdirSync(parentPath)
+const fetchSubFolderPosts = (category) => {
+  const childPaths = fs.readdirSync(category.name)
   const directoriesToCheck = childPaths.filter(path => {
-    return shouldIncludeDirectory(join(parentPath, path))
+    return shouldIncludeDirectory(join(category.name, path))
   })
   return directoriesToCheck
     .map(dir => ({
       name: dir,
-      paths: fs.readdirSync(join(parentPath, dir))
+      paths: fs.readdirSync(join(category.name, dir))
     }))
     .filter(({ paths }) => paths.some(isSubfolderPost))
-}
-
-const fetchSubFolderPosts = (category) => {
-  return fetchDirectoriesWithPosts(category.name)
     .map(dir => {
       const fileName = dir.paths.find(isSubfolderPost)
       return createPostFile(fileName, category, dir.name)
