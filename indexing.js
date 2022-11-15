@@ -97,11 +97,13 @@ const fetchCategories = (parentPath, { excludePaths }) => {
       const slug = getSlug(name)
       const permalink = `/${slug}`
       const src = join(parentPath, name)
+      const out = join(paths.SITE, name, 'index.html')
       return {
         name,
         slug,
         permalink,
-        src
+        src,
+        out
       }
     })
 }

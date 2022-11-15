@@ -11,7 +11,7 @@ const compileCategoryPages = (categories) => {
   categories.forEach(category => {
     render({
       content: '{{>category}}',
-      path: join(paths.SITE, category.name, 'index.html'),
+      path: category.out,
       data: {
         site: settings.site,
         category,
