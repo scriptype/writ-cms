@@ -1,7 +1,7 @@
 const { extname } = require('path')
 
 const READ_MORE_DIVIDER = '{{seeMore}}'
-const EXTENSION = '.hbs'
+const EXTENSION_PATTERN = /\.hbs|\.handlebars/i
 
 const getMetaBlock = (content) => {
   const metaBlock = content.match(/\{\{.*\n.*=".*"\n\}\}/gs)
@@ -28,7 +28,9 @@ const getPartialType = (content, metaBlock) => {
 
 const getMetadata = (content, metaBlock) => {
   const metadata = (metaBlock || getMetaBlock(content)).match(/.*=.*/g)
-  if (!metadata) return {}
+  if (!metadata) {
+    return {}
+  }
   return metadata.map(s => s
       .trim()
       .split('=')
@@ -52,12 +54,13 @@ const parseTemplate = (content) => {
 }
 
 const isTemplate = (path) => {
-  return extname(path) === EXTENSION
+  const extension = extname(path)
+  return EXTENSION_PATTERN.test(extension)
 }
 
 module.exports = {
   READ_MORE_DIVIDER,
-  EXTENSION,
+  EXTENSION_PATTERN,
   getMetaBlock,
   getContent,
   getPartialType,
