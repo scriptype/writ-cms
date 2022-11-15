@@ -21,8 +21,6 @@ const shouldIncludeDirectory = (path) => {
 }
 
 const isSubfolderPost = (path) => {
-  const extension = extname(path)
-  console.log('isSubfolderPost', path, extension)
   return new RegExp(`^${SUBFOLDER_POST_FILE_NAME}|${INDEX_TEMPLATE_FILE_NAME}$`).test(basename(path))
 }
 
