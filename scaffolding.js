@@ -33,8 +33,6 @@ const copyPaths = () => {
 const copyStaticAssets = () => {
   const src = join(__dirname, 'rendering', 'assets')
   const out = join(paths.SITE, paths.ASSETS, '_')
-  console.log('src', src)
-  console.log('out', out)
   if (!isDirectory(join(paths.SITE, paths.ASSETS))) {
     fs.mkdirSync(join(paths.SITE, paths.ASSETS))
   }
