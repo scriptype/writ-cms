@@ -15,7 +15,9 @@ const Settings = {
     assetsDirectory: 'assets',
     pagesDirectory: 'pages',
     ignorePaths: [
-      "_.*",
+      "package.json",
+      "package-lock.json",
+      "node_modules",
       "settings.json",
       "start.js"
     ]
@@ -42,7 +44,7 @@ const Settings = {
       ASSETS: assetsDirectory,
       SUBPAGES: pagesDirectory,
       IGNORE: ignorePaths,
-      IGNORE_REG_EXP: new RegExp((ignorePaths).join('|'))
+      IGNORE_REG_EXP: new RegExp(ignorePaths.join('|'))
     }
   },
 
