@@ -21,6 +21,16 @@ const createCompiler = ({
   Targets,
   Settings
 }) => {
+  const siteIndex = require('./indexing-2').indexSite()
+  require('fs').writeFileSync('./index.json', JSON.stringify(siteIndex, null, 2))
+
+  const contentModel = require('./contentModel').parseIndex(siteIndex)
+  require('fs').writeFileSync('./content.json', JSON.stringify(contentModel, null, 2))
+
+  return
+
+  /*
+
   // Create target folder structure
   Scaffolder.scaffoldSite()
 
@@ -43,6 +53,7 @@ const createCompiler = ({
 
   // Finalize the target folder
   Scaffolder.finalizeSite()
+  */
 }
 
 module.exports = setup
