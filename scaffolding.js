@@ -8,7 +8,6 @@ const createSiteDir = () => {
   if (!paths.SITE) {
     throw new Error('paths.SITE is missing. Won\'t continue.')
   }
-  const dirname = resolve(__dirname)
   if (paths.SITE === '.' || paths.SITE === './' || paths.SITE === '..' || paths.SITE === '../' || paths.SITE === '/' || paths.SITE === '~') {
     throw new Error(`Dangerous export directory: "${paths.SITE}". Won't continue.`)
   }
