@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const { dirname, extname } = require('path')
 const { paths } = require('./settings')
 const { templateParser } = require('./rendering')
@@ -53,10 +54,14 @@ const createFolderedPost = (fsObject) => {
   const indexFile = fsObject.children
     .map(({ folderedPostIndex }) => folderedPostIndex)
     .find(Boolean)
+  const localAssets = fsObject.children
+    .map(({ localAsset }) => localAsset)
+    .filter(Boolean)
   return {
     post: {
-      ...fsObject,
+      ..._.omit(fsObject, 'children'),
       postMode: 'foldered',
+      localAssets,
       data: {
         title,
         slug: getSlug(title),
