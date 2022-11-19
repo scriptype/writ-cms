@@ -33,9 +33,23 @@ const createLocalAsset = (fsObject) => {
   }
 }
 
+const createSubPage = (fsObject) => {
+  const title = removeExtension(fsObject.name)
+  return {
+    subPage: {
+      ...fsObject,
+      data: {
+        title,
+        slug: getSlug(title),
+        ...templateParser.parseTemplate(fsObject.content)
+      }
+    }
+  }
+}
+
 const createSubPages = (fsObject) => {
   return {
-    pages: fsObject.children.map(child => child.name)
+    subPages: fsObject.children.map(createSubPage).map(({ subPage }) => subPage)
   }
 }
 
@@ -65,6 +79,7 @@ const createFolderedPost = (fsObject) => {
       data: {
         title,
         slug: getSlug(title),
+        id: getSlug(title),
         category: dirname(fsObject.name),
         ...templateParser.parseTemplate(indexFile.content)
       }
@@ -87,6 +102,7 @@ const createUncategorizedPost = (fsObject) => {
       data: {
         title,
         slug: getSlug(title),
+        id: getSlug(title),
         category: UNCATEGORIZED,
         ...templateParser.parseTemplate(fsObject.content)
       }
@@ -103,6 +119,7 @@ const createPost = (fsObject) => {
       data: {
         title,
         slug: getSlug(title),
+        id: getSlug(title),
         category: dirname(fsObject.path),
         ...templateParser.parseTemplate(fsObject.content)
       }
@@ -178,6 +195,53 @@ const parseIndex = (tree) => {
   })
 }
 
+const createContentModel = (parsedIndex) => {
+  return parsedIndex.reduce((contentTree, content) => {
+    if (content.category) {
+      return {
+        ...contentTree,
+        categories: contentTree.categories.concat({
+          ...content.category,
+          posts: content.category.posts.map(({ data }) => data.id)
+        }),
+        posts: contentTree.posts.concat(content.category.posts)
+      }
+    } if (content.post) {
+      const uncategorizedCategory = contentTree.categories.find(
+        cat => cat.name === UNCATEGORIZED
+      )
+      if (uncategorizedCategory) {
+        uncategorizedCategory.posts.push(content.post.data.id)
+      } else {
+        contentTree.categories.push({
+          name: UNCATEGORIZED,
+          posts: [content.post.data.id],
+          localAssets: []
+        })
+      }
+      return {
+        ...contentTree,
+        posts: contentTree.posts.concat(content.post),
+      }
+    } if (content.subPages) {
+      return {
+        ...contentTree,
+        subPages: content.subPages
+      }
+    }
+    return {
+      ...contentTree,
+      unrecognized: contentTree.unrecognized.concat(content)
+    }
+  }, {
+    categories: [],
+    posts: [],
+    subPages: [],
+    unrecognized: []
+  })
+}
+
 module.exports = {
-  parseIndex
+  parseIndex,
+  createContentModel
 }

@@ -21,11 +21,16 @@ const createCompiler = ({
   Targets,
   Settings
 }) => {
+  const fs = require('fs')
   const siteIndex = require('./indexing-2').indexSite()
-  require('fs').writeFileSync('./index.json', JSON.stringify(siteIndex, null, 2))
+  fs.writeFileSync('./index.json', JSON.stringify(siteIndex, null, 2))
 
-  const contentModel = require('./contentModel').parseIndex(siteIndex)
-  require('fs').writeFileSync('./content.json', JSON.stringify(contentModel, null, 2))
+  const ContentModel = require('./contentModel')
+  const parsedIndex = ContentModel.parseIndex(siteIndex)
+  fs.writeFileSync('./parsedIndex.json', JSON.stringify(parsedIndex, null, 2))
+
+  const contentModel = ContentModel.createContentModel(parsedIndex)
+  fs.writeFileSync('./content.json', JSON.stringify(contentModel, null, 2))
 
   return
 
