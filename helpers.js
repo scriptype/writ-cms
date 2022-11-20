@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { extname } = require('path')
 
 const readFileContent = (path) => {
   return fs.readFileSync(path, { encoding: 'utf-8' })
@@ -22,8 +23,13 @@ const getSlug = (string) => {
   return string.toLowerCase()
 }
 
+const removeExtension = (fileName) => {
+  return fileName.replace(extname(fileName), '')
+}
+
 module.exports = {
   readFileContent,
   isDirectory,
-  getSlug
+  getSlug,
+  removeExtension
 }

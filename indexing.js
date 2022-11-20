@@ -1,6 +1,6 @@
 const fs = require('fs')
 const { join, format, basename, extname } = require('path')
-const { readFileContent, isDirectory, getSlug } = require('./helpers')
+const { readFileContent, isDirectory, getSlug, removeExtension } = require('./helpers')
 const { UNCATEGORIZED } = require('./constants')
 const { templateParser } = require('./rendering')
 const { paths } = require('./settings')
@@ -9,10 +9,6 @@ const isSubfolderPost = (path) => {
   const isTemplateFile = templateParser.isTemplate(path)
   const fileNameMatches = /^(index|post)\..+$/.test(basename(path))
   return isTemplateFile && fileNameMatches
-}
-
-const removeExtension = (fileName) => {
-  return fileName.replace(extname(fileName), '')
 }
 
 const shouldIncludeDirectory = (path) => {

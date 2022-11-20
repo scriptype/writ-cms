@@ -2,78 +2,18 @@ const _ = require('lodash')
 const { dirname, extname, join } = require('path')
 const { settings, paths } = require('../settings')
 const { templateParser } = require('../rendering')
-const { getSlug } = require('../helpers')
+const { getSlug, removeExtension } = require('../helpers')
 const { UNCATEGORIZED } = require('../constants')
 const Linker = require('./linking')
+const contentTypes = require('./contentTypes')
 
-const contentTypes = {
-  POST: 'post',
-  CATEGORY: 'category',
-  SUBPAGE: 'subpage',
-  SUBPAGES: 'subpages',
-  ASSET: 'asset',
-  ASSETS: 'assets',
-  LOCAL_ASSET: 'localAsset',
-  FOLDERED_POST_INDEX: 'folderedPostIndex',
-  UNRECOGNIZED_DIRECTORY: 'unrecognizedDirecoty',
-  UNRECOGNIZED_FILE: 'unrecognizedFile'
-}
-
-const isPost = (fsObject) => {
-  return fsObject.type === contentTypes.POST
-}
-
-const isCategory = (fsObject) => {
-  return fsObject.type === contentTypes.CATEGORY
-}
-
-const isSubPage = (fsObject) => {
-  return fsObject.type === contentTypes.SUBPAGE
-}
-
-const isSubPages = (fsObject) => {
-  return fsObject.type === contentTypes.SUBPAGES
-}
-
-const isAsset = (fsObject) => {
-  return fsObject.type === contentTypes.ASSET
-}
-
-const isAssets = (fsObject) => {
-  return fsObject.type === contentTypes.ASSETS
-}
-
-const isLocalAsset = (fsObject) => {
-  return fsObject.type === contentTypes.LOCAL_ASSET
-}
-
-const isFolderedPostIndex = (fsObject) => {
-  return fsObject.type === contentTypes.FOLDERED_POST_INDEX
-}
-
-const isUnrecozgnizedDirectory = (fsObject) => {
-  return fsObject.type === contentTypes.UNRECOGNIZED_DIRECTORY
-}
-
-const isUnrecozgnizedFile = (fsObject) => {
-  return fsObject.type === contentTypes.UNRECOGNIZED_FILE
-}
-
-const hasContent = (fsObject) => {
-  return typeof fsObject.content !== 'undefined'
-}
-
-const isPostFile = (fsObject) => {
-  return templateParser.isTemplate(fsObject.name) && hasContent(fsObject)
-}
-
-const isFolderedPostIndexFile = (fsObject) => {
-  return isPostFile(fsObject) && fsObject.name.match(/^(index|post)\..+$/)
-}
-
-const removeExtension = (fileName) => {
-  return fileName.replace(extname(fileName), '')
-}
+const {
+  isPost,
+  isPostFile,
+  isFolderedPostIndex,
+  isFolderedPostIndexFile,
+  isLocalAsset
+} = contentTypes
 
 const createAsset = (fsObject) => {
   return {
@@ -133,6 +73,13 @@ const createCategory = (fsObject) => {
   }
 }
 
+const createFolderedPostIndex = (fsObject) => {
+  return {
+    ...fsObject,
+    type: contentTypes.FOLDERED_POST_INDEX
+  }
+}
+
 const createFolderedPost = (fsObject) => {
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const { metadata, ...templateData } = templateParser.parseTemplate(indexFile.content)
@@ -154,13 +101,6 @@ const createFolderedPost = (fsObject) => {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
     data
-  }
-}
-
-const createFolderedPostIndex = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.FOLDERED_POST_INDEX
   }
 }
 
@@ -301,7 +241,7 @@ const createContentModel = (parsedIndex) => {
 
       case contentTypes.POST:
         const uncategorizedCategory = ContentModel.categories.find(
-          c => c.name === UNCATEGORIZED
+          category => category.name === UNCATEGORIZED
         )
         if (uncategorizedCategory) {
           uncategorizedCategory.data.posts.push(content)
@@ -334,7 +274,7 @@ const createContentModel = (parsedIndex) => {
 
   ContentModel.posts.sort(sortPosts)
   ContentModel.postsJSON.push(
-    ...ContentModel.posts.map(({ content, output, ...rest }) => rest)
+    ...ContentModel.posts.map(({ content, ...rest }) => rest)
   )
 
   return ContentModel
