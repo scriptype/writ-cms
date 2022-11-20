@@ -25,12 +25,8 @@ const createCompiler = ({
   const siteIndex = require('./indexing-2').indexSite()
   fs.writeFileSync('./index.json', JSON.stringify(siteIndex, null, 2))
 
-  const ContentModel = require('./contentModel')
-  const parsedIndex = ContentModel.parseIndex(siteIndex)
-  fs.writeFileSync('./parsedIndex.json', JSON.stringify(parsedIndex, null, 2))
-
-  const contentModel = ContentModel.createContentModel(parsedIndex)
-  fs.writeFileSync('./content.json', JSON.stringify(contentModel, null, 2))
+  const content = require('./contentModel').parseIndex(siteIndex)
+  fs.writeFileSync('./content.json', JSON.stringify(content, null, 2))
 
   return
 

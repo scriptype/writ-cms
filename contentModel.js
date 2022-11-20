@@ -1,9 +1,62 @@
 const _ = require('lodash')
 const { dirname, extname } = require('path')
-const { paths } = require('./settings')
+const { settings, paths } = require('./settings')
 const { templateParser } = require('./rendering')
 const { getSlug } = require('./helpers')
 const { UNCATEGORIZED } = require('./constants')
+
+const contentTypes = {
+  POST: 'post',
+  CATEGORY: 'category',
+  SUBPAGE: 'subpage',
+  SUBPAGES: 'subpages',
+  ASSET: 'asset',
+  ASSETS: 'assets',
+  LOCAL_ASSET: 'localAsset',
+  FOLDERED_POST_INDEX: 'folderedPostIndex',
+  UNRECOGNIZED_DIRECTORY: 'unrecognizedDirecoty',
+  UNRECOGNIZED_FILE: 'unrecognizedFile'
+}
+
+const isPost = (fsObject) => {
+  return fsObject.type === contentTypes.POST
+}
+
+const isCategory = (fsObject) => {
+  return fsObject.type === contentTypes.CATEGORY
+}
+
+const isSubPage = (fsObject) => {
+  return fsObject.type === contentTypes.SUBPAGE
+}
+
+const isSubPages = (fsObject) => {
+  return fsObject.type === contentTypes.SUBPAGES
+}
+
+const isAsset = (fsObject) => {
+  return fsObject.type === contentTypes.ASSET
+}
+
+const isAssets = (fsObject) => {
+  return fsObject.type === contentTypes.ASSETS
+}
+
+const isLocalAsset = (fsObject) => {
+  return fsObject.type === contentTypes.LOCAL_ASSET
+}
+
+const isFolderedPostIndex = (fsObject) => {
+  return fsObject.type === contentTypes.FOLDERED_POST_INDEX
+}
+
+const isUnrecozgnizedDirectory = (fsObject) => {
+  return fsObject.type === contentTypes.UNRECOGNIZED_DIRECTORY
+}
+
+const isUnrecozgnizedFile = (fsObject) => {
+  return fsObject.type === contentTypes.UNRECOGNIZED_FILE
+}
 
 const hasContent = (fsObject) => {
   return typeof fsObject.content !== 'undefined'
@@ -21,91 +74,98 @@ const removeExtension = (fileName) => {
   return fileName.replace(extname(fileName), '')
 }
 
+const createAsset = (fsObject) => {
+  return {
+    ...fsObject,
+    type: contentTypes.ASSET
+  }
+}
+
 const createAssets = (fsObject) => {
   return {
-    assets: fsObject.children
+    ...fsObject,
+    type: contentTypes.ASSETS,
+    data: fsObject.children.map(createAsset)
   }
 }
 
 const createLocalAsset = (fsObject) => {
   return {
-    localAsset: fsObject
+    ...fsObject,
+    type: contentTypes.LOCAL_ASSET
   }
 }
 
 const createSubPage = (fsObject) => {
   const title = removeExtension(fsObject.name)
   return {
-    subPage: {
-      ...fsObject,
-      data: {
-        title,
-        slug: getSlug(title),
-        ...templateParser.parseTemplate(fsObject.content)
-      }
+    ...fsObject,
+    type: contentTypes.SUBPAGE,
+    data: {
+      title,
+      slug: getSlug(title),
+      ...templateParser.parseTemplate(fsObject.content)
     }
   }
 }
 
 const createSubPages = (fsObject) => {
   return {
-    subPages: fsObject.children.map(createSubPage).map(({ subPage }) => subPage)
+    ...fsObject,
+    type: contentTypes.SUBPAGES,
+    data: fsObject.children.map(createSubPage)
   }
 }
 
 const createCategory = (fsObject) => {
   return {
-    category: {
-      name: fsObject.name,
-      posts: fsObject.children.map(({ post }) => post).filter(Boolean),
-      localAssets: fsObject.children.map(({ localAsset}) => localAsset).filter(Boolean)
+    ..._.omit(fsObject, 'children'),
+    type: contentTypes.CATEGORY,
+    data: {
+      posts: fsObject.children.filter(isPost),
+      localAssets: fsObject.children.filter(isLocalAsset)
     }
   }
 }
 
 const createFolderedPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
-  const indexFile = fsObject.children
-    .map(({ folderedPostIndex }) => folderedPostIndex)
-    .find(Boolean)
-  const localAssets = fsObject.children
-    .map(({ localAsset }) => localAsset)
-    .filter(Boolean)
+  const indexFile = fsObject.children.find(isFolderedPostIndex)
+  const localAssets = fsObject.children.filter(isLocalAsset)
   return {
-    post: {
-      ..._.omit(fsObject, 'children'),
-      postMode: 'foldered',
+    ..._.omit(fsObject, 'children'),
+    type: contentTypes.POST,
+    data: {
       localAssets,
-      data: {
-        title,
-        slug: getSlug(title),
-        id: getSlug(title),
-        category: dirname(fsObject.name),
-        ...templateParser.parseTemplate(indexFile.content)
-      }
+      title,
+      slug: getSlug(title),
+      id: getSlug(title),
+      category: dirname(fsObject.name),
+      site: settings.site,
+      ...templateParser.parseTemplate(indexFile.content)
     }
   }
 }
 
 const createFolderedPostIndex = (fsObject) => {
   return {
-    folderedPostIndex: fsObject
+    ...fsObject,
+    type: contentTypes.FOLDERED_POST_INDEX
   }
 }
 
 const createUncategorizedPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
   return {
-    post: {
-      ...fsObject,
-      postMode: 'uncategorized',
-      data: {
-        title,
-        slug: getSlug(title),
-        id: getSlug(title),
-        category: UNCATEGORIZED,
-        ...templateParser.parseTemplate(fsObject.content)
-      }
+    ...fsObject,
+    type: contentTypes.POST,
+    data: {
+      title,
+      slug: getSlug(title),
+      id: getSlug(title),
+      category: UNCATEGORIZED,
+      site: settings.site,
+      ...templateParser.parseTemplate(fsObject.content)
     }
   }
 }
@@ -113,29 +173,30 @@ const createUncategorizedPost = (fsObject) => {
 const createPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
   return {
-    post: {
-      ...fsObject,
-      postMode: 'file',
-      data: {
-        title,
-        slug: getSlug(title),
-        id: getSlug(title),
-        category: dirname(fsObject.path),
-        ...templateParser.parseTemplate(fsObject.content)
-      }
+    ...fsObject,
+    type: contentTypes.POST,
+    data: {
+      title,
+      slug: getSlug(title),
+      id: getSlug(title),
+      category: dirname(fsObject.path),
+      site: settings.site,
+      ...templateParser.parseTemplate(fsObject.content),
     }
   }
 }
 
 const createUnrecognizedDirectory = (fsObject) => {
   return {
-    unrecognizedDirectory: fsObject
+    ...fsObject,
+    type: contentTypes.UNRECOGNIZED_DIRECTORY
   }
 }
 
 const createUnrecognizedFile = (fsObject) => {
   return {
-    unrecognizedFile: fsObject
+    ...fsObject,
+    type: contentTypes.UNRECOGNIZED_FILE
   }
 }
 
@@ -195,53 +256,66 @@ const parseIndex = (tree) => {
   })
 }
 
-const createContentModel = (parsedIndex) => {
+const reduceIndexToContentModel = (parsedIndex) => {
   return parsedIndex.reduce((contentTree, content) => {
-    if (content.category) {
-      return {
-        ...contentTree,
-        categories: contentTree.categories.concat({
-          ...content.category,
-          posts: content.category.posts.map(({ data }) => data.id)
-        }),
-        posts: contentTree.posts.concat(content.category.posts)
-      }
-    } if (content.post) {
-      const uncategorizedCategory = contentTree.categories.find(
-        cat => cat.name === UNCATEGORIZED
-      )
-      if (uncategorizedCategory) {
-        uncategorizedCategory.posts.push(content.post.data.id)
-      } else {
-        contentTree.categories.push({
-          name: UNCATEGORIZED,
-          posts: [content.post.data.id],
-          localAssets: []
-        })
-      }
-      return {
-        ...contentTree,
-        posts: contentTree.posts.concat(content.post),
-      }
-    } if (content.subPages) {
-      return {
-        ...contentTree,
-        subPages: content.subPages
-      }
-    }
-    return {
-      ...contentTree,
-      unrecognized: contentTree.unrecognized.concat(content)
+    switch (content.type) {
+      case contentTypes.CATEGORY:
+        return {
+          ...contentTree,
+          categories: contentTree.categories.concat(content),
+          posts: contentTree.posts.concat(content.data.posts)
+        }
+
+      case contentTypes.POST:
+        const uncategorizedCategory = contentTree.categories.find(
+          category => category.name === UNCATEGORIZED
+        )
+        if (uncategorizedCategory) {
+          uncategorizedCategory.posts.push(content)
+        } else {
+          contentTree.categories.push({
+            name: UNCATEGORIZED,
+            data: {
+              posts: [content],
+              localAssets: []
+            }
+          })
+        }
+        return {
+          ...contentTree,
+          posts: contentTree.posts.concat(content),
+        }
+
+      case contentTypes.SUBPAGES:
+        return {
+          ...contentTree,
+          subPages: contentTree.subPages.concat(...content.data)
+        }
+
+      case contentTypes.ASSETS:
+        return {
+          ...contentTree,
+          assets: contentTree.assets.concat(...content.data)
+        }
+
+      default:
+        return {
+          ...contentTree,
+          unrecognized: contentTree.unrecognized.concat(content)
+        }
     }
   }, {
     categories: [],
     posts: [],
     subPages: [],
+    assets: [],
     unrecognized: []
   })
 }
 
 module.exports = {
-  parseIndex,
-  createContentModel
+  parseIndex(siteIndex) {
+    const parsedIndex = parseIndex(siteIndex)
+    return reduceIndexToContentModel(parsedIndex)
+  },
 }
