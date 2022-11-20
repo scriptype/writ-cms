@@ -139,7 +139,6 @@ const createFolderedPost = (fsObject) => {
       localAssets,
       title,
       slug: getSlug(title),
-      id: getSlug(title),
       category: dirname(fsObject.name),
       site: settings.site,
       ...templateParser.parseTemplate(indexFile.content)
@@ -162,7 +161,6 @@ const createUncategorizedPost = (fsObject) => {
     data: {
       title,
       slug: getSlug(title),
-      id: getSlug(title),
       category: UNCATEGORIZED,
       site: settings.site,
       ...templateParser.parseTemplate(fsObject.content)
@@ -178,7 +176,6 @@ const createPost = (fsObject) => {
     data: {
       title,
       slug: getSlug(title),
-      id: getSlug(title),
       category: dirname(fsObject.path),
       site: settings.site,
       ...templateParser.parseTemplate(fsObject.content),
@@ -256,24 +253,30 @@ const parseIndex = (tree) => {
   })
 }
 
-const reduceIndexToContentModel = (parsedIndex) => {
-  return parsedIndex.reduce((contentTree, content) => {
+const createContentModel = (parsedIndex) => {
+  const ContentModel = {
+    assets: [],
+    subPages: [],
+    categories: [],
+    posts: [],
+    unrecognized: []
+  }
+
+  parsedIndex.forEach(content => {
     switch (content.type) {
       case contentTypes.CATEGORY:
-        return {
-          ...contentTree,
-          categories: contentTree.categories.concat(content),
-          posts: contentTree.posts.concat(content.data.posts)
-        }
+        ContentModel.categories.push(content)
+        ContentModel.posts.push(content.data.posts)
+        break
 
       case contentTypes.POST:
-        const uncategorizedCategory = contentTree.categories.find(
+        const uncategorizedCategory = ContentModel.categories.find(
           category => category.name === UNCATEGORIZED
         )
         if (uncategorizedCategory) {
           uncategorizedCategory.posts.push(content)
         } else {
-          contentTree.categories.push({
+          ContentModel.categories.push({
             name: UNCATEGORIZED,
             data: {
               posts: [content],
@@ -281,41 +284,29 @@ const reduceIndexToContentModel = (parsedIndex) => {
             }
           })
         }
-        return {
-          ...contentTree,
-          posts: contentTree.posts.concat(content),
-        }
+        ContentModel.posts.push(content)
+        break
 
       case contentTypes.SUBPAGES:
-        return {
-          ...contentTree,
-          subPages: contentTree.subPages.concat(...content.data)
-        }
+        ContentModel.subPages.push(...content.data)
+        break
 
       case contentTypes.ASSETS:
-        return {
-          ...contentTree,
-          assets: contentTree.assets.concat(...content.data)
-        }
+        ContentModel.assets.push(...content.data)
+        break
 
       default:
-        return {
-          ...contentTree,
-          unrecognized: contentTree.unrecognized.concat(content)
-        }
+        ContentModel.unrecognized.push(content)
+        break
     }
-  }, {
-    categories: [],
-    posts: [],
-    subPages: [],
-    assets: [],
-    unrecognized: []
   })
+
+  return ContentModel
 }
 
 module.exports = {
   parseIndex(siteIndex) {
     const parsedIndex = parseIndex(siteIndex)
-    return reduceIndexToContentModel(parsedIndex)
+    return createContentModel(parsedIndex)
   },
 }
