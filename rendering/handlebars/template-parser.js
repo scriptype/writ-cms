@@ -21,17 +21,36 @@ const getSummary = (content) => {
   return content.substring(0, indexOfReadMore)
 }
 
-const getPartialType = (content, metaBlock) => {
-  const partialType = (metaBlock || getMetaBlock(content)).match(/\{\{#>(.*)/)
-  return partialType ? partialType[1].trim() : 'text-post'
+const attachTags = ({ tags, ...rest }) => {
+  return {
+    ...rest,
+    tags: (tags ? tags.split(',') : []).map(t => t.trim())
+  }
 }
 
-const getMetadata = (content, metaBlock) => {
-  const metadata = (metaBlock || getMetaBlock(content)).match(/.*=.*/g)
+const attachDates = ({ date = '2022-11-12, 02:04', ...rest }) => {
+  const locale = 'en-US'
+  const publishedAt = new Date(date)
+  const publishedAtFull = publishedAt.toLocaleString(locale, { dateStyle: 'full' })
+  const publishedAtLong = publishedAt.toLocaleString(locale, { dateStyle: 'long' })
+  const publishedAtMedium = publishedAt.toLocaleString(locale, { dateStyle: 'medium' })
+  const publishedAtShort = publishedAt.toLocaleString(locale, { dateStyle: 'short' })
+  return {
+    ...rest,
+    publishedAt,
+    publishedAtFull,
+    publishedAtLong,
+    publishedAtMedium,
+    publishedAtShort
+  }
+}
+
+const getMetadata = (metaBlock) => {
+  const metadata = metaBlock.match(/.*=.*/g)
   if (!metadata) {
     return {}
   }
-  return metadata.map(s => s
+  const frontMatter = metadata.map(s => s
       .trim()
       .split('=')
       .map(k => k.replace(/"/g, ''))
@@ -40,16 +59,35 @@ const getMetadata = (content, metaBlock) => {
       ...acc,
       [tuple[0]]: tuple[1]
     }), {})
+
+  return (
+    attachTags(
+      attachDates(
+        frontMatter
+      )
+    )
+  )
 }
 
-const parseTemplate = (content) => {
-  const metaBlock = getMetaBlock(content)
-  const contentSection = getContent(content)
+const getPartialType = (metaBlock) => {
+  const partialType = metaBlock.match(/\{\{#>(.*)/)
   return {
-    type: getPartialType(content, metaBlock),
-    content: contentSection,
-    metadata: getMetadata(content, metaBlock),
-    summary: getSummary(contentSection)
+    type: partialType ? partialType[1].trim() : 'text-post'
+  }
+}
+
+const parseTemplate = (fileContent = '') => {
+  const metaBlock = getMetaBlock(fileContent)
+  const metadata = {
+    ...getMetadata(metaBlock),
+    ...getPartialType(metaBlock),
+  }
+  const content = getContent(fileContent)
+  const summary = getSummary(content)
+  return {
+    metadata,
+    content,
+    summary
   }
 }
 
@@ -61,9 +99,6 @@ const isTemplate = (path) => {
 module.exports = {
   READ_MORE_DIVIDER,
   EXTENSION_PATTERN,
-  getMetaBlock,
-  getContent,
-  getPartialType,
   getMetadata,
   parseTemplate,
   isTemplate

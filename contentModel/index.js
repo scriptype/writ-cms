@@ -1,9 +1,10 @@
 const _ = require('lodash')
-const { dirname, extname } = require('path')
-const { settings, paths } = require('./settings')
-const { templateParser } = require('./rendering')
-const { getSlug } = require('./helpers')
-const { UNCATEGORIZED } = require('./constants')
+const { dirname, extname, join } = require('path')
+const { settings, paths } = require('../settings')
+const { templateParser } = require('../rendering')
+const { getSlug } = require('../helpers')
+const { UNCATEGORIZED } = require('../constants')
+const Linker = require('./linking')
 
 const contentTypes = {
   POST: 'post',
@@ -97,15 +98,18 @@ const createLocalAsset = (fsObject) => {
 }
 
 const createSubPage = (fsObject) => {
+  const { metadata, ...rest } = templateParser.parseTemplate(fsObject.content)
   const title = removeExtension(fsObject.name)
+  const data = {
+    ...rest,
+    ...metadata,
+    title,
+    slug: getSlug(title)
+  }
   return {
     ...fsObject,
     type: contentTypes.SUBPAGE,
-    data: {
-      title,
-      slug: getSlug(title),
-      ...templateParser.parseTemplate(fsObject.content)
-    }
+    data
   }
 }
 
@@ -118,31 +122,38 @@ const createSubPages = (fsObject) => {
 }
 
 const createCategory = (fsObject) => {
+  const data = {
+    posts: fsObject.children.filter(isPost),
+    localAssets: fsObject.children.filter(isLocalAsset)
+  }
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.CATEGORY,
-    data: {
-      posts: fsObject.children.filter(isPost),
-      localAssets: fsObject.children.filter(isLocalAsset)
-    }
+    data
   }
 }
 
 const createFolderedPost = (fsObject) => {
-  const title = removeExtension(fsObject.name)
   const indexFile = fsObject.children.find(isFolderedPostIndex)
-  const localAssets = fsObject.children.filter(isLocalAsset)
+  const { metadata, ...templateData } = templateParser.parseTemplate(indexFile.content)
+  const title = removeExtension(fsObject.name)
+  const slug = getSlug(title)
+  const category = dirname(fsObject.path)
+  const permalink = join('/', getSlug(category), slug)
+  const data = {
+    ...templateData,
+    ...metadata,
+    title,
+    slug,
+    permalink,
+    category,
+    localAssets: fsObject.children.filter(isLocalAsset),
+    site: settings.site,
+  }
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
-    data: {
-      localAssets,
-      title,
-      slug: getSlug(title),
-      category: dirname(fsObject.name),
-      site: settings.site,
-      ...templateParser.parseTemplate(indexFile.content)
-    }
+    data
   }
 }
 
@@ -154,32 +165,45 @@ const createFolderedPostIndex = (fsObject) => {
 }
 
 const createUncategorizedPost = (fsObject) => {
+  const { metadata, ...templateData } = templateParser.parseTemplate(fsObject.content)
   const title = removeExtension(fsObject.name)
+  const slug = getSlug(title)
+  const permalink = join('/', slug)
+  const data = {
+    ...templateData,
+    ...metadata,
+    title,
+    slug,
+    permalink,
+    category: UNCATEGORIZED,
+    site: settings.site,
+  }
   return {
     ...fsObject,
     type: contentTypes.POST,
-    data: {
-      title,
-      slug: getSlug(title),
-      category: UNCATEGORIZED,
-      site: settings.site,
-      ...templateParser.parseTemplate(fsObject.content)
-    }
+    data
   }
 }
 
 const createPost = (fsObject) => {
+  const { metadata, ...templateData } = templateParser.parseTemplate(fsObject.content)
   const title = removeExtension(fsObject.name)
+  const slug = getSlug(title)
+  const category = dirname(fsObject.path)
+  const permalink = join('/', getSlug(category), slug)
+  const data = {
+    ...templateData,
+    ...metadata,
+    title,
+    slug,
+    permalink,
+    category,
+    site: settings.site,
+  }
   return {
     ...fsObject,
     type: contentTypes.POST,
-    data: {
-      title,
-      slug: getSlug(title),
-      category: dirname(fsObject.path),
-      site: settings.site,
-      ...templateParser.parseTemplate(fsObject.content),
-    }
+    data
   }
 }
 
@@ -253,28 +277,35 @@ const parseIndex = (tree) => {
   })
 }
 
+const sortPosts = (a, b) => {
+  return new Date(b.data.publishedAt) - new Date(a.data.publishedAt)
+}
+
 const createContentModel = (parsedIndex) => {
   const ContentModel = {
     assets: [],
     subPages: [],
     categories: [],
     posts: [],
-    unrecognized: []
+    unrecognized: [],
+    postsJSON: []
   }
 
   parsedIndex.forEach(content => {
     switch (content.type) {
       case contentTypes.CATEGORY:
+        content.data.posts.sort(sortPosts)
         ContentModel.categories.push(content)
-        ContentModel.posts.push(content.data.posts)
+        ContentModel.posts.push(...content.data.posts)
         break
 
       case contentTypes.POST:
         const uncategorizedCategory = ContentModel.categories.find(
-          category => category.name === UNCATEGORIZED
+          c => c.name === UNCATEGORIZED
         )
         if (uncategorizedCategory) {
-          uncategorizedCategory.posts.push(content)
+          uncategorizedCategory.data.posts.push(content)
+          uncategorizedCategory.data.posts.sort(sortPosts)
         } else {
           ContentModel.categories.push({
             name: UNCATEGORIZED,
@@ -301,12 +332,18 @@ const createContentModel = (parsedIndex) => {
     }
   })
 
+  ContentModel.posts.sort(sortPosts)
+  ContentModel.postsJSON.push(
+    ...ContentModel.posts.map(({ content, output, ...rest }) => rest)
+  )
+
   return ContentModel
 }
 
 module.exports = {
-  parseIndex(siteIndex) {
+  createContentModel(siteIndex) {
     const parsedIndex = parseIndex(siteIndex)
-    return createContentModel(parsedIndex)
+    const contentModel = createContentModel(parsedIndex)
+    return Linker.link(contentModel)
   },
 }

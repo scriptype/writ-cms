@@ -6,7 +6,8 @@ const setup = (settings = {}) => {
   return createCompiler({
     Scaffolder: require('./scaffolding'),
     Indexer: require('./indexing'),
-    Parser: require('./parsing'),
+    Indexer2: require('./indexing-2'),
+    ContentModel: require('./contentModel'),
     Targets: require('./targets'),
     Renderer: require('./rendering'),
     Settings
@@ -16,16 +17,17 @@ const setup = (settings = {}) => {
 const createCompiler = ({
   Scaffolder,
   Indexer,
-  Parser,
+  Indexer2,
+  ContentModel,
   Renderer,
   Targets,
   Settings
 }) => {
   const fs = require('fs')
-  const siteIndex = require('./indexing-2').indexSite()
+  const siteIndex = Indexer2.indexSite()
   fs.writeFileSync('./index.json', JSON.stringify(siteIndex, null, 2))
 
-  const content = require('./contentModel').parseIndex(siteIndex)
+  const content = ContentModel.createContentModel(siteIndex)
   fs.writeFileSync('./content.json', JSON.stringify(content, null, 2))
 
   return
