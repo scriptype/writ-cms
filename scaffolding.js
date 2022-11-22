@@ -5,14 +5,12 @@ const { getSlug, isDirectory } = require('./helpers')
 const { paths, settings } = require('./settings')
 
 const createSiteDir = () => {
-  if (!paths.SITE) {
-    throw new Error('paths.SITE is missing. Won\'t continue.')
-  }
+  const path = paths.SITE || 'site'
   if (paths.SITE === '.' || paths.SITE === './' || paths.SITE === '..' || paths.SITE === '../' || paths.SITE === '/' || paths.SITE === '~') {
     throw new Error(`Dangerous export directory: "${paths.SITE}". Won't continue.`)
   }
   try {
-    execSync(`rm -rf ${paths.SITE}`)
+    execSync(`rm -r ${paths.SITE}`)
   } catch (e) {
     console.log('createSiteDir error:', e)
   } finally {
