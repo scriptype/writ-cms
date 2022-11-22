@@ -25,8 +25,6 @@ const createCompiler = ({
   Renderer.init()
   const siteIndex = Indexer.indexSite()
   const contentModel = ContentModel.createContentModel(siteIndex)
-  require('fs').writeFileSync('./.content.json', JSON.stringify(contentModel, null, 2))
-
   Targets.compileHomepage(contentModel)
   Targets.compileSubPages(contentModel.subPages)
   Targets.compileCategoryPages(contentModel.categories)
