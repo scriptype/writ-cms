@@ -62,7 +62,11 @@ const createSubPages = (fsObject) => {
 }
 
 const createCategory = (fsObject) => {
+  const slug = getSlug(fsObject.name)
   const data = {
+    name: fsObject.name,
+    slug,
+    permalink: slug,
     posts: fsObject.children.filter(isPost),
     localAssets: fsObject.children.filter(isLocalAsset)
   }
@@ -71,6 +75,13 @@ const createCategory = (fsObject) => {
     type: contentTypes.CATEGORY,
     data
   }
+}
+
+const createUncategorizedCategory = (posts) => {
+  return createCategory({
+    name: UNCATEGORIZED,
+    children: posts
+  })
 }
 
 const createFolderedPostIndex = (fsObject) => {
@@ -100,7 +111,10 @@ const createFolderedPost = (fsObject) => {
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
-    data
+    data,
+    foldered: true,
+    content: indexFile.content,
+    extension: indexFile.extension
   }
 }
 
@@ -247,13 +261,7 @@ const createContentModel = (parsedIndex) => {
           uncategorizedCategory.data.posts.push(content)
           uncategorizedCategory.data.posts.sort(sortPosts)
         } else {
-          ContentModel.categories.push({
-            name: UNCATEGORIZED,
-            data: {
-              posts: [content],
-              localAssets: []
-            }
-          })
+          createUncategorizedCategory([content])
         }
         ContentModel.posts.push(content)
         break

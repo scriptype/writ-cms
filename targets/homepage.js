@@ -8,8 +8,8 @@ const compileHomePage = ({ categories, posts }) => {
     path: join(paths.SITE, 'index.html'),
     data: {
       site: settings.site,
-      posts,
-      categories
+      posts: posts.map(({ data }) => data),
+      categories: categories.map(({ data }) => data)
     }
   })
 }

@@ -5,17 +5,16 @@ const { render } = require('../rendering')
 const { UNCATEGORIZED } = require('../constants')
 
 const compileCategoryPages = (categories) => {
-  if (categories.find(c => c.name === UNCATEGORIZED)) {
-    mkdirSync(join(paths.SITE, UNCATEGORIZED))
-  }
   categories.forEach(category => {
+    const dir = join(paths.SITE, category.data.slug)
+    mkdirSync(dir)
     render({
       content: '{{>category}}',
-      path: category.out,
+      path: join(dir, 'index.html'),
       data: {
         site: settings.site,
-        category,
-        posts: category.posts
+        category: category.data,
+        posts: category.data.posts.map(({ data }) => data)
       }
     })
   })
