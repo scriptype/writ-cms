@@ -1,35 +1,35 @@
-const fs = require('fs')
+const { rm, cp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
-const { execSync } = require('child_process')
+const { exec } = require('child_process')
 const { getSlug, isDirectory } = require('./helpers')
 const { paths, settings } = require('./settings')
 
-const createSiteDir = () => {
+const createSiteDir = async () => {
   const path = paths.SITE || 'site'
   if (paths.SITE === '.' || paths.SITE === './' || paths.SITE === '..' || paths.SITE === '../' || paths.SITE === '/' || paths.SITE === '~') {
     throw new Error(`Dangerous export directory: "${paths.SITE}". Won't continue.`)
   }
   try {
-    execSync(`rm -r ${paths.SITE}`)
+    await rm(paths.SITE, { recursive: true })
   } catch (e) {
     console.log('createSiteDir error:', e)
   } finally {
-    fs.mkdirSync(paths.SITE)
+    return mkdir(paths.SITE)
   }
 }
 
-const copyStaticAssets = () => {
+const copyStaticAssets = async () => {
   const src = join(__dirname, 'rendering', 'assets')
   const out = join(paths.SITE, paths.ASSETS, '_')
-  if (!isDirectory(join(paths.SITE, paths.ASSETS))) {
-    fs.mkdirSync(join(paths.SITE, paths.ASSETS))
+  if (!(await isDirectory(join(paths.SITE, paths.ASSETS)))) {
+    await mkdir(join(paths.SITE, paths.ASSETS))
   }
-  execSync(`cp -R ${src} ${out}`)
+  return cp(src, out, { recursive: true })
 }
 
 module.exports = {
-  scaffoldSite() {
-    createSiteDir()
-    copyStaticAssets()
+  async scaffoldSite() {
+    await createSiteDir()
+    return copyStaticAssets()
   }
 }

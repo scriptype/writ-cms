@@ -1,13 +1,12 @@
-const { mkdirSync } = require('fs')
+const { mkdir } = require('fs/promises')
 const { join } = require('path')
 const { settings, paths } = require('../settings')
 const { render } = require('../rendering')
-const { UNCATEGORIZED } = require('../constants')
 
-const compileCategoryPages = (categories) => {
-  categories.forEach(category => {
+const compileCategoryPages = ({ categories }) => {
+  categories.forEach(async category => {
     const dir = join(paths.SITE, category.data.slug)
-    mkdirSync(dir)
+    await mkdir(dir)
     render({
       content: '{{>category}}',
       path: join(dir, 'index.html'),

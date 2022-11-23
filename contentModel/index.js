@@ -44,7 +44,8 @@ const createSubPage = (fsObject) => {
     ...rest,
     ...metadata,
     title,
-    slug: getSlug(title)
+    slug: getSlug(title),
+    site: settings.site,
   }
   return {
     ...fsObject,
@@ -104,7 +105,10 @@ const createFolderedPost = (fsObject) => {
     title,
     slug,
     permalink,
-    category,
+    category: {
+      name: category,
+      permalink: join('/', getSlug(category))
+    },
     localAssets: fsObject.children.filter(isLocalAsset),
     site: settings.site,
   }
@@ -129,7 +133,10 @@ const createUncategorizedPost = (fsObject) => {
     title,
     slug,
     permalink,
-    category: UNCATEGORIZED,
+    category: {
+      name: UNCATEGORIZED,
+      permalink: join('/', getSlug(UNCATEGORIZED))
+    },
     site: settings.site,
   }
   return {
@@ -151,7 +158,10 @@ const createPost = (fsObject) => {
     title,
     slug,
     permalink,
-    category,
+    category: {
+      name: category,
+      permalink: join('/', getSlug(category))
+    },
     site: settings.site,
   }
   return {
@@ -261,7 +271,7 @@ const createContentModel = (parsedIndex) => {
           uncategorizedCategory.data.posts.push(content)
           uncategorizedCategory.data.posts.sort(sortPosts)
         } else {
-          createUncategorizedCategory([content])
+          ContentModel.categories.push(createUncategorizedCategory([content]))
         }
         ContentModel.posts.push(content)
         break
@@ -289,8 +299,8 @@ const createContentModel = (parsedIndex) => {
 }
 
 module.exports = {
-  createContentModel(siteIndex) {
-    const parsedIndex = parseIndex(siteIndex)
+  createContentModel(fileSystemIndex) {
+    const parsedIndex = parseIndex(fileSystemIndex)
     const contentModel = createContentModel(parsedIndex)
     return Linker.link(contentModel)
   },

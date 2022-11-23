@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs/promises')
 const { extname, join, resolve } = require('path')
 const Handlebars = require('handlebars')
 const templateParser = require('./handlebars/template-parser')
@@ -13,11 +13,12 @@ const registerHelpers = () => {
   })
 }
 
-const registerPartials = () => {
-  fs.readdirSync(PARTIALS_PATH).forEach(path => {
+const registerPartials = async () => {
+  const files = await fs.readdir(PARTIALS_PATH)
+  files.forEach(async (path) => {
     const name = path.replace(extname(path), '')
-    const partialsPath = join(PARTIALS_PATH, path)
-    Handlebars.registerPartial(name, readFileContent(partialsPath))
+    const fileContent = await readFileContent(join(PARTIALS_PATH, path))
+    Handlebars.registerPartial(name, fileContent)
   })
 }
 
@@ -29,9 +30,8 @@ const init = () => {
 const render = ({ content, path, data }) => {
   const template = Handlebars.compile(content)
   const output = template(data || {})
-  fs.writeFileSync(path, output)
-  console.log('rendered:', path)
-  return output
+  console.log('rendering:', path)
+  return fs.writeFile(path, output)
 }
 
 module.exports = {

@@ -1,12 +1,12 @@
-const fs = require('fs')
+const { writeFile } = require('fs/promises')
 const { paths } = require('../settings')
 
-const compilePostsJSON = (postsJSON) => {
-  fs.writeFileSync(
+const compilePostsJSON = ({ postsJSON }) => {
+  console.log('creating:', paths.POSTS_JSON)
+  return writeFile(
     paths.POSTS_JSON,
     JSON.stringify(postsJSON, null, 2)
   )
-  console.log('created:', paths.POSTS_JSON)
 }
 
 module.exports = {

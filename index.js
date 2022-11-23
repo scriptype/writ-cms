@@ -13,7 +13,7 @@ const setup = (settings = {}) => {
   })
 }
 
-const createCompiler = ({
+const createCompiler = async ({
   Scaffolder,
   Indexer,
   ContentModel,
@@ -21,15 +21,17 @@ const createCompiler = ({
   Targets,
   Settings
 }) => {
-  Scaffolder.scaffoldSite()
-  Renderer.init()
-  const siteIndex = Indexer.indexSite()
-  const contentModel = ContentModel.createContentModel(siteIndex)
+  const [ , , fileSystemIndex ] = await Promise.all([
+    Renderer.init(),
+    Scaffolder.scaffoldSite(),
+    Indexer.indexFileSystem()
+  ])
+  const contentModel = ContentModel.createContentModel(fileSystemIndex)
   Targets.compileHomepage(contentModel)
-  Targets.compileSubPages(contentModel.subPages)
-  Targets.compileCategoryPages(contentModel.categories)
-  Targets.compilePosts(contentModel.posts)
-  Targets.compilePostsJSON(contentModel.postsJSON)
+  Targets.compileSubPages(contentModel)
+  Targets.compileCategoryPages(contentModel)
+  Targets.compilePosts(contentModel)
+  Targets.compilePostsJSON(contentModel)
 }
 
 module.exports = setup

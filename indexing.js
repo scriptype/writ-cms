@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs/promises')
 const { join, extname } = require('path')
 const { readFileContent, isDirectory } = require('./helpers')
 const { paths } = require('./settings')
@@ -28,37 +28,42 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const walk = (dir = '.', depth = 0) => {
-  return fs.readdirSync(dir)
-    .filter(shouldIncludePath)
-    .map(path => {
-      const fullPath = join(dir, path)
-      const baseProperties = {
-        name: path,
-        path: fullPath,
-        depth,
-      }
-      if (isDirectory(fullPath)) {
-        return {
-          ...baseProperties,
-          children: walk(fullPath, depth + 1)
+const indexFileSystem = async (dir = '.', depth = 0) => {
+  return Promise.all(
+    (await fs.readdir(dir))
+      .filter(shouldIncludePath)
+      .map(async path => {
+        const fullPath = join(dir, path)
+        const baseProperties = {
+          name: path,
+          path: fullPath,
+          depth,
         }
-      }
-      const extension = extname(path)
-      const fileProperties = {
-        ...baseProperties,
-        extension,
-      }
-      if (!isTextFile(extension)) {
-        return fileProperties
-      }
-      return {
-        ...fileProperties,
-        content: readFileContent(fullPath)
-      }
-    })
+        if (await isDirectory(fullPath)) {
+          const children = await indexFileSystem(fullPath, depth + 1)
+          return {
+            ...baseProperties,
+            children
+          }
+        }
+        const extension = extname(path)
+        const fileProperties = {
+          ...baseProperties,
+          extension,
+        }
+        if (isTextFile(extension)) {
+          const content = await readFileContent(fullPath)
+          return {
+            ...fileProperties,
+            content
+          }
+        } else {
+          return fileProperties
+        }
+      })
+  )
 }
 
 module.exports = {
-  indexSite: walk
+  indexFileSystem
 }
