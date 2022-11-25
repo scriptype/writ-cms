@@ -38,19 +38,16 @@ const createLocalAsset = (fsObject) => {
 }
 
 const createSubPage = (fsObject) => {
-  const { metadata, ...rest } = templateParser.parseTemplate(fsObject.content)
   const title = removeExtension(fsObject.name)
-  const data = {
-    ...rest,
-    ...metadata,
-    title,
-    slug: getSlug(title),
-    site: settings.site,
-  }
   return {
     ...fsObject,
     type: contentTypes.SUBPAGE,
-    data
+    data: {
+      ...templateParser.parseTemplate(fsObject.content),
+      title,
+      slug: getSlug(title),
+      site: settings.site,
+    }
   }
 }
 
@@ -94,80 +91,71 @@ const createFolderedPostIndex = (fsObject) => {
 
 const createFolderedPost = (fsObject) => {
   const indexFile = fsObject.children.find(isFolderedPostIndex)
-  const { metadata, ...templateData } = templateParser.parseTemplate(indexFile.content)
   const title = removeExtension(fsObject.name)
   const slug = getSlug(title)
   const category = dirname(fsObject.path)
   const permalink = join('/', getSlug(category), slug)
-  const data = {
-    ...templateData,
-    ...metadata,
-    title,
-    slug,
-    permalink,
-    category: {
-      name: category,
-      permalink: join('/', getSlug(category))
-    },
-    localAssets: fsObject.children.filter(isLocalAsset),
-    site: settings.site,
-  }
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
-    data,
     foldered: true,
     content: indexFile.content,
-    extension: indexFile.extension
+    extension: indexFile.extension,
+    data: {
+      ...templateParser.parseTemplate(indexFile.content),
+      title,
+      slug,
+      permalink,
+      category: {
+        name: category,
+        permalink: join('/', getSlug(category))
+      },
+      localAssets: fsObject.children.filter(isLocalAsset),
+      site: settings.site,
+    }
   }
 }
 
 const createUncategorizedPost = (fsObject) => {
-  const { metadata, ...templateData } = templateParser.parseTemplate(fsObject.content)
   const title = removeExtension(fsObject.name)
   const slug = getSlug(title)
   const permalink = join('/', slug)
-  const data = {
-    ...templateData,
-    ...metadata,
-    title,
-    slug,
-    permalink,
-    category: {
-      name: UNCATEGORIZED,
-      permalink: join('/', getSlug(UNCATEGORIZED))
-    },
-    site: settings.site,
-  }
   return {
     ...fsObject,
     type: contentTypes.POST,
-    data
+    data: {
+      ...templateParser.parseTemplate(fsObject.content),
+      title,
+      slug,
+      permalink,
+      category: {
+        name: UNCATEGORIZED,
+        permalink: join('/', getSlug(UNCATEGORIZED))
+      },
+      site: settings.site,
+    }
   }
 }
 
 const createPost = (fsObject) => {
-  const { metadata, ...templateData } = templateParser.parseTemplate(fsObject.content)
   const title = removeExtension(fsObject.name)
   const slug = getSlug(title)
   const category = dirname(fsObject.path)
   const permalink = join('/', getSlug(category), slug)
-  const data = {
-    ...templateData,
-    ...metadata,
-    title,
-    slug,
-    permalink,
-    category: {
-      name: category,
-      permalink: join('/', getSlug(category))
-    },
-    site: settings.site,
-  }
   return {
     ...fsObject,
     type: contentTypes.POST,
-    data
+    data: {
+      ...templateParser.parseTemplate(fsObject.content),
+      title,
+      slug,
+      permalink,
+      category: {
+        name: category,
+        permalink: join('/', getSlug(category))
+      },
+      site: settings.site,
+    }
   }
 }
 
@@ -217,7 +205,7 @@ const parseIndex = (tree) => {
       if (isPostFile(fsObject)) {
         return createPost(fsObject)
       }
-      if (fsObject.children.some(isFolderedPostIndexFile)) {
+      if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
         return createFolderedPost({
           ...fsObject,
           children: parseIndex(fsObject.children)

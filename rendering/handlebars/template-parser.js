@@ -36,7 +36,6 @@ const attachDates = ({ date = '2022-11-12, 02:04', ...rest }) => {
   const publishedAtMedium = publishedAt.toLocaleString(locale, { dateStyle: 'medium' })
   const publishedAtShort = publishedAt.toLocaleString(locale, { dateStyle: 'short' })
   return {
-    ...rest,
     publishedAt,
     publishedAtFull,
     publishedAtLong,
@@ -60,13 +59,11 @@ const getMetadata = (metaBlock) => {
       [tuple[0]]: tuple[1]
     }), {})
 
-  return (
-    attachTags(
-      attachDates(
-        frontMatter
-      )
-    )
-  )
+  return {
+    ...frontMatter,
+    ...attachDates(frontMatter),
+    ...attachTags(frontMatter)
+  }
 }
 
 const getPartialType = (metaBlock) => {
@@ -78,14 +75,11 @@ const getPartialType = (metaBlock) => {
 
 const parseTemplate = (fileContent = '') => {
   const metaBlock = getMetaBlock(fileContent)
-  const metadata = {
-    ...getMetadata(metaBlock),
-    ...getPartialType(metaBlock),
-  }
   const content = getContent(fileContent)
   const summary = getSummary(content)
   return {
-    metadata,
+    ...getMetadata(metaBlock),
+    ...getPartialType(metaBlock),
     content,
     summary
   }
