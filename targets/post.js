@@ -20,7 +20,7 @@ const getOutPath = (post) => {
 }
 
 const compilePosts = ({ posts }) => {
-  posts.forEach(async post => {
+  const compilation = posts.map(async post => {
     if (post.foldered) {
       await mkdir(join(paths.SITE, post.data.permalink))
     }
@@ -31,12 +31,15 @@ const compilePosts = ({ posts }) => {
         cp(src, out)
       })
     }
-    const output = render({
+    return render({
+      extension: post.extension,
       content: post.content,
       path: join(paths.SITE, getOutPath(post)),
       data: post.data
     })
   })
+
+  return Promise.all(compilation)
 }
 
 module.exports = {

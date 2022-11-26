@@ -8,8 +8,6 @@ const setup = (settings = {}) => {
     Indexer: require('./indexing'),
     ContentModel: require('./contentModel'),
     Targets: require('./targets'),
-    Renderer: require('./rendering'),
-    Settings
   })
 }
 
@@ -17,21 +15,18 @@ const createCompiler = async ({
   Scaffolder,
   Indexer,
   ContentModel,
-  Renderer,
-  Targets,
-  Settings
+  Targets
 }) => {
-  const [ , , fileSystemIndex ] = await Promise.all([
-    Renderer.init(),
+  const [ , fileSystemIndex ] = await Promise.all([
     Scaffolder.scaffoldSite(),
     Indexer.indexFileSystem()
   ])
   const contentModel = ContentModel.createContentModel(fileSystemIndex)
   Targets.compileHomepage(contentModel)
   Targets.compileSubPages(contentModel)
-  Targets.compileCategoryPages(contentModel)
-  Targets.compilePosts(contentModel)
   Targets.compilePostsJSON(contentModel)
+  await Targets.compileCategoryPages(contentModel)
+  Targets.compilePosts(contentModel)
 }
 
 module.exports = setup

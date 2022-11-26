@@ -1,13 +1,13 @@
 const { mkdir } = require('fs/promises')
 const { join } = require('path')
 const { settings, paths } = require('../settings')
-const { render } = require('../rendering')
+const { renderGeneratedContent } = require('../rendering')
 
 const compileCategoryPages = ({ categories }) => {
-  categories.forEach(async category => {
+  const compilation = categories.map(async category => {
     const dir = join(paths.SITE, category.data.slug)
     await mkdir(dir)
-    render({
+    return renderGeneratedContent({
       content: '{{>category}}',
       path: join(dir, 'index.html'),
       data: {
@@ -17,6 +17,8 @@ const compileCategoryPages = ({ categories }) => {
       }
     })
   })
+
+  return Promise.all(compilation)
 }
 
 module.exports = {

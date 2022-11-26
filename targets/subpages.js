@@ -3,14 +3,16 @@ const { settings, paths } = require('../settings')
 const { render } = require('../rendering')
 
 const compileSubPages = ({ subPages }) => {
-  subPages.forEach(subPage => {
-    const outPath = join(paths.SITE, `${subPage.data.slug}.html`)
-    render({
+  const compilation = subPages.map(subPage => {
+    return render({
+      extension: subPage.extension,
       content: subPage.content,
-      path: outPath,
+      path: join(paths.SITE, `${subPage.data.slug}.html`),
       data: subPage.data,
     })
   })
+
+  return Promise.all(compilation)
 }
 
 module.exports = {

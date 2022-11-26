@@ -1,41 +1,55 @@
-const fs = require('fs/promises')
-const { extname, join, resolve } = require('path')
-const Handlebars = require('handlebars')
-const templateParser = require('./handlebars/template-parser')
-const handlebarsHelpers = require('./handlebars/helpers')
-const { readFileContent } = require('../helpers')
+const handlebars = require('./handlebars')
 
-const PARTIALS_PATH = resolve(join(__dirname, 'handlebars', 'partials'))
+const renderers = [handlebars]
 
-const registerHelpers = () => {
-  Object.keys(handlebarsHelpers).forEach((key) => {
-    Handlebars.registerHelper(key, handlebarsHelpers[key])
+const getRenderer = (extension) => {
+  const renderer = renderers.find(
+    ({ EXTENSION_PATTERN }) => EXTENSION_PATTERN.test(extension)
+  )
+  return renderer
+}
+
+const render = ({ extension, content, path, data }) => {
+  const renderer = getRenderer(extension)
+  if (renderer) {
+    console.log('rendering:', path)
+    renderer.render({
+      content,
+      path,
+      data
+    })
+  }
+}
+
+const renderGeneratedContent = (renderParameters) => {
+  render({
+    extension: '.hbs',
+    ...renderParameters
   })
 }
 
-const registerPartials = async () => {
-  const files = await fs.readdir(PARTIALS_PATH)
-  files.forEach(async (path) => {
-    const name = path.replace(extname(path), '')
-    const fileContent = await readFileContent(join(PARTIALS_PATH, path))
-    Handlebars.registerPartial(name, fileContent)
-  })
-}
+const templateParser = {
+  isTemplate({ extension, name }) {
+    if (!extension) {
+      return false
+    }
+    const renderer = getRenderer(extension)
+    return !!renderer
+  },
 
-const init = () => {
-  registerHelpers()
-  registerPartials()
-}
-
-const render = ({ content, path, data }) => {
-  const template = Handlebars.compile(content)
-  const output = template(data || {})
-  console.log('rendering:', path)
-  return fs.writeFile(path, output)
+  parseTemplate({ extension, content }) {
+    const renderer = getRenderer(extension)
+    if (renderer) {
+      return renderer.templateParser.parseTemplate(content)
+    }
+    return {
+      unparsed: true
+    }
+  }
 }
 
 module.exports = {
-  init,
   render,
+  renderGeneratedContent,
   templateParser
 }

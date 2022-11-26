@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const { templateParser } = require('../rendering')
 
 const getScoreByOverlap = (arrayOfStrings1, arrayOfStrings2) => {
   const overlap = _.intersection(
@@ -39,7 +38,6 @@ const normalizeText = (text) => {
     .replace(/<(p|a|img|pre|video|i|u|em|strong|small|div|section)>/i, '')
     .replace(/-_:'\(\)\[\]\{\}\./g, '')
     .replace(/\n/g, '')
-    .replace(new RegExp(templateParser.READ_MORE_DIVIDER, 'gi'), '')
 }
 
 const attachRelevantPosts = (post, posts) => {

@@ -43,7 +43,7 @@ const createSubPage = (fsObject) => {
     ...fsObject,
     type: contentTypes.SUBPAGE,
     data: {
-      ...templateParser.parseTemplate(fsObject.content),
+      ...templateParser.parseTemplate(fsObject),
       title,
       slug: getSlug(title),
       site: settings.site,
@@ -102,7 +102,7 @@ const createFolderedPost = (fsObject) => {
     content: indexFile.content,
     extension: indexFile.extension,
     data: {
-      ...templateParser.parseTemplate(indexFile.content),
+      ...templateParser.parseTemplate(indexFile),
       title,
       slug,
       permalink,
@@ -124,7 +124,7 @@ const createUncategorizedPost = (fsObject) => {
     ...fsObject,
     type: contentTypes.POST,
     data: {
-      ...templateParser.parseTemplate(fsObject.content),
+      ...templateParser.parseTemplate(fsObject),
       title,
       slug,
       permalink,
@@ -146,7 +146,7 @@ const createPost = (fsObject) => {
     ...fsObject,
     type: contentTypes.POST,
     data: {
-      ...templateParser.parseTemplate(fsObject.content),
+      ...templateParser.parseTemplate(fsObject),
       title,
       slug,
       permalink,
@@ -175,7 +175,7 @@ const createUnrecognizedFile = (fsObject) => {
 
 const parseIndex = (tree) => {
   return tree.map(fsObject => {
-    const isTemplate = templateParser.isTemplate(fsObject.name)
+    const isTemplate = templateParser.isTemplate(fsObject)
     const isDirectory = fsObject.children
     const isRootLevel = fsObject.depth === 0
     const isCategoryLevel = fsObject.depth === 1

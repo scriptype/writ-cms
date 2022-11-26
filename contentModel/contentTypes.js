@@ -58,7 +58,7 @@ const hasContent = (fsObject) => {
 }
 
 const isPostFile = (fsObject) => {
-  return templateParser.isTemplate(fsObject.name) && hasContent(fsObject)
+  return templateParser.isTemplate(fsObject) && hasContent(fsObject)
 }
 
 const isFolderedPostIndexFile = (fsObject) => {
