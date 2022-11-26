@@ -246,9 +246,11 @@ const createContentModel = (parsedIndex) => {
   parsedIndex.forEach(content => {
     switch (content.type) {
       case contentTypes.CATEGORY:
-        content.data.posts.sort(sortPosts)
-        ContentModel.categories.push(content)
-        ContentModel.posts.push(...content.data.posts)
+        if (content.data.posts.length) {
+          content.data.posts.sort(sortPosts)
+          ContentModel.categories.push(content)
+          ContentModel.posts.push(...content.data.posts)
+        }
         break
 
       case contentTypes.POST:
