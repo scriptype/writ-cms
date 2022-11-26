@@ -14,7 +14,9 @@
   }
 
   const loadPosts = async (path) => {
-    return fetch(`/${path}`).then(r => r.json())
+    return fetch(`/${path}`)
+      .then(r => r.json())
+      .then(posts => posts.map(({ data }) => data))
   }
 
   const resultsTemplate = (results, query) => {
@@ -55,7 +57,6 @@
         ${post.title}
         ${post.summary}
         ${post.tags.join(' ')}
-        ${post.postDir}
       `,
       index
     }))
@@ -73,7 +74,9 @@
       })
       const results = posts.map((post, i) => {
         const isMatching = matchingPosts.find(({ index }) => index === i)
-        if (!isMatching) return null
+        if (!isMatching) {
+          return null
+        }
         return resultItemTemplate(post)
       }).filter(Boolean)
       resultsContainer.innerHTML = resultsTemplate(results, query)
