@@ -25,6 +25,7 @@ const createCompiler = async ({
   Targets.compileHomepage(contentModel)
   Targets.compileSubPages(contentModel)
   Targets.compilePostsJSON(contentModel)
+  Targets.copyLocalAssets(contentModel)
   await Targets.compileCategoryPages(contentModel)
   Targets.compilePosts(contentModel)
 }

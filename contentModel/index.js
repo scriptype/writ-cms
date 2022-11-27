@@ -240,6 +240,7 @@ const createContentModel = (parsedIndex) => {
     categories: [],
     posts: [],
     unrecognized: [],
+    localAssets: [],
     postsJSON: []
   }
 
@@ -272,6 +273,10 @@ const createContentModel = (parsedIndex) => {
 
       case contentTypes.ASSETS:
         ContentModel.assets.push(...content.data)
+        break
+
+      case contentTypes.LOCAL_ASSET:
+        ContentModel.localAssets.push(content)
         break
 
       default:

@@ -3,5 +3,6 @@ module.exports = {
   compileHomepage: require('./homepage').compile,
   compileCategoryPages: require('./category-page').compile,
   compileSubPages: require('./subpages').compile,
-  compilePostsJSON: require('./posts-json').compile
+  compilePostsJSON: require('./posts-json').compile,
+  copyLocalAssets: require('./local-assets').copy
 }

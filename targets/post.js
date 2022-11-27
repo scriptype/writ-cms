@@ -24,13 +24,6 @@ const compilePosts = ({ posts }) => {
     if (post.foldered) {
       await mkdir(join(paths.SITE, post.data.permalink))
     }
-    if (post.data.localAssets) {
-      post.data.localAssets.forEach(asset => {
-        const src = asset.path
-        const out = join(paths.SITE, getSlug(src))
-        cp(src, out)
-      })
-    }
     return render({
       extension: post.extension,
       content: post.content,
