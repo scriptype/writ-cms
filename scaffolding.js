@@ -20,7 +20,7 @@ const createSiteDir = async () => {
 
 const copyStaticAssets = async () => {
   const src = join(__dirname, 'rendering', 'assets')
-  const out = join(paths.SITE, paths.ASSETS, '_')
+  const out = join(paths.SITE, paths.ASSETS, 'default')
   if (!(await isDirectory(join(paths.SITE, paths.ASSETS)))) {
     await mkdir(join(paths.SITE, paths.ASSETS))
   }
