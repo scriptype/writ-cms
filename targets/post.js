@@ -22,7 +22,9 @@ const getOutPath = (post) => {
 const compilePosts = ({ posts }) => {
   const compilation = posts.map(async post => {
     if (post.foldered) {
-      await mkdir(join(paths.SITE, post.data.permalink))
+      try {
+        await mkdir(join(paths.SITE, post.data.permalink))
+      } catch (EEXIST) {}
     }
     return render({
       extension: post.extension,
