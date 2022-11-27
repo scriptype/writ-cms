@@ -1,14 +1,13 @@
 const { mkdir } = require('fs/promises')
 const { join } = require('path')
 const { settings, paths } = require('../settings')
-const { renderGeneratedContent } = require('../rendering')
+const { renderCategoryIndex } = require('../rendering')
 
 const compileCategoryPages = ({ categories }) => {
   const compilation = categories.map(async category => {
     const dir = join(paths.SITE, category.data.slug)
     await mkdir(dir)
-    return renderGeneratedContent({
-      content: '{{>category}}',
+    return renderCategoryIndex({
       path: join(dir, 'index.html'),
       data: {
         site: settings.site,

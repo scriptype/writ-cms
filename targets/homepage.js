@@ -1,10 +1,9 @@
 const { join } = require('path')
 const { settings, paths } = require('../settings')
-const { renderGeneratedContent } = require('../rendering')
+const { renderHomePage } = require('../rendering')
 
 const compileHomePage = ({ categories, posts }) => {
-  return renderGeneratedContent({
-    content: '{{>index}}',
+  return renderHomePage({
     path: join(paths.SITE, 'index.html'),
     data: {
       site: settings.site,

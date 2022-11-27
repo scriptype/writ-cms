@@ -13,7 +13,7 @@ const render = ({ extension, content, path, data }) => {
   const renderer = getRenderer(extension)
   if (renderer) {
     console.log('rendering:', path)
-    renderer.render({
+    return renderer.render({
       content,
       path,
       data
@@ -21,10 +21,19 @@ const render = ({ extension, content, path, data }) => {
   }
 }
 
-const renderGeneratedContent = (renderParameters) => {
-  render({
+const renderCategoryIndex = (params) => {
+  return render({
+    ...params,
     extension: '.hbs',
-    ...renderParameters
+    content: '{{>category}}'
+  })
+}
+
+const renderHomePage = (params) => {
+  return render({
+    ...params,
+    extension: '.hbs',
+    content: '{{>index}}',
   })
 }
 
@@ -50,6 +59,7 @@ const templateParser = {
 
 module.exports = {
   render,
-  renderGeneratedContent,
+  renderCategoryIndex,
+  renderHomePage,
   templateParser
 }
