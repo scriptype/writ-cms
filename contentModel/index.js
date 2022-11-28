@@ -37,7 +37,7 @@ const createLocalAsset = (fsObject) => {
   }
 }
 
-const createSubPage = (fsObject) => {
+const createSubpage = (fsObject) => {
   const title = removeExtension(fsObject.name)
   return {
     ...fsObject,
@@ -51,11 +51,11 @@ const createSubPage = (fsObject) => {
   }
 }
 
-const createSubPages = (fsObject) => {
+const createSubpages = (fsObject) => {
   return {
     ...fsObject,
     type: contentTypes.SUBPAGES,
-    data: fsObject.children.map(createSubPage)
+    data: fsObject.children.map(createSubpage)
   }
 }
 
@@ -190,7 +190,7 @@ const parseIndex = (tree) => {
         return createUncategorizedPost(fsObject)
       }
       if (fsObject.name === paths.SUBPAGES) {
-        return createSubPages(fsObject)
+        return createSubpages(fsObject)
       }
       if (fsObject.name === paths.assets) {
         return createAssets(fsObject)
@@ -236,7 +236,7 @@ const sortPosts = (a, b) => {
 const createContentModel = (parsedIndex) => {
   const ContentModel = {
     assets: [],
-    subPages: [],
+    subpages: [],
     categories: [],
     posts: [],
     unrecognized: [],
@@ -268,7 +268,7 @@ const createContentModel = (parsedIndex) => {
         break
 
       case contentTypes.SUBPAGES:
-        ContentModel.subPages.push(...content.data)
+        ContentModel.subpages.push(...content.data)
         break
 
       case contentTypes.ASSETS:

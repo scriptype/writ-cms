@@ -21,11 +21,11 @@ const isCategory = (fsObject) => {
   return fsObject.type === contentTypes.CATEGORY
 }
 
-const isSubPage = (fsObject) => {
+const isSubpage = (fsObject) => {
   return fsObject.type === contentTypes.SUBPAGE
 }
 
-const isSubPages = (fsObject) => {
+const isSubpages = (fsObject) => {
   return fsObject.type === contentTypes.SUBPAGES
 }
 
@@ -69,8 +69,8 @@ module.exports = {
   ...contentTypes,
   isPost,
   isCategory,
-  isSubPage,
-  isSubPages,
+  isSubpage,
+  isSubpages,
   isAsset,
   isAssets,
   isLocalAsset,

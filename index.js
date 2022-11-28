@@ -23,7 +23,7 @@ const createCompiler = async ({
   ])
   const contentModel = ContentModel.createContentModel(fileSystemIndex)
   Targets.compileHomepage(contentModel)
-  Targets.compileSubPages(contentModel)
+  Targets.compileSubpages(contentModel)
   Targets.compilePostsJSON(contentModel)
   Targets.copyLocalAssets(contentModel)
   await Targets.compileCategoryPages(contentModel)
