@@ -11,15 +11,15 @@ const sortPosts = (a, b) => {
 }
 
 const upsertUncategorizedCategory = (ContentModel, newContent) => {
-  const uncategorizedCategory = ContentModel.categories.find(
+  let uncategorizedCategory = ContentModel.categories.find(
     category => category.name === UNCATEGORIZED
   )
-  if (uncategorizedCategory) {
-    uncategorizedCategory.posts.push(newContent)
-    uncategorizedCategory.posts.sort(sortPosts)
-  } else {
-    ContentModel.categories.push(createUncategorizedCategory([newContent]).data)
+  if (!uncategorizedCategory) {
+    uncategorizedCategory = createUncategorizedCategory().data
+    ContentModel.categories.push(uncategorizedCategory)
   }
+  uncategorizedCategory.posts.push(newContent)
+  uncategorizedCategory.posts.sort(sortPosts)
 }
 
 const createContentModel = (contentTree) => {
@@ -49,7 +49,7 @@ const createContentModel = (contentTree) => {
         break
 
       case contentTypes.POST:
-        upsertUncategorizedCategory(ContentModel, content)
+        upsertUncategorizedCategory(ContentModel, content.data)
         ContentModel.posts.push(content.data)
         break
 

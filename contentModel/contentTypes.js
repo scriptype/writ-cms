@@ -130,10 +130,10 @@ const createCategory = (fsObject) => {
   }
 }
 
-const createUncategorizedCategory = (posts) => {
+const createUncategorizedCategory = () => {
   return createCategory({
     name: UNCATEGORIZED,
-    children: posts
+    children: []
   })
 }
 
