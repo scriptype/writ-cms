@@ -11,9 +11,9 @@ const createSiteDir = async () => {
   }
   try {
     await rm(paths.SITE, { recursive: true })
-  } catch (e) {
-    console.log('createSiteDir error:', e)
-  } finally {
+  }
+  catch (ENOENT) {}
+  finally {
     return mkdir(paths.SITE)
   }
 }

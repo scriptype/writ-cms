@@ -1,7 +1,9 @@
 const { cp } = require('fs/promises')
 const { join, dirname } = require('path')
-const { paths } = require('../settings')
-const { getSlug } = require('../helpers')
+const { paths } = require('../../settings')
+const { getSlug } = require('../../helpers')
+
+const all = Promise.all.bind(Promise)
 
 const copyAsset = ({ path, name }) => {
   const dirnameSlug = getSlug(dirname(path))
@@ -11,29 +13,27 @@ const copyAsset = ({ path, name }) => {
 }
 
 const copyLocalAssets = ({ localAssets, posts, categories }) => {
-  const copyRootAssets = Promise.all(
+  const copyRootAssets = all(
     localAssets.map(copyAsset)
   )
 
-  const copyCategoryAssets = Promise.all(
-    categories.map(({ data: { localAssets } }) => {
-      return localAssets.map(copyAsset)
+  const copyCategoryAssets = all(
+    categories.map(({ localAssets }) => {
+      return all(localAssets.map(copyAsset))
     })
   )
 
-  const copyPostAssets = Promise.all(
-    posts.map(({ data: { localAssets = [] } }) => {
-      return localAssets.map(copyAsset)
+  const copyPostAssets = all(
+    posts.map(({ localAssets = [] }) => {
+      return all(localAssets.map(copyAsset))
     })
   )
 
-  return Promise.all([
+  return all([
     copyRootAssets,
     copyCategoryAssets,
     copyPostAssets
   ])
 }
 
-module.exports = {
-  copy: copyLocalAssets
-}
+module.exports = copyLocalAssets

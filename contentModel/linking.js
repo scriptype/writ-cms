@@ -1,6 +1,6 @@
 const _ = require('lodash')
 
-const getScoreByOverlap = (arrayOfStrings1, arrayOfStrings2) => {
+const getScoreByOverlap = (arrayOfStrings1 = [], arrayOfStrings2 = []) => {
   const overlap = _.intersection(
     arrayOfStrings1.map(string => string.toUpperCase()),
     arrayOfStrings2.map(string => string.toUpperCase())
@@ -20,20 +20,20 @@ const attachPaging = (post, postIndex, posts) => {
   const paging = {}
   if (postIndex > 0) {
     paging.nextPost = {
-      title: posts[postIndex - 1].data.title,
-      permalink: posts[postIndex - 1].data.permalink
+      title: posts[postIndex - 1].title,
+      permalink: posts[postIndex - 1].permalink
     }
   }
   if (postIndex < posts.length - 1) {
     paging.prevPost = {
-      title: posts[postIndex + 1].data.title,
-      permalink: posts[postIndex + 1].data.permalink
+      title: posts[postIndex + 1].title,
+      permalink: posts[postIndex + 1].permalink
     }
   }
   return paging
 }
 
-const normalizeText = (text) => {
+const normalizeText = (text = '') => {
   return text
     .replace(/<(p|a|img|pre|video|i|u|em|strong|small|div|section)>/i, '')
     .replace(/-_:'\(\)\[\]\{\}\./g, '')
@@ -46,12 +46,12 @@ const attachRelevantPosts = (post, posts) => {
     if (otherPost === post) {
       return
     }
-    const tagsOverlapScore = getScoreByOverlap(post.data.tags, otherPost.data.tags)
+    const tagsOverlapScore = getScoreByOverlap(post.tags, otherPost.tags)
     const titleSimilarityScore = getScoreByTextSimilarity(
-      normalizeText(post.data.title),
-      normalizeText(otherPost.data.title)
+      normalizeText(post.title),
+      normalizeText(otherPost.title)
     )
-    const sameCategoryScore = getScoreByEquality(post.data.category, otherPost.data.category)
+    const sameCategoryScore = getScoreByEquality(post.category, otherPost.category)
     const relevancyScore = (
       tagsOverlapScore +
       titleSimilarityScore +
@@ -59,7 +59,7 @@ const attachRelevantPosts = (post, posts) => {
     )
     if (relevancyScore > 0) {
       const relevantPost = {
-        ..._.pick(otherPost.data, [
+        ..._.pick(otherPost, [
           'title',
           'permalink',
           'category'
@@ -79,8 +79,8 @@ const attachRelevantPosts = (post, posts) => {
 module.exports = {
   link({ categories, ...rest }) {
     categories.forEach(category => {
-      category.data.posts.forEach((post, postIndex, posts) => {
-        post.data.links = {
+      category.posts.forEach((post, postIndex, posts) => {
+        post.links = {
           ...attachPaging(post, postIndex, posts),
           ...attachRelevantPosts(post, posts)
         }

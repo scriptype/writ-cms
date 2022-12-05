@@ -1,7 +1,7 @@
 const { writeFile } = require('fs/promises')
-const { paths } = require('../settings')
+const { paths } = require('../../settings')
 
-const compilePostsJSON = ({ postsJSON }) => {
+const renderPostsJSON = ({ postsJSON }) => {
   console.log('creating:', paths.POSTS_JSON)
   return writeFile(
     paths.POSTS_JSON,
@@ -9,6 +9,4 @@ const compilePostsJSON = ({ postsJSON }) => {
   )
 }
 
-module.exports = {
-  compile: compilePostsJSON
-}
+module.exports = renderPostsJSON

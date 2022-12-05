@@ -14,9 +14,7 @@
   }
 
   const loadPosts = async (path) => {
-    return fetch(`/${path}`)
-      .then(r => r.json())
-      .then(posts => posts.map(({ data }) => data))
+    return fetch(`/${path}`).then(r => r.json())
   }
 
   const resultsTemplate = (results, query) => {
