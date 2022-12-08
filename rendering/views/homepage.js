@@ -3,7 +3,7 @@ const { settings, paths } = require('../../settings')
 
 const renderHomePage = (render, { categories, posts }) => {
   return render({
-    path: join(paths.SITE, 'index.html'),
+    path: join(paths.out, 'index.html'),
     content: '{{>index}}',
     data: {
       site: settings.site,

@@ -28,7 +28,7 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const indexFileSystem = async (dir = '.', depth = 0) => {
+const indexFileSystem = async (dir = paths.ROOT, depth = 0) => {
   return Promise.all(
     (await fs.readdir(dir))
       .filter(shouldIncludePath)
@@ -36,7 +36,7 @@ const indexFileSystem = async (dir = '.', depth = 0) => {
         const fullPath = join(dir, path)
         const baseProperties = {
           name: path,
-          path: fullPath,
+          path: fullPath.replace(paths.ROOT + '/', ''),
           depth,
         }
         if (await isDirectory(fullPath)) {

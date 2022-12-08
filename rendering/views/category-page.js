@@ -12,7 +12,7 @@ const mkdirCategoryFolder = async (dirName) => {
 
 const renderCategoryPages = (render, { categories }) => {
   const compilation = categories.map(async category => {
-    const dir = join(paths.SITE, category.slug)
+    const dir = join(paths.out, category.slug)
     await mkdirCategoryFolder(dir)
     return render({
       path: join(dir, 'index.html'),

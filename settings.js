@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const { join } = require('path')
 
 const Settings = {
   _settings: {
@@ -10,8 +11,8 @@ const Settings = {
   get settings() { return this._settings },
 
   _paths: {
+    rootDirectory: '.',
     exportDirectory: '_site',
-    categoriesDirectory: '.',
     assetsDirectory: 'assets',
     pagesDirectory: 'pages',
     ignorePaths: [
@@ -20,7 +21,7 @@ const Settings = {
       "node_modules",
       "settings.json",
       "start.js"
-    ]
+    ],
   },
   get paths() { return this._paths },
 
@@ -28,8 +29,8 @@ const Settings = {
     const keysToExclude = Object.keys(this._settings)
     const paths = _.omit(settings, keysToExclude)
     const {
+      rootDirectory,
       exportDirectory,
-      categoriesDirectory,
       assetsDirectory,
       pagesDirectory,
       ignorePaths
@@ -38,13 +39,14 @@ const Settings = {
       ...paths
     }
     this._paths = {
+      ROOT: rootDirectory,
       SITE: exportDirectory,
-      POSTS_JSON: `${exportDirectory}/posts.json`,
-      CATEGORIES: categoriesDirectory,
+      POSTS_JSON: join(rootDirectory, exportDirectory, 'posts.json'),
       ASSETS: assetsDirectory,
       SUBPAGES: pagesDirectory,
       IGNORE: ignorePaths,
-      IGNORE_REG_EXP: new RegExp(ignorePaths.join('|'))
+      IGNORE_REG_EXP: new RegExp(ignorePaths.join('|')),
+      out: join(rootDirectory, exportDirectory)
     }
   },
 
@@ -67,7 +69,7 @@ const Settings = {
    *     description?: String
    *   },
    *   exportDirectory?: String,
-   *   categoriesDirectory?: String,
+   *   rootDirectory?: String,
    *   assetsDirectory?: String,
    *   pagesDirectory?: String,
    *   ignorePaths?: String[]

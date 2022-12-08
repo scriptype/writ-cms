@@ -5,24 +5,23 @@ const { getSlug, isDirectory } = require('./helpers')
 const { paths, settings } = require('./settings')
 
 const createSiteDir = async () => {
-  const path = paths.SITE || 'site'
   if (paths.SITE === '.' || paths.SITE === './' || paths.SITE === '..' || paths.SITE === '../' || paths.SITE === '/' || paths.SITE === '~') {
     throw new Error(`Dangerous export directory: "${paths.SITE}". Won't continue.`)
   }
   try {
-    await rm(paths.SITE, { recursive: true })
+    await rm(paths.out, { recursive: true })
   }
   catch (ENOENT) {}
   finally {
-    return mkdir(paths.SITE)
+    return mkdir(paths.out)
   }
 }
 
 const copyStaticAssets = async () => {
   const src = join(__dirname, 'rendering', 'assets')
-  const out = join(paths.SITE, paths.ASSETS, 'default')
-  if (!(await isDirectory(join(paths.SITE, paths.ASSETS)))) {
-    await mkdir(join(paths.SITE, paths.ASSETS))
+  const out = join(paths.out, paths.ASSETS, 'default')
+  if (!(await isDirectory(join(paths.out, paths.ASSETS)))) {
+    await mkdir(join(paths.out, paths.ASSETS))
   }
   return cp(src, out, { recursive: true })
 }

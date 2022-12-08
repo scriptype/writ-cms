@@ -7,7 +7,7 @@ const all = Promise.all.bind(Promise)
 
 const copyAsset = ({ path, name }) => {
   const dirnameSlug = getSlug(dirname(path))
-  const newPath = join(paths.SITE, join(dirnameSlug, name))
+  const newPath = join(paths.out, join(dirnameSlug, name))
   console.log('copying:', newPath)
   return cp(path, newPath)
 }

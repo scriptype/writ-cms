@@ -21,7 +21,7 @@ const outPaths = {
 
 const mkdirPostFolder = async (post) => {
   try {
-    return await mkdir(join(paths.SITE, post.permalink))
+    return await mkdir(join(paths.out, post.permalink))
   } catch (EEXIST) {
     return Promise.resolve(true)
   }
@@ -38,7 +38,7 @@ const renderPosts = (render, { posts }) => {
       outPath = outPaths.uncategorized(post)
     }
     return render({
-      path: join(paths.SITE, outPath),
+      path: join(paths.out, outPath),
       content: `{{#>${post.type}}}${post.content}{{/${post.type}}}`,
       data: post
     })
