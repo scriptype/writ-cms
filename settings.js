@@ -3,12 +3,9 @@ const { join } = require('path')
 
 const Settings = {
   _settings: {
-    site: {
-      title: 'Blog',
-      description: 'My new blog'
-    },
+    title: 'Blog',
+    description: 'My new blog'
   },
-  get settings() { return this._settings },
 
   _paths: {
     rootDirectory: '.',
@@ -23,7 +20,6 @@ const Settings = {
       "start.js"
     ],
   },
-  get paths() { return this._paths },
 
   setPaths(settings) {
     const keysToExclude = Object.keys(this._settings)
@@ -38,7 +34,7 @@ const Settings = {
       ...this._paths,
       ...paths
     }
-    this._paths = {
+    this.paths = {
       ROOT: rootDirectory,
       SITE: exportDirectory,
       POSTS_JSON: join(rootDirectory, exportDirectory, 'posts.json'),
@@ -57,7 +53,7 @@ const Settings = {
       ...this._settings,
       ...settings
     }
-    this._settings = {
+    this.settings = {
       site
     }
   },
