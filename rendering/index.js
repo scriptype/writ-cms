@@ -10,13 +10,17 @@ const Views = {
 }
 
 module.exports = {
+  renderPromise: Promise.resolve(true),
   async render(contentModel) {
+    await this.renderPromise
     await init()
-    Views.renderHomepage(render, contentModel)
-    Views.renderSubpages(render, contentModel)
-    Views.renderPostsJSON(contentModel)
-    Views.copyLocalAssets(contentModel)
-    await Views.renderCategoryPages(render, contentModel)
-    return Views.renderPosts(render, contentModel)
+    this.renderPromise = Promise.all([
+      Views.renderHomepage(render, contentModel),
+      Views.renderSubpages(render, contentModel),
+      Views.renderPostsJSON(contentModel),
+      Views.copyLocalAssets(contentModel),
+      Views.renderCategoryPages(render, contentModel),
+    ]).then(() => Views.renderPosts(render, contentModel))
+    return this.renderPromise
   }
 }

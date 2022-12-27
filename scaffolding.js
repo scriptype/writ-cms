@@ -27,8 +27,12 @@ const copyStaticAssets = async () => {
 }
 
 module.exports = {
+  scaffold: Promise.resolve(true),
   async scaffoldSite() {
-    await createSiteDir()
-    return copyStaticAssets()
+    this.scaffold = this.scaffold
+      .then(createSiteDir)
+      .then(copyStaticAssets)
+
+    return this.scaffold
   }
 }

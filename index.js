@@ -22,7 +22,7 @@ const createCompiler = async ({
     Indexer.indexFileSystem()
   ])
   const contentModel = ContentModel.createContentModel(fileSystemIndex)
-  await Rendering.render(contentModel)
+  return Rendering.render(contentModel)
 }
 
 module.exports = setup
