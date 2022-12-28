@@ -37,14 +37,13 @@ const createContentModel = (contentTree) => {
     switch (content.type) {
       case contentTypes.CATEGORY:
         if (content.data.posts.length) {
-          content.data.posts.sort(sortPosts)
+          const categoryPosts = content.data.posts.map(({ data }) => data)
+          const sortedCategoryPosts = categoryPosts.sort(sortPosts)
           ContentModel.categories.push({
             ...content.data,
-            posts: content.data.posts.map(({ data }) => data)
+            posts: sortedCategoryPosts
           })
-          ContentModel.posts.push(
-            ...content.data.posts.map(({ data }) => data)
-          )
+          ContentModel.posts.push(...sortedCategoryPosts)
         }
         break
 
