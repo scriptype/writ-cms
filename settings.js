@@ -4,7 +4,8 @@ const { join } = require('path')
 const Settings = {
   _settings: {
     title: 'Blog',
-    description: 'My new blog'
+    description: 'My new blog',
+    theme: 'default'
   },
 
   _paths: {
@@ -49,12 +50,13 @@ const Settings = {
   // Return the relevant settings from whatever object is passed,
   // And default to the current this.settings
   setSettings(settings) {
-    const { site } = {
+    const { site, theme } = {
       ...this._settings,
       ...settings
     }
     this.settings = {
-      site
+      site,
+      theme
     }
   },
 

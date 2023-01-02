@@ -1,9 +1,10 @@
 const Handlebars = require('handlebars')
 const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
-const { readFileContent } = require('../helpers')
+const { isDirectory, readFileContent } = require('../helpers')
+const { settings } = require('../settings')
 
-const PARTIALS_PATH = resolve(join(__dirname, 'partials'))
+const PARTIALS_PATH = resolve(join(__dirname, 'themes', settings.theme))
 
 const helpers = {
   multiLineTextList(list) {
@@ -32,7 +33,15 @@ const registerHelpers = () => {
 }
 
 const registerPartials = async () => {
-  const files = await readdir(PARTIALS_PATH)
+  const paths = await Promise.all(
+    (await readdir(PARTIALS_PATH)).map(async path => ({
+      path,
+      isDirectory: await isDirectory(join(PARTIALS_PATH, path))
+    }))
+  )
+  const files = paths
+    .filter(p => !p.isDirectory && /\.hbs$/i.test(p.path))
+    .map(({ path }) => path)
   const register = files.map(async (path) => {
     const name = path.replace(extname(path), '')
     const fileContent = await readFileContent(join(PARTIALS_PATH, path))
