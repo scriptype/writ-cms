@@ -20,28 +20,17 @@ So, you can generate a full-fledged static blog using a single file in a single 
 
 ***
 
-## Development
-
-This repository is the core/backend of the site generator. Currently it's not
-yet in the npm.
-
-So, the only way to move forward is to clone this locally and use
-`npm link` to link it locally as a dependency to an actualy blog project.
-
-For now, I just use my personal sample blog as the callsite for the CMS.
+## Usage
 
 ```
 git clone git@github.com:scriptype/writ-cms.git
 cd writ-cms
 npm install
 cd ..
-
-# Clone my personal blog that will use the CMS
-git clone git@github.com:scriptype/writ.git
-cd writ
-npm install
-npm link writ-cms ../writ-cms
-npm start
+mkdir my-new-blog
+cd my-new-blog
+echo "Hello" > hello.txt
+node -p "require('../writ-cms')().watch()"
 ```
 
 ***
