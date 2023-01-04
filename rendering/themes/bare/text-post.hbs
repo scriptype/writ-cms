@@ -1,59 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="{{site.description}}" />
-        <title>{{title}} / {{site.title}}</title>
-        <link rel="stylesheet" href="/assets/bare/style/style.css">
-    </head>
+{{#> base }}
+    <div class="container">
+        <nav class="topbar">
+            <h1 class="site-title">{{site.title}}</h1>
+        </nav>
 
-    <body>
-
-        <div class="container">
-            <nav class="topbar">
-                <h1 class="site-title">{{site.title}}</h1>
-            </nav>
-
-            <main class="content">
-                <article class="post post--text">
-                    <header class="post-header">
-                        <h2>{{title}}</h2>
-                    </header>
-                    <section class="post-content">
-                        {{> @partial-block }}
+        <main class="content">
+            <article class="post post--text">
+                <header class="post-header">
+                    <h2>{{title}} from text-post</h2>
+                </header>
+                <section class="post-content">
+                    {{> @partial-block }}
+                </section>
+                <footer class="post-footer">
+                    <section class="post-footer-section">
+                        <table class="post-metadata">
+                            <tr class="post-metadata-date">
+                                <td>Published at</td>
+                                <td>{{publishedAtMedium}}</td>
+                            </tr>
+                            {{#if category}}
+                            <tr class="post-metadata-category">
+                                <td>Category</td>
+                                <td><a href="{{category.permalink}}">{{category.name}}</a></td>
+                            </tr>
+                            {{/if}}
+                            {{#if tags}}
+                            <tr class="post-metadata-tags">
+                                <td>Tags</td>
+                                <td>{{tags}}</td>
+                            </tr>
+                            {{/if}}
+                        </table>
                     </section>
-                    <footer class="post-footer">
-                        <section class="post-footer-section">
-                            <table class="post-metadata">
-                                <tr class="post-metadata-date">
-                                    <td>Published at</td>
-                                    <td>{{publishedAtMedium}}</td>
-                                </tr>
-                                {{#if category}}
-                                <tr class="post-metadata-category">
-                                    <td>Category</td>
-                                    <td><a href="{{category.permalink}}">{{category.name}}</a></td>
-                                </tr>
-                                {{/if}}
-                                {{#if tags}}
-                                <tr class="post-metadata-tags">
-                                    <td>Tags</td>
-                                    <td>{{tags}}</td>
-                                </tr>
-                                {{/if}}
-                            </table>
-                        </section>
-                        {{#if links.prevPost}}
-                            <a href="{{links.prevPost.permalink}}">&laquo; {{links.prevPost.title}}</a>
-                        {{/if}}
-                        {{#if links.nextPost}}
-                            <a href="{{links.nextPost.permalink}}">{{links.nextPost.title}} &raquo;</a>
-                        {{/if}}
-                    </footer>
-                </article>
-            </main>
-        </div>
-    </body>
-
-</html>
+                    {{#if links.prevPost}}
+                        <a href="{{links.prevPost.permalink}}">&laquo; {{links.prevPost.title}}</a>
+                    {{/if}}
+                    {{#if links.nextPost}}
+                        <a href="{{links.nextPost.permalink}}">{{links.nextPost.title}} &raquo;</a>
+                    {{/if}}
+                </footer>
+            </article>
+        </main>
+    </div>
+{{/base}}

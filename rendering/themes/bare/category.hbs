@@ -1,39 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="{{site.description}}" />
-        <title>{{category.name}} / {{site.title}}</title>
-        <link rel="stylesheet" href="/assets/bare/style/style.css">
-    </head>
+{{#> base }}
+    <div class="container">
+        <nav class="topbar">
+            <h1 class="site-title">{{site.title}}</h1>
+            {{>search}}
+        </nav>
 
-    <body>
-
-        <div class="container">
-            <nav class="topbar">
-                <h1 class="site-title">{{site.title}}</h1>
-                {{>search}}
-            </nav>
-
-            <main class="content" id="posts-container">
-                {{#each posts as |post|}}
-                    {{#if (isPostType 'photo-post' post.type)}}
-                        <a href="{{post.permalink}}" title="{{post.title}}" class="photo-thumbnail">
-                            <img src="{{post.permalink}}/{{post.thumbnailUrl}}" alt="{{post.title}}" />
-                        </a>
-                    {{/if}}
-                    {{#if (isPostType 'text-post' post.type)}}
-                        <div class="post">
-                            <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
-                            {{{post.summary}}}
-                            <p>{{post.tags}}</p>
-                            <p>{{post.publishedAtMedium}}</p>
-                        </div>
-                    {{/if}}
-                {{/each}}
-            </main>
-        </div>
-    </body>
-
-</html>
+        <main class="content" id="posts-container">
+            {{#each posts as |post|}}
+                {{#if (isPostType 'photo-post' post.type)}}
+                    <a href="{{post.permalink}}" title="{{post.title}}" class="photo-thumbnail">
+                        <img src="{{post.permalink}}/{{post.thumbnailUrl}}" alt="{{post.title}}" />
+                    </a>
+                {{/if}}
+                {{#if (isPostType 'text-post' post.type)}}
+                    <div class="post">
+                        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
+                        {{{post.summary}}}
+                        <p>{{post.tags}}</p>
+                        <p>{{post.publishedAtMedium}}</p>
+                    </div>
+                {{/if}}
+            {{/each}}
+        </main>
+    </div>
+{{/base}}
