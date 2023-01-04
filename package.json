@@ -11,10 +11,13 @@
     "url": "git+https://github.com/scriptype/writ-cms.git"
   },
   "homepage": "https://github.com/scriptype/writ-cms#readme",
-  "devDependencies": {
-    "handlebars": "4.7.7"
-  },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "body-parser": "^1.20.1",
+    "browser-sync": "^2.27.11",
+    "front-matter": "^4.0.2",
+    "handlebars": "^4.7.7",
+    "lodash": "^4.17.21",
+    "marked": "^4.2.5",
+    "turndown": "^7.1.1"
   }
 }

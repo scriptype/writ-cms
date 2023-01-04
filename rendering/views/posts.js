@@ -37,9 +37,21 @@ const renderPosts = (render, { posts }) => {
     if (post.category.name === UNCATEGORIZED) {
       outPath = outPaths.uncategorized(post)
     }
+    const devContent = `
+      <div data-editable="true" data-section="content" data-slug="${post.category.permalink}/${post.slug}">
+        ${post.content}
+      </div>
+      {{> editor }}
+    `
+    const buildContent = post.content
+    const content = `
+      {{#>${post.type}}}
+        ${process.env.NODE_ENV === 'dev' ? devContent : buildContent}
+      {{/${post.type}}}
+    `
     return render({
       path: join(paths.out, outPath),
-      content: `{{#>${post.type}}}${post.content}{{/${post.type}}}`,
+      content,
       data: post
     })
   })

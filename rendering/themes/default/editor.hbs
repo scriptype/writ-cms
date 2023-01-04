@@ -1,0 +1,160 @@
+<template id="editor-tmpl">
+  <div class="writ-editor">
+    <div class="checkbox-control">
+      <input type="checkbox" class="checkbox-input" id="edit-mode" />
+      <label for="edit-mode" class="checkbox-label">
+        Edit mode
+      </label>
+    </div>
+    <button type="button" id="rebuild-btn">Rebuild</button>
+    <button type="button" id="save-btn">Save</button>
+    <div class="unsaved-changes">
+      <h3>Unsaved changes:</h3>
+      <ul id="unsaved-changes-list" class="unsaved-changes-list"></ul>
+    </div>
+  </div>
+</template>
+
+<style type="text/css">
+:root {
+  --editor-height: 36px;
+}
+
+body {
+  margin-top: var(--editor-height);
+}
+
+.writ-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--editor-height);
+  background: #fffa;
+  backdrop-filter: blur(5px);
+  transition: all .5s;
+}
+
+.writ-editor .checkbox-control {
+  --padding: 0.25rem;
+  padding: var(--padding);
+  position: relative;
+  display: inline-flex;
+}
+
+.writ-editor .checkbox-control .checkbox-input {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--padding) + 0.5rem);
+  z-index: 1;
+  transform: translateY(-55%);
+}
+
+.writ-editor .checkbox-control .checkbox-label {
+  padding: 0.5em 0.5em 0.4em 1.75em;
+  font: normal 14px/1 helvetica, arial, sans-serif;
+  background: hotpink;
+  border-radius: 5px;
+}
+
+.writ-editor .checkbox-control :checked + .checkbox-label {
+  background: yellow;
+}
+
+.writ-editor .checkbox-control .checkbox-input {
+  margin: 0;
+  align-self: flex-start;
+}
+
+.writ-editor .unsaved-changes {
+  max-height: initial;
+  overflow: visible;
+  opacity: 1;
+  transform: scale(1, 1);
+}
+
+.writ-editor .unsaved-changes {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(1, 0);
+  transition: all .5s;
+}
+</style>
+
+<script type="text/javascript">
+  const query = document.querySelector.bind(document)
+  const queryAll = document.querySelectorAll.bind(document)
+  const editorTemplate = query('#editor-tmpl')
+  const editorElement = editorTemplate.content.firstElementChild
+  const unsavedChangesList = editorElement.querySelector('#unsaved-changes-list')
+
+  const rebuild = () => {
+    return fetch('/cms/refresh')
+  }
+
+  const updateContent = (slug, content) => {
+    return fetch(`/cms/update/${slug}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        content: content.trim()
+      })
+    })
+  }
+
+  let editMode = false
+  let unsavedChanges = {}
+
+  document.body.appendChild(editorElement)
+
+  query('#rebuild-btn').addEventListener('click', () => {
+    rebuild()
+  })
+
+  query('#save-btn').addEventListener('click', async () => {
+    console.log('changes', unsavedChanges)
+    Object.keys(unsavedChanges).forEach(async (slug) => {
+        const change = unsavedChanges[slug]
+        if (change.section === 'content') {
+          var result = await updateContent(slug, change.html)
+        }
+    })
+  })
+
+  query('#edit-mode').addEventListener('change', (e) => {
+    editables.forEach(editable => {
+      editable.contentEditable = e.target.checked
+    })
+  })
+
+  const editables = Array.from(queryAll('[data-editable="true"]'))
+  const originals = editables.map(e => ({
+    slug: e.dataset.slug,
+    content: e.innerHTML
+  }))
+
+  editables.forEach(editable => {
+    editable.addEventListener('input', (e) => {
+      const { section, slug } = editable.dataset
+      const originalContent = originals.find(c => c.slug === slug).content
+      const isSameContent = originalContent === editable.innerHTML
+      if (isSameContent) {
+        unsavedChanges = {}
+      } else {
+        unsavedChanges[slug] = {
+          slug,
+          section,
+          html: editable.innerHTML
+        }
+      }
+      unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(key => `
+        <li>${unsavedChanges[key].slug} (${unsavedChanges[key].section})</li>
+      `).join('')
+      editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
+    })
+  })
+</script>

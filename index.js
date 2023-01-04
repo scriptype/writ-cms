@@ -3,12 +3,19 @@ const setup = (settings = {}) => {
   const Settings = require('./settings')
   Settings.init(settings)
 
-  return createCompiler({
-    Scaffolder: require('./scaffolding'),
-    Indexer: require('./indexing'),
-    ContentModel: require('./contentModel'),
-    Rendering: require('./rendering'),
-  })
+  return {
+    compile() {
+      return createCompiler({
+        Scaffolder: require('./scaffolding'),
+        Indexer: require('./indexing'),
+        ContentModel: require('./contentModel'),
+        Rendering: require('./rendering'),
+      })
+    },
+    watch() {
+      require('./watcher')(settings)
+    }
+  }
 }
 
 const createCompiler = async ({
