@@ -1,14 +1,15 @@
 const fs = require('fs/promises')
-const { extname } = require('path')
+const { extname, join } = require('path')
 const frontMatter = require('front-matter')
 const TurndownService = require('turndown')
 
 const turndownService = new TurndownService()
 
 module.exports = ({ settings }) => async (req, res, next) => {
-  const { content, path: srcFilePath } = req.body
-  const extension = extname(srcFilePath)
+  const { content, path } = req.body
+  const extension = extname(path)
   const isMarkdown = /\.(md|markdown)$/i.test(extension)
+  const srcFilePath = join(settings.rootDirectory || '.', path)
 
   if (isMarkdown) {
     const md = turndownService.turndown(content)
