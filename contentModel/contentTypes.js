@@ -167,6 +167,7 @@ const createFolderedPost = (fsObject) => {
       },
       localAssets: fsObject.children.filter(isLocalAsset),
       site: settings.site,
+      path: indexFile.path
     }
   }
 }
@@ -188,6 +189,7 @@ const createUncategorizedPost = (fsObject) => {
         permalink: join('/', getSlug(UNCATEGORIZED))
       },
       site: settings.site,
+      path: fsObject.path
     }
   }
 }
@@ -210,6 +212,7 @@ const createPost = (fsObject) => {
         permalink: join('/', getSlug(category))
       },
       site: settings.site,
+      path: fsObject.path
     }
   }
 }

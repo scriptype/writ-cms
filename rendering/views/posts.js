@@ -38,7 +38,11 @@ const renderPosts = (render, { posts }) => {
       outPath = outPaths.uncategorized(post)
     }
     const devContent = `
-      <div data-editable="true" data-section="content" data-slug="${post.category.permalink}/${post.slug}">
+      <div
+        data-editable="true"
+        data-section="content"
+        data-path="${post.path}"
+      >
         ${post.content}
       </div>
       {{> editor }}

@@ -2,7 +2,7 @@ const bodyParser = require('body-parser')
 
 const Routes = {
   refresh: require('./routes/refresh'),
-  update: require('./routes/update')
+  updatePost: require('./routes/updatePost')
 }
 
 const next = (promise, thenPromise) => {
@@ -28,7 +28,7 @@ module.exports = (compilePromise, settings) => {
       route: "/cms/update",
       handle: next(
         compilePromise, 
-        Routes.update({
+        Routes.updatePost({
           settings
         })
       )

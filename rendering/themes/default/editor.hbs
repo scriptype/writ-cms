@@ -94,14 +94,15 @@ body {
     return fetch('/cms/refresh')
   }
 
-  const updateContent = (slug, content) => {
-    return fetch(`/cms/update/${slug}`, {
+  const updateContent = (path, content) => {
+    return fetch(`/cms/update`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        content: content.trim()
+        content: content.trim(),
+        path
       })
     })
   }
@@ -117,10 +118,13 @@ body {
 
   query('#save-btn').addEventListener('click', async () => {
     console.log('changes', unsavedChanges)
-    Object.keys(unsavedChanges).forEach(async (slug) => {
-        const change = unsavedChanges[slug]
+    Object.keys(unsavedChanges).forEach(async (filePath) => {
+        const change = unsavedChanges[filePath]
+        if (!change) {
+          return
+        }
         if (change.section === 'content') {
-          var result = await updateContent(slug, change.html)
+          var result = await updateContent(filePath, change.html)
         }
     })
   })
@@ -133,26 +137,26 @@ body {
 
   const editables = Array.from(queryAll('[data-editable="true"]'))
   const originals = editables.map(e => ({
-    slug: e.dataset.slug,
+    path: e.dataset.path,
     content: e.innerHTML
   }))
 
   editables.forEach(editable => {
+    const { section, path } = editable.dataset
+    const originalContent = originals.find(c => c.path === path).content
+
     editable.addEventListener('input', (e) => {
-      const { section, slug } = editable.dataset
-      const originalContent = originals.find(c => c.slug === slug).content
       const isSameContent = originalContent === editable.innerHTML
       if (isSameContent) {
-        unsavedChanges = {}
+        unsavedChanges[path] = null
       } else {
-        unsavedChanges[slug] = {
-          slug,
+        unsavedChanges[path] = {
           section,
           html: editable.innerHTML
         }
       }
       unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(key => `
-        <li>${unsavedChanges[key].slug} (${unsavedChanges[key].section})</li>
+        <li>${key} (${unsavedChanges[key].section})</li>
       `).join('')
       editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
     })
