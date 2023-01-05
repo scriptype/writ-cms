@@ -9,7 +9,7 @@ const copyAsset = ({ path, name }) => {
   const dirnameSlug = getSlug(dirname(path))
   const newPath = join(paths.out, join(dirnameSlug, name))
   console.log('copying:', newPath)
-  return cp(path, newPath)
+  return cp(join(paths.ROOT, path), newPath)
 }
 
 const copyLocalAssets = ({ localAssets, posts, categories }) => {
