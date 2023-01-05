@@ -2,21 +2,12 @@ const { mkdir } = require('fs/promises')
 const { join, format, dirname } = require('path')
 const { paths } = require('../../settings')
 const { UNCATEGORIZED } = require('../../constants')
+const { getSlug, replaceExtension } = require('../../helpers')
 
-const outPaths = {
-  default: (post) => {
-    return format({
-      dir: dirname(post.permalink),
-      name: post.slug,
-      ext: '.html'
-    })
-  },
-  foldered: (post) => {
-    return join(post.permalink, 'index.html')
-  },
-  uncategorized: (post) => {
-    return `${post.slug}.html`
-  }
+const getExportPath = (post) => {
+  const pathWithHTMLExtension = replaceExtension(getSlug(post.path), '.html')
+  const pathWithCorrectFileName = pathWithHTMLExtension.replace(/\/post\.html$/i, '/index.html')
+  return join(paths.out, pathWithCorrectFileName)
 }
 
 const mkdirPostFolder = async (post) => {
@@ -29,13 +20,8 @@ const mkdirPostFolder = async (post) => {
 
 const renderPosts = (render, { posts }) => {
   const compilation = posts.map(async post => {
-    let outPath = outPaths.default(post)
     if (post.foldered) {
       await mkdirPostFolder(post)
-      outPath = outPaths.foldered(post)
-    }
-    if (post.category.name === UNCATEGORIZED) {
-      outPath = outPaths.uncategorized(post)
     }
     const devContent = `
       <div
@@ -54,7 +40,7 @@ const renderPosts = (render, { posts }) => {
       {{/${post.type}}}
     `
     return render({
-      path: join(paths.out, outPath),
+      path: getExportPath(post),
       content,
       data: post
     })

@@ -2,7 +2,7 @@ const _ = require('lodash')
 const { dirname, join } = require('path')
 const { settings } = require('../settings')
 const { UNCATEGORIZED } = require('../constants')
-const { getSlug, removeExtension } = require('../helpers')
+const { getSlug, removeExtension, replaceExtension } = require('../helpers')
 const { isTemplate, parseTemplate } = require('./templating')
 
 const contentTypes = {
@@ -147,9 +147,9 @@ const createFolderedPostIndex = (fsObject) => {
 const createFolderedPost = (fsObject) => {
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const title = removeExtension(fsObject.name)
-  const slug = getSlug(title)
+  const slug = getSlug(fsObject.name)
   const category = dirname(fsObject.path)
-  const permalink = join('/', getSlug(category), slug)
+  const permalink = replaceExtension(join('/', getSlug(category), slug), '.html')
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
@@ -174,8 +174,8 @@ const createFolderedPost = (fsObject) => {
 
 const createUncategorizedPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
-  const slug = getSlug(title)
-  const permalink = join('/', slug)
+  const slug = getSlug(fsObject.name)
+  const permalink = replaceExtension(join('/', slug), '.html')
   return {
     ...fsObject,
     type: contentTypes.POST,
@@ -196,9 +196,9 @@ const createUncategorizedPost = (fsObject) => {
 
 const createPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
-  const slug = getSlug(title)
+  const slug = getSlug(fsObject.name)
   const category = dirname(fsObject.path)
-  const permalink = join('/', getSlug(category), slug)
+  const permalink = replaceExtension(join('/', getSlug(category), slug), '.html')
   return {
     ...fsObject,
     type: contentTypes.POST,

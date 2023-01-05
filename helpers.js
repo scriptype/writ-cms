@@ -31,9 +31,19 @@ const removeExtension = (fileName) => {
   return fileName.replace(extname(fileName), '')
 }
 
+const replaceExtension = (path, newExtension) => {
+  const extension = extname(path)
+  if (extension) {
+    const re = new RegExp(extension + '$', 'i')
+    return path.replace(re, newExtension)
+  }
+  return path
+}
+
 module.exports = {
   readFileContent,
   isDirectory,
   getSlug,
-  removeExtension
+  removeExtension,
+  replaceExtension
 }
