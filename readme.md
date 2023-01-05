@@ -78,6 +78,30 @@ Human readable name of the folder will be the post title.
 If the post needs static resources, such as photos, they can be kept in the same
 folder as the post.
 
+A post file can look like this:
+
+```
+My new post starts like this.
+
+And it ends like this.
+```
+
+You can also add metadata like this at the beginning of a post file
+```
+---
+type: text-post
+date: 2023-01-05, 01:57
+tags: bananas, books
+musiclist:
+ - Your favorite artist - A song
+---
+My new post starts like this.
+
+And it ends like this.
+```
+
+"musiclist" is displayed at the end of the post when it's rendered.
+
 ### Subpages
 
 1) Create a folder named "pages"
