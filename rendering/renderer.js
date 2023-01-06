@@ -59,7 +59,9 @@ const init = () => {
 
 const render = ({ path, data, content }) => {
   console.log('rendering:', path)
-  const template = Handlebars.compile(content)
+  const template = Handlebars.compile(content, {
+    noEscape: true
+  })
   const output = template(data)
   return writeFile(path, output)
 }

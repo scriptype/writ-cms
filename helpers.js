@@ -40,10 +40,15 @@ const replaceExtension = (path, newExtension) => {
   return path
 }
 
+const pipe = (initialValue, functions) => {
+  return functions.reduce((acc, fn) => fn(acc), initialValue)
+}
+
 module.exports = {
   readFileContent,
   isDirectory,
   getSlug,
   removeExtension,
-  replaceExtension
+  replaceExtension,
+  pipe
 }

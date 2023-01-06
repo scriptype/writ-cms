@@ -1,12 +1,16 @@
 const { join } = require('path')
 const { settings, paths } = require('../../settings')
 
-const renderSubpages = (render, { subpages }) => {
+const renderSubpages = (render, { subpages }, decorateTemplate) => {
   const compilation = subpages.map(subpage => {
     const type = subpage.type || 'subpage'
     return render({
       path: join(paths.out, `${subpage.slug}.html`),
-      content: `{{#>${type}}}${subpage.content}{{/${type}}}`,
+      content: decorateTemplate(`
+        {{#>${type}}}
+          ${subpage.content}
+        {{/${type}}}
+      `),
       data: subpage,
     })
   })

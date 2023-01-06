@@ -81,6 +81,27 @@ body {
   transform: scale(1, 0);
   transition: all .5s;
 }
+
+body.edit-mode [data-editable="true"] {
+  --outline-offset: 7px;
+  --outline-width: 3px;
+  --outline-color: gainsboro;
+  box-shadow:
+    0 0 0 var(--outline-offset) white,
+    0 0 0 calc( var(--outline-offset) + var(--outline-width) ) var(--outline-color);
+  outline-offset: var(--outline-offset);
+  border-radius: 1px;
+  transition: all .3s;
+}
+
+body.edit-mode [data-editable="true"]:hover {
+  --outline-color: deepskyblue;
+}
+
+body.edit-mode [data-editable="true"]:focus-within {
+  --outline-color: transparent;
+  --outline-offset: 1px;
+}
 </style>
 
 <script type="text/javascript">
@@ -107,10 +128,26 @@ body {
     })
   }
 
+  const findParent = (element, tagName) => {
+    if (element === document.body) {
+      return null
+    }
+    const re = new RegExp(tagName, 'i')
+    if (element.parentElement.tagName.match(re)) {
+      return element.parentElement
+    }
+    return findParent(element.parentElement, tagName)
+  }
+
   let editMode = false
   let unsavedChanges = {}
 
   document.body.appendChild(editorElement)
+  document.title = (() => {
+    var el = document.createElement('div')
+    el.innerHTML = document.title
+    return el.innerText
+  })()
 
   query('#rebuild-btn').addEventListener('click', () => {
     rebuild()
@@ -130,6 +167,8 @@ body {
   })
 
   query('#edit-mode').addEventListener('change', (e) => {
+    document.body.classList.toggle('edit-mode')
+    editMode = !editMode
     editables.forEach(editable => {
       editable.contentEditable = e.target.checked
     })
@@ -159,6 +198,12 @@ body {
         <li>${key} (${unsavedChanges[key].section})</li>
       `).join('')
       editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
+    })
+
+    editable.addEventListener('click', e => {
+      if (editMode && findParent(editable, 'A')) {
+        e.preventDefault()
+      }
     })
   })
 </script>

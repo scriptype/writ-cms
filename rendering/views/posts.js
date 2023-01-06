@@ -18,30 +18,18 @@ const mkdirPostFolder = async (post) => {
   }
 }
 
-const renderPosts = (render, { posts }) => {
+const renderPosts = (render, { posts }, decorateTemplate) => {
   const compilation = posts.map(async post => {
     if (post.foldered) {
       await mkdirPostFolder(post)
     }
-    const devContent = `
-      <div
-        data-editable="true"
-        data-section="content"
-        data-path="${post.path}"
-      >
-        ${post.content}
-      </div>
-      {{> editor }}
-    `
-    const buildContent = post.content
-    const content = `
-      {{#>${post.type}}}
-        ${process.env.NODE_ENV === 'dev' ? devContent : buildContent}
-      {{/${post.type}}}
-    `
     return render({
       path: getExportPath(post),
-      content,
+      content: decorateTemplate(`
+        {{#>${post.type}}}
+          ${post.content}
+        {{/${post.type}}}
+      `),
       data: post
     })
   })
