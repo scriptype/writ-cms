@@ -94,14 +94,42 @@ body.edit-mode [data-editable="true"] {
   transition: all .3s;
 }
 
+body.edit-mode [data-editable="true"][data-section="summary"] {
+  --summary-color: gainsboro;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  margin: 0.5rem 0;
+  padding: 1rem 0;
+  cursor: ns-resize;
+  background: var(--summary-color);
+  transform: scaleX(0.3);
+  box-shadow:
+    inset 0 calc(1rem - 1px) 0 white,
+    inset 0 -1rem 0 white;
+}
+
+body.edit-mode [data-editable="true"][data-section="summary"]:hover {
+  box-shadow:
+    inset 0 0.8rem 0 white,
+    inset 0 -0.8rem 0 white;
+}
+
 body.edit-mode [data-editable="true"]:hover {
   --outline-color: deepskyblue;
+}
+
+body.edit-mode [data-editable="true"]:hover [data-section="summary"]{
+  --summary-color: deepskyblue;
 }
 
 body.edit-mode [data-editable="true"]:focus-within {
   --outline-color: transparent;
   --outline-offset: 1px;
 }
+
+body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
 </style>
 
 <script type="text/javascript">
@@ -118,7 +146,6 @@ body.edit-mode [data-editable="true"]:focus-within {
 
   const Post = {
     updateContent(path, content) {
-      console.log('updateContent', path, content)
       return fetch(`/cms/post`, {
         method: 'POST',
         headers: {
@@ -132,7 +159,6 @@ body.edit-mode [data-editable="true"]:focus-within {
     },
 
     updateTitle(path, title, foldered) {
-      console.log('updateTitle', path, title, foldered)
       return fetch(`/cms/post`, {
         method: 'POST',
         headers: {
@@ -148,15 +174,16 @@ body.edit-mode [data-editable="true"]:focus-within {
     }
   }
 
-  const findParent = (element, tagName) => {
+  const findParent = (element, selector) => {
     if (element === document.body) {
       return null
     }
-    const re = new RegExp(tagName, 'i')
-    if (element.parentElement.tagName.match(re)) {
+    const el = document.createElement('div')
+    el.innerHTML = element.parentElement.outerHTML
+    if (el.querySelector(selector)) {
       return element.parentElement
     }
-    return findParent(element.parentElement, tagName)
+    return findParent(element.parentElement, selector)
   }
 
   const omit = (object, keyToOmit) => {
@@ -169,6 +196,14 @@ body.edit-mode [data-editable="true"]:focus-within {
       }
     }, {})
     return restObject
+  }
+
+  const restoreSeeMore = (content) => {
+    const el = document.createElement('div')
+    el.innerHTML = content
+    const seeMore = el.querySelector('[data-section="summary"]')
+    seeMore.replaceWith('\{\{seeMore}}')
+    return el.innerHTML
   }
 
   let editMode = false
@@ -193,7 +228,7 @@ body.edit-mode [data-editable="true"]:focus-within {
           return
         }
         if (change.content) {
-          await Post.updateContent(filePath, change.content)
+          await Post.updateContent(filePath, restoreSeeMore(change.content))
         }
         if (change.title) {
           await Post.updateTitle(filePath, change.title, change.foldered)
@@ -211,13 +246,18 @@ body.edit-mode [data-editable="true"]:focus-within {
 
   const editables = Array.from(queryAll('[data-editable="true"]'))
   const originals = editables.map(e => ({
-    path: e.dataset.path,
+    path:
+      e.dataset.section === 'summary' ?
+      findParent(e, '[data-section="content"]').dataset.path :
+      e.dataset.path,
     content: e.innerHTML
   }))
 
   editables.forEach(editable => {
-    const { section, path, foldered } = editable.dataset
-      console.log('foldered', foldered)
+    let { section, path, foldered } = editable.dataset
+    if (section === 'summary') {
+      path = findParent(editable, '[data-section="content"]').dataset.path
+    }
     const originalContent = originals.find(c => c.path === path).content
 
     editable.addEventListener('input', (e) => {
@@ -245,7 +285,7 @@ body.edit-mode [data-editable="true"]:focus-within {
     })
 
     editable.addEventListener('click', e => {
-      if (editMode && findParent(editable, 'A')) {
+      if (editMode && findParent(editable, 'a')) {
         e.preventDefault()
       }
     })

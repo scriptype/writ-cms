@@ -18,7 +18,9 @@ const helpers = {
   },
 
   seeMore() {
-    return ''
+    return process.env.NODE_ENV === 'dev' ?
+      `<img data-editable="true" data-section="summary" />` :
+      ''
   },
 
   isPostType(string, type) {

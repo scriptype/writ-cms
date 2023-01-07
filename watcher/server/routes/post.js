@@ -73,7 +73,9 @@ module.exports = ({ settings }) => async (req, res, next) => {
     if (/\.(md|markdown|txt)$/i.test(extension)) {
       newSrcContent = turndownService.turndown(content).trim()
     }
-    await savePost(srcFilePath, newSrcContent)
+    await savePost(srcFilePath, {
+      content: newSrcContent
+    })
   }
   if (typeof title !== 'undefined') {
     await renamePost(srcFilePath, title, updateUrl, foldered, extension)
