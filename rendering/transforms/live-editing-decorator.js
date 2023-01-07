@@ -34,10 +34,10 @@ const decorateCategory = (category) => {
 
 module.exports = {
   decorateTemplate(template) {
-    return `
-      ${template}
-      ${process.env.NODE_ENV === 'dev' ? '{{> editor }}' : ''}
-    `
+    return (
+      template +
+      (process.env.NODE_ENV === 'dev' ? '{{> editor }}' : '')
+    )
   },
 
   decorateContent(contentModel) {
