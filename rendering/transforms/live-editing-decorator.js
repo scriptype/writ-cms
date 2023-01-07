@@ -6,6 +6,7 @@ const decoratePost = (post) => {
         data-editable="true"
         data-section="title"
         data-path="${post.path}"
+        data-foldered="${post.foldered}"
       >
         ${post.title}
       </span>
@@ -16,6 +17,7 @@ const decoratePost = (post) => {
         data-editable="true"
         data-section="content"
         data-path="${post.path}"
+        data-foldered="${post.foldered}"
       >
         ${post.content}
       </div>

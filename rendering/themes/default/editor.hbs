@@ -107,6 +107,7 @@ body.edit-mode [data-editable="true"]:focus-within {
 <script type="text/javascript">
   const query = document.querySelector.bind(document)
   const queryAll = document.querySelectorAll.bind(document)
+
   const editorTemplate = query('#editor-tmpl')
   const editorElement = editorTemplate.content.firstElementChild
   const unsavedChangesList = editorElement.querySelector('#unsaved-changes-list')
@@ -115,17 +116,36 @@ body.edit-mode [data-editable="true"]:focus-within {
     return fetch('/cms/refresh')
   }
 
-  const updateContent = (path, content) => {
-    return fetch(`/cms/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        content: content.trim(),
-        path
+  const Post = {
+    updateContent(path, content) {
+      console.log('updateContent', path, content)
+      return fetch(`/cms/post`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content,
+          path
+        })
       })
-    })
+    },
+
+    updateTitle(path, title, foldered) {
+      console.log('updateTitle', path, title, foldered)
+      return fetch(`/cms/post`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          updateUrl: true,
+          path,
+          foldered
+        })
+      })
+    }
   }
 
   const findParent = (element, tagName) => {
@@ -137,6 +157,18 @@ body.edit-mode [data-editable="true"]:focus-within {
       return element.parentElement
     }
     return findParent(element.parentElement, tagName)
+  }
+
+  const omit = (object, keyToOmit) => {
+    const keys = Object.keys(object)
+    const restKeys = keys.filter(k => k !== keyToOmit)
+    const restObject = restKeys.reduce((obj, key) => {
+      return {
+        ...obj,
+        [key]: object[key]
+      }
+    }, {})
+    return restObject
   }
 
   let editMode = false
@@ -160,8 +192,11 @@ body.edit-mode [data-editable="true"]:focus-within {
         if (!change) {
           return
         }
-        if (change.section === 'content') {
-          var result = await updateContent(filePath, change.html)
+        if (change.content) {
+          await Post.updateContent(filePath, change.content)
+        }
+        if (change.title) {
+          await Post.updateTitle(filePath, change.title, change.foldered)
         }
     })
   })
@@ -181,21 +216,30 @@ body.edit-mode [data-editable="true"]:focus-within {
   }))
 
   editables.forEach(editable => {
-    const { section, path } = editable.dataset
+    const { section, path, foldered } = editable.dataset
+      console.log('foldered', foldered)
     const originalContent = originals.find(c => c.path === path).content
 
     editable.addEventListener('input', (e) => {
       const isSameContent = originalContent === editable.innerHTML
       if (isSameContent) {
-        unsavedChanges[path] = null
+        const otherChanges = omit(omit(unsavedChanges[path], section), 'foldered')
+        if (Object.keys(otherChanges).length) {
+          unsavedChanges[path] = otherChanges
+        } else {
+          unsavedChanges = omit(unsavedChanges, path)
+        }
       } else {
         unsavedChanges[path] = {
-          section,
-          html: editable.innerHTML
+          ...unsavedChanges[path],
+          [section]: editable.innerHTML.trim(),
+          foldered: foldered === 'true' || foldered === true
         }
       }
-      unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(key => `
-        <li>${key} (${unsavedChanges[key].section})</li>
+      unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(path => `
+        ${Object.keys(unsavedChanges[path]).map(key => `
+          <li>${path} (${unsavedChanges[path][key]})</li>
+        `)}
       `).join('')
       editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
     })
