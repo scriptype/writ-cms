@@ -1,5 +1,9 @@
-const marked = require('marked')
 const frontMatter = require('front-matter')
+const marked = require('marked')
+
+marked.setOptions({
+  headerIds: false
+})
 
 const READ_MORE_DIVIDER = '{{seeMore}}'
 
@@ -11,7 +15,6 @@ const acceptedExtensionsForTemplates = [
   '.html'
 ]
 
-// Tries to get the first paragraph
 const getSummary = (content) => {
   return content.split(READ_MORE_DIVIDER)[0]
 }
@@ -21,9 +24,14 @@ const getHTMLContent = (body, extension) => {
     return body
   }
   if (/^(\.md|\.markdown|\.txt)$/i.test(extension)) {
-    return marked.parse(
+    const parsedMd = marked.parse(
       body.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')
     )
+    const paragraphContainingSeeMore = parsedMd.match(/<p>(\s+|)\{\{seeMore\}\}(\s+|)<\/p>/s)
+    if (paragraphContainingSeeMore) {
+      return parsedMd.replace(paragraphContainingSeeMore[0], '{{seeMore}}')
+    }
+    return parsedMd
   }
   return body
 }

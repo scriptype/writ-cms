@@ -94,6 +94,11 @@ body.edit-mode [data-editable="true"] {
   transition: all .3s;
 }
 
+body:not(.edit-mode) [data-editable="true"][data-section="summary"] {
+  opacity: 0;
+  position: absolute;
+}
+
 body.edit-mode [data-editable="true"][data-section="summary"] {
   --summary-color: gainsboro;
   position: relative;
@@ -105,6 +110,7 @@ body.edit-mode [data-editable="true"][data-section="summary"] {
   cursor: ns-resize;
   background: var(--summary-color);
   transform: scaleX(0.3);
+  opacity: 1;
   box-shadow:
     inset 0 calc(1rem - 1px) 0 white,
     inset 0 -1rem 0 white;
@@ -202,6 +208,18 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
     const el = document.createElement('div')
     el.innerHTML = content
     const seeMore = el.querySelector('[data-section="summary"]')
+    const parentNode = seeMore.parentNode
+    const grandParentNode = parentNode.parentNode
+    if (grandParentNode && !grandParentNode.querySelector('[data-section="content"]')) {
+      const isFirst = !seeMore.previousSibling
+      const isOnly = isFirst && !seeMore.nextSibling
+      const insertPosition = isFirst ? 'beforeBegin' : 'afterEnd'
+      parentNode.insertAdjacentElement(insertPosition, seeMore)
+      if (isOnly) {
+        parentNode.remove()
+      }
+      return restoreSeeMore(el.innerHTML)
+    }
     seeMore.replaceWith('\{\{seeMore}}')
     return el.innerHTML
   }
