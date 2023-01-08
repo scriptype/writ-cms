@@ -61,20 +61,41 @@ const renamePost = async (srcFilePath, newTitle, updateUrl, foldered, extension)
   }
 }
 
+const trimTrailingSpace = (content) => {
+  return content
+    .split('\n')
+    .map(line => line.replace(/\s+$/g, ''))
+    .join('\n')
+}
+
+const preserveNewlines = (content) => {
+  const random = parseInt(Math.random() * 100000)
+  return content
+    .replace(
+      /\n<(p|h1|h2|h3|h4|h5|h6)>/g,
+      `<<<${random}-\$1->>>`
+    )
+    .replace(/\n/g, '<br />\n')
+    .replace(
+      new RegExp(`<<<${random}-(p|h1|h2|h3|h4|h5|h6)->>>`, 'g'),
+      '\n<\$1>'
+    )
+}
+
 module.exports = ({ settings }) => async (req, res, next) => {
   const { content, title, updateUrl, path, foldered } = req.body
   const extension = extname(path)
   const srcFilePath = join(settings.rootDirectory || '.', path)
+  const isMarkdown = /\.(md|markdown|txt)$/i.test(extension)
 
   console.log('req.body', req.body)
 
   if (typeof content !== 'undefined') {
-    let newSrcContent = content.trim()
-    if (/\.(md|markdown|txt)$/i.test(extension)) {
-      newSrcContent = turndownService.turndown(content).trim()
-    }
+    const newContent = isMarkdown ?
+      turndownService.turndown(preserveNewlines(content)) :
+      content
     await savePost(srcFilePath, {
-      content: newSrcContent
+      content: trimTrailingSpace(newContent.trim())
     })
   }
   if (typeof title !== 'undefined') {

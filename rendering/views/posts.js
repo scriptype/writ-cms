@@ -25,11 +25,9 @@ const renderPosts = (render, { posts }, decorateTemplate) => {
     }
     return render({
       path: getExportPath(post),
-      content: decorateTemplate(`
-        {{#>${post.type}}}
-          ${post.content}
-        {{/${post.type}}}
-      `),
+      content: decorateTemplate(
+        `{{#>${post.type}}}${post.content}{{/${post.type}}}`
+      ),
       data: post
     })
   })

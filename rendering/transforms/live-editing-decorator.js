@@ -7,9 +7,7 @@ const decoratePost = (post) => {
         data-section="title"
         data-path="${post.path}"
         data-foldered="${post.foldered}"
-      >
-        ${post.title}
-      </span>
+      >${post.title}</span>
     `,
 
     content: `
@@ -18,9 +16,7 @@ const decoratePost = (post) => {
         data-section="content"
         data-path="${post.path}"
         data-foldered="${post.foldered}"
-      >
-        ${post.content}
-      </div>
+      >${post.content}</div>
     `
   }
 }

@@ -24,14 +24,14 @@ const getHTMLContent = (body, extension) => {
     return body
   }
   if (/^(\.md|\.markdown|\.txt)$/i.test(extension)) {
-    const parsedMd = marked.parse(
+    const compiledHTML = marked.parse(
       body.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')
     )
-    const paragraphContainingSeeMore = parsedMd.match(/<p>(\s+|)\{\{seeMore\}\}(\s+|)<\/p>/s)
+    const paragraphContainingSeeMore = compiledHTML.match(/<p>(\s+|)\{\{seeMore\}\}(\s+|)<\/p>/s)
     if (paragraphContainingSeeMore) {
-      return parsedMd.replace(paragraphContainingSeeMore[0], '{{seeMore}}')
+      return compiledHTML.replace(paragraphContainingSeeMore[0], '{{seeMore}}')
     }
-    return parsedMd
+    return compiledHTML
   }
   return body
 }

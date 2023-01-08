@@ -6,11 +6,9 @@ const renderSubpages = (render, { subpages }, decorateTemplate) => {
     const type = subpage.type || 'subpage'
     return render({
       path: join(paths.out, `${subpage.slug}.html`),
-      content: decorateTemplate(`
-        {{#>${type}}}
-          ${subpage.content}
-        {{/${type}}}
-      `),
+      content: decorateTemplate(
+        `{{#>${type}}}${subpage.content}{{/${type}}}`
+      ),
       data: subpage,
     })
   })
