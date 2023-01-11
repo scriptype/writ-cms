@@ -4,29 +4,31 @@ const setup = (settings = {}) => {
   Settings.init(settings)
 
   return {
-    compile() {
+    compile(settings) {
       return createCompiler({
+        Settings: Settings.init(settings),
         Scaffolder: require('./scaffolding'),
         Indexer: require('./indexing'),
         ContentModel: require('./contentModel'),
         Rendering: require('./rendering'),
       })
     },
-    watch() {
-      require('./watcher')(settings)
+    watch(settings) {
+      require('./watcher')(Settings.init(settings))
     }
   }
 }
 
 const createCompiler = async ({
+  Settings,
   Scaffolder,
   Indexer,
   ContentModel,
   Rendering
 }) => {
   const [ , fileSystemIndex ] = await Promise.all([
-    Scaffolder.scaffoldSite(),
-    Indexer.indexFileSystem()
+    Scaffolder.scaffoldSite(Settings),
+    Indexer.indexFileSystem(Settings)
   ])
   const contentModel = ContentModel.createContentModel(fileSystemIndex)
   return Rendering.render(contentModel)

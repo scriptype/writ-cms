@@ -2,9 +2,8 @@ const { rm, cp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const { exec } = require('child_process')
 const { getSlug, isDirectory } = require('./helpers')
-const { paths, settings } = require('./settings')
 
-const createSiteDir = async () => {
+const createSiteDir = async ({ paths }) => {
   if (paths.SITE === '.' || paths.SITE === './' || paths.SITE === '..' || paths.SITE === '../' || paths.SITE === '/' || paths.SITE === '~') {
     throw new Error(`Dangerous export directory: "${paths.SITE}". Won't continue.`)
   }
@@ -17,7 +16,7 @@ const createSiteDir = async () => {
   }
 }
 
-const copyStaticAssets = async () => {
+const copyStaticAssets = async ({ paths, settings }) => {
   const src = join(__dirname, 'rendering', 'themes', settings.theme, 'assets')
   const out = join(paths.out, paths.ASSETS, settings.theme)
   if (!(await isDirectory(join(paths.out, paths.ASSETS)))) {
@@ -28,10 +27,10 @@ const copyStaticAssets = async () => {
 
 module.exports = {
   scaffold: Promise.resolve(true),
-  async scaffoldSite() {
+  async scaffoldSite(Settings) {
     this.scaffold = this.scaffold
-      .then(createSiteDir)
-      .then(copyStaticAssets)
+      .then(() => createSiteDir(Settings))
+      .then(() => copyStaticAssets(Settings))
 
     return this.scaffold
   }
