@@ -1,6 +1,15 @@
 const fs = require('fs/promises')
 const { join, extname } = require('path')
 const { readFileContent, isDirectory } = require('./helpers')
+const { paths } = require('./settings')
+
+const shouldIncludePath = (path) => {
+  return (
+    !path.startsWith('_') &&
+    !path.startsWith('.') &&
+    !path.match(paths.IGNORE_REG_EXP)
+  )
+}
 
 const isTextFile = (extension) => {
   const acceptedExtensions = [
@@ -19,16 +28,10 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const indexFileSystem = async ({ paths }, dir = '.', depth = 0) => {
+const indexFileSystem = async (dir = paths.ROOT, depth = 0) => {
   return Promise.all(
     (await fs.readdir(dir))
-      .filter(path => {
-        return (
-          !path.startsWith('_') &&
-          !path.startsWith('.') &&
-          !path.match(paths.IGNORE_REG_EXP)
-        )
-      })
+      .filter(shouldIncludePath)
       .map(async path => {
         const fullPath = join(dir, path)
         const baseProperties = {
@@ -37,7 +40,7 @@ const indexFileSystem = async ({ paths }, dir = '.', depth = 0) => {
           depth,
         }
         if (await isDirectory(fullPath)) {
-          const children = await indexFileSystem({ paths }, fullPath, depth + 1)
+          const children = await indexFileSystem(fullPath, depth + 1)
           return {
             ...baseProperties,
             children

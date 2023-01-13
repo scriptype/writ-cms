@@ -1,3 +1,4 @@
+const { paths } = require('../settings')
 const {
   isPostFile,
   isFolderedPostIndexFile,
@@ -13,7 +14,7 @@ const {
   createUnrecognizedFile
 } = require('./contentTypes')
 
-const mapFSIndexToContentTree = (fsTree, Settings) => {
+const mapFSIndexToContentTree = (fsTree) => {
   return fsTree.map(fsObject => {
     const isDirectory = fsObject.children
     const isRootLevel = fsObject.depth === 0
@@ -28,15 +29,15 @@ const mapFSIndexToContentTree = (fsTree, Settings) => {
       if (isPostFile(fsObject)) {
         return createUncategorizedPost(fsObject)
       }
-      if (fsObject.name === Settings.paths.SUBPAGES) {
+      if (fsObject.name === paths.SUBPAGES) {
         return createSubpages(fsObject)
       }
-      if (fsObject.name === Settings.paths.assets) {
+      if (fsObject.name === paths.assets) {
         return createAssets(fsObject)
       }
       return createCategory({
         ...fsObject,
-        children: mapFSIndexToContentTree(fsObject.children, Settings)
+        children: mapFSIndexToContentTree(fsObject.children)
       })
     }
 
@@ -47,7 +48,7 @@ const mapFSIndexToContentTree = (fsTree, Settings) => {
       if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
         return createFolderedPost({
           ...fsObject,
-          children: mapFSIndexToContentTree(fsObject.children, Settings)
+          children: mapFSIndexToContentTree(fsObject.children)
         })
       }
     }
@@ -61,7 +62,7 @@ const mapFSIndexToContentTree = (fsTree, Settings) => {
     if (isDirectory) {
       return createUnrecognizedDirectory({
         ...fsObject,
-        children: mapFSIndexToContentTree(fsObject.children, Settings)
+        children: mapFSIndexToContentTree(fsObject.children)
       })
     }
     return createUnrecognizedFile(fsObject)
