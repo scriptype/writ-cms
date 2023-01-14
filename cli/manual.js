@@ -6,10 +6,10 @@ module.exports = `
   $ writ [start|build] [dir=.]
 
   Start local development:
-  $ writ start .
+  $ writ start
 
   Produce a build output:
-  $ writ build .
+  $ writ build
 
   Use a different source directory:
   $ writ <start|build> ../the-other-directory
