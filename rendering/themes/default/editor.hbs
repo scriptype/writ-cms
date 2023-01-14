@@ -224,6 +224,14 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
     return el.innerHTML
   }
 
+  const toggleEditMode = (isEditMode) => {
+    document.body.classList.toggle('edit-mode')
+    editMode = !editMode
+    editables.forEach(editable => {
+      editable.contentEditable = isEditMode
+    })
+  }
+
   let editMode = false
   let unsavedChanges = {}
 
@@ -255,11 +263,10 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
   })
 
   query('#edit-mode').addEventListener('change', (e) => {
-    document.body.classList.toggle('edit-mode')
-    editMode = !editMode
-    editables.forEach(editable => {
-      editable.contentEditable = e.target.checked
-    })
+    toggleEditMode(e.target.checked)
+    localStorage.setItem(localStorageKey, JSON.stringify({
+      editMode
+    }))
   })
 
   const editables = Array.from(queryAll('[data-editable="true"]'))
@@ -308,4 +315,12 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
       }
     })
   })
+
+  const localStorageKey = 'editor'
+  const store = localStorage.getItem(localStorageKey)
+
+  if (store && JSON.parse(store) && JSON.parse(store).editMode) {
+    query('#edit-mode').checked = true
+    toggleEditMode(true)
+  }
 </script>
