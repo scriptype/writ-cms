@@ -16,7 +16,9 @@ const Transforms = {
 }
 
 module.exports = {
+  renderPromise: Promise.resolve(true),
   async render(contentModel) {
+    await this.renderPromise
     await init()
 
     const transformedContentModel = pipe(contentModel, [
@@ -31,7 +33,7 @@ module.exports = {
       mode
     )
 
-    return Promise.all([
+    this.renderPromise = Promise.all([
       Views.renderHomepage(render, transformedContentModel, decorateTemplate),
       Views.renderSubpages(render, transformedContentModel, decorateTemplate),
       Views.renderPostsJSON(transformedContentModel, decorateTemplate),
@@ -40,5 +42,6 @@ module.exports = {
     ]).then(() =>
       Views.renderPosts(render, transformedContentModel, decorateTemplate)
     )
+    return this.renderPromise
   }
 }

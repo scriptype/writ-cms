@@ -5,7 +5,7 @@ const settings = require('../settings').getSettings()
 const createServer = require('./server/create')
 
 const watchOptions = {
-  reloadDebounce: 200,
+  reloadDebounce: 100,
   ignoreInitial: true,
   ignored: new RegExp(
     [
@@ -31,10 +31,9 @@ let compilePromise = writ.start(rootDirectory, {
   watch: false
 })
 
-bs.watch(watchDir, watchOptions, async (e, file) => {
-  await compilePromise
+bs.watch(watchDir, watchOptions, (e, file) => {
   console.log('Changed:', file)
-  compilePromise = writ.start(rootDirectory, { watch: false })
+  compilePromise = compilePromise.then(() => writ.start(rootDirectory, { watch: false }))
   bs.reload()
 });
 
