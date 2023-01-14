@@ -1,7 +1,7 @@
 const Handlebars = require('handlebars')
 const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
-const { isDirectory, readFileContent } = require('../helpers')
+const { isDirectory, readFileContent, debugLog } = require('../helpers')
 const { theme, mode } = require('../settings').getSettings()
 
 const PARTIALS_PATH = resolve(join(__dirname, 'themes', theme))
@@ -60,7 +60,7 @@ const init = () => {
 }
 
 const render = ({ path, data, content }) => {
-  console.log('rendering:', path)
+  debugLog('rendering:', path)
   const template = Handlebars.compile(content, {
     noEscape: true
   })

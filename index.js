@@ -16,8 +16,12 @@ const compile = async ({
 }
 
 module.exports = {
-  start(rootDirectory, { watch } = {}) {
-    Settings.init('start', rootDirectory)
+  start({ rootDirectory, watch, debug } = {}) {
+    Settings.init({
+      mode: 'start',
+      rootDirectory,
+      debug
+    })
     if (typeof watch === 'undefined' || watch === true) {
       require('./watcher')
       return Promise.resolve()
@@ -30,8 +34,12 @@ module.exports = {
     })
   },
 
-  build(rootDirectory) {
-    Settings.init('build', rootDirectory)
+  build({ rootDirectory, debug }) {
+    Settings.init({
+      mode: 'build',
+      rootDirectory,
+      debug
+    })
     return compile({
       Scaffolder: require('./scaffolding'),
       Indexer: require('./indexing'),

@@ -10,15 +10,27 @@ if (!cli.length) {
   process.exit(1)
 }
 
-let [ mode, rootDirectory ] = cli
+let [ mode, rootDirectory, debug ] = cli
 
 if (mode !== 'start' && mode !== 'build') {
   console.log('Incorrect usage, see manual:\n' + manual)
   process.exit(1)
 }
 
-if (!rootDirectory) {
+const DEBUG_FLAG = /(--|)debug/
+const secondParameterIsDebug = rootDirectory?.match(DEBUG_FLAG)
+if (!rootDirectory || secondParameterIsDebug) {
   rootDirectory = '.'
 }
 
-writ[mode](rootDirectory)
+const debugMode = !!(debug?.match(DEBUG_FLAG) || secondParameterIsDebug)
+
+if (secondParameterIsDebug && debug) {
+  console.log('Incorrect usage, see manual:\n' + manual)
+  process.exit(1)
+}
+
+writ[mode]({
+  rootDirectory,
+  debug: debugMode
+})

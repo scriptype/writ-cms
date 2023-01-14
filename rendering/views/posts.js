@@ -1,6 +1,6 @@
 const { mkdir } = require('fs/promises')
 const { join, format, dirname } = require('path')
-const { out } = require('../../settings').getSettings()
+const { out, debug } = require('../../settings').getSettings()
 const { UNCATEGORIZED } = require('../../constants')
 const { getSlug, replaceExtension } = require('../../helpers')
 
@@ -28,7 +28,10 @@ const renderPosts = (render, { posts }, decorateTemplate) => {
       content: decorateTemplate(
         `{{#>${post.type}}}${post.content}{{/${post.type}}}`
       ),
-      data: post
+      data: {
+        ...post,
+        debug
+      }
     })
   })
 

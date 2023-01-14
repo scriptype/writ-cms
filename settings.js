@@ -19,13 +19,12 @@ const defaultSettings = {
   ]
 }
  
-
 module.exports = {
   _settings: defaultSettings,
   getSettings() {
     return this._settings
   },
-  init(mode, rootDirectory) {
+  init({ mode, rootDirectory, debug }) {
     const root = resolve(rootDirectory)
     const settingsJSON = require(join(root, 'settings.json'))
     this._settings = {
@@ -36,9 +35,10 @@ module.exports = {
         ...settingsJSON.ignorePaths,
         settingsJSON.exportDirectory
       ],
-      mode,
       rootDirectory: root,
-      out: join(root, settingsJSON.exportDirectory)
+      out: join(root, settingsJSON.exportDirectory),
+      mode,
+      debug
     }
   }
 }

@@ -1,5 +1,5 @@
 const { join } = require('path')
-const { site, out } = require('../../settings').getSettings()
+const { site, out, debug } = require('../../settings').getSettings()
 
 const renderHomePage = (render, { categories, posts }, decorateTemplate) => {
   return render({
@@ -8,7 +8,8 @@ const renderHomePage = (render, { categories, posts }, decorateTemplate) => {
     data: {
       site: site,
       posts,
-      categories
+      categories,
+      debug
     }
   })
 }

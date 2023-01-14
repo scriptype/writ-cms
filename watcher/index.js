@@ -3,9 +3,10 @@ const { resolve } = require('path')
 const writ = require('../')
 const settings = require('../settings').getSettings()
 const createServer = require('./server/create')
+const { debugLog } = require('../helpers')
 
 const watchOptions = {
-  reloadDebounce: 100,
+  reloadDebounce: 500,
   ignoreInitial: true,
   ignored: new RegExp(
     [
@@ -20,20 +21,28 @@ const watchOptions = {
   )
 }
 
-const { rootDirectory, exportDirectory } = settings
+const { rootDirectory, exportDirectory, debug } = settings
 const watchDir = resolve(rootDirectory)
 const serverDir = resolve(rootDirectory, exportDirectory)
 
-console.log('watch', watchDir)
-console.log('serve', serverDir)
+debugLog('watch', watchDir)
+debugLog('serve', serverDir)
 
-let compilePromise = writ.start(rootDirectory, {
-  watch: false
+let compilePromise = writ.start({
+  rootDirectory,
+  watch: false,
+  debug
 })
 
 bs.watch(watchDir, watchOptions, (e, file) => {
-  console.log('Changed:', file)
-  compilePromise = compilePromise.then(() => writ.start(rootDirectory, { watch: false }))
+  console.log(new Date(), file)
+  compilePromise = compilePromise.then(() => {
+    return writ.start({
+      rootDirectory,
+      watch: false,
+      debug,
+    })
+  })
   bs.reload()
 });
 

@@ -141,6 +141,8 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
 <script type="text/javascript">
   const query = document.querySelector.bind(document)
   const queryAll = document.querySelectorAll.bind(document)
+  const debug = {{debug}}
+  const debugLog = (...args) => debug ? console.log(...args) : undefined
 
   const editorTemplate = query('#editor-tmpl')
   const editorElement = editorTemplate.content.firstElementChild
@@ -260,7 +262,7 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
   })
 
   query('#save-btn').addEventListener('click', async () => {
-    console.log('changes', unsavedChanges)
+    debugLog('changes', unsavedChanges)
     Object.keys(unsavedChanges).forEach(async (filePath) => {
         const change = unsavedChanges[filePath]
         if (!change) {

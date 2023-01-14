@@ -3,7 +3,7 @@ const { extname, join, dirname } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const TurndownService = require('turndown')
-const { getSlug } = require('../../../helpers')
+const { getSlug, debugLog } = require('../../../helpers')
 const { rootDirectory } = require('../../../settings').getSettings()
 
 const turndownService = new TurndownService()
@@ -89,7 +89,7 @@ module.exports = async (req, res, next) => {
   const srcFilePath = join(rootDirectory, path)
   const isMarkdown = /\.(md|markdown|txt)$/i.test(extension)
 
-  console.log('req.body', req.body)
+  debugLog('req.body', req.body)
 
   if (typeof content !== 'undefined') {
     const newContent = isMarkdown ?

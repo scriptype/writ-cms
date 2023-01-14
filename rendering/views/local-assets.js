@@ -1,14 +1,14 @@
 const { cp } = require('fs/promises')
 const { join, dirname } = require('path')
 const { rootDirectory, out } = require('../../settings').getSettings()
-const { getSlug } = require('../../helpers')
+const { getSlug, debugLog } = require('../../helpers')
 
 const all = Promise.all.bind(Promise)
 
 const copyAsset = ({ path, name }) => {
   const dirnameSlug = getSlug(dirname(path))
   const newPath = join(out, join(dirnameSlug, name))
-  console.log('copying:', newPath)
+  debugLog('copying:', newPath)
   return cp(join(rootDirectory, path), newPath)
 }
 

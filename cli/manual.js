@@ -1,9 +1,11 @@
+const { version: vn } = require('../package.json')
+
 module.exports = `
-  Writ
-  ====
+  writ (v${vn})
+  =============
 
   Interface:
-  $ writ [start|build] [dir=.]
+  $ writ [start|build] [dir=.] [--debug]
 
   Start local development:
   $ writ start
@@ -13,4 +15,13 @@ module.exports = `
 
   Use a different source directory:
   $ writ <start|build> ../the-other-directory
+
+  Start local development in debug mode:
+  $ writ start --debug
+
+  Start local development in debug mode in different source directory:
+  $ writ start ../the-other-directory --debug
+
+  Produce a build in debug mode:
+  $ writ build --debug
 `
