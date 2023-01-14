@@ -1,5 +1,6 @@
 const { init, render } = require('./renderer')
 const { pipe } = require('../helpers')
+const { mode } = require('../settings').getSettings()
 
 const Views = {
   renderCategoryPages: require('./views/category-page'),
@@ -14,18 +15,23 @@ const Transforms = {
   liveEditing: require('./transforms/live-editing-decorator')
 }
 
-const transformPipe = [
-  Transforms.liveEditing.decorateContent
-]
-
 module.exports = {
   renderPromise: Promise.resolve(true),
   async render(contentModel) {
     await this.renderPromise
     await init()
 
-    const transformedContentModel = pipe(contentModel, transformPipe)
-    const { decorateTemplate } = Transforms.liveEditing
+    const transformedContentModel = pipe(contentModel, [
+      Transforms.liveEditing.decorateContent.bind(
+        Transforms.liveEditing,
+        mode
+      )
+    ])
+
+    const decorateTemplate = Transforms.liveEditing.decorateTemplate.bind(
+      Transforms.liveEditing,
+      mode
+    )
 
     this.renderPromise = Promise.all([
       Views.renderHomepage(render, transformedContentModel, decorateTemplate),

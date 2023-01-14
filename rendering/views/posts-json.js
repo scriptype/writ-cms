@@ -1,10 +1,12 @@
+const { join } = require('path')
 const { writeFile } = require('fs/promises')
-const { paths } = require('../../settings')
+const { out } = require('../../settings').getSettings()
 
 const renderPostsJSON = ({ postsJSON }) => {
-  console.log('creating:', paths.POSTS_JSON)
+  const outPath = join(out, 'posts.json')
+  console.log('creating:', outPath)
   return writeFile(
-    paths.POSTS_JSON,
+    outPath,
     JSON.stringify(postsJSON, null, 2)
   )
 }

@@ -1,12 +1,12 @@
 const { join } = require('path')
-const { settings, paths } = require('../../settings')
+const { site, out } = require('../../settings').getSettings()
 
 const renderHomePage = (render, { categories, posts }, decorateTemplate) => {
   return render({
-    path: join(paths.out, 'index.html'),
+    path: join(out, 'index.html'),
     content: decorateTemplate('{{>index}}'),
     data: {
-      site: settings.site,
+      site: site,
       posts,
       categories
     }

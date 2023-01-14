@@ -4,6 +4,7 @@ const _ = require('lodash')
 const frontMatter = require('front-matter')
 const TurndownService = require('turndown')
 const { getSlug } = require('../../../helpers')
+const { rootDirectory } = require('../../../settings').getSettings()
 
 const turndownService = new TurndownService()
 
@@ -82,10 +83,10 @@ const preserveNewlines = (content) => {
     )
 }
 
-module.exports = ({ settings }) => async (req, res, next) => {
+module.exports = async (req, res, next) => {
   const { content, title, updateUrl, path, foldered } = req.body
   const extension = extname(path)
-  const srcFilePath = join(settings.rootDirectory || '.', path)
+  const srcFilePath = join(rootDirectory, path)
   const isMarkdown = /\.(md|markdown|txt)$/i.test(extension)
 
   console.log('req.body', req.body)

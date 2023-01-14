@@ -29,15 +29,12 @@ const decorateCategory = (category) => {
 }
 
 module.exports = {
-  decorateTemplate(template) {
-    return (
-      template +
-      (process.env.NODE_ENV === 'dev' ? '{{> editor }}' : '')
-    )
+  decorateTemplate(mode, template) {
+    return template + (mode === 'start' ? '{{> editor }}' : '')
   },
 
-  decorateContent(contentModel) {
-    return process.env.NODE_ENV !== 'dev' ?
+  decorateContent(mode, contentModel) {
+    return mode !== 'start' ?
       contentModel :
       {
         ...contentModel,

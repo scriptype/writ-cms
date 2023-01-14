@@ -12,25 +12,21 @@ const next = (promise, thenPromise) => {
   }
 }
 
-module.exports = (compilePromise, settings) => {
+module.exports = (compilePromise) => {
   return [
     bodyParser.json(),
     {
       route: "/cms/refresh",
       handle: next(
         compilePromise,
-        Routes.refresh({
-          settings
-        })
+        Routes.refresh
       )
     },
     {
       route: "/cms/post",
       handle: next(
         compilePromise, 
-        Routes.post({
-          settings
-        })
+        Routes.post
       )
     }
   ]

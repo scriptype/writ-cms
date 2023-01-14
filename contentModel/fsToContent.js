@@ -1,4 +1,7 @@
-const { paths } = require('../settings')
+const {
+  pagesDirectory,
+  assetsDirectory
+} = require('../settings').getSettings()
 const {
   isPostFile,
   isFolderedPostIndexFile,
@@ -29,10 +32,10 @@ const mapFSIndexToContentTree = (fsTree) => {
       if (isPostFile(fsObject)) {
         return createUncategorizedPost(fsObject)
       }
-      if (fsObject.name === paths.SUBPAGES) {
+      if (fsObject.name === pagesDirectory) {
         return createSubpages(fsObject)
       }
-      if (fsObject.name === paths.assets) {
+      if (fsObject.name === assetsDirectory) {
         return createAssets(fsObject)
       }
       return createCategory({

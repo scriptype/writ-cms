@@ -1,24 +1,7 @@
-// We need to init Settings before everything.
-const setup = (settings = {}) => {
-  const Settings = require('./settings')
-  Settings.init(settings)
+const { join, resolve } = require('path')
+const Settings = require('./settings')
 
-  return {
-    compile() {
-      return createCompiler({
-        Scaffolder: require('./scaffolding'),
-        Indexer: require('./indexing'),
-        ContentModel: require('./contentModel'),
-        Rendering: require('./rendering'),
-      })
-    },
-    watch() {
-      require('./watcher')(settings)
-    }
-  }
-}
-
-const createCompiler = async ({
+const compile = async ({
   Scaffolder,
   Indexer,
   ContentModel,
@@ -32,4 +15,28 @@ const createCompiler = async ({
   return Rendering.render(contentModel)
 }
 
-module.exports = setup
+module.exports = {
+  start(rootDirectory, { watch } = {}) {
+    Settings.init('start', rootDirectory)
+    if (typeof watch === 'undefined' || watch === true) {
+      require('./watcher')
+      return Promise.resolve()
+    }
+    return compile({
+      Scaffolder: require('./scaffolding'),
+      Indexer: require('./indexing'),
+      ContentModel: require('./contentModel'),
+      Rendering: require('./rendering'),
+    })
+  },
+
+  build(rootDirectory) {
+    Settings.init('build', rootDirectory)
+    return compile({
+      Scaffolder: require('./scaffolding'),
+      Indexer: require('./indexing'),
+      ContentModel: require('./contentModel'),
+      Rendering: require('./rendering'),
+    })
+  }
+}

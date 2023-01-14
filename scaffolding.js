@@ -2,28 +2,33 @@ const { rm, cp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const { exec } = require('child_process')
 const { getSlug, isDirectory } = require('./helpers')
-const { paths, settings } = require('./settings')
+const {
+  theme,
+  exportDirectory,
+  assetsDirectory,
+  out
+} = require('./settings').getSettings()
 
 const createSiteDir = async () => {
-  if (paths.SITE === '.' || paths.SITE === './' || paths.SITE === '..' || paths.SITE === '../' || paths.SITE === '/' || paths.SITE === '~') {
-    throw new Error(`Dangerous export directory: "${paths.SITE}". Won't continue.`)
+  if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {
+    throw new Error(`Dangerous export directory: "${exportDirectory}". Won't continue.`)
   }
   try {
-    await rm(paths.out, { recursive: true })
+    await rm(out, { recursive: true })
   }
   catch (ENOENT) {}
   finally {
-    return mkdir(paths.out)
+    return mkdir(out)
   }
 }
 
 const copyStaticAssets = async () => {
-  const src = join(__dirname, 'rendering', 'themes', settings.theme, 'assets')
-  const out = join(paths.out, paths.ASSETS, settings.theme)
-  if (!(await isDirectory(join(paths.out, paths.ASSETS)))) {
-    await mkdir(join(paths.out, paths.ASSETS))
+  const src = join(__dirname, 'rendering', 'themes', theme, 'assets')
+  const dest = join(out, assetsDirectory, theme)
+  if (!(await isDirectory(join(out, assetsDirectory)))) {
+    await mkdir(join(out, assetsDirectory))
   }
-  return cp(src, out, { recursive: true })
+  return cp(src, dest, { recursive: true })
 }
 
 module.exports = {

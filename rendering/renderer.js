@@ -2,9 +2,9 @@ const Handlebars = require('handlebars')
 const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../helpers')
-const { settings } = require('../settings')
+const { theme, mode } = require('../settings').getSettings()
 
-const PARTIALS_PATH = resolve(join(__dirname, 'themes', settings.theme))
+const PARTIALS_PATH = resolve(join(__dirname, 'themes', theme))
 
 const helpers = {
   multiLineTextList(list) {
@@ -18,7 +18,7 @@ const helpers = {
   },
 
   seeMore() {
-    return process.env.NODE_ENV === 'dev' ?
+    return mode === 'start' ?
       `<img data-editable="true" data-section="summary" />` :
       ''
   },

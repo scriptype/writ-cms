@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
-const { settings } = require('../settings')
+const { site } = require('../settings').getSettings()
 const { UNCATEGORIZED } = require('../constants')
 const { getSlug, removeExtension, replaceExtension } = require('../helpers')
 const { isTemplate, parseTemplate } = require('./templating')
@@ -101,7 +101,7 @@ const createSubpage = (fsObject) => {
       title,
       ...parseTemplate(fsObject),
       slug: getSlug(title),
-      site: settings.site,
+      site,
     }
   }
 }
@@ -166,7 +166,7 @@ const createFolderedPost = (fsObject) => {
         permalink: join('/', getSlug(category))
       },
       localAssets: fsObject.children.filter(isLocalAsset),
-      site: settings.site,
+      site,
       path: indexFile.path
     }
   }
@@ -188,7 +188,7 @@ const createUncategorizedPost = (fsObject) => {
         name: UNCATEGORIZED,
         permalink: join('/', getSlug(UNCATEGORIZED))
       },
-      site: settings.site,
+      site,
       path: fsObject.path
     }
   }
@@ -211,7 +211,7 @@ const createPost = (fsObject) => {
         name: category,
         permalink: join('/', getSlug(category))
       },
-      site: settings.site,
+      site,
       path: fsObject.path
     }
   }
