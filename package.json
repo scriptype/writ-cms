@@ -3,6 +3,9 @@
   "version": "0.8.1",
   "description": "Simple static site generator",
   "main": "index.js",
+  "bin": {
+    "writ": "cli/bin"
+  },
   "scripts": {
     "start": "node ."
   },
