@@ -232,6 +232,19 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
     })
   }
 
+  const forbiddenChars = 'äÄåÅÉéi̇ıİİöÖüÜçÇğĞşŞ'
+  const slugChars = 'aaaaeeiiiioouuccggss'
+
+  const getSlug = (string) => {
+    string = string.trim()
+    string = string.replace(/\s+/g, '-')
+    for (let i = 0; i < forbiddenChars.length - 1; i++) {
+      const regex = new RegExp(forbiddenChars[i], 'gi')
+      string = string.replace(regex, slugChars[i])
+    }
+    return string.toLowerCase()
+  }
+
   let editMode = false
   let unsavedChanges = {}
 
@@ -257,7 +270,10 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
           await Post.updateContent(filePath, restoreSeeMore(change.content))
         }
         if (change.title) {
-          await Post.updateTitle(filePath, change.title, change.foldered)
+          const response = await Post.updateTitle(filePath, change.title, change.foldered)
+          if (change.ownPageChange && response.redirected) {
+            window.history.pushState({}, '', response.url)
+          }
         }
     })
   })
@@ -298,7 +314,8 @@ body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
         unsavedChanges[path] = {
           ...unsavedChanges[path],
           [section]: editable.innerHTML.trim(),
-          foldered: foldered === 'true' || foldered === true
+          foldered: foldered === 'true' || foldered === true,
+          ownPageChange: section === 'title' && location.href.match(getSlug(originalContent))
         }
       }
       unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(path => `

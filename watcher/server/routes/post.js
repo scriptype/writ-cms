@@ -51,9 +51,9 @@ const renamePost = async (srcFilePath, newTitle, updateUrl, foldered, extension)
       metadata: toFrontMatter(_.omit(attributes, 'title'))
     })
     const [srcPath, destPath] = getPostRenamePaths(srcFilePath, newTitle, extension, foldered)
-    await fs.rename(srcPath, destPath)
+    return fs.rename(srcPath, destPath)
   } else {
-    await savePost(srcFilePath, {
+    return savePost(srcFilePath, {
       metadata: toFrontMatter({
         ...attributes,
         title: newTitle
@@ -101,6 +101,10 @@ module.exports = async (req, res, next) => {
   }
   if (typeof title !== 'undefined') {
     await renamePost(srcFilePath, title, updateUrl, foldered, extension)
+    const [, destPath] = getPostRenamePaths(srcFilePath, title, extension, foldered)
+    res.writeHead(302, {
+      location: getSlug(destPath.replace(rootDirectory, ''))
+    })
   }
 
   res.end()
