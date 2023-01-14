@@ -15,8 +15,7 @@ const defaultSettings = {
     ".gitignore",
     ".DS_Store",
     "_.*",
-    "settings.json",
-    "_site"
+    "settings.json"
   ]
 }
  
@@ -32,6 +31,11 @@ module.exports = {
     this._settings = {
       ...defaultSettings,
       ...settingsJSON,
+      ignorePaths: [
+        ...defaultSettings.ignorePaths,
+        ...settingsJSON.ignorePaths,
+        settingsJSON.exportDirectory
+      ],
       mode,
       rootDirectory: root,
       out: join(root, settingsJSON.exportDirectory)
