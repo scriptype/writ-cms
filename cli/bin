@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+const writ = require('../')
+const manual = require('./manual')
+
+const cli = process.argv.slice(2)
+
+if (!cli.length) {
+  console.log(manual)
+  process.exit(1)
+}
+
+let [ mode, rootDirectory ] = cli
+
+if (mode !== 'start' && mode !== 'build') {
+  console.log('Incorrect usage, see manual:\n' + manual)
+  process.exit(1)
+}
+
+if (!rootDirectory) {
+  rootDirectory = '.'
+}
+
+writ[mode](rootDirectory)
