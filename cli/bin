@@ -30,6 +30,12 @@ if (secondParameterIsDebug && debug) {
   process.exit(1)
 }
 
+if (debugMode) {
+  console.log('cli debugMode', debugMode)
+  console.log('cli mode', mode)
+  console.log('cli rootDirectory', rootDirectory)
+}
+
 writ[mode]({
   rootDirectory,
   debug: debugMode
