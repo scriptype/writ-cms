@@ -5,6 +5,15 @@ const readFileContent = path => {
   return fs.readFile(path, { encoding: 'utf-8' })
 }
 
+const loadJSON = async (path) => {
+  try {
+    const exists = await fs.stat(path)
+    return exists ? JSON.parse(await readFileContent(path)) : {}
+  } catch {
+    return {}
+  }
+}
+
 const isDirectory = async (path) => {
   try {
     return (await fs.lstat(path)).isDirectory()
@@ -46,6 +55,7 @@ const pipe = (initialValue, functions) => {
 
 module.exports = {
   readFileContent,
+  loadJSON,
   isDirectory,
   getSlug,
   removeExtension,

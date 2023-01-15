@@ -1,13 +1,14 @@
 const fs = require('fs/promises')
 const { join, extname } = require('path')
 const { readFileContent, isDirectory } = require('./helpers')
-const { rootDirectory, ignorePaths } = require('./settings').getSettings()
+const { rootDirectory, IGNORE_PATHS_REG_EXP } = require('./settings').getSettings()
+const { debugLog } = require('./debug')
 
 const shouldIncludePath = (path) => {
   return (
     !path.startsWith('_') &&
     !path.startsWith('.') &&
-    !path.match(new RegExp(ignorePaths.join('|')))
+    !path.match(IGNORE_PATHS_REG_EXP)
   )
 }
 
@@ -28,12 +29,14 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const indexFileSystem = async (dir = rootDirectory, depth = 0) => {
+const indexFileSystem = async (dir, depth = 0) => {
+  const activePath = dir || rootDirectory
+  debugLog('indexing activePath', activePath)
   return Promise.all(
-    (await fs.readdir(dir))
+    (await fs.readdir(activePath))
       .filter(shouldIncludePath)
       .map(async path => {
-        const fullPath = join(dir, path)
+        const fullPath = join(activePath, path)
         const baseProperties = {
           name: path,
           path: fullPath.replace(rootDirectory + '/', ''),
