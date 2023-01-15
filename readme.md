@@ -28,6 +28,7 @@ git clone git@github.com:scriptype/writ-cms.git
 # Install dependencies
 cd writ-cms
 npm install
+npm i -g .
 cd ..
 
 # Create your blog folder
@@ -38,10 +39,10 @@ cd my_new_blog
 echo "Hello" > hello.txt
 
 # Start live preview editor mode
-NODE_ENV=dev node -p "require('../writ-cms')().watch()"
+writ start
 
 # Compile final site for deployment purposes
-NODE_ENV=build node -p "require('../writ-cms')().compile()"
+writ build
 ```
 
 ***
