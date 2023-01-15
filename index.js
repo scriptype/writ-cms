@@ -1,5 +1,6 @@
 const { join, resolve } = require('path')
 const Settings = require('./settings')
+const Debug = require('./debug')
 
 const compile = async ({
   Scaffolder,
@@ -19,9 +20,9 @@ module.exports = {
   start({ rootDirectory, watch, debug } = {}) {
     Settings.init({
       mode: 'start',
-      rootDirectory,
-      debug
+      rootDirectory
     })
+    Debug.init(debug)
     if (typeof watch === 'undefined' || watch === true) {
       require('./watcher')
       return Promise.resolve()
@@ -37,9 +38,9 @@ module.exports = {
   build({ rootDirectory, debug }) {
     Settings.init({
       mode: 'build',
-      rootDirectory,
-      debug
+      rootDirectory
     })
+    Debug.init(debug)
     return compile({
       Scaffolder: require('./scaffolding'),
       Indexer: require('./indexing'),

@@ -1,6 +1,5 @@
 const fs = require('fs/promises')
 const { extname } = require('path')
-const { debug } = require('./settings').getSettings()
 
 const readFileContent = path => {
   return fs.readFile(path, { encoding: 'utf-8' })
@@ -45,18 +44,11 @@ const pipe = (initialValue, functions) => {
   return functions.reduce((acc, fn) => fn(acc), initialValue)
 }
 
-const debugLog = (...args) => {
-  if (debug) {
-    return console.log(...args)
-  }
-}
-
 module.exports = {
   readFileContent,
   isDirectory,
   getSlug,
   removeExtension,
   replaceExtension,
-  pipe,
-  debugLog
+  pipe
 }

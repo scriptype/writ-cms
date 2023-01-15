@@ -24,7 +24,7 @@ module.exports = {
   getSettings() {
     return this._settings
   },
-  init({ mode, rootDirectory, debug }) {
+  init({ mode, rootDirectory }) {
     const root = resolve(rootDirectory)
     const settingsJSON = require(join(root, 'settings.json'))
     this._settings = {
@@ -37,8 +37,7 @@ module.exports = {
       ],
       rootDirectory: root,
       out: join(root, settingsJSON.exportDirectory),
-      mode,
-      debug
+      mode
     }
   }
 }

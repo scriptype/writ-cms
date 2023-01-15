@@ -1,7 +1,8 @@
 const Handlebars = require('handlebars')
 const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
-const { isDirectory, readFileContent, debugLog } = require('../helpers')
+const { isDirectory, readFileContent } = require('../helpers')
+const { debugLog } = require('../debug')
 const { theme, mode } = require('../settings').getSettings()
 
 const PARTIALS_PATH = resolve(join(__dirname, 'themes', theme))

@@ -1,13 +1,13 @@
 const writ = require('../../../')
-const { rootDirectory, debug } = require('../../../settings')
-const { debugLog } = require('../../../helpers')
+const { rootDirectory } = require('../../../settings')
+const Debug = require('../../../debug')
 
 module.exports = (rootDirectory) =>
   async (req, res, next) => {
-    debugLog('rebuilding')
+    Debug.debugLog('rebuilding')
     await writ.build({
       rootDirectory,
-      debug
+      debug: Debug.getDebug()
     })
     res.end()
   }

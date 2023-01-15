@@ -3,7 +3,7 @@ const { resolve } = require('path')
 const writ = require('../')
 const settings = require('../settings').getSettings()
 const createServer = require('./server/create')
-const { debugLog } = require('../helpers')
+const Debug = require('../debug')
 
 const watchOptions = {
   reloadDebounce: 500,
@@ -21,17 +21,17 @@ const watchOptions = {
   )
 }
 
-const { rootDirectory, exportDirectory, debug } = settings
+const { rootDirectory, exportDirectory } = settings
 const watchDir = resolve(rootDirectory)
 const serverDir = resolve(rootDirectory, exportDirectory)
 
-debugLog('watch', watchDir)
-debugLog('serve', serverDir)
+Debug.debugLog('watch', watchDir)
+Debug.debugLog('serve', serverDir)
 
 let compilePromise = writ.start({
   rootDirectory,
   watch: false,
-  debug
+  debug: Debug.getDebug()
 })
 
 bs.watch(watchDir, watchOptions, (e, file) => {
@@ -40,7 +40,7 @@ bs.watch(watchDir, watchOptions, (e, file) => {
     return writ.start({
       rootDirectory,
       watch: false,
-      debug,
+      debug: Debug.getDebug()
     })
   })
   bs.reload()

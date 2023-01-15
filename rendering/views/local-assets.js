@@ -1,7 +1,8 @@
 const { cp } = require('fs/promises')
 const { join, dirname } = require('path')
 const { rootDirectory, out } = require('../../settings').getSettings()
-const { getSlug, debugLog } = require('../../helpers')
+const { getSlug } = require('../../helpers')
+const { debugLog } = require('../../debug')
 
 const all = Promise.all.bind(Promise)
 

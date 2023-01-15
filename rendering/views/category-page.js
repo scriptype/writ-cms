@@ -1,6 +1,7 @@
 const { mkdir, readFile } = require('fs/promises')
 const { join } = require('path')
-const { site, out, debug } = require('../../settings').getSettings()
+const { site, out } = require('../../settings').getSettings()
+const { debug } = require('../../debug').getDebug()
 
 const mkdirCategoryFolder = async (dirName) => {
   try {
