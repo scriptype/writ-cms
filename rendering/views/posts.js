@@ -1,7 +1,7 @@
 const { mkdir } = require('fs/promises')
 const { join, format, dirname } = require('path')
 const { out } = require('../../settings').getSettings()
-const { debug } = require('../../debug').getDebug()
+const Debug = require('../../debug')
 const { UNCATEGORIZED } = require('../../constants')
 const { getSlug, replaceExtension } = require('../../helpers')
 
@@ -31,7 +31,7 @@ const renderPosts = (render, { posts }, decorateTemplate) => {
       ),
       data: {
         ...post,
-        debug
+        debug: Debug.getDebug()
       }
     })
   })

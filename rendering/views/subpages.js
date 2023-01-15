@@ -1,6 +1,6 @@
 const { join } = require('path')
 const { out } = require('../../settings').getSettings()
-const { debug } = require('../../debug').getDebug()
+const Debug = require('../../debug')
 
 const renderSubpages = (render, { subpages }, decorateTemplate) => {
   const compilation = subpages.map(subpage => {
@@ -12,7 +12,7 @@ const renderSubpages = (render, { subpages }, decorateTemplate) => {
       ),
       data: {
         ...subpage,
-        debug
+        debug: Debug.getDebug()
       }
     })
   })

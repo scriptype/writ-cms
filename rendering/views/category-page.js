@@ -1,7 +1,7 @@
 const { mkdir, readFile } = require('fs/promises')
 const { join } = require('path')
 const { site, out } = require('../../settings').getSettings()
-const { debug } = require('../../debug').getDebug()
+const Debug = require('../../debug')
 
 const mkdirCategoryFolder = async (dirName) => {
   try {
@@ -21,8 +21,8 @@ const renderCategoryPages = (render, { categories }, decorateTemplate) => {
       data: {
         category,
         posts: category.posts,
-        site: site,
-        debug
+        site,
+        debug: Debug.getDebug()
       }
     })
   })
