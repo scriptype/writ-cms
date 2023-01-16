@@ -1,10 +1,9 @@
 const _ = require('lodash')
-const { join, resolve } = require('path')
+const { basename, join, resolve } = require('path')
 const { loadJSON } = require('./helpers')
 const { debugLog } = require('./debug')
 
 const defaultSettings = {
-  title: 'A Blog website',
   description: "A future work",
   theme: "default",
   assetsDirectory: "assets",
@@ -36,6 +35,7 @@ module.exports = {
       ...defaultSettings,
       ...settingsJSON,
     }
+    userSettings.title = userSettings.title || basename(resolve(rootDirectory))
     this._settings = _.omit({
       ...userSettings,
       site: {
