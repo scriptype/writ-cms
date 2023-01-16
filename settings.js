@@ -3,7 +3,8 @@ const { basename, join, resolve } = require('path')
 const { loadJSON } = require('./helpers')
 const { debugLog } = require('./debug')
 
-const defaultSettings = {
+const defaultSettings = (rootDirectory) => ({
+  title: basename(resolve(rootDirectory)),
   description: "A future work",
   theme: "default",
   assetsDirectory: "assets",
@@ -17,21 +18,22 @@ const defaultSettings = {
     "_.*",
     "settings.json"
   ],
-}
+})
 
 const getIgnoreRegExp = ({ ignorePaths, exportDirectory }) => {
   return new RegExp(ignorePaths.concat(exportDirectory).join('|'), 'i')
 }
 
 module.exports = {
-  _defaultSettings: {
-    ...defaultSettings
-  },
-  getDefaultSettings() {
+  _defaultSettings: defaultSettings('.'),
+  getDefaultSettings(rootDirectory) {
+    if (rootDirectory) {
+      return defaultSettings(rootDirectory)
+    }
     return this._defaultSettings
   },
   _settings: {
-    ...defaultSettings
+    ...defaultSettings('.')
   },
   getSettings() {
     return this._settings
@@ -39,11 +41,11 @@ module.exports = {
   async init({ mode, rootDirectory }) {
     const root = resolve(rootDirectory)
     const settingsJSON = await loadJSON(join(root, 'settings.json'))
+    this._defaultSettings = {...defaultSettings(rootDirectory)}
     const userSettings = {
-      ...defaultSettings,
+      ...this._defaultSettings,
       ...settingsJSON,
     }
-    userSettings.title = userSettings.title || basename(resolve(rootDirectory))
     this._settings = _.omit({
       ...userSettings,
       site: {

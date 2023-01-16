@@ -49,7 +49,7 @@ module.exports = {
     })
   },
 
-  getDefaultSettings() {
-    return Settings.getDefaultSettings()
+  getDefaultSettings(...args) {
+    return Settings.getDefaultSettings(...args)
   }
 }
