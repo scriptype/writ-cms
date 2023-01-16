@@ -1,17 +1,19 @@
 const { mkdir } = require('fs/promises')
 const { join, format, dirname } = require('path')
-const { out } = require('../../settings').getSettings()
+const Settings = require('../../settings')
 const Debug = require('../../debug')
 const { UNCATEGORIZED } = require('../../constants')
 const { getSlug, replaceExtension } = require('../../helpers')
 
 const getExportPath = (post) => {
+  const { out } = Settings.getSettings()
   const pathWithHTMLExtension = replaceExtension(getSlug(post.path), '.html')
   const pathWithCorrectFileName = pathWithHTMLExtension.replace(/\/post\.html$/i, '/index.html')
   return join(out, pathWithCorrectFileName)
 }
 
 const mkdirPostFolder = async (post) => {
+  const { out } = Settings.getSettings()
   try {
     return await mkdir(join(out, post.permalink))
   } catch (EEXIST) {

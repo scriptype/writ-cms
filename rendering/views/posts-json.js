@@ -1,9 +1,10 @@
 const { join } = require('path')
 const { writeFile } = require('fs/promises')
-const { out } = require('../../settings').getSettings()
+const Settings = require('../../settings')
 const { debugLog } = require('../../debug')
 
 const renderPostsJSON = ({ postsJSON }) => {
+  const { out } = Settings.getSettings()
   const outPath = join(out, 'posts.json')
   debugLog('creating:', outPath)
   return writeFile(

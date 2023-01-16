@@ -1,8 +1,9 @@
 const { join } = require('path')
-const { out } = require('../../settings').getSettings()
+const Settings = require('../../settings')
 const Debug = require('../../debug')
 
 const renderSubpages = (render, { subpages }, decorateTemplate) => {
+  const { out } = Settings.getSettings()
   const compilation = subpages.map(subpage => {
     const type = subpage.type || 'subpage'
     return render({

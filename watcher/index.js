@@ -15,8 +15,7 @@ const watchOptions = {
       '.git',
       '.DS_Store',
       'package.json',
-      'package-lock.json',
-      'settings.json'
+      'package-lock.json'
     ].join('|')
   )
 }
