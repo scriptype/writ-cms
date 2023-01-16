@@ -47,5 +47,9 @@ module.exports = {
       ContentModel: require('./contentModel'),
       Rendering: require('./rendering'),
     })
+  },
+
+  getDefaultSettings() {
+    return Settings.getDefaultSettings()
   }
 }

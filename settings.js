@@ -24,7 +24,15 @@ const getIgnoreRegExp = ({ ignorePaths, exportDirectory }) => {
 }
 
 module.exports = {
-  _settings: defaultSettings,
+  _defaultSettings: {
+    ...defaultSettings
+  },
+  getDefaultSettings() {
+    return this._defaultSettings
+  },
+  _settings: {
+    ...defaultSettings
+  },
   getSettings() {
     return this._settings
   },
