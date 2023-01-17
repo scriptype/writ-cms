@@ -20,7 +20,7 @@ const helpers = {
 
   seeMore() {
     return mode === 'start' ?
-      `<img data-editable="true" data-section="summary" />` :
+      `<img data-editable="true" data-section="summary" src="/assets/default/transparent.png" />` :
       ''
   },
 
