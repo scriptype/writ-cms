@@ -68,7 +68,7 @@ writ
 
 ### Entry formats
 
-- Any text file (plain text, HTML, markdown).
+- Any text file (.hbs, .md, .markdown, .txt, .html).
 - Live WYSIWYG editor
 
 ### Categories
