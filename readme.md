@@ -6,14 +6,14 @@ Work in progress.
 
 ## Contents
 
-- [Idea](https://github.com/scriptype/writ-cms/edit/master/readme.md#idea)
-- [Installation](https://github.com/scriptype/writ-cms/edit/master/readme.md#installation)
-- [Usage](https://github.com/scriptype/writ-cms/edit/master/readme.md#usage)
-- [Manual](https://github.com/scriptype/writ-cms/edit/master/readme.md#maual)
-  - [Entry formats](https://github.com/scriptype/writ-cms/edit/master/readme.md#entry-formats)
-  - [Posts](https://github.com/scriptype/writ-cms/edit/master/readme.md#posts)
-  - [Subpages](https://github.com/scriptype/writ-cms/edit/master/readme.md#subpages)
-  - [Static assets](https://github.com/scriptype/writ-cms/edit/master/readme.md#static-assets)
+- [Idea](https://github.com/scriptype/writ-cms#idea)
+- [Installation](https://github.com/scriptype/writ-cms#installation)
+- [Usage](https://github.com/scriptype/writ-cms#usage)
+- [Manual](https://github.com/scriptype/writ-cms#maual)
+  - [Entry formats](https://github.com/scriptype/writ-cms#entry-formats)
+  - [Posts](https://github.com/scriptype/writ-cms#posts)
+  - [Subpages](https://github.com/scriptype/writ-cms#subpages)
+  - [Static assets](https://github.com/scriptype/writ-cms#static-assets)
 
 ***
 
