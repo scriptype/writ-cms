@@ -7,6 +7,7 @@ Work in progress.
 ## Contents
 
 - [Idea](https://github.com/scriptype/writ-cms#idea)
+- [Example sites](https://github.com/scriptype/writ-cms#example-sites)
 - [Installation](https://github.com/scriptype/writ-cms#installation)
 - [Usage](https://github.com/scriptype/writ-cms#usage)
 - [Manual](https://github.com/scriptype/writ-cms#maual)
@@ -28,7 +29,9 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 - Homepage, category indexes, pagination, search, sitemap, rss should be automatized
 - I should be able to use it without remembering much.
 
-***
+## Example sites
+
+- https://writ.enes.in (source: https://github.com/scriptype/writ)
 
 ## Installation
 
