@@ -19,9 +19,9 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 
 ***
 
-## Usage
+## Installation
 
-```
+```sh
 # Let's clone writ-cms locally
 git clone git@github.com:scriptype/writ-cms.git
 
@@ -29,11 +29,14 @@ git clone git@github.com:scriptype/writ-cms.git
 cd writ-cms
 npm install
 npm i -g .
-cd ..
+```
 
+## Usage
+
+```
 # Create your blog folder
-mkdir my_new_blog
-cd my_new_blog
+mkdir "New blog"
+cd "New blog"
 
 # Create any text file (.hbs, .md, .markdown, .txt, .html)
 echo "Hello" > hello.txt
