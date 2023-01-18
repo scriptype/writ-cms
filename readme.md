@@ -36,7 +36,7 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 
 ## Warnings
 
-- This software is not ready for production use and you should not hold it accountable for any loss of value.
+- This software is not ready for production use and, therefore, cannot be held accountable for any loss of value.
   - It is generally advised to use [git](https://git-scm.com/doc) in text-heavy personal projects, such as a website, to avoid content loss.
 
 ## Installation
