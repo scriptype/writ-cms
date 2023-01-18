@@ -4,6 +4,8 @@ A static site generator that is intended to be very easy to use, develop and ext
 
 Work in progress.
 
+***
+
 ## Contents
 
 - [Idea](https://github.com/scriptype/writ-cms#idea)
@@ -15,8 +17,6 @@ Work in progress.
   - [Posts](https://github.com/scriptype/writ-cms#posts)
   - [Subpages](https://github.com/scriptype/writ-cms#subpages)
   - [Static assets](https://github.com/scriptype/writ-cms#static-assets)
-
-***
 
 ## Idea
 
