@@ -4,6 +4,17 @@ A static site generator that is intended to be very easy to use, develop and ext
 
 Work in progress.
 
+## Contents
+
+- [Idea](https://github.com/scriptype/writ-cms/edit/master/readme.md#idea)
+- [Installation](https://github.com/scriptype/writ-cms/edit/master/readme.md#installation)
+- [Usage](https://github.com/scriptype/writ-cms/edit/master/readme.md#usage)
+- [Manual](https://github.com/scriptype/writ-cms/edit/master/readme.md#maual)
+  - [Entry formats](https://github.com/scriptype/writ-cms/edit/master/readme.md#entry-formats)
+  - [Posts](https://github.com/scriptype/writ-cms/edit/master/readme.md#posts)
+  - [Subpages](https://github.com/scriptype/writ-cms/edit/master/readme.md#subpages)
+  - [Static assets](https://github.com/scriptype/writ-cms/edit/master/readme.md#static-assets)
+
 ***
 
 ## Idea
