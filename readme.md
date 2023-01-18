@@ -22,7 +22,7 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 ## Installation
 
 ```sh
-# Let's clone writ-cms locally
+# Clone writ-cms
 git clone git@github.com:scriptype/writ-cms.git
 
 # Install dependencies
@@ -33,7 +33,7 @@ npm i -g .
 
 ## Usage
 
-```
+```sh
 # Create your blog folder
 mkdir "New blog"
 cd "New blog"
