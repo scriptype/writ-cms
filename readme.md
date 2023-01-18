@@ -10,6 +10,7 @@ Work in progress.
 
 - [Idea](https://github.com/scriptype/writ-cms#idea)
 - [Example sites](https://github.com/scriptype/writ-cms#example-sites)
+- [Warnings](https://github.com/scriptype/writ-cms#warnings)
 - [Installation](https://github.com/scriptype/writ-cms#installation)
 - [Usage](https://github.com/scriptype/writ-cms#usage)
 - [Manual](https://github.com/scriptype/writ-cms#maual)
@@ -32,6 +33,11 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 ## Example sites
 
 - https://writ.enes.in (source: https://github.com/scriptype/writ)
+
+## Warnings
+
+- This software is not ready for production use and you should not hold it accountable for any loss of value.
+- I recommend using `git` in any text-heavy personal project, such as a writ blog. So, actually, this is a great excuse to learn git.
 
 ## Installation
 
@@ -65,9 +71,7 @@ writ build
 writ
 ```
 
-***
-
-## Docs
+## Manual
 
 ### Entry formats
 
