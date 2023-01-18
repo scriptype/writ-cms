@@ -37,7 +37,7 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 ## Warnings
 
 - This software is not ready for production use and you should not hold it accountable for any loss of value.
-- I recommend using `git` in any text-heavy personal project, such as a writ blog. So, actually, this is a great excuse to learn git.
+- I recommend using [git](https://git-scm.com/doc) in text-heavy personal projects, such as a writ blog, to avoid content loss.
 
 ## Installation
 
