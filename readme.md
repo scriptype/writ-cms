@@ -57,6 +57,9 @@ writ start
 
 # Compile final site for deployment purposes
 writ build
+
+# Print CLI manual for more
+writ
 ```
 
 ***
