@@ -30,7 +30,7 @@ const decorateCategory = (category) => {
 
 module.exports = {
   decorateTemplate(mode, template) {
-    return template + (mode === 'start' ? '{{> editor }}' : '')
+    return template + (mode === 'start' ? '{{> preview }}' : '')
   },
 
   decorateContent(mode, contentModel) {
