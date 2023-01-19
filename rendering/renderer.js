@@ -5,7 +5,8 @@ const { isDirectory, readFileContent } = require('../helpers')
 const { debugLog } = require('../debug')
 const { theme, mode } = require('../settings').getSettings()
 
-const PARTIALS_PATH = resolve(join(__dirname, 'themes', theme))
+const themePartials = resolve(join(__dirname, 'themes', theme))
+const previewPartials = resolve(join(__dirname, '..', 'preview', 'partials'))
 
 const helpers = {
   multiLineTextList(list) {
@@ -35,11 +36,11 @@ const registerHelpers = () => {
   })
 }
 
-const registerPartials = async () => {
+const registerPartials = async (partialsPath) => {
   const paths = await Promise.all(
-    (await readdir(PARTIALS_PATH)).map(async path => ({
+    (await readdir(partialsPath)).map(async path => ({
       path,
-      isDirectory: await isDirectory(join(PARTIALS_PATH, path))
+      isDirectory: await isDirectory(join(partialsPath, path))
     }))
   )
   const files = paths
@@ -47,7 +48,7 @@ const registerPartials = async () => {
     .map(({ path }) => path)
   const register = files.map(async (path) => {
     const name = path.replace(extname(path), '')
-    const fileContent = await readFileContent(join(PARTIALS_PATH, path))
+    const fileContent = await readFileContent(join(partialsPath, path))
     Handlebars.registerPartial(name, fileContent)
   })
   return Promise.all(register)
@@ -56,7 +57,8 @@ const registerPartials = async () => {
 const init = () => {
   return Promise.all([
     registerHelpers(),
-    registerPartials()
+    registerPartials(themePartials),
+    registerPartials(previewPartials)
   ])
 }
 

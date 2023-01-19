@@ -3,6 +3,7 @@ const { resolve, join } = require('path')
 const { exec } = require('child_process')
 const { getSlug, isDirectory } = require('./helpers')
 const {
+  mode,
   theme,
   exportDirectory,
   assetsDirectory,
@@ -22,21 +23,37 @@ const createSiteDir = async () => {
   }
 }
 
-const copyStaticAssets = async () => {
-  const src = join(__dirname, 'rendering', 'themes', theme, 'assets')
-  const dest = join(out, assetsDirectory, theme)
-  if (!(await isDirectory(join(out, assetsDirectory)))) {
+const ensureAssetsDirectory = async () => {
+  const assetsDirectoryExists = await isDirectory(join(out, assetsDirectory))
+  if (!assetsDirectoryExists) {
     await mkdir(join(out, assetsDirectory))
   }
-  return cp(src, dest, { recursive: true })
 }
+
+const copyAssets = async ({ src, dest }) => {
+  await ensureAssetsDirectory()
+  return cp(src, join(out, assetsDirectory, dest), { recursive: true })
+}
+
+const copyThemeAssets = () =>
+  copyAssets({
+    src: join(__dirname, 'rendering', 'themes', theme, 'assets'),
+    dest: theme
+  })
+
+const copyPreviewAssets = () =>
+  copyAssets({
+    src: join(__dirname, 'preview', 'static'),
+    dest: 'preview'
+  })
 
 module.exports = {
   scaffold: Promise.resolve(true),
   async scaffoldSite() {
     this.scaffold = this.scaffold
       .then(createSiteDir)
-      .then(copyStaticAssets)
+      .then(copyThemeAssets)
+      .then(mode === 'start' ? copyPreviewAssets :_=>_)
 
     return this.scaffold
   }

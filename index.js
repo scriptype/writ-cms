@@ -23,9 +23,9 @@ module.exports = {
       mode: 'start',
       rootDirectory
     })
-    if (typeof watch === 'undefined' || watch === true) {
-      require('./watcher')
-      return Promise.resolve()
+    if (watch !== false) {
+      const Preview = require('./preview')
+      return Preview.init()
     }
     return compile({
       Scaffolder: require('./scaffolding'),
