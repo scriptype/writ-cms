@@ -2,7 +2,7 @@ const { mkdir, readFile } = require('fs/promises')
 const { join } = require('path')
 const Settings = require('../../settings')
 const Debug = require('../../debug')
-const { expandTemplate } = require('../../hooks')
+const { finaliseTemplate } = require('../../routines')
 
 const mkdirCategoryFolder = async (dirName) => {
   try {
@@ -19,7 +19,7 @@ const renderCategoryPages = (render, { categories }) => {
     await mkdirCategoryFolder(dir)
     return render({
       path: join(dir, 'index.html'),
-      content: expandTemplate('{{>category}}'),
+      content: await finaliseTemplate('{{>category}}'),
       data: {
         category,
         posts: category.posts,

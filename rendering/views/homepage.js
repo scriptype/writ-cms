@@ -1,13 +1,13 @@
 const { join } = require('path')
 const Settings = require('../../settings')
 const Debug = require('../../debug')
-const { expandTemplate } = require('../../hooks')
+const { finaliseTemplate } = require('../../routines')
 
-const renderHomePage = (render, { categories, posts }) => {
+const renderHomePage = async (render, { categories, posts }) => {
   const { site, out } = Settings.getSettings()
   return render({
     path: join(out, 'index.html'),
-    content: expandTemplate('{{>index}}'),
+    content: await finaliseTemplate('{{>index}}'),
     data: {
       site,
       posts,

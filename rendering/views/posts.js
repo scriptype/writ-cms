@@ -4,7 +4,7 @@ const Settings = require('../../settings')
 const Debug = require('../../debug')
 const { UNCATEGORIZED } = require('../../constants')
 const { getSlug, replaceExtension } = require('../../helpers')
-const { expandTemplate } = require('../../hooks')
+const { finaliseTemplate } = require('../../routines')
 
 const getExportPath = (post) => {
   const { out } = Settings.getSettings()
@@ -29,7 +29,7 @@ const renderPosts = (render, { posts }) => {
     }
     return render({
       path: getExportPath(post),
-      content: await expandTemplate(
+      content: await finaliseTemplate(
         `{{#>${post.type}}}${post.content}{{/${post.type}}}`
       ),
       data: {
