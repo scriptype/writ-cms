@@ -3,9 +3,6 @@ const { extname, join, dirname } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const TurndownService = require('turndown')
-const { getSlug } = require('../../../helpers')
-const { debugLog } = require('../../../debug')
-const { rootDirectory } = require('../../../settings').getSettings()
 
 const turndownService = new TurndownService()
 
@@ -84,29 +81,32 @@ const preserveNewlines = (content) => {
     )
 }
 
-module.exports = async (req, res, next) => {
-  const { content, title, updateUrl, path, foldered } = req.body
-  const extension = extname(path)
-  const srcFilePath = join(rootDirectory, path)
-  const isMarkdown = /\.(md|markdown|txt)$/i.test(extension)
+module.exports = (settings, { debugLog, getSlug }) => {
+  const { rootDirectory } = settings
+  return async (req, res, next) => {
+    const { content, title, updateUrl, path, foldered } = req.body
+    const extension = extname(path)
+    const srcFilePath = join(rootDirectory, path)
+    const isMarkdown = /\.(md|markdown|txt)$/i.test(extension)
 
-  debugLog('req.body', req.body)
+    debugLog('req.body', req.body)
 
-  if (typeof content !== 'undefined') {
-    const newContent = isMarkdown ?
-      turndownService.turndown(preserveNewlines(content)) :
-      content
-    await savePost(srcFilePath, {
-      content: trimTrailingSpace(newContent.trim())
-    })
+    if (typeof content !== 'undefined') {
+      const newContent = isMarkdown ?
+        turndownService.turndown(preserveNewlines(content)) :
+        content
+      await savePost(srcFilePath, {
+        content: trimTrailingSpace(newContent.trim())
+      })
+    }
+    if (typeof title !== 'undefined') {
+      await renamePost(srcFilePath, title, updateUrl, foldered, extension)
+      const [, destPath] = getPostRenamePaths(srcFilePath, title, extension, foldered)
+      res.writeHead(302, {
+        location: getSlug(destPath.replace(rootDirectory, ''))
+      })
+    }
+
+    res.end()
   }
-  if (typeof title !== 'undefined') {
-    await renamePost(srcFilePath, title, updateUrl, foldered, extension)
-    const [, destPath] = getPostRenamePaths(srcFilePath, title, extension, foldered)
-    res.writeHead(302, {
-      location: getSlug(destPath.replace(rootDirectory, ''))
-    })
-  }
-
-  res.end()
 }

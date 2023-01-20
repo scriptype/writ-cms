@@ -1,12 +1,13 @@
 const { join } = require('path')
 const Settings = require('../../settings')
 const Debug = require('../../debug')
+const { expandTemplate } = require('../../hooks')
 
-const renderHomePage = (render, { categories, posts }, decorateTemplate) => {
+const renderHomePage = (render, { categories, posts }) => {
   const { site, out } = Settings.getSettings()
   return render({
     path: join(out, 'index.html'),
-    content: decorateTemplate('{{>index}}'),
+    content: expandTemplate('{{>index}}'),
     data: {
       site,
       posts,

@@ -2,6 +2,7 @@ const { mkdir, readFile } = require('fs/promises')
 const { join } = require('path')
 const Settings = require('../../settings')
 const Debug = require('../../debug')
+const { expandTemplate } = require('../../hooks')
 
 const mkdirCategoryFolder = async (dirName) => {
   try {
@@ -11,14 +12,14 @@ const mkdirCategoryFolder = async (dirName) => {
   }
 }
 
-const renderCategoryPages = (render, { categories }, decorateTemplate) => {
+const renderCategoryPages = (render, { categories }) => {
   const { site, out } = Settings.getSettings()
   const compilation = categories.map(async category => {
     const dir = join(out, category.slug)
     await mkdirCategoryFolder(dir)
     return render({
       path: join(dir, 'index.html'),
-      content: decorateTemplate('{{>category}}'),
+      content: expandTemplate('{{>category}}'),
       data: {
         category,
         posts: category.posts,

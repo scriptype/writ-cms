@@ -3,6 +3,7 @@ const { getSlug } = require('../helpers')
 const { UNCATEGORIZED } = require('../constants')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
+const { expandContent } = require('../hooks')
 const contentTypes = require('./contentTypes')
 const { createUncategorizedCategory, isPost, isLocalAsset } = contentTypes
 
@@ -82,6 +83,6 @@ module.exports = {
   createContentModel(fileSystemIndex) {
     const contentTree = mapFSIndexToContentTree(fileSystemIndex)
     const contentModel = createContentModel(contentTree)
-    return Linker.link(contentModel)
+    return expandContent(Linker.link(contentModel))
   },
 }

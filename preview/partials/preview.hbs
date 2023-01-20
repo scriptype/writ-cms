@@ -1,26 +1,4 @@
-<template id="editor-tmpl">
-  <div class="writ-editor">
-    <div class="checkbox-control">
-      <input type="checkbox" class="checkbox-input" id="edit-mode" />
-      <label for="edit-mode" class="checkbox-label">
-        Edit mode
-      </label>
-    </div>
-    <button type="button" id="rebuild-btn">Rebuild</button>
-    <button type="button" id="save-btn">Save</button>
-    <div class="unsaved-changes">
-      <h3>Unsaved changes:</h3>
-      <ul id="unsaved-changes-list" class="unsaved-changes-list"></ul>
-    </div>
-  </div>
-</template>
-
-<style type="text/css">
-@import "/assets/preview/preview.css";
-</style>
-
-<script
-    type="module"
-    id="preview"
-    src="/assets/preview/preview.js?debug={{debug}}">
+<script type="text/javascript">
+  window.debug = {{debug}}
+  window.debugLog = (...args) => debug ? console.log(...args) : undefined
 </script>

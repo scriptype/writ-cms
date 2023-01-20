@@ -1,6 +1,7 @@
 const { join, resolve } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
+const Hooks = require('./hooks')
 
 const compile = async ({
   Scaffolder,
@@ -17,6 +18,8 @@ const compile = async ({
 }
 
 module.exports = {
+  ...Hooks.api,
+
   async start({ rootDirectory, watch, debug } = {}) {
     Debug.init(debug)
     await Settings.init({

@@ -1,5 +1,4 @@
 import Post from './models/post.js'
-import CMS from './models/cms.js'
 import {
   query,
   queryAll,
@@ -9,9 +8,6 @@ import {
   getSlug,
   stripTags
 } from './helpers.js'
-
-const { debug } = parseScriptParameters(query('script#preview').src)
-const debugLog = (...args) => debug ? console.log(...args) : undefined
 
 const editorTemplate = query('#editor-tmpl')
 const editorElement = editorTemplate.content.firstElementChild
@@ -79,12 +75,8 @@ const toggleEditMode = (isEditMode) => {
   })
 }
 
-query('#rebuild-btn').addEventListener('click', () => {
-  CMS.refresh()
-})
-
 query('#save-btn').addEventListener('click', async () => {
-  debugLog('changes', unsavedChanges)
+  window.debugLog('changes', unsavedChanges)
   Object.keys(unsavedChanges).forEach(async (filePath) => {
     const change = unsavedChanges[filePath]
     if (!change) {

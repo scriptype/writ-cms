@@ -1,14 +1,15 @@
 const { join } = require('path')
 const Settings = require('../../settings')
 const Debug = require('../../debug')
+const { expandTemplate } = require('../../hooks')
 
-const renderSubpages = (render, { subpages }, decorateTemplate) => {
+const renderSubpages = (render, { subpages }) => {
   const { out } = Settings.getSettings()
   const compilation = subpages.map(subpage => {
     const type = subpage.type || 'subpage'
     return render({
       path: join(out, `${subpage.slug}.html`),
-      content: decorateTemplate(
+      content: expandTemplate(
         `{{#>${type}}}${subpage.content}{{/${type}}}`
       ),
       data: {

@@ -119,4 +119,3 @@ body.edit-mode [data-editable="true"]:focus-within {
 }
 
 body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
-

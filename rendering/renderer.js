@@ -4,6 +4,7 @@ const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../helpers')
 const { debugLog } = require('../debug')
 const { theme, mode } = require('../settings').getSettings()
+const { expandTemplateHelpers, expandTemplatePartials } = require('../hooks')
 
 const themePartials = resolve(join(__dirname, 'themes', theme))
 const previewPartials = resolve(join(__dirname, '..', 'preview', 'partials'))
@@ -20,9 +21,7 @@ const helpers = {
   },
 
   seeMore() {
-    return mode === 'start' ?
-      `<img data-editable="true" data-section="summary" src="/assets/default/transparent.png" />` :
-      ''
+    return ''
   },
 
   isPostType(string, type) {
@@ -30,13 +29,18 @@ const helpers = {
   }
 }
 
-const registerHelpers = () => {
-  Object.keys(helpers).forEach((key) => {
+const registerHelpers = async () => {
+  const allHelpers = {
+    ...helpers,
+    ...(await expandTemplateHelpers(helpers))
+  }
+  Object.keys(allHelpers).forEach((key) => {
     Handlebars.registerHelper(key, helpers[key])
   })
 }
 
 const registerPartials = async (partialsPath) => {
+  console.log('0000000>>>> registerPartials', partialsPath)
   const paths = await Promise.all(
     (await readdir(partialsPath)).map(async path => ({
       path,
@@ -55,15 +59,17 @@ const registerPartials = async (partialsPath) => {
 }
 
 const init = () => {
+  console.log('=========> renderer expansions', expandTemplatePartials([]))
   return Promise.all([
     registerHelpers(),
     registerPartials(themePartials),
-    registerPartials(previewPartials)
+    registerPartials(previewPartials),
+    ...expandTemplatePartials([]).map(registerPartials)
   ])
 }
 
 const render = ({ path, data, content }) => {
-  debugLog('rendering:', path)
+  debugLog('rendering:', path, content)
   const template = Handlebars.compile(content, {
     noEscape: true
   })

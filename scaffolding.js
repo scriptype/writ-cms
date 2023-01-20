@@ -9,6 +9,7 @@ const {
   assetsDirectory,
   out
 } = require('./settings').getSettings()
+const { expandAssets } = require('./hooks')
 
 const createSiteDir = async () => {
   if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {
@@ -41,11 +42,7 @@ const copyThemeAssets = () =>
     dest: theme
   })
 
-const copyPreviewAssets = () =>
-  copyAssets({
-    src: join(__dirname, 'preview', 'static'),
-    dest: 'preview'
-  })
+const copyExpansionAssets = () => expandAssets([]).map(copyAssets)
 
 module.exports = {
   scaffold: Promise.resolve(true),
@@ -53,7 +50,7 @@ module.exports = {
     this.scaffold = this.scaffold
       .then(createSiteDir)
       .then(copyThemeAssets)
-      .then(mode === 'start' ? copyPreviewAssets :_=>_)
+      .then(copyExpansionAssets)
 
     return this.scaffold
   }

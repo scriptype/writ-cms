@@ -4,6 +4,7 @@ const Settings = require('../../settings')
 const Debug = require('../../debug')
 const { UNCATEGORIZED } = require('../../constants')
 const { getSlug, replaceExtension } = require('../../helpers')
+const { expandTemplate } = require('../../hooks')
 
 const getExportPath = (post) => {
   const { out } = Settings.getSettings()
@@ -21,14 +22,14 @@ const mkdirPostFolder = async (post) => {
   }
 }
 
-const renderPosts = (render, { posts }, decorateTemplate) => {
+const renderPosts = (render, { posts }) => {
   const compilation = posts.map(async post => {
     if (post.foldered) {
       await mkdirPostFolder(post)
     }
     return render({
       path: getExportPath(post),
-      content: decorateTemplate(
+      content: await expandTemplate(
         `{{#>${post.type}}}${post.content}{{/${post.type}}}`
       ),
       data: {

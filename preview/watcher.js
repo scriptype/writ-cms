@@ -3,6 +3,7 @@ const { resolve } = require('path')
 const writ = require('../')
 const settings = require('../settings').getSettings()
 const Debug = require('../debug')
+const api = require('./api')
 
 const watchOptions = {
   reloadDebounce: 500,
@@ -27,7 +28,7 @@ Debug.debugLog('watch', watchDir)
 Debug.debugLog('serve', serverDir)
 
 module.exports = {
-  init({ api }) {
+  init() {
     let compilePromise = writ.start({
       rootDirectory,
       watch: false,
