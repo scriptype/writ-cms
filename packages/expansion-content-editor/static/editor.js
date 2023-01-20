@@ -2,7 +2,6 @@ import Post from './models/post.js'
 import {
   query,
   queryAll,
-  parseScriptParameters,
   findParent,
   omit,
   getSlug,

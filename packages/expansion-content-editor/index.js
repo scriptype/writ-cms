@@ -14,7 +14,7 @@ module.exports = (mode) => ({
   },
 
   useTemplate(template) {
-    return template + (mode === 'start' ? '{{> preview }}{{> content-editor }}' : '')
+    return template + (mode === 'start' ? '{{> content-editor }}' : '')
   },
 
   useContent(contentModel) {
