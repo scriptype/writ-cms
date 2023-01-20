@@ -51,7 +51,8 @@ module.exports = {
       server: serverDir,
       watch: true,
       ui: false,
-      middleware: api.create(compilePromise, settings)
+      middleware: api.create(compilePromise, settings),
+      notify: false
     })
   }
 }
