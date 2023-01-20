@@ -1,3 +1,7 @@
+const expand = (initialValue, fns) => {
+  return fns.reduce((value, fn) => fn(value), initialValue)
+}
+
 const hooks = {
   assets: [],
   content: [],
@@ -9,7 +13,6 @@ const hooks = {
 
 const api = {
   use(expansion) {
-    console.log('==> hooks.use', expansion)
     Object.keys(expansion).forEach(key => {
       const apiMethod = api[key]
       const fn = expansion[key]
@@ -19,48 +22,38 @@ const api = {
   },
 
   useAssets(fn) {
-    console.log('=> hooks.useAssets', fn)
     hooks.assets.push(fn)
   },
 
   useContent(fn) {
-    console.log('=> hooks.useContent', fn)
     hooks.content.push(fn)
     return this
   },
 
   usePreviewApi(fn) {
-    console.log('=> hooks.usePreviewApi', fn)
     hooks.previewApi.push(...fn())
     return this
   },
 
   useTemplate(fn) {
-    console.log('=> hooks.useTemplate', fn)
     hooks.template.push(fn)
     return this
   },
 
   useTemplateHelpers(fn) {
-    console.log('=> hooks.useTemplateHelpers', fn)
     hooks.templateHelpers.push(fn)
     return this
   },
 
   useTemplatePartials(fn) {
-    console.log('=> hooks.useTemplatePartials', fn)
     hooks.templatePartials.push(fn)
     return this
   }
 }
 
-const expand = (initialValue, fns) => {
-  return fns.reduce((value, fn) => fn(value), initialValue)
-}
-
-const routines = {
+module.exports = {
+  api,
   expandAssets(assets) {
-    console.log('=> expandAssets', hooks.assets)
     return [
       ...assets,
       ...hooks.assets.map(_=>_())
@@ -68,7 +61,6 @@ const routines = {
   },
 
   expandPreviewApi(previewApi) {
-    console.log('=> expandPreviewApi', hooks.previewApi)
     return [
       ...previewApi,
       ...hooks.previewApi
@@ -76,7 +68,6 @@ const routines = {
   },
 
   expandContent(content) {
-    console.log('=> expandContent', hooks.content)
     return expand(content, hooks.content)
   },
 
@@ -85,20 +76,13 @@ const routines = {
   },
 
   expandTemplateHelpers(helpers) {
-    console.log('=> expandTemplateHelpers', hooks.templateHelpers)
     return expand(helpers, hooks.templateHelpers)
   },
 
   expandTemplatePartials(partials) {
-    console.log('=> expandTemplatePartials', hooks.templatePartials)
     return [
       ...partials,
       ...hooks.templatePartials.map(_=>_())
     ]
   }
-}
-
-module.exports = {
-  api,
-  ...routines
 }
