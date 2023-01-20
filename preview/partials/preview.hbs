@@ -1,4 +1,4 @@
 <script type="text/javascript">
-  window.debug = {{debug}}
+  window.debug = '{{debug}}' === 'true';
   window.debugLog = (...args) => debug ? console.log(...args) : undefined
 </script>
