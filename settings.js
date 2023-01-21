@@ -18,35 +18,40 @@ const defaultSettings = (rootDirectory) => ({
     "_.*",
     "settings.json"
   ],
+  expansions: [
+    "content-editor"
+  ]
 })
 
 const getIgnoreRegExp = ({ ignorePaths, exportDirectory }) => {
   return new RegExp(ignorePaths.concat(exportDirectory).join('|'), 'i')
 }
 
+let _defaultSettings = defaultSettings('.')
+
+let _settings = {
+  ..._defaultSettings
+}
+
 module.exports = {
-  _defaultSettings: defaultSettings('.'),
   getDefaultSettings(rootDirectory) {
     if (rootDirectory) {
       return defaultSettings(rootDirectory)
     }
-    return this._defaultSettings
-  },
-  _settings: {
-    ...defaultSettings('.')
+    return _defaultSettings
   },
   getSettings() {
-    return this._settings
+    return _settings
   },
   async init({ mode, rootDirectory }) {
     const root = resolve(rootDirectory)
     const settingsJSON = await loadJSON(join(root, 'settings.json'))
-    this._defaultSettings = {...defaultSettings(rootDirectory)}
+    _defaultSettings = {...defaultSettings(rootDirectory)}
     const userSettings = {
-      ...this._defaultSettings,
+      ..._defaultSettings,
       ...settingsJSON,
     }
-    this._settings = _.omit({
+    _settings = _.omit({
       ...userSettings,
       site: {
         title: userSettings.title,
@@ -57,6 +62,6 @@ module.exports = {
       out: join(root, userSettings.exportDirectory),
       mode
     }, ['title', 'description'])
-    debugLog('settings', mode, rootDirectory, root, settingsJSON, userSettings, this._settings)
+    debugLog('settings', { mode, rootDirectory, root, settingsJSON, userSettings, _settings })
   }
 }

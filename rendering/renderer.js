@@ -4,8 +4,7 @@ const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../helpers')
 const { debugLog } = require('../debug')
 const { theme, mode } = require('../settings').getSettings()
-const { finaliseTemplatePartials } = require('../routines')
-const { expandTemplateHelpers } = require('../hooks')
+const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../routines')
 
 const themePartials = resolve(join(__dirname, 'themes', theme))
 
@@ -32,7 +31,7 @@ const helpers = {
 const registerHelpers = () => {
   const allHelpers = {
     ...helpers,
-    ...expandTemplateHelpers(helpers)
+    ...finaliseTemplateHelpers(helpers)
   }
   debugLog('registerHelpers allHelpers', allHelpers)
   Handlebars.registerHelper(allHelpers)

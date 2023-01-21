@@ -1,9 +1,6 @@
 const writ = require('../')
-const ContentEditor = require('../packages/expansion-content-editor')
 
-writ
-  .use(ContentEditor('start'))
-  .start({
+writ.build({
     rootDirectory: '/Users/enes/code/writ',
     debug: true
   })

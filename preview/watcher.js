@@ -1,7 +1,7 @@
 const bs = require('browser-sync').create()
 const { resolve } = require('path')
 const writ = require('../')
-const settings = require('../settings').getSettings()
+const settings = require('../settings')
 const Debug = require('../debug')
 const api = require('./api')
 
@@ -10,7 +10,7 @@ const watchOptions = {
   ignoreInitial: true,
   ignored: new RegExp(
     [
-      settings.exportDirectory,
+      settings.getSettings().exportDirectory,
       'node_modules',
       '.git',
       '.DS_Store',
@@ -20,15 +20,15 @@ const watchOptions = {
   )
 }
 
-const { rootDirectory, exportDirectory } = settings
-const watchDir = resolve(rootDirectory)
-const serverDir = resolve(rootDirectory, exportDirectory)
-
-Debug.debugLog('watch', watchDir)
-Debug.debugLog('serve', serverDir)
-
 module.exports = {
   init() {
+    const { rootDirectory, exportDirectory } = settings.getSettings()
+    const watchDir = resolve(rootDirectory)
+    const serverDir = resolve(rootDirectory, exportDirectory)
+
+    Debug.debugLog('watch', watchDir)
+    Debug.debugLog('serve', serverDir)
+
     let compilePromise = writ.start({
       rootDirectory,
       watch: false,

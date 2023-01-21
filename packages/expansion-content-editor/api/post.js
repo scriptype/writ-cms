@@ -81,9 +81,9 @@ const preserveNewlines = (content) => {
     )
 }
 
-module.exports = (settings, { debugLog, getSlug }) => {
-  const { rootDirectory } = settings
+module.exports = ({ settings, debugLog, getSlug }) => {
   return async (req, res, next) => {
+    const { rootDirectory } = settings
     const { content, title, updateUrl, path, foldered } = req.body
     const extension = extname(path)
     const srcFilePath = join(rootDirectory, path)

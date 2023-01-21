@@ -7,15 +7,18 @@ module.exports = {
     Watcher.init()
   },
 
-  useTemplate(template) {
-    const { mode } = settings.getSettings()
-    return template + (mode === 'start' ? '{{> preview }}' : '')
-  },
+  use(type, value) {
+    switch (type) {
+      case "template":
+        const { mode } = settings.getSettings()
+        return value + (mode === 'start' ? '{{> preview }}' : '')
 
-  useTemplatePartials(partials) {
-    return [
-      ...partials,
-      resolve(join(__dirname, 'partials'))
-    ]
+      case "templatePartials":
+        return [
+          ...value,
+          resolve(join(__dirname, 'partials'))
+        ]
+    }
+    return value
   }
 }

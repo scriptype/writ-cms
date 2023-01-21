@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser')
-const { expandPreviewApi } = require('../hooks')
+const { finalisePreviewApi } = require('../routines')
 const { debugLog } = require('../debug')
+const Settings = require('../settings')
 const { getSlug } = require('../helpers')
 
 const next = (promise, thenPromise) => {
@@ -10,25 +11,26 @@ const next = (promise, thenPromise) => {
   }
 }
 
-const getExpansionApis = (compilePromise, settings) => {
+const getExpansionApis = (compilePromise) => {
   const utils = {
+    settings: Settings.getSettings(),
     debugLog,
     getSlug
   }
-  return expandPreviewApi([]).map(api => ({
+  return finalisePreviewApi([]).map(api => ({
     ...api,
     handle: next(
       compilePromise, 
-      api.handle(settings, utils)
+      api.handle(utils)
     )
   }))
 }
 
 module.exports = {
-  create: (compilePromise, settings) => {
+  create: (compilePromise) => {
     return [
       bodyParser.json(),
-      ...getExpansionApis(compilePromise, settings)
+      ...getExpansionApis(compilePromise)
     ]
   }
 }

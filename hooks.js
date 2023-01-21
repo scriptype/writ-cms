@@ -1,7 +1,3 @@
-const expand = (initialValue, fns) => {
-  return fns.reduce((value, fn) => fn(value), initialValue)
-}
-
 const hooks = {
   assets: [],
   content: [],
@@ -51,38 +47,61 @@ const api = {
   }
 }
 
+const expand = (initialValue, fns) => {
+  return fns.reduce((value, fn) => fn(value), initialValue)
+}
+
+const expandTemplate = (template) => {
+  return expand(template, hooks.template)
+}
+
+const expandTemplateHelpers = (helpers) => {
+  return expand(helpers, hooks.templateHelpers)
+}
+
+const expandTemplatePartials = (partials) => {
+  return [
+    partials,
+    ...hooks.templatePartials.map(_=>_())
+  ]
+}
+
+const expandContent = (content) => {
+  return expand(content, hooks.content)
+}
+
+const expandAssets = (assets) => {
+  return [
+    ...assets,
+    ...hooks.assets
+  ]
+}
+
+const expandPreviewApi = (previewApi) => {
+  return [
+    ...previewApi,
+    ...hooks.previewApi
+  ]
+}
+
 module.exports = {
   api,
-  expandAssets(assets) {
-    return [
-      ...assets,
-      ...hooks.assets.map(_=>_())
-    ]
+
+  expand(expansionHook, value) {
+    return {
+      template: expandTemplate,
+      templatePartials: expandTemplatePartials,
+      templateHelpers: expandTemplateHelpers,
+      content: expandContent,
+      assets: expandAssets,
+      previewApi: expandPreviewApi,
+    }[expansionHook](value)
   },
 
-  expandPreviewApi(previewApi) {
-    return [
-      ...previewApi,
-      ...hooks.previewApi
-    ]
-  },
-
-  expandContent(content) {
-    return expand(content, hooks.content)
-  },
-
-  expandTemplate(template) {
-    return expand(template, hooks.template)
-  },
-
-  expandTemplateHelpers(helpers) {
-    return expand(helpers, hooks.templateHelpers)
-  },
-
-  expandTemplatePartials(partials) {
-    return [
-      ...partials,
-      ...hooks.templatePartials.map(_=>_())
-    ]
-  }
+  expandTemplate,
+  expandTemplatePartials,
+  expandTemplateHelpers,
+  expandContent,
+  expandAssets,
+  expandPreviewApi,
 }
