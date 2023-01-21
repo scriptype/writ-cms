@@ -9,7 +9,7 @@ module.exports = (mode) => {
         <img
           data-editable="true"
           data-section="summary"
-          src="/assets/default/transparent.png" />
+          src="/assets/expansions/content-editor/transparent.png" />
         ` : helpers.seeMore,
         lorem: 'hele'
       }
@@ -43,12 +43,12 @@ module.exports = (mode) => {
     },
 
     useAssets() {
-      return [
+      return mode === 'start' ? [
         {
           src: resolve(__dirname, './static'),
           dest: 'expansions/content-editor'
         }
-      ]
+      ] : []
     }
   }
 }
