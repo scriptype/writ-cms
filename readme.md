@@ -47,29 +47,27 @@ npm install -g scriptype/writ-cms
 
 ## Usage
 
+### 1) Name your site
 ```sh
-# Create your blog folder
-mkdir "New blog"
-cd "New blog"
+mkdir "All about trees"
+cd "All about trees"
+```
 
-# Create any text file (.hbs, .md, .markdown, .txt, .html)
-echo "Hello" > hello.txt
+### 2) Create a post
+```sh
+echo "Pines are nice" > hello.txt
+```
 
-# Start live preview editor mode
+### 3) Preview & live edit
+```sh
 writ start
-
-# Compile final site for deployment purposes
-writ build
-
-# Print CLI manual for more
-writ
 ```
 
 ## Manual
 
 ### Entry formats
 
-- Any text file (.hbs, .md, .markdown, .txt, .html).
+- Any text file (.txt, .md, .markdown, .hbs, .html).
 - Live WYSIWYG editor
 
 ### Categories
