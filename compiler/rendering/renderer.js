@@ -6,7 +6,9 @@ const { debugLog } = require('../../debug')
 const { theme, mode } = require('../../settings').getSettings()
 const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../../routines')
 
-const themePartials = resolve(join(__dirname, 'themes', theme))
+const themePartials = resolve(
+  join(__dirname, '..', '..', 'packages', `theme-${theme}`)
+)
 
 const helpers = {
   multiLineTextList(list) {
