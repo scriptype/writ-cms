@@ -19,8 +19,8 @@
             <main class="content" id="posts-container">
                 {{#each posts as |post|}}
                     {{#if (isPostType 'photo-post' post.type)}}
-                        <a href="{{post.permalink}}" title="{{post.title}}" class="photo-thumbnail">
-                            <img src="{{post.permalink}}/{{post.thumbnailUrl}}" alt="{{post.title}}" />
+                        <a href="{{post.permalink}}" class="photo-thumbnail">
+                            <img src="{{post.permalink}}/{{post.thumbnailUrl}}" />
                         </a>
                     {{/if}}
                     {{#if (isPostType 'text-post' post.type)}}
