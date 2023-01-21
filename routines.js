@@ -12,8 +12,7 @@ const startUp = async ({ mode, rootDirectory, watch, debug }) => {
   })
   await Expansions.init()
   if (mode === 'start' && watch !== false) {
-    const Preview = require('./preview')
-    return Preview.init()
+    return require('./preview').init()
   }
   return require('./compiler').compile()
 }
