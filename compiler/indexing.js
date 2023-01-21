@@ -1,8 +1,8 @@
 const fs = require('fs/promises')
 const { join, extname } = require('path')
-const { readFileContent, isDirectory } = require('./helpers')
-const { rootDirectory, IGNORE_PATHS_REG_EXP } = require('./settings').getSettings()
-const { debugLog } = require('./debug')
+const { readFileContent, isDirectory } = require('../helpers')
+const { rootDirectory, IGNORE_PATHS_REG_EXP } = require('../settings').getSettings()
+const { debugLog } = require('../debug')
 
 const shouldIncludePath = (path) => {
   return (

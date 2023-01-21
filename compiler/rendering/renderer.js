@@ -1,10 +1,10 @@
 const Handlebars = require('handlebars')
 const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
-const { isDirectory, readFileContent } = require('../helpers')
-const { debugLog } = require('../debug')
-const { theme, mode } = require('../settings').getSettings()
-const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../routines')
+const { isDirectory, readFileContent } = require('../../helpers')
+const { debugLog } = require('../../debug')
+const { theme, mode } = require('../../settings').getSettings()
+const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../../routines')
 
 const themePartials = resolve(join(__dirname, 'themes', theme))
 

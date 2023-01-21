@@ -1,15 +1,15 @@
 const { rm, cp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const { exec } = require('child_process')
-const { getSlug, isDirectory } = require('./helpers')
+const { getSlug, isDirectory } = require('../helpers')
 const {
   mode,
   theme,
   exportDirectory,
   assetsDirectory,
   out
-} = require('./settings').getSettings()
-const { finaliseAssets } = require('./routines')
+} = require('../settings').getSettings()
+const { finaliseAssets } = require('../routines')
 
 const createSiteDir = async () => {
   if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {

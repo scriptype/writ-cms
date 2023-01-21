@@ -1,7 +1,7 @@
 const { join } = require('path')
-const Settings = require('../../settings')
-const Debug = require('../../debug')
-const { finaliseTemplate } = require('../../routines')
+const Settings = require('../../../settings')
+const Debug = require('../../../debug')
+const { finaliseTemplate } = require('../../../routines')
 
 const renderSubpages = (render, { subpages }) => {
   const { out } = Settings.getSettings()

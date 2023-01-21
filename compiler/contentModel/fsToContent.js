@@ -1,7 +1,7 @@
 const {
   pagesDirectory,
   assetsDirectory
-} = require('../settings').getSettings()
+} = require('../../settings').getSettings()
 const {
   isPostFile,
   isFolderedPostIndexFile,

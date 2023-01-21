@@ -1,9 +1,9 @@
 const _ = require('lodash')
-const { getSlug } = require('../helpers')
+const { getSlug } = require('../../helpers')
+const { finaliseContent } = require('../../routines')
 const { UNCATEGORIZED } = require('../constants')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
-const { finaliseContent } = require('../routines')
 const contentTypes = require('./contentTypes')
 const { createUncategorizedCategory, isPost, isLocalAsset } = contentTypes
 

@@ -1,8 +1,8 @@
 const { mkdir, readFile } = require('fs/promises')
 const { join } = require('path')
-const Settings = require('../../settings')
-const Debug = require('../../debug')
-const { finaliseTemplate } = require('../../routines')
+const Settings = require('../../../settings')
+const Debug = require('../../../debug')
+const { finaliseTemplate } = require('../../../routines')
 
 const mkdirCategoryFolder = async (dirName) => {
   try {

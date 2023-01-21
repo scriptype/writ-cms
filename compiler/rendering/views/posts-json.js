@@ -1,7 +1,7 @@
 const { join } = require('path')
 const { writeFile } = require('fs/promises')
-const Settings = require('../../settings')
-const { debugLog } = require('../../debug')
+const Settings = require('../../../settings')
+const { debugLog } = require('../../../debug')
 
 const renderPostsJSON = ({ postsJSON }) => {
   const { out } = Settings.getSettings()

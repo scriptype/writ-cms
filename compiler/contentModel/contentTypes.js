@@ -1,8 +1,8 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
-const { site } = require('../settings').getSettings()
+const { site } = require('../../settings').getSettings()
 const { UNCATEGORIZED } = require('../constants')
-const { getSlug, removeExtension, replaceExtension } = require('../helpers')
+const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
 const { isTemplate, parseTemplate } = require('./templating')
 
 const contentTypes = {
