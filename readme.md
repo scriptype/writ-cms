@@ -42,13 +42,7 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 ## Installation
 
 ```sh
-# Clone writ-cms
-git clone git@github.com:scriptype/writ-cms.git
-
-# Install dependencies
-cd writ-cms
-npm install
-npm i -g .
+npm install -g scriptype/writ-cms
 ```
 
 ## Usage
