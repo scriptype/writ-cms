@@ -7,7 +7,7 @@ const { theme, mode } = require('../../settings').getSettings()
 const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../../routines')
 
 const themePartials = resolve(
-  join(__dirname, '..', '..', 'packages', `theme-${theme}`)
+  join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)
 )
 
 const helpers = {

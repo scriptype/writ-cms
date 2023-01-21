@@ -38,7 +38,7 @@ const copyAssets = async ({ src, dest }) => {
 
 const copyThemeAssets = () =>
   copyAssets({
-    src: join(__dirname, '..', 'packages', `theme-${theme}`, 'assets'),
+    src: join(__dirname, '..', '..', 'packages', `theme-${theme}`, 'assets'),
     dest: theme
   })
 

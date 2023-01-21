@@ -4,10 +4,10 @@
   "description": "Simple static site generator",
   "main": "index.js",
   "bin": {
-    "writ": "cli/bin"
+    "writ": "src/cli/bin"
   },
   "scripts": {
-    "start": "node ."
+    "start": "node src"
   },
   "repository": {
     "type": "git",

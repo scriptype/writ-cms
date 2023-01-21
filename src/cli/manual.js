@@ -1,4 +1,4 @@
-const { version: vn } = require('../package.json')
+const { version: vn } = require('../../package.json')
 
 module.exports = `
   writ (v${vn})
