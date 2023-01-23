@@ -1,54 +1,17 @@
-const { resolve } = require('path')
-const { Post, Category } = require('./content')
+const useContent = require('./useContent')
+const useTemplate = require('./useTemplate')
+const useTemplateHelpers = require('./useTemplateHelpers')
+const useTemplatePartials = require('./useTemplatePartials')
+const useAssets = require('./useAssets')
+const usePreviewApi = require('./usePreviewApi')
 
 module.exports = (mode) => {
   return {
-    useTemplateHelpers(helpers) {
-      return {
-        seeMore: mode === 'start' ? `
-        <img
-          data-editable="true"
-          data-section="summary"
-          src="/assets/expansions/content-editor/transparent.png" />
-        ` : helpers.seeMore,
-        lorem: 'hele'
-      }
-    },
-
-    useTemplate(template) {
-      return template + (mode === 'start' ? '{{> content-editor }}' : '')
-    },
-
-    useContent(contentModel) {
-      return mode === 'start' ?
-        {
-          ...contentModel,
-          posts: contentModel.posts.map(Post),
-          categories: contentModel.categories.map(Category)
-        } :
-        contentModel
-    },
-
-    usePreviewApi() {
-      return [
-        {
-          route: "/cms/post",
-          handle: require('./api/post')
-        }
-      ]
-    },
-
-    useTemplatePartials() {
-      return resolve(__dirname, './partials')
-    },
-
-    useAssets() {
-      return mode === 'start' ? [
-        {
-          src: resolve(__dirname, './static'),
-          dest: 'expansions/content-editor'
-        }
-      ] : []
-    }
+    useTemplate: useTemplate(mode),
+    useTemplateHelpers: useTemplateHelpers(mode),
+    useTemplatePartials: useTemplatePartials(mode),
+    useContent: useContent(mode),
+    useAssets: useAssets(mode),
+    usePreviewApi: usePreviewApi(mode)
   }
 }
