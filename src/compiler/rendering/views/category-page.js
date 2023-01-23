@@ -1,4 +1,4 @@
-const { mkdir, readFile } = require('fs/promises')
+const { mkdir } = require('fs/promises')
 const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
