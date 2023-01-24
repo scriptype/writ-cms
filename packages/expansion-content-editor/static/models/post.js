@@ -1,7 +1,7 @@
 const restoreSeeMore = (content) => {
   const el = document.createElement('div')
   el.innerHTML = content
-  const seeMore = el.querySelector('[data-section="summary"]')
+  const seeMore = el.querySelector('img[alt="writ summary divider"]')
   const parentNode = seeMore.parentNode
   const grandParentNode = parentNode.parentNode
   if (grandParentNode && !grandParentNode.querySelector('[data-section="content"]')) {

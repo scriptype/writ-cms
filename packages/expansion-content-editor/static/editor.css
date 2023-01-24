@@ -77,12 +77,12 @@ body.edit-mode [data-editable="true"] {
   transition: all .3s;
 }
 
-body:not(.edit-mode) [data-editable="true"][data-section="summary"] {
+body:not(.edit-mode) img[alt="writ summary divider"] {
   opacity: 0;
   position: absolute;
 }
 
-body.edit-mode [data-editable="true"][data-section="summary"] {
+body.edit-mode img[alt="writ summary divider"] {
   --summary-color: gainsboro;
   position: relative;
   display: inline-block;
@@ -99,7 +99,7 @@ body.edit-mode [data-editable="true"][data-section="summary"] {
     inset 0 -1rem 0 white;
 }
 
-body.edit-mode [data-editable="true"][data-section="summary"]:hover {
+body.edit-mode img[alt="writ summary divider"]:hover {
   box-shadow:
     inset 0 0.8rem 0 white,
     inset 0 -0.8rem 0 white;
@@ -109,7 +109,7 @@ body.edit-mode [data-editable="true"]:hover {
   --outline-color: deepskyblue;
 }
 
-body.edit-mode [data-editable="true"]:hover [data-section="summary"]{
+body.edit-mode [data-editable="true"]:hover img[alt="writ summary divider"] {
   --summary-color: deepskyblue;
 }
 
@@ -118,4 +118,4 @@ body.edit-mode [data-editable="true"]:focus-within {
   --outline-offset: 1px;
 }
 
-body.edit-mode [data-editable="true"]:focus-within [data-section="summary"] {}
+body.edit-mode [data-editable="true"]:focus-within img[alt="writ summary divider"] {}

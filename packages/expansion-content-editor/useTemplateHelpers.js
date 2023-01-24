@@ -2,8 +2,7 @@ const useTemplateHelpers = (mode) =>
   (helpers) => ({
     seeMore: mode === 'start' ? `
         <img
-          data-editable="true"
-          data-section="summary"
+          alt="writ summary divider"
           src="/assets/expansions/content-editor/transparent.png" />
         ` : helpers.seeMore
   })
