@@ -133,7 +133,7 @@ const createEditor = (selector, options) => {
         $('#tooltip-controls, #sidebar-controls').hide();
         $('#sidebar-controls').removeClass('active');
       }
-    } else {
+    } else if (quill.isEnabled()){
       $('#sidebar-controls, #sidebar-controls').hide();
       $('#sidebar-controls').removeClass('active');
       let rangeBounds = quill.getBounds(range);

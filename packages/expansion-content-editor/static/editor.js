@@ -31,22 +31,26 @@ const listenToTitleChanges = (editable) => {
   })
 }
 
-const listenContentChanges = (editable) => {
+const createQuill = (editable) => {
+  editable.insertAdjacentHTML('beforeBegin', quillHelpersElement.innerHTML)
+  window.editors = window.editors || []
+  const quill = createEditor(editable)
+  window.editors.push({
+    editable,
+    quill
+  });
   if (!editMode) {
-    queryAll('[id^=editor-]').forEach(node => node.remove())
-    queryAll('.ql-toolbar').forEach(node => node.remove())
-    queryAll('#tooltip-controls').forEach(node => node.remove())
-    queryAll('#sidebar-controls').forEach(node => node.remove())
-    editable.style.cssText += ';display: block;'
-    window.quills.forEach(q => q.disable())
-    return
+    quill.disable()
   }
+  return quill
+}
+
+const listenContentChanges = (editable) => {
   let { section, path, foldered } = editable.dataset
   const originalContent = originals.find(c => c.path === path && c.section === section).content
-  editable.insertAdjacentHTML('beforeBegin', quillHelpersElement.innerHTML)
-  window.quills = window.quills || []
-  const quill = createEditor(editable)
-  window.quills.push(quill);
+  let quill = window.editors ?
+    window.editors.find(e => e.editable === editable).quill :
+    createQuill(editable)
   quill.on('text-change', (delta, source) => {
     unsavedChanges[path] = {
       ...unsavedChanges[path],
@@ -66,6 +70,11 @@ const listenContentChanges = (editable) => {
 const toggleEditMode = (isEditMode) => {
   document.body.classList.toggle('edit-mode')
   editMode = !editMode
+  if (editMode) {
+    window.editors.forEach(e => e.quill.enable())
+  } else {
+    window.editors.forEach(e => e.quill.disable())
+  }
 }
 
 const editorTemplate = query('#editor-tmpl')
@@ -82,11 +91,6 @@ let unsavedChanges = {}
 
 const localStorageKey = 'editor'
 const store = localStorage.getItem(localStorageKey)
-
-if (store && JSON.parse(store) && JSON.parse(store).editMode) {
-  query('#edit-mode').checked = true
-  toggleEditMode(true)
-}
 
 const editables = Array.from(queryAll('[data-editable="true"]'))
 const originals = editables.map(e => ({
@@ -108,6 +112,11 @@ editables.forEach((editable, i) => {
     }
   })
 })
+
+if (store && JSON.parse(store) && JSON.parse(store).editMode) {
+  query('#edit-mode').checked = true
+  toggleEditMode(true)
+}
 
 query('#save-btn').addEventListener('click', async () => {
   window.debugLog('changes', unsavedChanges)
