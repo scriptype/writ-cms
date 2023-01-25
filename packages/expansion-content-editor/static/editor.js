@@ -111,7 +111,7 @@ editables.forEach((editable, i) => {
     listenContentChanges(editable)
   }
   editable.addEventListener('click', e => {
-    if (findParent(editable, 'a')) {
+    if (editMode && findParent(editable, 'a')) {
       e.preventDefault()
     }
   })
