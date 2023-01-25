@@ -123,7 +123,7 @@ const createEditor = (selector, options) => {
     if (range.length === 0) {
       $('#tooltip-controls').hide();
       let [block, offset] = quill.scroll.descendant(Block, range.index);
-      if (block != null && block.domNode.firstChild instanceof HTMLBRElement) {
+      if (quill.isEnabled() && block != null && block.domNode.firstChild instanceof HTMLBRElement) {
         let lineBounds = quill.getBounds(range);
         $('#sidebar-controls').removeClass('active').show().css({
           left: lineBounds.left - 50,
@@ -179,6 +179,12 @@ const createEditor = (selector, options) => {
   });
 
   $('#image-button').click(function() {
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.addEventListener('change', (e) => {
+      console.log('file selected', e, fileInput)
+    })
+    fileInput.click()
     let range = quill.getSelection(true);
     quill.insertEmbed(range.index, 'image', {
       alt: 'Quill Cloud',

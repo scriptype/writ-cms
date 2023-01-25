@@ -14,7 +14,6 @@ const { random, round, pow } = Math
 const listenToTitleChanges = (editable) => {
   let { section, path, foldered } = editable.dataset
   const originalContent = originals.find(c => c.path === path && c.section === section).content
-  editable.contentEditable = editMode
   return editable.addEventListener('input', () => {
     unsavedChanges[path] = {
       ...unsavedChanges[path],
@@ -75,6 +74,11 @@ const toggleEditMode = (isEditMode) => {
   } else {
     window.editors.forEach(e => e.quill.disable())
   }
+  editables.forEach(editable => {
+    if (editable.dataset.section === 'title') {
+      editable.contentEditable = editMode
+    }
+  })
 }
 
 const editorTemplate = query('#editor-tmpl')

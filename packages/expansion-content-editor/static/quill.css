@@ -82,6 +82,7 @@ ql-container {
   background-color: transparent;
   border: none;
   padding: 0;
+  font-size: 18px;
 }
 #sidebar-controls i.fa {
   background-color: #fff;
@@ -91,6 +92,9 @@ ql-container {
   width: 32px;
   height: 32px;
   line-height: 32px;
+  display: inline-flex !important;
+  justify-content: center;
+  align-items: center;
 }
 #sidebar-controls .controls {
   display: none;
