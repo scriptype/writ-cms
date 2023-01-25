@@ -1,11 +1,8 @@
-const _ = require('lodash')
-const { getSlug } = require('../../helpers')
 const { finaliseContent } = require('../../routines')
 const { UNCATEGORIZED } = require('../constants')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
-const { createUncategorizedCategory, isPost, isLocalAsset } = contentTypes
 
 const sortPosts = (a, b) => {
   return new Date(b.publishedAt) - new Date(a.publishedAt)
@@ -16,7 +13,7 @@ const upsertUncategorizedCategory = (ContentModel, newContent) => {
     category => category.name === UNCATEGORIZED
   )
   if (!uncategorizedCategory) {
-    uncategorizedCategory = createUncategorizedCategory().data
+    uncategorizedCategory = contentTypes.createUncategorizedCategory().data
     ContentModel.categories.push(uncategorizedCategory)
   }
   uncategorizedCategory.posts.push(newContent)
@@ -31,7 +28,8 @@ const createContentModel = (contentTree) => {
     posts: [],
     unrecognized: [],
     localAssets: [],
-    postsJSON: []
+    postsJSON: [],
+    customTheme: null
   }
 
   contentTree.forEach(content => {
@@ -55,6 +53,12 @@ const createContentModel = (contentTree) => {
 
       case contentTypes.SUBPAGES:
         ContentModel.subpages.push(...content.data.map(({ data }) => data))
+        break
+
+      case contentTypes.CUSTOM_THEME_FOLDER:
+        ContentModel.customTheme = {
+          ...content.data
+        }
         break
 
       case contentTypes.ASSETS:

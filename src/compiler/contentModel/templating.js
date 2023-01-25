@@ -7,8 +7,10 @@ marked.setOptions({
 
 const READ_MORE_DIVIDER = '{{seeMore}}'
 
-const acceptedExtensionsForTemplates = [
+const partialExtensions = ['.hbs', '.handlebars']
+const templateExtensions = [
   '.hbs',
+  '.handlebars',
   '.md',
   '.markdown',
   '.txt',
@@ -63,14 +65,15 @@ const attachTags = ({ tags }) => {
   }
 }
 
-const isTemplate = ({ extension }) => {
+const matchesExtension = (extension, acceptedExtensions) => {
   if (!extension) {
     return false
   }
-  const extensions = acceptedExtensionsForTemplates.join('|')
-  const pattern = new RegExp(extensions, 'i')
-  return pattern.test(extension)
+  return new RegExp(acceptedExtensions.join('|'), 'i').test(extension)
 }
+
+const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
+const isPartial = ({ extension }) => matchesExtension(extension, partialExtensions)
 
 const parseTemplate = ({ content, extension }) => {
   const { attributes, body } = frontMatter(content)
@@ -88,5 +91,6 @@ const parseTemplate = ({ content, extension }) => {
 
 module.exports = {
   isTemplate,
+  isPartial,
   parseTemplate
 }

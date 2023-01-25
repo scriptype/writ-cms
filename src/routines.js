@@ -11,25 +11,27 @@ const startUp = async ({ mode, rootDirectory, watch, debug }) => {
     rootDirectory
   })
   await Expansions.init()
+  await require('./compiler').compile()
   if (mode === 'start' && watch !== false) {
     return require('./preview').init()
   }
-  return require('./compiler').compile()
+  return Promise.resolve()
 }
 
 const finalise =
   (expansionHook) => {
     return (value) => {
-      const expandedValue = Expansions.expandBy(expansionHook)(value)
-      const hookedValue = Hooks.expand(expansionHook, expandedValue)
-      const previewUsedValue = require('./preview').use(expansionHook, hookedValue)
-      return previewUsedValue
+      let result
+      result = Expansions.expandBy(expansionHook)(value)
+      result = Hooks.expand(expansionHook, result)
+      result = require('./preview').use(expansionHook, result)
+      result = require('./custom-theme').use(expansionHook, result)
+      return result
     }
   }
 
 const Routines = {
   startUp,
-  finalise,
   finaliseTemplate: finalise('template'),
   finaliseTemplatePartials: finalise('templatePartials'),
   finaliseTemplateHelpers: finalise('templateHelpers'),

@@ -5,9 +5,13 @@ const Watcher = require('./watcher')
 module.exports = {
   init() {
     Watcher.init()
+    this.started = true
   },
 
   use(type, value) {
+    if (!this.started) {
+      return value
+    }
     switch (type) {
       case "template":
         const { mode } = settings.getSettings()

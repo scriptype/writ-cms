@@ -12,7 +12,6 @@ const init = async () => {
     .map(exp => {
       const pkgPath = join(__dirname, '..', `packages/expansion-${exp}`)
       const pkg = require(pkgPath)
-      const mode = settings.mode
       return pkg(settings.mode)
     })
 

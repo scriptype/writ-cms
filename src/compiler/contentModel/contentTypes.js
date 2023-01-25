@@ -3,7 +3,7 @@ const { dirname, join } = require('path')
 const { site } = require('../../settings').getSettings()
 const { UNCATEGORIZED } = require('../constants')
 const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
-const { isTemplate, parseTemplate } = require('./templating')
+const { isTemplate, isPartial, parseTemplate } = require('./templating')
 
 const contentTypes = {
   POST: 'post',
@@ -15,7 +15,9 @@ const contentTypes = {
   LOCAL_ASSET: 'localAsset',
   FOLDERED_POST_INDEX: 'folderedPostIndex',
   UNRECOGNIZED_DIRECTORY: 'unrecognizedDirecoty',
-  UNRECOGNIZED_FILE: 'unrecognizedFile'
+  UNRECOGNIZED_FILE: 'unrecognizedFile',
+  CUSTOM_THEME_FOLDER: 'themeFolder',
+  CUSTOM_THEME_PARTIAL: 'customThemePartial'
 }
 
 const isPost = (fsObject) => {
@@ -111,6 +113,28 @@ const createSubpages = (fsObject) => {
     ...fsObject,
     type: contentTypes.SUBPAGES,
     data: fsObject.children.map(createSubpage)
+  }
+}
+
+const createCustomThemePartial = ({ name, path, content }) => {
+  return {
+    type: contentTypes.CUSTOM_THEME_PARTIAL,
+    partialName: name.split('.')[0],
+    name,
+    path,
+    content
+  }
+}
+
+const createCustomTheme = (fsObject) => {
+  return {
+    ...fsObject,
+    type: contentTypes.CUSTOM_THEME_FOLDER,
+    data: {
+      name: 'custom',
+      assets: fsObject.children.filter(c => !isPartial(c)).map(createLocalAsset),
+      partials: fsObject.children.map(createCustomThemePartial),
+    }
   }
 }
 
@@ -259,4 +283,5 @@ module.exports = {
   createPost,
   createUnrecognizedDirectory,
   createUnrecognizedFile,
+  createCustomTheme
 }

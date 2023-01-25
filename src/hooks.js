@@ -18,7 +18,8 @@ const api = {
   },
 
   useAssets(fn) {
-    hooks.assets.push(fn)
+    hooks.assets.push(...fn())
+    return this
   },
 
   useContent(fn) {

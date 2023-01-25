@@ -10,6 +10,7 @@ const defaultSettings = (rootDirectory) => ({
   assetsDirectory: "assets",
   exportDirectory: "docs",
   pagesDirectory: "pages",
+  themeDirectory: "theme",
   ignorePaths: [
     ".git",
     ".gitignore",

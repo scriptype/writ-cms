@@ -1,14 +1,8 @@
 const { rm, cp, mkdir } = require('fs/promises')
-const { resolve, join } = require('path')
+const { resolve, join, basename } = require('path')
 const { exec } = require('child_process')
-const { getSlug, isDirectory } = require('../helpers')
-const {
-  mode,
-  theme,
-  exportDirectory,
-  assetsDirectory,
-  out
-} = require('../settings').getSettings()
+const { getSlug } = require('../helpers')
+const { theme, exportDirectory, assetsDirectory, out } = require('../settings').getSettings()
 const { finaliseAssets } = require('../routines')
 
 const createSiteDir = async () => {
@@ -24,33 +18,56 @@ const createSiteDir = async () => {
   }
 }
 
-const ensureAssetsDirectory = async () => {
-  const assetsDirectoryExists = await isDirectory(join(out, assetsDirectory))
-  if (!assetsDirectoryExists) {
-    await mkdir(join(out, assetsDirectory))
+const ensureDirectory = async (path) => {
+  try {
+    return await mkdir(path)
+  } catch (e) { } finally {
+    return Promise.resolve()
   }
 }
 
-const copyAssets = async ({ src, dest }) => {
-  await ensureAssetsDirectory()
+const ensureAssetsDirectory = () => ensureDirectory(join(out, assetsDirectory))
+
+const copyAssetsDirectory = ({ src, dest }) => {
   return cp(src, join(out, assetsDirectory, dest), { recursive: true })
 }
 
+const copyAsset = async ({ src, dest }) => {
+  const targetDirectory = join(out, assetsDirectory, dest)
+  try {
+    await ensureDirectory(targetDirectory)
+  } catch (e) {} finally {
+    return cp(src, join(targetDirectory, basename(src)))
+  }
+}
+
 const copyThemeAssets = () =>
-  copyAssets({
+  copyAssetsDirectory({
     src: join(__dirname, '..', '..', 'packages', `theme-${theme}`, 'assets'),
     dest: theme
   })
 
-const copyExpansionAssets = () => finaliseAssets([]).map(copyAssets)
+const copyExpandedAssets = async () => {
+  const finalAssets = await finaliseAssets([])
+  return await Promise.all(
+    finalAssets.map((assetEntry) => {
+      if (assetEntry.single) {
+        return copyAsset(assetEntry)
+      } else {
+        return copyAssetsDirectory(assetEntry)
+      }
+    })
+  )
+}
 
 module.exports = {
   scaffold: Promise.resolve(true),
-  async scaffoldSite() {
+  scaffoldSite() {
     this.scaffold = this.scaffold
       .then(createSiteDir)
+      .then(ensureAssetsDirectory)
       .then(copyThemeAssets)
-      .then(copyExpansionAssets)
+      .then(copyExpandedAssets)
 
     return this.scaffold
   }
