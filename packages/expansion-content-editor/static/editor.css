@@ -68,7 +68,6 @@ body.edit-mode [data-editable="true"] {
   --outline-offset: 7px;
   --outline-width: 3px;
   --outline-color: gainsboro;
-  padding: .2em .5em;
   box-shadow:
     0 0 0 var(--outline-offset) white,
     0 0 0 calc( var(--outline-offset) + var(--outline-width) ) var(--outline-color);
