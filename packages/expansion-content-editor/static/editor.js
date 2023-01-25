@@ -26,78 +26,78 @@ let unsavedChanges = {}
 const editables = Array.from(queryAll('[data-editable="true"]'))
 const originals = editables.map(e => ({
   path: e.dataset.path,
-  content: e.innerHTML
+  content: e.innerHTML,
+  section: e.dataset.section
 }))
+
+const listenToTitleChanges = (editable) => {
+  let { section, path, foldered } = editable.dataset
+  const originalContent = originals.find(c => c.path === path && c.section === section).content
+  editable.contentEditable = editMode
+  return editable.addEventListener('input', () => {
+    unsavedChanges[path] = {
+      ...unsavedChanges[path],
+      title: editable.innerText.trim(),
+      foldered: foldered === 'true' || foldered === true,
+      ownPageChange: location.href.match(getSlug(originalContent))
+    }
+    unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(path => `
+            ${Object.keys(unsavedChanges[path]).map(key => `
+              <li>${path} (${unsavedChanges[path][key]})</li>
+            `)}
+          `).join('')
+    editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
+  })
+}
+
+const listenContentChange = (editable) => {
+  if (!editMode) {
+    queryAll('[id^=editor-]').forEach(node => node.remove())
+    queryAll('.ql-toolbar').forEach(node => node.remove())
+    queryAll('#tooltip-controls').forEach(node => node.remove())
+    queryAll('#sidebar-controls').forEach(node => node.remove())
+    editable.style.cssText += ';display: block;'
+    return
+  }
+  let { section, path, foldered } = editable.dataset
+  const originalContent = originals.find(c => c.path === path && c.section === section).content
+  editable.insertAdjacentHTML('beforeBegin', quillHelpersElement.innerHTML)
+  window.quills = window.quills || []
+  const quill = createEditor(editable)
+  window.quills.push(quill);
+  quill.on('text-change', (delta, source) => {
+    console.log('originalContent', originalContent)
+    console.log('change content', quill.root.innerHTML.trim())
+    unsavedChanges[path] = {
+      ...unsavedChanges[path],
+      [section]: quill.root.innerHTML.trim(),
+      foldered: foldered === 'true' || foldered === true,
+      ownPageChange: location.href.match(getSlug(originalContent))
+    }
+    unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(path => `
+          ${Object.keys(unsavedChanges[path]).map(key => `
+            <li>${path} (${unsavedChanges[path][key]})</li>
+          `)}
+        `).join('')
+    editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
+  })
+}
 
 const toggleEditMode = (isEditMode) => {
   document.body.classList.toggle('edit-mode')
   editMode = !editMode
   editables.forEach((editable, i) => {
-    let { section, path, foldered } = editable.dataset
-    const originalContent = originals.find(c => c.path === path).content
-    if (editable.dataset.section === 'title') {
-      editable.contentEditable = editMode
-      return editable.addEventListener('input', () => {
-        unsavedChanges[path] = {
-          ...unsavedChanges[path],
-          title: editable.innerText.trim(),
-          foldered: foldered === 'true' || foldered === true,
-          ownPageChange: location.href.match(getSlug(originalContent))
-        }
-        unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(path => `
-            ${Object.keys(unsavedChanges[path]).map(key => `
-              <li>${path} (${unsavedChanges[path][key]})</li>
-            `)}
-          `).join('')
-        editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
-      })
+    let { section } = editable.dataset
+    if (section === 'title') {
+      listenToTitleChanges(editable)
+    } else if (section === 'content') {
+      listenContentChange(editable)
     }
-    if (editable.dataset.section === 'content') {
-      if (editMode) {
-        let { section, path, foldered } = editable.dataset
-        const originalContent = originals.find(c => c.path === path).content
-        editable.classList.toggle('is-editing')
-        editable.insertAdjacentHTML('beforeBegin', quillHelpersElement.innerHTML)
-        window.quills = window.quills || []
-        const quill = createEditor(editable)
-        window.quills.push(quill);
-        editable.addEventListener('click', e => {
-          if (findParent(editable, 'a')) {
-            e.preventDefault()
-          }
-        })
-        quill.on('text-change', (delta, source) => {
-          const isSameContent = originalContent === editable.innerHTML
-          if (isSameContent) {
-            const otherChanges = omit(omit(unsavedChanges[path], section), 'foldered')
-            if (Object.keys(otherChanges).length) {
-              unsavedChanges[path] = otherChanges
-            } else {
-              unsavedChanges = omit(unsavedChanges, path)
-            }
-          } else {
-            unsavedChanges[path] = {
-              ...unsavedChanges[path],
-              [section]: quill.root.innerHTML.trim(),
-              foldered: foldered === 'true' || foldered === true,
-              ownPageChange: location.href.match(getSlug(originalContent))
-            }
-          }
-          unsavedChangesList.innerHTML = Object.keys(unsavedChanges).map(path => `
-            ${Object.keys(unsavedChanges[path]).map(key => `
-              <li>${path} (${unsavedChanges[path][key]})</li>
-            `)}
-          `).join('')
-          editorElement.classList.toggle('unsaved', Object.keys(unsavedChanges).length)
-        })
-      } else {
-        queryAll('[id^=editor-]').forEach(node => node.remove())
-        queryAll('.ql-toolbar').forEach(node => node.remove())
-        queryAll('#tooltip-controls').forEach(node => node.remove())
-        queryAll('#sidebar-controls').forEach(node => node.remove())
-        editable.style.cssText += ';display: block;'
+    editable.addEventListener('click', e => {
+      if (findParent(editable, 'a')) {
+        e.preventDefault()
       }
-    }
+    })
   })
 }
 
