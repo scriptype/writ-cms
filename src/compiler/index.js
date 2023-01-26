@@ -7,7 +7,7 @@ const Rendering = require('./rendering')
 const compile = async () => {
   const fileSystemIndex = await Indexer.indexFileSystem()
   const contentModel = ContentModel.createContentModel(fileSystemIndex)
-  await CustomTheme.init(contentModel.customTheme)
+  CustomTheme.init(contentModel.customTheme)
   await Scaffolder.scaffoldSite()
   await Rendering.render(contentModel)
   return {
