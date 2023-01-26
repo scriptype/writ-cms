@@ -3,16 +3,12 @@ const Settings = require('./settings')
 
 module.exports = {
   init(theme) {
-    console.log('initing custom theme', theme)
     this.customTheme = theme
     return this
   },
 
   use(type, value) {
-    const yes = type === 'templatePartials' || type === 'assets'
-    yes && console.log(type, 'customTheme.use', value)
     if (!this.customTheme) {
-      console.log('no custom theme. returning')
       return value
     }
 
