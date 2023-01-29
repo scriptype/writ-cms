@@ -1,7 +1,7 @@
 const util = require('util')
 const exec = util.promisify(require('node:child_process').exec)
 
-const logExecError = (cmd, error) => {
+const printExecError = (cmd, error) => {
   console.log(`${cmd} failed with error:`, error)
 }
 
@@ -11,7 +11,7 @@ const gitClient = {
       const { stderr } = await exec('git status')
       return !stderr
     } catch (err) {
-      logExecError('git status', err)
+      printExecError('git status', err)
       return false
     }
   },
@@ -21,7 +21,7 @@ const gitClient = {
       const { stderr } = await exec('git init')
       return !stderr
     } catch (err) {
-      logExecError('git init', err)
+      printExecError('git init', err)
       return false
     }
   },
@@ -33,7 +33,7 @@ const gitClient = {
       })
       return true
     } catch (err) {
-      logExecError('git add', err)
+      printExecError('git add', err)
     }
   },
 
@@ -42,7 +42,7 @@ const gitClient = {
       const { stderr } = await exec(`git commit -m ${message}`)
       return !stderr
     } catch (err) {
-      logExecError('git commit', err)
+      printExecError('git commit', err)
       return false
     }
   }
