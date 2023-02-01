@@ -1,0 +1,46 @@
+:root {
+  --toolbar-height: 36px;
+}
+
+body {
+  margin-top: var(--toolbar-height);
+}
+
+#writ-preview-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--toolbar-height);
+    background: #fffa;
+    backdrop-filter: blur(5px);
+    transition: all .5s;
+}
+
+#writ-preview-toolbar .tool-btn {
+  --padding: 0.25rem;
+  padding: var(--padding);
+  position: relative;
+  display: inline-flex;
+}
+
+#writ-preview-toolbar .tool-btn input {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--padding) + 0.5rem);
+  z-index: 1;
+  align-self: flex-start;
+  transform: translateY(-55%);
+}
+
+#writ-preview-toolbar .tool-btn label {
+  padding: 0.5em 0.5em 0.4em 1.75em;
+  font: normal 14px/1 helvetica, arial, sans-serif;
+  background: skyblue;
+  border-radius: 5px;
+}
+
+#writ-preview-toolbar .tool-btn input:checked + label {
+  background: orange;
+}

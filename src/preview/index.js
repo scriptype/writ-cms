@@ -12,16 +12,25 @@ module.exports = {
     if (!this.started) {
       return value
     }
+    const { mode } = settings.getSettings()
     switch (type) {
       case "template":
-        const { mode } = settings.getSettings()
         return value + (mode === 'start' ? '{{> preview }}' : '')
 
       case "templatePartials":
-        return [
+        return mode === 'start' ? [
           ...value,
           resolve(join(__dirname, 'partials'))
-        ]
+        ] : []
+
+      case "assets":
+        return mode === 'start' ? [
+          ...value,
+          {
+            src: resolve(__dirname, './static'),
+            dest: 'preview'
+          }
+        ] : []
     }
     return value
   }
