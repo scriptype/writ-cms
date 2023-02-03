@@ -1,3 +1,5 @@
-import Editor from './editor/editor.js'
+import createContentEditorTool from './tool.js'
 
-Editor.init()
+window.addEventListener('DOMContentLoaded', () => {
+  window.Preview.Toolbar.addTool(createContentEditorTool())
+})

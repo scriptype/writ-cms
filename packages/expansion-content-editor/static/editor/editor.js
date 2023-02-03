@@ -8,6 +8,7 @@ import {
   getSlug,
   stripTags
 } from './helpers.js'
+import createState from './state.js'
 
 const Templates = {
   quillHelpers: query('#quill-helpers-tmpl').content.firstElementChild,
@@ -21,62 +22,7 @@ const UI = {
   )
 }
 
-const State = {
-  localStorageKey: null,
-  defaults: {},
-  data: {},
-
-  create({ key, defaults }) {
-    console.log('create parameters', key, defaults)
-    this.localStorageKey = key
-    this.defaults = {...defaults}
-    console.log('create defaults', this.defaults)
-    const stored = this.getState()
-    console.log('create stored', stored)
-    if (stored.error) {
-      console.error('create could not retrieve stored', stored.error)
-    }
-    this.data = {
-      ...defaults,
-      ...(stored.data || {})
-    }
-    console.log('create data', this.data)
-  },
-
-  get(key) {
-    if (key) {
-      return this.data[key]
-    }
-    return this.data
-  },
-
-  getState() {
-    try {
-      return {
-        data: JSON.parse(localStorage.getItem(this.localStorageKey))
-      }
-    } catch (error) {
-      return {
-        error
-      }
-    }
-  },
-
-  set(state) {
-    this.data = {
-      ...this.data,
-      ...state
-    }
-    console.log('set state', this.data)
-    try {
-      localStorage.setItem(this.localStorageKey, JSON.stringify(this.data))
-    } catch (error) {
-      return {
-        error
-      }
-    }
-  }
-}
+let State = {}
 
 const originals = UI.editables.map(e => ({
   path: e.dataset.path,
@@ -213,7 +159,7 @@ const rememberEditMode = () => {
 }
 
 const initState = () => {
-  State.create({
+  State = createState({
     key: 'editor',
     defaults: {
       editMode: false,

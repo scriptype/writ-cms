@@ -1,34 +1,25 @@
+import Tool from './tool.js'
+
 const createDOMNodeFromHTML = (html) => {
   const el = document.createElement('div')
   el.innerHTML = html
   return el.firstElementChild
 }
 
-class Tool {
-  constructor({ id, label, activate, deactivate, save }) {
-    if (!id || !label || !activate || !deactivate || !save) {
-      throw new Error('Tool must consist of "id", "label", "activate()", "deactivate()", "save()".')
-    }
-    this.id = id
-    this.label = label
-    this.activate = activate
-    this.deactivate = deactivate
-    this.save = save
-  }
-}
-
 const Toolbar = (() => {
   const createToolButton = (tool) => {
+    const id = tool.get('id')
+    const label = tool.get('label')
     const btn = createDOMNodeFromHTML(`
       <div class="tool-btn">
-        <input type="checkbox" id="tool-btn-${tool.id}" />
-        <label for="tool-btn-${tool.id}">
-          ${tool.label}
+        <input type="checkbox" id="tool-btn-${id}" />
+        <label for="tool-btn-${id}">
+          ${label}
         </label>
       </div>
     `)
 
-    const checkbox = btn.querySelector(`#tool-btn-${tool.id}`)
+    const checkbox = btn.querySelector(`#tool-btn-${id}`)
     checkbox.addEventListener('change', (event) => {
       if (!event.target.checked) {
         console.log('deactivate')
@@ -47,10 +38,12 @@ const Toolbar = (() => {
   }
 
   const addTool = (tool) => {
-    const newTool = new Tool(tool)
-    console.log('addtool', newTool)
-    tools.push(newTool)
-    insertToolButton(newTool)
+    if (!(tool instanceof Tool)) {
+      throw new Error('Only instances of Tool is accepted.')
+    }
+    console.log('addtool', tool)
+    tools.push(tool)
+    insertToolButton(tool)
   }
 
   const createToolbar = () => {
@@ -73,5 +66,6 @@ const Toolbar = (() => {
 })()
 
 window.Preview = {
-  Toolbar
+  Toolbar,
+  Tool,
 }
