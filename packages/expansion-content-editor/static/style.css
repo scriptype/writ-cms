@@ -1,62 +1,11 @@
-:root {
-  --editor-height: 36px;
-}
-
-body {
-  margin-top: var(--editor-height);
-}
-
-.writ-editor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--editor-height);
-  background: #fffa;
-  backdrop-filter: blur(5px);
-  transition: all .5s;
-}
-
-.writ-editor .checkbox-control {
-  --padding: 0.25rem;
-  padding: var(--padding);
-  position: relative;
-  display: inline-flex;
-}
-
-.writ-editor .checkbox-control .checkbox-input {
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: calc(var(--padding) + 0.5rem);
-  z-index: 1;
-  transform: translateY(-55%);
-}
-
-.writ-editor .checkbox-control .checkbox-label {
-  padding: 0.5em 0.5em 0.4em 1.75em;
-  font: normal 14px/1 helvetica, arial, sans-serif;
-  background: hotpink;
-  border-radius: 5px;
-}
-
-.writ-editor .checkbox-control :checked + .checkbox-label {
-  background: yellow;
-}
-
-.writ-editor .checkbox-control .checkbox-input {
-  margin: 0;
-  align-self: flex-start;
-}
-
-.writ-editor .unsaved-changes {
+.unsaved-changes {
   max-height: initial;
   overflow: visible;
   opacity: 1;
   transform: scale(1, 1);
 }
 
-.writ-editor .unsaved-changes {
+.unsaved-changes {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
@@ -64,7 +13,7 @@ body {
   transition: all .5s;
 }
 
-body.edit-mode [data-editable="true"] {
+body.tool-content-editor-active [data-editable="true"] {
   --outline-offset: 7px;
   --outline-width: 3px;
   --outline-color: gainsboro;
@@ -76,12 +25,12 @@ body.edit-mode [data-editable="true"] {
   transition: all .3s;
 }
 
-body:not(.edit-mode) img[alt="writ summary divider"] {
+body:not(.tool-content-editor-active) img[alt="writ summary divider"] {
   opacity: 0;
   position: absolute;
 }
 
-body.edit-mode img[alt="writ summary divider"] {
+body.tool-content-editor-active img[alt="writ summary divider"] {
   --summary-color: gainsboro;
   position: relative;
   display: inline-block;
@@ -98,23 +47,23 @@ body.edit-mode img[alt="writ summary divider"] {
     inset 0 -1rem 0 white;
 }
 
-body.edit-mode img[alt="writ summary divider"]:hover {
+body.tool-content-editor-active img[alt="writ summary divider"]:hover {
   box-shadow:
     inset 0 0.8rem 0 white,
     inset 0 -0.8rem 0 white;
 }
 
-body.edit-mode [data-editable="true"]:hover {
+body.tool-content-editor-active [data-editable="true"]:hover {
   --outline-color: deepskyblue;
 }
 
-body.edit-mode [data-editable="true"]:hover img[alt="writ summary divider"] {
+body.tool-content-editor-active [data-editable="true"]:hover img[alt="writ summary divider"] {
   --summary-color: deepskyblue;
 }
 
-body.edit-mode [data-editable="true"]:focus-within {
+body.tool-content-editor-active [data-editable="true"]:focus-within {
   --outline-color: transparent;
   --outline-offset: 1px;
 }
 
-body.edit-mode [data-editable="true"]:focus-within img[alt="writ summary divider"] {}
+body.tool-content-editor-active [data-editable="true"]:focus-within img[alt="writ summary divider"] {}

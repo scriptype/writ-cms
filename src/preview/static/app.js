@@ -22,10 +22,8 @@ const Toolbar = (() => {
     const checkbox = btn.querySelector(`#tool-btn-${id}`)
     checkbox.addEventListener('change', (event) => {
       if (!event.target.checked) {
-        console.log('deactivate')
         tool.deactivate()
       } else {
-        console.log('activate')
         tool.activate()
       }
     })
@@ -37,11 +35,19 @@ const Toolbar = (() => {
     el.appendChild(btn)
   }
 
+  const insertSaveButton = (onSave) => {
+    const btn = createDOMNodeFromHTML(`
+      <button type="button" id="save-btn">save</button>
+    `)
+    btn.addEventListener('click', onSave)
+    el.appendChild(btn)
+  }
+
   const addTool = (tool) => {
     if (!(tool instanceof Tool)) {
       throw new Error('Only instances of Tool is accepted.')
     }
-    console.log('addtool', tool)
+    window.debugLog('Toolbar.addTool', tool)
     tools.push(tool)
     insertToolButton(tool)
   }
@@ -57,6 +63,9 @@ const Toolbar = (() => {
 
   const el = createToolbar()
   document.body.appendChild(el)
+  insertSaveButton(() => {
+    tools.forEach(tool => tool.options.save())
+  })
 
   return Object.freeze({
     el,

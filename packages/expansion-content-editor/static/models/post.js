@@ -19,7 +19,7 @@ const restoreSeeMore = (content) => {
 }
 
 export default {
-  updateContent(path, content) {
+  updateContent(path, { content }) {
     return fetch(`/cms/post`, {
       method: 'POST',
       headers: {
@@ -32,7 +32,7 @@ export default {
     })
   },
 
-  updateTitle(path, title, foldered) {
+  updateTitle(path, { title, foldered, shouldRedirect }) {
     return fetch(`/cms/post`, {
       method: 'POST',
       headers: {
@@ -41,6 +41,7 @@ export default {
       body: JSON.stringify({
         title,
         updateUrl: true,
+        shouldRedirect,
         path,
         foldered
       })
