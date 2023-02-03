@@ -10,6 +10,8 @@ import {
 } from './helpers.js'
 import createState from './state.js'
 
+let State = {}
+
 const Templates = {
   quillHelpers: query('#quill-helpers-tmpl').content.firstElementChild,
   editor: query('#editor-tmpl').content.firstElementChild,
@@ -21,8 +23,6 @@ const UI = {
     queryAll('[data-editable="true"]')
   )
 }
-
-let State = {}
 
 const originals = UI.editables.map(e => ({
   path: e.dataset.path,
