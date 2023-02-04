@@ -1,6 +1,5 @@
 import Post from '../models/post.js'
 import Quill from './quill.js'
-import createState from './state.js'
 import {
   queryAll,
   findParent,
@@ -39,11 +38,11 @@ const getTemplates = () => {
   }, {})
 }
 
-const initState = () => {
-  return createState({
+const getInitialState = () => {
+  return {
     isActive: false,
     unsavedChanges: {}
-  })
+  }
 }
 
 const stripTagsFromDocumentTitle = () => {
@@ -63,7 +62,7 @@ const mountFrontend = () => {
 }
 
 const save = () => {
-  const unsavedChanges = State.data.unsavedChanges || {}
+  const unsavedChanges = State.unsavedChanges || {}
   window.debugLog('changes', unsavedChanges)
   Object.keys(unsavedChanges).forEach(async (filePath) => {
     const change = unsavedChanges[filePath]
@@ -83,7 +82,7 @@ const save = () => {
 }
 
 const toggleActivate = () => {
-  const { isActive } = State.data
+  const { isActive } = State
 
   const editors = window.editors || []
   editors.forEach(e => e.quill.enable(isActive))
@@ -97,7 +96,7 @@ const toggleActivate = () => {
 }
 
 const renderChanges = () => {
-  const changes = State.data.unsavedChanges
+  const changes = State.unsavedChanges
   UI.unsavedChangesList.innerHTML = Object.keys(changes).map(path => `
     ${Object.keys(changes[path]).map(key => `
       <li>${path} (${changes[path][key]})</li>
@@ -122,15 +121,15 @@ const getQuill = (contentElement) => {
     editable: contentElement,
     quill
   })
-  if (!State.data.isActive) {
+  if (!State.isActive) {
     quill.disable()
   }
   return quill
 }
 
 const pushChange = (path, change) => {
-  State.data.unsavedChanges[path] = {
-    ...State.data.unsavedChanges[path],
+  State.unsavedChanges[path] = {
+    ...State.unsavedChanges[path],
     ...change
   }
 }
@@ -175,7 +174,7 @@ const listenToChanges = () => {
 const preventLinkClickInEditMode = () => {
   UI.editables.forEach((editable, i) => {
     editable.addEventListener('click', e => {
-      if (State.data.isActive && findParent(editable, 'a')) {
+      if (State.isActive && findParent(editable, 'a')) {
         e.preventDefault()
       }
     })
@@ -183,7 +182,11 @@ const preventLinkClickInEditMode = () => {
 }
 
 export default () => {
-  State = initState()
+  State = getInitialState()
+  State = {
+  isActive: false,
+  unsavedChanges: {}
+}
   Templates = mountFrontend()
   UI = createUI(Templates)
   listenToChanges()
@@ -194,12 +197,12 @@ export default () => {
     id: 'content-editor',
     label: 'Edit',
     activate() {
-      State.set('isActive', true)
+      State.isActive = true
       toggleActivate()
       window.debugLog('activate content-editor')
     },
     deactivate() {
-      State.set('isActive', false)
+      State.isActive = false
       toggleActivate()
       window.debugLog('deactivate content-editor')
     },
