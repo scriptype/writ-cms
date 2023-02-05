@@ -15,7 +15,7 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 - I should get automated index pages, pagination, sitemap, rss, search etc. without touching code
 - I should be able to easily customize it
 - I should be able to use it without remembering much
-- Importantly, **everyone** also should be able to do all of the those.
+- And, **everyone** also should be able to do all of the those.
 </details>
 <details>
 <summary><h2>Example sites</h2></summary>
