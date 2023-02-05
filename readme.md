@@ -2,50 +2,37 @@
 
 A static site generator that is intended to be very easy to use, develop and extend.
 
-Work in progress.
+🚧 **Work in progress.**
 
-***
-
-## Contents
-
-- [Idea](https://github.com/scriptype/writ-cms#idea)
-- [Example sites](https://github.com/scriptype/writ-cms#example-sites)
-- [Warnings](https://github.com/scriptype/writ-cms#warnings)
-- [Installation](https://github.com/scriptype/writ-cms#installation)
-- [Usage](https://github.com/scriptype/writ-cms#usage)
-- [Manual](https://github.com/scriptype/writ-cms#maual)
-  - [Entry formats](https://github.com/scriptype/writ-cms#entry-formats)
-  - [Posts](https://github.com/scriptype/writ-cms#posts)
-  - [Subpages](https://github.com/scriptype/writ-cms#subpages)
-  - [Static assets](https://github.com/scriptype/writ-cms#static-assets)
-
-## Idea
+<details>
+<summary><h2>The idea</h2></summary>
 
 When I'm writing a blog post, I want to deal with the least amount of software complexity.
 
-- I should be able to compose freeform html as well as markdown
-- I should be able to create subpages that are not posts
-- I should be able to organize posts and categories using folders and text files
-- Post - Category relation should be automatized
-- Homepage, category indexes, pagination, search, sitemap, rss should be automatized
-- I should be able to use it without remembering much.
+- I should be able to compose freeform html, rich text and markdown
+- I should be able to just use GUI from start to end
+- I should be able to organize categories, posts and pages using folders and text files
+- I should get automated index pages, pagination, sitemap, rss, search etc. without touching code
+- I should be able to easily customize it
+- I should be able to use it without remembering much
+- Importantly, **everyone** also should be able to do all of the those.
+</details>
+<details>
+<summary><h2>Example sites</h2></summary>
 
-## Example sites
+Currently, only I'm using this system. Have a look at:
 
-- https://writ.enes.in (source: https://github.com/scriptype/writ)
-
-## Warnings
+- A simple writ project: https://github.com/scriptype/writ
+- The default frontend: https://writ.enes.in
+</details>
+<details>
+<summary><h2>Warnings</h2></summary>
 
 - This software is not ready for production use and, therefore, cannot be held accountable for any loss of value.
   - It is generally advised to use [git](https://git-scm.com/doc) in text-heavy personal projects, such as a website, to avoid content loss.
-
-## Installation
-
-```sh
-npm install -g scriptype/writ-cms
-```
-
-## Usage
+</details>
+<details>
+<summary><h2>Usage</h2></summary>
 
 ### 1) Name your site
 ```sh
@@ -62,8 +49,16 @@ echo "Pines are nice" > hello.txt
 ```sh
 writ start
 ```
+</details>
+<details>
+<summary><h2>Installation</h2></summary>
 
-## Manual
+```sh
+npm install -g scriptype/writ-cms
+```
+</details>
+<details>
+<summary><h2>Manual</h2></summary>
 
 ### Entry formats
 
@@ -140,3 +135,4 @@ You can use a different folder for assets by adding this to `settings.json`:
 ```
 "assetsDirectory": "my-different-assets-folder"
 ```
+</details>
