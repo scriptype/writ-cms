@@ -1,6 +1,6 @@
 # Writ-CMS
 
-A static site generator that is intended to be very easy to use, develop and extend.
+A spirited web engine for humans.
 
 🚧 **Work in progress.**
 
