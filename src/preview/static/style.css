@@ -1,46 +1,80 @@
 :root {
-  --toolbar-height: 36px;
-}
-
-body {
-  margin-top: var(--toolbar-height);
+    --toolbar-height: 36px;
 }
 
 #writ-preview-toolbar {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     height: var(--toolbar-height);
-    background: #fffa;
-    backdrop-filter: blur(5px);
+    top: calc(var(--toolbar-height) / 2);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    opacity: 0.6;
     transition: all .5s;
 }
 
+#writ-preview-toolbar:hover {
+    backdrop-filter: blur(5px);
+    background: #fff9;
+    border-color: #dedede;
+    opacity: 1;
+    box-shadow:
+        0 0 30px #6664,
+        inset 0 0 30px #fff6;
+}
+
+#writ-preview-toolbar.expanded {
+    transform: translate(calc(-50%), -10px);
+    padding: 20px 23px;
+}
+
+#writ-preview-toolbar #save-btn {
+    width: calc(var(--toolbar-height) / 1.5);
+    height: calc(var(--toolbar-height) / 1.5);
+    padding: 0;
+    border-radius: 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+#writ-preview-toolbar #save-btn:hover {
+}
+
+#writ-preview-toolbar #save-btn img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
 #writ-preview-toolbar .tool-btn {
-  --padding: 0.25rem;
-  padding: var(--padding);
-  position: relative;
-  display: inline-flex;
+    --padding: 0.25rem;
+    padding: var(--padding);
+    position: relative;
+    display: inline-flex;
 }
 
 #writ-preview-toolbar .tool-btn input {
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: calc(var(--padding) + 0.5rem);
-  z-index: 1;
-  align-self: flex-start;
-  transform: translateY(-55%);
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: calc(var(--padding) + 0.5rem);
+    z-index: 1;
+    align-self: flex-start;
+    transform: translateY(-55%);
 }
 
 #writ-preview-toolbar .tool-btn label {
-  padding: 0.5em 0.5em 0.4em 1.75em;
-  font: normal 14px/1 helvetica, arial, sans-serif;
-  background: skyblue;
-  border-radius: 5px;
+    padding: 0.5em 0.5em 0.4em 1.75em;
+    font: normal 14px/1 helvetica, arial, sans-serif;
+    background: skyblue;
+    border-radius: 5px;
 }
 
 #writ-preview-toolbar .tool-btn input:checked + label {
-  background: orange;
+    background: orange;
 }

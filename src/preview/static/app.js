@@ -11,7 +11,7 @@ const Toolbar = (() => {
     const id = tool.get('id')
     const label = tool.get('label')
     const btn = createDOMNodeFromHTML(`
-      <div class="tool-btn">
+      <div class="toolbar-item tool-btn">
         <input type="checkbox" id="tool-btn-${id}" />
         <label for="tool-btn-${id}">
           ${label}
@@ -27,17 +27,28 @@ const Toolbar = (() => {
         tool.activate()
       }
     })
+
     return btn
+  }
+
+  const handleToolbarItemHover = (toolbarItem) => {
+    toolbarItem.addEventListener('mouseover', () => el.classList.add('expanded'))
+    toolbarItem.addEventListener('mouseout', () => el.classList.remove('expanded'))
+    toolbarItem.addEventListener('focus', () => el.classList.add('expanded'))
+    toolbarItem.addEventListener('blur', () => el.classList.remove('expanded'))
   }
 
   const insertToolButton = (tool) => {
     const btn = createToolButton(tool)
+    handleToolbarItemHover(btn)
     el.appendChild(btn)
   }
 
   const insertSaveButton = (onSave) => {
     const btn = createDOMNodeFromHTML(`
-      <button type="button" id="save-btn">save</button>
+      <button class="toolbar-item" type="button" id="save-btn" title="Save">
+        <img src="/assets/preview/8665513_floppy_disk_icon.svg" />
+      </button>
     `)
     btn.addEventListener('click', onSave)
     el.appendChild(btn)
