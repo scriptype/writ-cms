@@ -7,14 +7,35 @@ const createDOMNodeFromHTML = (html) => {
 }
 
 const Toolbar = (() => {
-  const createToolButton = (tool) => {
+  let tools, el
+
+  const handleToolbarItemHover = (toolbarItem) => {
+    toolbarItem.addEventListener('mouseover', () => el.classList.add('expanded'))
+    toolbarItem.addEventListener('mouseout', () => el.classList.remove('expanded'))
+    toolbarItem.addEventListener('focus', () => el.classList.add('expanded'))
+    toolbarItem.addEventListener('blur', () => el.classList.remove('expanded'))
+  }
+
+  const createToolbar = () => {
+    const toolbar = createDOMNodeFromHTML(`
+      <div id="writ-preview-toolbar">
+        <div class="toolbar-tool-group"></div>
+        <div class="toolbar-tool-group"></div>
+      </div>
+    `)
+    return toolbar
+  }
+
+  const createToolButton = async (tool) => {
     const id = tool.get('id')
     const label = tool.get('label')
+    const svgIcon = tool.get('svgIcon')
+    const svgIconSource = await fetch(svgIcon).then(r => r.text())
     const btn = createDOMNodeFromHTML(`
       <div class="toolbar-item tool-btn">
         <input type="checkbox" id="tool-btn-${id}" />
         <label for="tool-btn-${id}">
-          ${label}
+          ${svgIconSource}
         </label>
       </div>
     `)
@@ -28,60 +49,47 @@ const Toolbar = (() => {
       }
     })
 
+    handleToolbarItemHover(btn)
     return btn
   }
 
-  const handleToolbarItemHover = (toolbarItem) => {
-    toolbarItem.addEventListener('mouseover', () => el.classList.add('expanded'))
-    toolbarItem.addEventListener('mouseout', () => el.classList.remove('expanded'))
-    toolbarItem.addEventListener('focus', () => el.classList.add('expanded'))
-    toolbarItem.addEventListener('blur', () => el.classList.remove('expanded'))
-  }
-
-  const insertToolButton = (tool) => {
-    const btn = createToolButton(tool)
-    handleToolbarItemHover(btn)
-    el.appendChild(btn)
-  }
-
-  const insertSaveButton = (onSave) => {
+  const createSaveButton = async (onSave) => {
+    const svgIcon = '/assets/preview/save-icon.svg'
+    const svgIconSource = await fetch(svgIcon).then(r => r.text())
     const btn = createDOMNodeFromHTML(`
-      <button class="toolbar-item" type="button" id="save-btn" title="Save">
-        <img src="/assets/preview/8665513_floppy_disk_icon.svg" />
+      <button class="toolbar-item tool-btn" type="button" title="Save changes">
+        ${svgIconSource}
       </button>
     `)
     btn.addEventListener('click', onSave)
-    el.appendChild(btn)
+    return btn
   }
 
-  const addTool = (tool) => {
+  const addTool = async (tool) => {
     if (!(tool instanceof Tool)) {
-      throw new Error('Only instances of Tool is accepted.')
+      throw new Error('Only Tool instances are accepted.')
     }
     window.debugLog('Toolbar.addTool', tool)
     tools.push(tool)
-    insertToolButton(tool)
+    const toolButton = await createToolButton(tool)
+    el.querySelector('.toolbar-tool-group:nth-child(2)').appendChild(toolButton)
   }
 
-  const createToolbar = () => {
-    const toolbar = createDOMNodeFromHTML(`
-      <div id="writ-preview-toolbar"></div>
-    `)
-    return toolbar
+  const init = async () => {
+    tools = []
+    el = createToolbar()
+    document.body.appendChild(el)
+    const saveButton = await createSaveButton(() => {
+      tools.forEach(tool => tool.options.save())
+    })
+    el.querySelector('.toolbar-tool-group').appendChild(saveButton)
   }
-
-  const tools = []
-
-  const el = createToolbar()
-  document.body.appendChild(el)
-  insertSaveButton(() => {
-    tools.forEach(tool => tool.options.save())
-  })
 
   return Object.freeze({
     el,
     tools,
-    addTool
+    addTool,
+    init
   })
 })()
 
@@ -89,3 +97,5 @@ window.Preview = {
   Toolbar,
   Tool,
 }
+
+window.Preview.Toolbar.init()

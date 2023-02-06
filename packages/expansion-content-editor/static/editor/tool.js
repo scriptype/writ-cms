@@ -195,7 +195,8 @@ export default () => {
 
   return new window.Preview.Tool({
     id: 'content-editor',
-    label: 'Edit',
+    label: 'Content editor',
+    svgIcon: '/assets/expansions/content-editor/icon.svg',
     activate() {
       State.isActive = true
       toggleActivate()

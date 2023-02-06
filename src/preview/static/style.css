@@ -33,48 +33,65 @@
     padding: 20px 23px;
 }
 
-#writ-preview-toolbar #save-btn {
+#writ-preview-toolbar:hover .toolbar-tool-group {
+    border-color: #dedede;
+}
+
+#writ-preview-toolbar .toolbar-tool-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid transparent;
+    padding-left: 5px;
+    padding-right: 5px;
+    transition: all .5s;
+}
+
+#writ-preview-toolbar .toolbar-tool-group:first-child {
+    padding-left: 0;
+}
+
+#writ-preview-toolbar .toolbar-tool-group:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
+#writ-preview-toolbar .tool-btn {
     width: calc(var(--toolbar-height) / 1.5);
     height: calc(var(--toolbar-height) / 1.5);
-    padding: 0;
-    border-radius: 4px;
+    padding: 0 5px;
+    box-sizing: content-box;
     border: none;
+    border-radius: 4px;
     background: none;
     cursor: pointer;
 }
 
-#writ-preview-toolbar #save-btn:hover {
+#writ-preview-toolbar .tool-btn svg {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    transition: all .3s;
 }
 
-#writ-preview-toolbar #save-btn img {
-    max-width: 100%;
-    max-height: 100%;
+#writ-preview-toolbar .tool-btn input[type="checkbox"] {
+    display: none;
 }
 
-#writ-preview-toolbar .tool-btn {
-    --padding: 0.25rem;
-    padding: var(--padding);
-    position: relative;
-    display: inline-flex;
+#writ-preview-toolbar .tool-btn input[type="checkbox"]:checked ~ label svg {
+    fill: #004cff;
+    animation: tool-activate .5s forwards;
 }
 
-#writ-preview-toolbar .tool-btn input {
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: calc(var(--padding) + 0.5rem);
-    z-index: 1;
-    align-self: flex-start;
-    transform: translateY(-55%);
-}
-
-#writ-preview-toolbar .tool-btn label {
-    padding: 0.5em 0.5em 0.4em 1.75em;
-    font: normal 14px/1 helvetica, arial, sans-serif;
-    background: skyblue;
-    border-radius: 5px;
-}
-
-#writ-preview-toolbar .tool-btn input:checked + label {
-    background: orange;
+@keyframes tool-activate {
+    33% {
+        transform:
+            translate(10%, 10%)
+            rotate(10deg)
+    }
+    66% {
+        transform:
+            translate(-10%, -10%)
+            rotate(-10deg)
+    }
 }
