@@ -42,7 +42,7 @@ cd "All about trees"
 
 ### 2) Create a post
 ```sh
-echo "Pines are nice" > hello.txt
+echo "Pines are nice" > "Hello world.txt"
 ```
 
 ### 3) Preview & live edit
