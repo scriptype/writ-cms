@@ -21,9 +21,9 @@ export default class Tool {
         type: String,
         required: true
       },
-      svgIcon: {
-        type: String,
-        required: false
+      buttonContent: {
+        type: Function,
+        required: true
       },
       activate: {
         type: Function,

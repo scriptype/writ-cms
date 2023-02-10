@@ -7,6 +7,8 @@ import {
   stripTags
 } from './helpers.js'
 
+const svgIconPath = '/assets/expansions/content-editor/icon.svg'
+
 let State
 let Templates
 let UI
@@ -183,10 +185,6 @@ const preventLinkClickInEditMode = () => {
 
 export default () => {
   State = getInitialState()
-  State = {
-  isActive: false,
-  unsavedChanges: {}
-}
   Templates = mountFrontend()
   UI = createUI(Templates)
   listenToChanges()
@@ -196,7 +194,17 @@ export default () => {
   return new window.Preview.Tool({
     id: 'content-editor',
     label: 'Content editor',
-    svgIcon: '/assets/expansions/content-editor/icon.svg',
+    async buttonContent() {
+      return `
+        ${await fetch(svgIconPath).then(r => r.text())}
+        <p class="tool-btn-animation">
+          <span>w</span>
+          <span>r</span>
+          <span>i</span>
+          <span>t</span>
+        </p>
+      `
+    },
     activate() {
       State.isActive = true
       toggleActivate()

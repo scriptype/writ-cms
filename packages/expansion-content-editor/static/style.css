@@ -67,3 +67,70 @@ body.tool-content-editor-active [data-editable="true"]:focus-within {
 }
 
 body.tool-content-editor-active [data-editable="true"]:focus-within img[alt="writ summary divider"] {}
+
+.writ-toolbar .tool-btn[data-tool-id="content-editor"] svg {
+    fill: var(--color);
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: defaults .5s forwards;
+    transition: all .3s;
+}
+
+.writ-toolbar .tool-btn[data-tool-id="content-editor"]:hover svg {
+    animation: typing 1s infinite, direction 2s infinite;
+}
+
+@keyframes defaults {
+    to {
+        top: 0;
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes direction {
+    from, to {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(55%, -62%);
+    }
+}
+
+@keyframes typing {
+    from, to {
+        top: 0;
+    }
+    20% {
+        top: .15em;
+    }
+    40% {
+        top: -.15em;
+    }
+    70% {
+        top: 0;
+    }
+}
+
+.writ-toolbar .tool-btn[data-tool-id="content-editor"] .tool-btn-animation {
+    pointer-events: none;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+    letter-spacing: -0.2em;
+    transform-style: preserve-3d;
+    text-transform: uppercase;
+    transform: rotate(-45deg) rotateX(45deg) translateX(-30%) translateY(90%);
+    mask-image: linear-gradient(to right, #000, #000 33%, #000c 66%, #0001);
+    color: var(--color);
+    transition: all 1s;
+}
+
+.writ-toolbar .tool-btn[data-tool-id="content-editor"]:hover .tool-btn-animation {
+    pointer-events: initial;
+    opacity: 1;
+}

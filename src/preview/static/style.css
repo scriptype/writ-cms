@@ -2,23 +2,25 @@
     --toolbar-height: 36px;
 }
 
-#writ-preview-toolbar {
+.writ-toolbar {
     position: fixed;
     height: var(--toolbar-height);
     top: calc(var(--toolbar-height) / 2);
     left: 50%;
     transform: translateX(-50%);
+    z-index: 1;
     padding: 10px 13px;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
     border: 1px solid transparent;
     border-radius: 20px;
     opacity: 0.6;
     transition: all .5s;
 }
 
-#writ-preview-toolbar:hover {
+.writ-toolbar:hover {
     backdrop-filter: blur(5px);
     background: #fff9;
     border-color: #dedede;
@@ -28,35 +30,40 @@
         inset 0 0 30px #fff6;
 }
 
-#writ-preview-toolbar.expanded {
-    transform: translate(calc(-50%), -10px);
-    padding: 20px 23px;
+.writ-toolbar.expanded {
+    transform: translate(-50%, -16px);
+    padding: 26px 23px 20px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
 }
 
-#writ-preview-toolbar:hover .toolbar-tool-group {
-    border-color: #dedede;
-}
-
-#writ-preview-toolbar .toolbar-tool-group {
+.writ-toolbar-content {
+    position: relative;
+    z-index: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-right: 1px solid transparent;
-    padding-left: 5px;
-    padding-right: 5px;
+    gap: 5px;
+}
+
+.writ-toolbar:hover .writ-toolbar-tool-group {
+    border-color: #dedede;
+}
+
+.writ-toolbar-tool-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 1px solid transparent;
     transition: all .5s;
 }
 
-#writ-preview-toolbar .toolbar-tool-group:first-child {
-    padding-left: 0;
+.writ-toolbar-tool-group:first-child {
+    border-left: none;
 }
 
-#writ-preview-toolbar .toolbar-tool-group:last-child {
-    border-right: none;
-    padding-right: 0;
-}
-
-#writ-preview-toolbar .tool-btn {
+.writ-toolbar .tool-btn {
+    position: relative;
     width: calc(var(--toolbar-height) / 1.5);
     height: calc(var(--toolbar-height) / 1.5);
     padding: 0 5px;
@@ -64,34 +71,17 @@
     border: none;
     border-radius: 4px;
     background: none;
-    cursor: pointer;
+    --color: var(--text-color);
 }
 
-#writ-preview-toolbar .tool-btn svg {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    transition: all .3s;
-}
-
-#writ-preview-toolbar .tool-btn input[type="checkbox"] {
+.writ-toolbar .tool-btn input[type="checkbox"] {
     display: none;
 }
 
-#writ-preview-toolbar .tool-btn input[type="checkbox"]:checked ~ label svg {
-    fill: #004cff;
-    animation: tool-activate .5s forwards;
+.writ-toolbar .tool-btn input[type="checkbox"]:checked ~ label {
+    --color: #004cff;
 }
 
-@keyframes tool-activate {
-    33% {
-        transform:
-            translate(10%, 10%)
-            rotate(10deg)
-    }
-    66% {
-        transform:
-            translate(-10%, -10%)
-            rotate(-10deg)
-    }
+.writ-toolbar .tool-btn label {
+    cursor: pointer;
 }
