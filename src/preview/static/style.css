@@ -30,13 +30,6 @@
         inset 0 0 30px #fff6;
 }
 
-.writ-toolbar.expanded {
-    transform: translate(-50%, -16px);
-    padding: 26px 23px 20px;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-}
-
 .writ-toolbar-content {
     position: relative;
     z-index: 1;
