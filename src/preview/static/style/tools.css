@@ -1,0 +1,7 @@
+.writ-toolbar .tool-btn[data-tool-id="save-button"] {
+    cursor: pointer;
+}
+
+.writ-toolbar .tool-btn[data-tool-id="save-button"]:hover svg {
+    fill: #004cff;
+}

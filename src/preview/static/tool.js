@@ -11,7 +11,7 @@ export class MisTypedOptionError extends Error {
 }
 
 export default class Tool {
-  static scheme() {
+  static toggleScheme() {
     return {
       id: {
         type: String,
@@ -21,7 +21,11 @@ export default class Tool {
         type: String,
         required: true
       },
-      buttonContent: {
+      type: {
+        type: String,
+        required: false,
+      },
+      content: {
         type: Function,
         required: true
       },
@@ -40,8 +44,40 @@ export default class Tool {
     }
   }
 
+  static buttonScheme() {
+    return {
+      id: {
+        type: String,
+        required: true
+      },
+      label: {
+        type: String,
+        required: true
+      },
+      type: {
+        type: String,
+        required: true,
+      },
+      content: {
+        type: Function,
+        required: true
+      },
+      onClick: {
+        type: Function,
+        required: true
+      }
+    }
+  }
+
+  static scheme(options) {
+    if (options.type === 'button') {
+      return Tool.buttonScheme()
+    }
+    return Tool.toggleScheme()
+  }
+
   static validateOptions(options) {
-		const scheme = Tool.scheme()
+    const scheme = Tool.scheme(options)
     for (let key in scheme) {
       if (scheme.hasOwnProperty(key)) {
         if (!(key in scheme)) {
@@ -52,7 +88,7 @@ export default class Tool {
           throw new MissingOptionError(key)
         }
         const validType = typeof scheme[key].type()
-        if (candidateType !== validType) {
+        if (scheme[key].required && candidateType !== validType) {
           throw new MisTypedOptionError(key, validType)
         }
       }
@@ -78,6 +114,21 @@ export default class Tool {
     this.isActive = false
     this.options.deactivate.call(this)
     return this
+  }
+
+  onClick() {
+    this.options.onClick.call(this)
+  }
+
+  save() {
+    const saveFn = this.options.save
+    if (saveFn) {
+      saveFn.call(this)
+    }
+  }
+
+  content() {
+    return this.options.content()
   }
 
   get(key) {

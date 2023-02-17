@@ -74,7 +74,7 @@ body.tool-content-editor-active [data-editable="true"]:focus-within img[alt="wri
     width: 100%;
     height: 100%;
     animation: defaults .5s forwards;
-    transition: all .3s;
+    transition: all .3s, fill 0;
 }
 
 .writ-toolbar .tool-btn[data-tool-id="content-editor"]:hover svg {

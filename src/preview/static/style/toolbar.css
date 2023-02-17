@@ -1,0 +1,80 @@
+:root {
+    --toolbar-height: 36px;
+}
+
+.writ-toolbar {
+    position: fixed;
+    height: var(--toolbar-height);
+    top: calc(var(--toolbar-height) / 2);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    padding: 10px 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    opacity: 0.6;
+    transition: all .5s;
+}
+
+.writ-toolbar:hover {
+    backdrop-filter: blur(5px);
+    background: #fff9;
+    border-color: #dedede;
+    opacity: 1;
+    box-shadow:
+        0 0 30px #6664,
+        inset 0 0 30px #fff6;
+}
+
+.writ-toolbar-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.writ-toolbar:hover .writ-toolbar-tool-group {
+    border-color: #dedede;
+}
+
+.writ-toolbar-tool-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 1px solid transparent;
+    transition: all .5s;
+}
+
+.writ-toolbar-tool-group:first-child {
+    border-left: none;
+}
+
+.writ-toolbar .tool-btn {
+    position: relative;
+    width: calc(var(--toolbar-height) / 1.5);
+    height: calc(var(--toolbar-height) / 1.5);
+    padding: 0 5px;
+    box-sizing: content-box;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    --color: var(--text-color);
+}
+
+.writ-toolbar .tool-btn input[type="checkbox"] {
+    display: none;
+}
+
+.writ-toolbar .tool-btn input[type="checkbox"]:checked ~ label {
+    --color: #004cff;
+}
+
+.writ-toolbar .tool-btn label {
+    cursor: pointer;
+}

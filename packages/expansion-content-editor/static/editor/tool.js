@@ -194,7 +194,7 @@ export default () => {
   return new window.Preview.Tool({
     id: 'content-editor',
     label: 'Content editor',
-    async buttonContent() {
+    async content() {
       return `
         ${await fetch(svgIconPath).then(r => r.text())}
         <p class="tool-btn-animation">
