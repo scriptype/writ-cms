@@ -1,7 +1,9 @@
-import createSaveTool from './tools/save.js'
+import createSaveTool from './primary-actions/save.js'
 import Tool from './tool.js'
+import PrimaryAction from './primary-action.js'
 
 let tools = []
+let primaryActions = []
 let el = null
 
 const createDOMNodeFromHTML = (html) => {
@@ -58,32 +60,31 @@ const createToolToggle = async (tool) => {
   return toolToggle
 }
 
-const createToolbarItem = async (tool) => {
-  if (tool.get('type') === 'button') {
-    return createToolButton(tool)
-  }
-  return createToolToggle(tool)
-}
-
 const addTool = async (tool) => {
   if (!(tool instanceof Tool)) {
     throw new Error('Only Tool instances are accepted.')
   }
   window.debugLog('Toolbar.addTool', tool)
   tools.push(tool)
-  const toolbarItem = await createToolbarItem(tool)
-  if (tool.get('isPrimary')) {
-    el.querySelector('.writ-toolbar-tool-group').appendChild(toolbarItem)
-  } else {
-    el.querySelector('.writ-toolbar-tool-group:nth-child(2)').appendChild(toolbarItem)
+  const toolbarItem = await createToolToggle(tool)
+  el.querySelector('.writ-toolbar-tool-group:nth-child(2)').appendChild(toolbarItem)
+}
+
+const addPrimaryAction = async (primaryAction) => {
+  if (!(primaryAction instanceof PrimaryAction)) {
+    throw new Error('Only PrimaryAction instances are accepted.')
   }
+  window.debugLog('Toolbar.addPrimaryAction', primaryAction)
+  primaryActions.push(primaryAction)
+  const toolbarItem = await createToolButton(primaryAction)
+  el.querySelector('.writ-toolbar-tool-group').appendChild(toolbarItem)
 }
 
 const init = async () => {
   tools = []
   el = createToolbar()
   document.body.appendChild(el)
-  addTool(await createSaveTool())
+  addPrimaryAction(await createSaveTool())
 }
 
 const getTools = () => {
