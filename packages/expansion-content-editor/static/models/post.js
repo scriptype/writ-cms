@@ -32,6 +32,19 @@ export default {
     })
   },
 
+  updateSummary(path, { summary }) {
+    return fetch(`/cms/post`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        summary,
+        path
+      })
+    })
+  },
+
   updateTitle(path, { title, foldered, shouldRedirect }) {
     return fetch(`/cms/post`, {
       method: 'POST',

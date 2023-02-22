@@ -41,6 +41,17 @@ const savePost = async (path, { content, metadata }) => {
   await fs.writeFile(path, newFileContent)
 }
 
+const updateSummary = async (srcFilePath, summary) => {
+  const fileContent = await fs.readFile(srcFilePath, 'utf-8')
+  const { attributes } = frontMatter(fileContent)
+  return savePost(srcFilePath, {
+    metadata: toFrontMatter({
+      ...attributes,
+      summary
+    })
+  })
+}
+
 const renamePost = async (srcFilePath, newTitle, updateUrl, foldered, extension) => {
   const fileContent = await fs.readFile(srcFilePath, 'utf-8')
   const { attributes } = frontMatter(fileContent)
@@ -84,7 +95,7 @@ const preserveNewlines = (content) => {
 module.exports = ({ settings, debugLog, getSlug }) => {
   return async (req, res, next) => {
     const { rootDirectory } = settings
-    const { content, title, updateUrl, path, foldered } = req.body
+    const { content, summary, title, updateUrl, path, foldered } = req.body
     const extension = extname(path)
     const srcFilePath = join(rootDirectory, path)
     const isMarkdown = /\.(md|markdown|txt)$/i.test(extension)
@@ -98,6 +109,9 @@ module.exports = ({ settings, debugLog, getSlug }) => {
       await savePost(srcFilePath, {
         content: trimTrailingSpace(newContent.trim())
       })
+    }
+    if (typeof summary !== 'undefined') {
+      await updateSummary(srcFilePath, summary)
     }
     if (typeof title !== 'undefined') {
       await renamePost(srcFilePath, title, updateUrl, foldered, extension)

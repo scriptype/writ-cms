@@ -17,6 +17,15 @@ const Post = (post) => {
         data-path="${post.path}"
         data-foldered="${post.foldered}"
       >${post.content}</div>
+    `,
+
+    summary: `
+      <div
+        data-editable="true"
+        data-section="summary"
+        data-path="${post.path}"
+        data-foldered="${post.foldered}"
+      >${post.summary}</div>
     `
   }
 }

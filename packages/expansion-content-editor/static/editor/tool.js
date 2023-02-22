@@ -74,6 +74,9 @@ const save = () => {
     if (change.content) {
       await Post.updateContent(filePath, change)
     }
+    if (change.summary) {
+      await Post.updateSummary(filePath, change)
+    }
     if (change.title) {
       const response = await Post.updateTitle(filePath, change)
       if (change.shouldRedirect && response.redirected) {
@@ -162,6 +165,19 @@ const onChangeContent = (contentElement) => {
   })
 }
 
+const onChangeSummary = (contentElement) => {
+  let { path, foldered } = contentElement.dataset
+  let quill = getQuill(contentElement)
+
+  quill.on('text-change', (delta, source) => {
+    pushChange(path, {
+      summary: quill.root.innerHTML.trim(),
+      foldered: foldered === 'true' || foldered === true
+    })
+    renderChanges()
+  })
+}
+
 const listenToChanges = () => {
   UI.editables.forEach((editable, i) => {
     let { section } = editable.dataset
@@ -169,6 +185,8 @@ const listenToChanges = () => {
       onChangeTitle(editable)
     } else if (section === 'content') {
       onChangeContent(editable)
+    } else if (section === 'summary') {
+      onChangeSummary(editable)
     }
   })
 }
