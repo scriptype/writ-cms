@@ -13,9 +13,9 @@ let State
 let Templates
 let UI
 
-const createUI = (templates) => {
+const createUI = () => {
   return {
-    unsavedChangesList: templates.unsavedChanges.querySelector('#unsaved-changes-list'),
+    unsavedChangesList: Templates.unsavedChanges.querySelector('#unsaved-changes-list'),
     editables: Array.from(
       queryAll('[data-editable="true"]')
     ),
@@ -45,22 +45,6 @@ const getInitialState = () => {
     isActive: false,
     unsavedChanges: {}
   }
-}
-
-const stripTagsFromDocumentTitle = () => {
-  document.title = stripTags(document.title)
-}
-
-const mountTemplate = (DOMNode) => {
-  document.body.appendChild(DOMNode)
-}
-
-const mountFrontend = () => {
-  stripTagsFromDocumentTitle()
-  const templates = getTemplates()
-  mountTemplate(templates.unsavedChanges)
-  mountTemplate(templates.quillHelpers)
-  return templates
 }
 
 const save = () => {
@@ -202,12 +186,14 @@ const preventLinkClickInEditMode = () => {
 }
 
 export default () => {
+  document.title = stripTags(document.title)
+  Templates = getTemplates()
+  document.body.appendChild(Templates.unsavedChanges)
+  document.body.appendChild(Templates.quillHelpers)
+  UI = createUI()
   State = getInitialState()
-  Templates = mountFrontend()
-  UI = createUI(Templates)
   listenToChanges()
   preventLinkClickInEditMode()
-  toggleActivate()
 
   return new window.Preview.Tool({
     id: 'content-editor',
