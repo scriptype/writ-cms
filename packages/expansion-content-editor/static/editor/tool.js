@@ -7,11 +7,14 @@ import {
   stripTags
 } from './helpers.js'
 
-const svgIconPath = '/assets/expansions/content-editor/icon.svg'
-
 let State
 let Templates
 let UI
+let quillInstance
+
+const svgIconPath = '/assets/expansions/content-editor/icon.svg'
+const editableSections = ['title', 'content', 'summary']
+const isSinglePage = (postTitle) => location.href.match(getSlug(postTitle))
 
 const createUI = () => {
   return {
@@ -24,7 +27,7 @@ const createUI = () => {
     ).map(o => ({
       path: o.dataset.path,
       section: o.dataset.section,
-      content: o.innerHTML
+      value: o.innerHTML
     }))
   }
 }
@@ -70,20 +73,6 @@ const save = () => {
   })
 }
 
-const toggleActivate = () => {
-  const { isActive } = State
-
-  const editors = window.editors || []
-  editors.forEach(e => e.quill.enable(isActive))
-
-  document.body.classList.toggle('tool-content-editor-active', isActive)
-  UI.editables.forEach(editable => {
-    if (editable.dataset.section === 'title') {
-      editable.contentEditable = isActive
-    }
-  })
-}
-
 const renderChanges = () => {
   const changes = State.unsavedChanges
   UI.unsavedChangesList.innerHTML = Object.keys(changes).map(path => `
@@ -94,28 +83,6 @@ const renderChanges = () => {
   Templates.unsavedChanges.classList.toggle('unsaved', Object.keys(changes).length)
 }
 
-const getQuill = (contentElement) => {
-  const existingEditor = (window.editors || []).find(
-    e => e.editable === contentElement
-  )
-
-  if (existingEditor) {
-    return existingEditor.quill
-  }
-
-  contentElement.insertAdjacentHTML('beforeBegin', Templates.quillHelpers.innerHTML)
-  window.editors = window.editors || []
-  const quill = Quill(contentElement)
-  window.editors.push({
-    editable: contentElement,
-    quill
-  })
-  if (!State.isActive) {
-    quill.disable()
-  }
-  return quill
-}
-
 const pushChange = (path, change) => {
   State.unsavedChanges[path] = {
     ...State.unsavedChanges[path],
@@ -123,66 +90,54 @@ const pushChange = (path, change) => {
   }
 }
 
-const onChangeTitle = (titleElement) => {
-  let { path, section, foldered } = titleElement.dataset
-  const originalContent = UI.originals.find(c => c.path === path && c.section === section).content
-  return titleElement.addEventListener('input', () => {
-    pushChange(path, {
-      title: titleElement.innerText.trim(),
-      foldered: foldered === 'true' || foldered === true,
-      shouldRedirect: location.href.match(getSlug(originalContent))
-    })
-    renderChanges()
+const makeEditable = (editable) => {
+  if (!State.isActive) {
+    return
+  }
+
+  let { path, section, foldered } = editable.dataset
+
+  if (editableSections.indexOf(section) === -1) {
+    return console.error('This section is not editable!')
+  }
+
+  const original = UI.originals.find(o => {
+    return o.path === path && o.section === section
   })
-}
 
-const onChangeContent = (contentElement) => {
-  let { path, foldered } = contentElement.dataset
-  let quill = getQuill(contentElement)
+  const change = {
+    title: undefined,
+    content: undefined,
+    summary: undefined,
+    foldered: foldered === 'true' || foldered === true,
+    shouldRedirect: section === 'title' && isSinglePage(original.value)
+  }
 
-  quill.on('text-change', (delta, source) => {
-    pushChange(path, {
-      content: quill.root.innerHTML.trim(),
-      foldered: foldered === 'true' || foldered === true
-    })
-    renderChanges()
-  })
-}
-
-const onChangeSummary = (contentElement) => {
-  let { path, foldered } = contentElement.dataset
-  let quill = getQuill(contentElement)
-
-  quill.on('text-change', (delta, source) => {
-    pushChange(path, {
-      summary: quill.root.innerHTML.trim(),
-      foldered: foldered === 'true' || foldered === true
-    })
-    renderChanges()
-  })
-}
-
-const listenToChanges = () => {
-  UI.editables.forEach((editable, i) => {
-    let { section } = editable.dataset
-    if (section === 'title') {
-      onChangeTitle(editable)
-    } else if (section === 'content') {
-      onChangeContent(editable)
-    } else if (section === 'summary') {
-      onChangeSummary(editable)
+  if (section === 'title') {
+    if (editable.dataset.section === 'title') {
+      editable.contentEditable = true
     }
-  })
-}
-
-const preventLinkClickInEditMode = () => {
-  UI.editables.forEach((editable, i) => {
-    editable.addEventListener('click', e => {
-      if (State.isActive && findParent(editable, 'a')) {
-        e.preventDefault()
-      }
+    editable.addEventListener('input', () => {
+      change.title = editable.innerText.trim()
+      pushChange(path, change)
     })
-  })
+
+  } else {
+    if (quillInstance) {
+      quillInstance.enable()
+      return console.log('quill already exists', Math.round(Math.random() * 1000))
+    }
+    console.log('create quill')
+    editable.insertAdjacentHTML('beforeBegin', Templates.quillHelpers.innerHTML)
+    quillInstance = Quill(editable)
+    quillInstance.enable()
+    quillInstance.on('text-change', () => {
+      change[section] = quillInstance.root.innerHTML.trim()
+      pushChange(path, change)
+    })
+  }
+
+  renderChanges()
 }
 
 export default () => {
@@ -190,10 +145,11 @@ export default () => {
   Templates = getTemplates()
   document.body.appendChild(Templates.unsavedChanges)
   document.body.appendChild(Templates.quillHelpers)
-  UI = createUI()
   State = getInitialState()
-  listenToChanges()
-  preventLinkClickInEditMode()
+  UI = createUI()
+  UI.editables.forEach(editable => {
+    editable.addEventListener('click', () => makeEditable(editable))
+  })
 
   return new window.Preview.Tool({
     id: 'content-editor',
@@ -210,14 +166,15 @@ export default () => {
       `
     },
     activate() {
-      State.isActive = true
-      toggleActivate()
       window.debugLog('activate content-editor')
+      State.isActive = true
+      document.body.classList.add('tool-content-editor-active')
     },
     deactivate() {
-      State.isActive = false
-      toggleActivate()
       window.debugLog('deactivate content-editor')
+      State.isActive = false
+      quillInstance.disable()
+      document.body.classList.remove('tool-content-editor-active')
     },
     save
   })
