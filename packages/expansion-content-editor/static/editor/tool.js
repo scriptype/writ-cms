@@ -173,7 +173,9 @@ export default () => {
     deactivate() {
       window.debugLog('deactivate content-editor')
       State.isActive = false
-      quillInstance.disable()
+      if (quillInstance) {
+        quillInstance.disable()
+      }
       document.body.classList.remove('tool-content-editor-active')
     },
     save
