@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writ</title>
+    <style type="text/css">
+      body {
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        font: italic 100 20vmin/1 times, serif;
+        background: linear-gradient(
+          to bottom,
+          #dedede,
+          #fff
+        )
+      }
+
+      h1 {
+        --letter-1-x: 0;
+        --letter-1-y: 0;
+        --letter-2-x: -0.13em;
+        --letter-2-y: -0.0272em;
+        --letter-3-x: -0.076em;
+        --letter-3-y: -0.028em;
+        --letter-4-x: -0.098em;
+        --letter-4-y: -0.071em;
+        --bg-1: url("https://assets.codepen.io/25387/writ1.jpg");
+        --bg-2: url("https://assets.codepen.io/25387/wri2.jpg");
+        background:
+          radial-gradient(
+            at 0% 100%,
+            transparent 30%,
+            #111 60%
+          ),
+          var(--bg-2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        background-size: cover;
+        color: transparent;
+        animation:
+          bg-position 10s linear infinite,
+          reveal 3s forwards;
+      }
+
+      @keyframes bg-position {
+        from, to {
+          background-position: right top;
+        }
+        70% {
+          background-position: right 10%;
+        }
+      }
+
+      @keyframes reveal {
+        from {
+          filter: brightness(0%);
+        }
+        to {
+          filter: brightness(100%);
+        }
+      }
+
+      span {
+        position: relative;
+      }
+
+      span:nth-child(1) {
+        top: var(--letter-1-y);
+        left: var(--letter-1-x);
+      }
+
+      span:nth-child(2) {
+        top: var(--letter-2-y);
+        left: var(--letter-2-x);
+      }
+
+      span:nth-child(3) {
+        top: calc(
+          var(--letter-3-y) +
+          var(--letter-2-y)
+        );
+        left: calc(
+          var(--letter-3-x) +
+          var(--letter-2-x)
+        );
+      }
+
+      span:nth-child(4) {
+        top: var(--letter-4-y);
+        left: calc(
+          var(--letter-4-x) +
+          var(--letter-3-x) +
+          var(--letter-2-x)
+        );
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1><span>w</span><span>r</span><span>i</span><span>t</span></h1>
+  </body>
+
+</html>
