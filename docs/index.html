@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Writ</title>
     <style type="text/css">
+
       body {
         height: 100vh;
         display: grid;
@@ -26,22 +27,37 @@
         --letter-3-y: -0.028em;
         --letter-4-x: -0.098em;
         --letter-4-y: -0.071em;
-        --bg-1: url("https://assets.codepen.io/25387/writ1.jpg");
-        --bg-2: url("https://assets.codepen.io/25387/wri2.jpg");
-        background:
-          radial-gradient(
-            at 0% 100%,
-            transparent 30%,
-            #111 60%
-          ),
-          var(--bg-2);
-        -webkit-background-clip: text;
-        background-clip: text;
-        background-size: cover;
+        --bg: url("./writ-png.png");
+        position: relative;
+        top: -0.133em;
+        left: -0.133em;
+        font-size: 1.618em;
+        background: var(--bg) no-repeat center center;
+        background-size: contain;
         color: transparent;
-        animation:
-          bg-position 10s linear infinite,
-          reveal 3s forwards;
+        animation: fade-in 3s forwards;
+      }
+
+      @supports (background-clip: text) {
+        h1 {
+          --bg: url("./writ-tree.jpg");
+          top: 0;
+          left: 0;
+          font-size: 2em;
+          background:
+            radial-gradient(
+              at 0% 100%,
+              transparent 30%,
+              #111 60%
+            ),
+            var(--bg);
+          -webkit-background-clip: text;
+          background-clip: text;
+          background-size: cover;
+          animation:
+            bg-position 10s linear infinite,
+            reveal 3s forwards;
+        }
       }
 
       @keyframes bg-position {
@@ -50,6 +66,15 @@
         }
         70% {
           background-position: right 10%;
+        }
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
         }
       }
 
