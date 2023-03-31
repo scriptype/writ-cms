@@ -27,20 +27,18 @@
         --letter-3-y: -0.028em;
         --letter-4-x: -0.098em;
         --letter-4-y: -0.071em;
-        --bg: url("./writ-png.png");
         position: relative;
         top: -0.133em;
         left: -0.133em;
         font-size: 1.618em;
-        background: var(--bg) no-repeat center center;
+        background: url("./writ-png.png") no-repeat center center;
         background-size: contain;
         color: transparent;
         animation: fade-in 3s forwards;
       }
 
       @supports (background-clip: text) {
-        h1 {
-          --bg: url("./writ-tree.jpg");
+        body:not(.safari) h1 {
           top: 0;
           left: 0;
           font-size: 2em;
@@ -50,7 +48,7 @@
               transparent 30%,
               #111 60%
             ),
-            var(--bg);
+            url("./writ-tree.jpg");
           -webkit-background-clip: text;
           background-clip: text;
           background-size: cover;
@@ -125,6 +123,12 @@
 
   <body>
     <h1><span>w</span><span>r</span><span>i</span><span>t</span></h1>
+
+    <script>
+        if (window.navigator.appVersion.includes('Safari')) {
+            document.body.classList.add('safari')
+        }
+    </script>
   </body>
 
 </html>
