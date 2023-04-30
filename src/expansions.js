@@ -46,7 +46,6 @@ const expandBy =
       )
       return expandedValue
     }
-      
   }
 
 module.exports = {
