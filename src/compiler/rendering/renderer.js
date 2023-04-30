@@ -35,7 +35,7 @@ const registerHelpers = () => {
     ...helpers,
     ...finaliseTemplateHelpers(helpers)
   }
-  debugLog('registerHelpers allHelpers', allHelpers)
+  debugLog('registerHelpers', allHelpers)
   Handlebars.registerHelper(allHelpers)
 }
 
@@ -52,17 +52,20 @@ const registerPartials = async (partialsPath) => {
   const register = files.map(async (path) => {
     const name = path.replace(extname(path), '')
     const fileContent = await readFileContent(join(partialsPath, path))
+    debugLog('registerPartial', name, join(partialsPath, path))
     Handlebars.registerPartial(name, fileContent)
   })
   return Promise.all(register)
 }
 
-const init = () => {
-  return Promise.all([
+const init = async () => {
+  await Promise.all([
     registerHelpers(),
-    registerPartials(themePartials),
-    ...finaliseTemplatePartials([]).map(registerPartials)
+    registerPartials(themePartials)
   ])
+  await Promise.all(
+    finaliseTemplatePartials([]).map(registerPartials)
+  )
 }
 
 const render = ({ path, data, content }) => {
