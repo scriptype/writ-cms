@@ -1,4 +1,5 @@
 const { resolve } = require('path')
+const { debugLog } = require('./debug')
 const Settings = require('./settings')
 
 module.exports = {
@@ -20,6 +21,19 @@ module.exports = {
           ...value,
           resolve(rootDirectory, './theme')
         ]
+
+      case "templateHelpers":
+        let helpers = {}
+        const templateHelpersPath = resolve(rootDirectory, './theme', 'template-helpers.js')
+        try {
+          helpers = require(templateHelpersPath)
+        } catch (e) {
+          debugLog('no custom template helpers')
+        }
+        return {
+          ...value,
+          ...helpers
+        }
 
       case "assets":
         return [
