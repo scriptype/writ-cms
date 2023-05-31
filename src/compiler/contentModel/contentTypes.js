@@ -72,6 +72,10 @@ const isFolderedPostIndexFile = (fsObject) => {
   return isPostFile(fsObject) && fsObject.name.match(/^(index|post)\..+$/)
 }
 
+const isTemplateHelpersFile = (fsObject) => {
+  return fsObject.name === 'template-helpers.js'
+}
+
 const createAsset = (fsObject) => {
   return {
     ...fsObject,
@@ -132,8 +136,9 @@ const createCustomTheme = (fsObject) => {
     type: contentTypes.CUSTOM_THEME_FOLDER,
     data: {
       name: 'custom',
-      assets: fsObject.children.filter(c => !isPartial(c)).map(createLocalAsset),
-      partials: fsObject.children.map(createCustomThemePartial),
+      assets: fsObject.children.filter(c => !isPartial(c) && !isTemplateHelpersFile(c)).map(createLocalAsset),
+      partials: fsObject.children.filter(isPartial),
+      helpers: fsObject.children.find(isTemplateHelpersFile)
     }
   }
 }
@@ -270,6 +275,7 @@ module.exports = {
   hasContent,
   isPostFile,
   isFolderedPostIndexFile,
+  isTemplateHelpersFile,
   createAsset,
   createAssets,
   createLocalAsset,
