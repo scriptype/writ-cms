@@ -30,7 +30,7 @@ const renderPosts = (render, { posts }) => {
     return render({
       path: getExportPath(post),
       content: await finaliseTemplate(
-        `{{#>${post.type}}}${post.content}{{/${post.type}}}`
+        `{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`
       ),
       data: {
         ...post,

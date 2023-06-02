@@ -18,12 +18,12 @@
 
             <main class="content" id="posts-container">
                 {{#each posts as |post|}}
-                    {{#if (isPostType 'photo-post' post.type)}}
+                    {{#if (isPostType 'photo' post.type)}}
                         <a href="{{post.permalink}}" title="{{post.title}}" class="photo-thumbnail">
                             <img src="{{post.permalink}}/{{post.thumbnailUrl}}" alt="{{post.title}}" />
                         </a>
                     {{/if}}
-                    {{#if (isPostType 'text-post' post.type)}}
+                    {{#if (isPostType 'text' post.type)}}
                         <div class="post">
                             <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
                             {{{post.summary}}}

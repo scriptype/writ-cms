@@ -26,7 +26,7 @@
 
             <main class="content" id="posts-container">
                 {{#each posts as |post|}}
-                    {{#if (isPostType 'text-post' post.type)}}
+                    {{#if (isPostType 'text' post.type)}}
                         <div class="post">
                             <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
                             {{{post.summary}}}

@@ -77,7 +77,7 @@ const isPartial = ({ extension }) => matchesExtension(extension, partialExtensio
 
 const parseTemplate = ({ content, extension }) => {
   const { attributes, body } = frontMatter(content)
-  const type = attributes.type || 'text-post'
+  const type = attributes.type || 'text'
   const HTMLContent = getHTMLContent(body, extension)
   return {
     type,

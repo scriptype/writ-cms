@@ -101,7 +101,7 @@ And it ends like this.
 You can also add metadata like this at the beginning of a post file
 ```
 ---
-type: text-post
+type: text
 date: 2023-01-05, 01:57
 tags: bananas, books
 musiclist:

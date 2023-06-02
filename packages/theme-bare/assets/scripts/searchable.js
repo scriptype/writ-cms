@@ -30,7 +30,7 @@
   }
 
   const resultItemTemplate = (post) => {
-    if (post.type === 'photo-post') {
+    if (post.type === 'photo') {
       return `
         <div class="search-result-item">
           <a href="${post.permalink}" class="photo-thumbnail-mini">
@@ -40,7 +40,7 @@
         </div>
       `
     }
-    if (post.type === 'text-post') {
+    if (post.type === 'text') {
       return `
         <div class="search-result-item">
           <h3><a href="${post.permalink}">${post.title}</a></h3>
