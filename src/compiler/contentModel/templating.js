@@ -27,9 +27,20 @@ const MarkdownHelpers = {
   },
 
   unescapePartialUsage(html) {
+    // partial greater sign
     html = html.replace(/\{\{\&gt;/g, '{{>')
-    html = html.replace(/&quot;/g, '"')
-    html = html.replace(/&#39;/g, "'")
+
+    // helper double quotes
+    html = html.replace(/\{\{(.+)&quot;(.+)&quot;(.+)\}\}/g, '{{\$1"\$2"\$3}}')
+
+    // helper single quotes
+    html = html.replace(/\{\{(.+)&#39;(.+)&#39;(.+)\}\}/g, "{{\$1'\$2'\$3}}")
+
+    // partial double quotes
+    html = html.replace(/\{\{>(.+)&quot;(.+)&quot;(.+|)\}\}/g, '{{>\$1"\$2"\$3}}')
+
+    // partial single quotes
+    html = html.replace(/\{\{>(.+)&#39;(.+)&#39;(.+|)\}\}/g, "{{>\$1'\$2'\$3}}")
     return html
   }
 }
