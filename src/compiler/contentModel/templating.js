@@ -17,6 +17,24 @@ const templateExtensions = [
   '.html'
 ]
 
+const MarkdownHelpers = {
+  trimExtraParagraphAroundSeeMore(html) {
+    const paragraphContainingSeeMore = html.match(/<p>(\s+|)\{\{seeMore\}\}(\s+|)<\/p>/s)
+    if (paragraphContainingSeeMore) {
+      return html.replace(paragraphContainingSeeMore[0], '{{seeMore}}')
+    }
+    return html
+  },
+
+  unescapePartialUsage(html) {
+    html = html.replace(/\{\{\&gt;/g, '{{>')
+    html = html.replace(/&quot;/g, '"')
+    html = html.replace(/&#39;/g, "'")
+    return html
+  }
+}
+
+
 const getSummary = (content) => {
   return content.split(READ_MORE_DIVIDER)[0]
 }
@@ -29,14 +47,8 @@ const getHTMLContent = (body, extension) => {
     let compiledHTML = marked.parse(
       body.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')
     )
-    const paragraphContainingSeeMore = compiledHTML.match(/<p>(\s+|)\{\{seeMore\}\}(\s+|)<\/p>/s)
-    if (paragraphContainingSeeMore) {
-      compiledHTML = compiledHTML.replace(paragraphContainingSeeMore[0], '{{seeMore}}')
-    }
-    const partialStart = compiledHTML.match(/\{\{\&gt;/)
-    if (partialStart) {
-      compiledHTML = compiledHTML.replace(partialStart[0], '{{>')
-    }
+    compiledHTML = MarkdownHelpers.trimExtraParagraphAroundSeeMore(compiledHTML)
+    compiledHTML = MarkdownHelpers.unescapePartialUsage(compiledHTML)
     return compiledHTML
   }
   return body
