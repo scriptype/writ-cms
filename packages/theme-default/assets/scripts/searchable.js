@@ -14,7 +14,8 @@
   }
 
   const loadPosts = async (path) => {
-    return fetch(`/${path}`).then(r => r.json())
+    const prefix = window.permalinkPrefix === '/' ? '' : window.permalinkPrefix
+    return fetch(`${prefix}/${path}`).then(r => r.json())
   }
 
   const resultsTemplate = (results, query) => {

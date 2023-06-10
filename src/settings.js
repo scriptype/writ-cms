@@ -7,6 +7,7 @@ const defaultSettings = (rootDirectory) => ({
   title: basename(resolve(rootDirectory)),
   description: "A future work",
   theme: "default",
+  permalinkPrefix: "/",
   assetsDirectory: "assets",
   exportDirectory: "docs",
   pagesDirectory: "pages",

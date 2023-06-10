@@ -46,8 +46,18 @@ const MarkdownHelpers = {
 }
 
 
-const getSummary = (content) => {
-  return content.split(READ_MORE_DIVIDER)[0]
+const getSummary = (content, localAssets, permalink) => {
+  let summaryPart = content.split(READ_MORE_DIVIDER)[0]
+  if (!localAssets) {
+    return summaryPart
+  }
+  localAssets.forEach(asset => {
+    const srcRe = new RegExp(`src=("|'|)(\.\/|)${asset.name}("|'|)`, 'g')
+    summaryPart = summaryPart.replace(srcRe, `src="${permalink}/${asset.name}"`)
+    const hrefRe = new RegExp(`href=("|'|)(\.\/|)${asset.name}("|'|)`, 'g')
+    summaryPart = summaryPart.replace(hrefRe, `href="${permalink}/${asset.name}"`)
+  })
+  return summaryPart
 }
 
 const getHTMLContent = (body, extension) => {
@@ -102,14 +112,14 @@ const matchesExtension = (extension, acceptedExtensions) => {
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 const isPartial = ({ extension }) => matchesExtension(extension, partialExtensions)
 
-const parseTemplate = ({ content, extension }) => {
+const parseTemplate = ({ content, extension, localAssets, permalink }) => {
   const { attributes, body } = frontMatter(content)
   const type = attributes.type || 'text'
   const HTMLContent = getHTMLContent(body, extension)
   return {
     type,
     content: HTMLContent,
-    summary: getSummary(HTMLContent),
+    summary: getSummary(HTMLContent, localAssets, permalink),
     ...attributes,
     ...attachTags(attributes),
     ...attachDates(attributes),

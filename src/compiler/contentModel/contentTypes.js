@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
-const { site } = require('../../settings').getSettings()
+const { site, permalinkPrefix } = require('../../settings').getSettings()
 const { UNCATEGORIZED } = require('../constants')
 const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
 const { isTemplate, isPartial, parseTemplate } = require('./templating')
@@ -148,7 +148,7 @@ const createCategory = (fsObject) => {
   const data = {
     name: fsObject.name,
     slug,
-    permalink: slug,
+    permalink: join(permalinkPrefix, slug),
     posts: fsObject.children.filter(isPost),
     localAssets: fsObject.children.filter(isLocalAsset)
   }
@@ -178,7 +178,8 @@ const createFolderedPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const category = dirname(fsObject.path)
-  const permalink = replaceExtension(join('/', getSlug(category), slug), '.html')
+  const permalink = replaceExtension(join(permalinkPrefix, getSlug(category), slug), '.html')
+  const localAssets = fsObject.children.filter(isLocalAsset)
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
@@ -186,15 +187,19 @@ const createFolderedPost = (fsObject) => {
     extension: indexFile.extension,
     data: {
       title,
-      ...parseTemplate(indexFile),
+      ...parseTemplate({
+        ...indexFile,
+        localAssets,
+        permalink
+      }),
       foldered: true,
       slug,
       permalink,
       category: {
         name: category,
-        permalink: join('/', getSlug(category))
+        permalink: join(permalinkPrefix, getSlug(category))
       },
-      localAssets: fsObject.children.filter(isLocalAsset),
+      localAssets,
       site,
       path: indexFile.path
     }
@@ -204,7 +209,7 @@ const createFolderedPost = (fsObject) => {
 const createUncategorizedPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
-  const permalink = replaceExtension(join('/', slug), '.html')
+  const permalink = replaceExtension(join(permalinkPrefix, slug), '.html')
   return {
     ...fsObject,
     type: contentTypes.POST,
@@ -215,7 +220,7 @@ const createUncategorizedPost = (fsObject) => {
       permalink,
       category: {
         name: UNCATEGORIZED,
-        permalink: join('/', getSlug(UNCATEGORIZED))
+        permalink: join(permalinkPrefix, getSlug(UNCATEGORIZED))
       },
       site,
       path: fsObject.path
@@ -227,7 +232,7 @@ const createPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const category = dirname(fsObject.path)
-  const permalink = replaceExtension(join('/', getSlug(category), slug), '.html')
+  const permalink = replaceExtension(join(permalinkPrefix, getSlug(category), slug), '.html')
   return {
     ...fsObject,
     type: contentTypes.POST,
@@ -238,7 +243,7 @@ const createPost = (fsObject) => {
       permalink,
       category: {
         name: category,
-        permalink: join('/', getSlug(category))
+        permalink: join(permalinkPrefix, getSlug(category))
       },
       site,
       path: fsObject.path

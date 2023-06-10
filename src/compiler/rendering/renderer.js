@@ -3,7 +3,7 @@ const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../../helpers')
 const { debugLog } = require('../../debug')
-const { theme, mode } = require('../../settings').getSettings()
+const { theme, mode, permalinkPrefix, assetsDirectory } = require('../../settings').getSettings()
 const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../../routines')
 
 const themePartials = resolve(
@@ -27,6 +27,14 @@ const helpers = {
 
   isPostType(string, type) {
     return string === type
+  },
+
+  assetsPath() {
+    return join(permalinkPrefix, assetsDirectory)
+  },
+
+  permalinkPrefix() {
+    return permalinkPrefix
   }
 }
 
