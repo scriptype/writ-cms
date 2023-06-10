@@ -27,7 +27,7 @@ const mapFSIndexToContentTree = (fsTree) => {
     const isCategoryLevel = fsObject.depth === 1
     const isSubFolderLevel = fsObject.depth === 2
 
-    if (!isDirectory && !isPostFile(fsObject)) {
+    if (!isDirectory && !isSubFolderLevel && !isPostFile(fsObject)) {
       return createLocalAsset(fsObject)
     }
 
@@ -66,6 +66,9 @@ const mapFSIndexToContentTree = (fsTree) => {
       if (isFolderedPostIndexFile(fsObject)) {
         return createFolderedPostIndex(fsObject)
       }
+      if (!isDirectory) {
+        return createLocalAsset(fsObject)
+      }
     }
 
     if (isDirectory) {
@@ -74,6 +77,7 @@ const mapFSIndexToContentTree = (fsTree) => {
         children: mapFSIndexToContentTree(fsObject.children)
       })
     }
+
     return createUnrecognizedFile(fsObject)
   })
 }
