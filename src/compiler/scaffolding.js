@@ -3,9 +3,13 @@ const { resolve, join, basename } = require('path')
 const { exec } = require('child_process')
 const { getSlug } = require('../helpers')
 const { theme, exportDirectory, assetsDirectory, out } = require('../settings').getSettings()
+const Debug = require('../debug')
 const { finaliseAssets } = require('../routines')
 
+const sleep = (duration) => new Promise(res => setTimeout(res, duration))
+
 const createSiteDir = async () => {
+  Debug.debugLog('create site directory')
   if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {
     throw new Error(`Dangerous export directory: "${exportDirectory}". Won't continue.`)
   }
@@ -19,6 +23,7 @@ const createSiteDir = async () => {
 }
 
 const ensureDirectory = async (path) => {
+  Debug.debugLog('ensure directory', path)
   try {
     return await mkdir(path)
   } catch (e) { } finally {
@@ -26,28 +31,41 @@ const ensureDirectory = async (path) => {
   }
 }
 
-const ensureAssetsDirectory = () => ensureDirectory(join(out, assetsDirectory))
+const ensureAssetsDirectory = () => {
+  Debug.debugLog('ensure assets directory')
+  return ensureDirectory(join(out, assetsDirectory))
+}
 
 const copyAssetsDirectory = ({ src, dest }) => {
+  Debug.debugLog('copy assets directory', src, dest)
   return cp(src, join(out, assetsDirectory, dest), { recursive: true })
 }
 
 const copyAsset = async ({ src, dest }) => {
+  Debug.debugLog('copy asset', src, dest)
   const targetDirectory = join(out, assetsDirectory, dest)
-  try {
-    await ensureDirectory(targetDirectory)
-  } catch (e) {} finally {
-    return cp(src, join(targetDirectory, basename(src)))
-  }
+  await ensureDirectory(targetDirectory)
+  return cp(src, join(targetDirectory, basename(src)))
 }
 
-const copyThemeAssets = () =>
-  copyAssetsDirectory({
+const copyThemeAssets = () => {
+  Debug.debugLog('copy theme assets')
+  return copyAssetsDirectory({
     src: join(__dirname, '..', '..', 'packages', `theme-${theme}`, 'assets'),
     dest: theme
   })
+}
+
+const copyCommonAssets = () => {
+  Debug.debugLog('copy theme assets')
+  return copyAssetsDirectory({
+    src: join(__dirname, '..', 'common-assets'),
+    dest: 'common'
+  })
+}
 
 const copyExpandedAssets = async () => {
+  Debug.debugLog('copy expanded assets')
   const finalAssets = await finaliseAssets([])
   return await Promise.all(
     finalAssets.map((assetEntry) => {
@@ -63,11 +81,14 @@ const copyExpandedAssets = async () => {
 module.exports = {
   scaffold: Promise.resolve(true),
   scaffoldSite() {
+    Debug.debugLog('scaffolding')
     this.scaffold = this.scaffold
       .then(createSiteDir)
       .then(ensureAssetsDirectory)
       .then(copyThemeAssets)
       .then(copyExpandedAssets)
+
+    setTimeout(copyCommonAssets, 2000)
 
     return this.scaffold
   }

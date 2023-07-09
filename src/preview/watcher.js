@@ -20,6 +20,8 @@ const watchOptions = {
   )
 }
 
+Debug.debugLog('watch options', watchOptions)
+
 module.exports = {
   init() {
     const { rootDirectory, exportDirectory } = settings.getSettings()
