@@ -2,11 +2,9 @@ const { rm, cp, mkdir } = require('fs/promises')
 const { resolve, join, basename } = require('path')
 const { exec } = require('child_process')
 const { getSlug } = require('../helpers')
-const { theme, exportDirectory, assetsDirectory, out } = require('../settings').getSettings()
+const { mode, theme, exportDirectory, assetsDirectory, out } = require('../settings').getSettings()
 const Debug = require('../debug')
 const { finaliseAssets } = require('../routines')
-
-const sleep = (duration) => new Promise(res => setTimeout(res, duration))
 
 const createSiteDir = async () => {
   Debug.debugLog('create site directory')
@@ -87,8 +85,13 @@ module.exports = {
       .then(ensureAssetsDirectory)
       .then(copyThemeAssets)
       .then(copyExpandedAssets)
-
-    setTimeout(copyCommonAssets, 2000)
+      .then(() => {
+        if (mode === 'build') {
+          return copyCommonAssets()
+        }
+        Debug.debugLog('⚠️  Skipping copying common assets in watch mode.')
+        return Promise.resolve()
+      })
 
     return this.scaffold
   }

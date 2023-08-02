@@ -4,6 +4,9 @@ const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 
 const startUp = async ({ mode, rootDirectory, watch, debug }) => {
+  if (mode === 'start') {
+    console.log('⚠️  Watch out for frustration.')
+  }
   Debug.init(debug)
   Debug.debugLog('startUp', { mode, rootDirectory, watch, debug })
   await Settings.init({
