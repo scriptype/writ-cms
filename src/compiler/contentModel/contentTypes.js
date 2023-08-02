@@ -1,7 +1,6 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
-const { site, permalinkPrefix } = require('../../settings').getSettings()
-const { UNCATEGORIZED } = require('../constants')
+const { site, permalinkPrefix, defaultCategoryName } = require('../../settings').getSettings()
 const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
 const { isTemplate, isPartial, parseTemplate } = require('./templating')
 
@@ -159,9 +158,9 @@ const createCategory = (fsObject) => {
   }
 }
 
-const createUncategorizedCategory = () => {
+const createDefaultCategory = () => {
   return createCategory({
-    name: UNCATEGORIZED,
+    name: defaultCategoryName,
     children: []
   })
 }
@@ -206,7 +205,7 @@ const createFolderedPost = (fsObject) => {
   }
 }
 
-const createUncategorizedPost = (fsObject) => {
+const createDefaultCategoryPost = (fsObject) => {
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const permalink = replaceExtension(join(permalinkPrefix, slug), '.html')
@@ -219,8 +218,8 @@ const createUncategorizedPost = (fsObject) => {
       slug,
       permalink,
       category: {
-        name: UNCATEGORIZED,
-        permalink: join(permalinkPrefix, getSlug(UNCATEGORIZED))
+        name: defaultCategoryName,
+        permalink: join(permalinkPrefix, getSlug(defaultCategoryName))
       },
       site,
       path: fsObject.path
@@ -287,10 +286,10 @@ module.exports = {
   createSubpage,
   createSubpages,
   createCategory,
-  createUncategorizedCategory,
+  createDefaultCategory,
   createFolderedPostIndex,
   createFolderedPost,
-  createUncategorizedPost,
+  createDefaultCategoryPost,
   createPost,
   createUnrecognizedDirectory,
   createUnrecognizedFile,

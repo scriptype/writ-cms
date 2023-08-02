@@ -1,5 +1,5 @@
 const { finaliseContent } = require('../../routines')
-const { UNCATEGORIZED } = require('../constants')
+const { defaultCategoryName } = require('../../settings').getSettings()
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
@@ -8,16 +8,16 @@ const sortPosts = (a, b) => {
   return new Date(b.publishedAt) - new Date(a.publishedAt)
 }
 
-const upsertUncategorizedCategory = (ContentModel, newContent) => {
-  let uncategorizedCategory = ContentModel.categories.find(
-    category => category.name === UNCATEGORIZED
+const upsertDefaultCategory = (ContentModel, newContent) => {
+  let defaultCategory = ContentModel.categories.find(
+    category => category.name === defaultCategoryName
   )
-  if (!uncategorizedCategory) {
-    uncategorizedCategory = contentTypes.createUncategorizedCategory().data
-    ContentModel.categories.push(uncategorizedCategory)
+  if (!defaultCategory) {
+    defaultCategory = contentTypes.createDefaultCategory().data
+    ContentModel.categories.push(defaultCategory)
   }
-  uncategorizedCategory.posts.push(newContent)
-  uncategorizedCategory.posts.sort(sortPosts)
+  defaultCategory.posts.push(newContent)
+  defaultCategory.posts.sort(sortPosts)
 }
 
 const createContentModel = (contentTree) => {
@@ -47,7 +47,7 @@ const createContentModel = (contentTree) => {
         break
 
       case contentTypes.POST:
-        upsertUncategorizedCategory(ContentModel, content.data)
+        upsertDefaultCategory(ContentModel, content.data)
         ContentModel.posts.push(content.data)
         break
 

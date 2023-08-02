@@ -8,7 +8,7 @@ const {
   isPostFile,
   isFolderedPostIndexFile,
   createLocalAsset,
-  createUncategorizedPost,
+  createDefaultCategoryPost,
   createSubpages,
   createAssets,
   createCategory,
@@ -33,7 +33,7 @@ const mapFSIndexToContentTree = (fsTree) => {
 
     if (isRootLevel) {
       if (isPostFile(fsObject)) {
-        return createUncategorizedPost(fsObject)
+        return createDefaultCategoryPost(fsObject)
       }
       if (fsObject.name === pagesDirectory) {
         return createSubpages(fsObject)
