@@ -55,9 +55,9 @@ const copyThemeAssets = () => {
 }
 
 const copyCommonAssets = () => {
-  Debug.debugLog('copy theme assets')
+  Debug.debugLog('copy common assets')
   return copyAssetsDirectory({
-    src: join(__dirname, '..', 'common-assets'),
+    src: join(__dirname, '..', 'common', 'assets'),
     dest: 'common'
   })
 }
@@ -83,8 +83,6 @@ module.exports = {
     this.scaffold = this.scaffold
       .then(createSiteDir)
       .then(ensureAssetsDirectory)
-      .then(copyThemeAssets)
-      .then(copyExpandedAssets)
       .then(() => {
         if (mode === 'build') {
           return copyCommonAssets()
@@ -92,6 +90,8 @@ module.exports = {
         Debug.debugLog('⚠️  Skipping copying common assets in watch mode.')
         return Promise.resolve()
       })
+      .then(copyThemeAssets)
+      .then(copyExpandedAssets)
 
     return this.scaffold
   }
