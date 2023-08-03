@@ -9,6 +9,7 @@
         <script src="{{assetsPath}}/common/highlight/highlight.min.js"></script>
         <script>hljs.highlightAll();</script>
         <link rel="stylesheet" href="{{assetsPath}}/default/style/style.css">
+        {{>custom-style}}
     </head>
 
     <body>
@@ -43,6 +44,7 @@
 
         <script>window.permalinkPrefix = "{{permalinkPrefix}}"</script>
         <script type="text/javascript" src="{{assetsPath}}/default/scripts/base.js"></script>
+        {{>custom-script}}
     </body>
 
 </html>

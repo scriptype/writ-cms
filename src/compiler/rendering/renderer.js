@@ -35,6 +35,20 @@ const helpers = {
 
   permalinkPrefix() {
     return permalinkPrefix
+  },
+
+  hasCustomStyle() {
+    if (!this.customTheme) {
+      return false
+    }
+    return this.customTheme.assets.some(({ name }) => name === 'style.css')
+  },
+
+  hasCustomScript() {
+    if (!this.customTheme) {
+      return false
+    }
+    return this.customTheme.assets.some(({ name }) => name === 'script.js')
   }
 }
 

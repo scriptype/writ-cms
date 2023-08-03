@@ -3,7 +3,7 @@ const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 const { finaliseTemplate } = require('../../../routines')
 
-const renderHomePage = async (render, { categories, posts }) => {
+const renderHomePage = async (render, { categories, posts, customTheme }) => {
   const { site, out } = Settings.getSettings()
   return render({
     path: join(out, 'index.html'),
@@ -12,6 +12,7 @@ const renderHomePage = async (render, { categories, posts }) => {
       site,
       posts,
       categories,
+      customTheme,
       debug: Debug.getDebug()
     }
   })

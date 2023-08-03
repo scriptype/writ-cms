@@ -3,7 +3,7 @@ const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 const { finaliseTemplate } = require('../../../routines')
 
-const renderSubpages = (render, { subpages }) => {
+const renderSubpages = (render, { subpages, customTheme }) => {
   const { out } = Settings.getSettings()
   const compilation = subpages.map(async (subpage) => {
     const type = subpage.type || 'subpage'
@@ -14,6 +14,7 @@ const renderSubpages = (render, { subpages }) => {
       ),
       data: {
         ...subpage,
+        customTheme,
         debug: Debug.getDebug()
       }
     })

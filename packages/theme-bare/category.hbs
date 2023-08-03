@@ -6,6 +6,7 @@
         <meta name="description" content="{{site.description}}" />
         <title>{{category.name}} / {{site.title}}</title>
         <link rel="stylesheet" href="/assets/bare/style/style.css">
+        {{>custom-style}}
     </head>
 
     <body>
@@ -34,6 +35,7 @@
                 {{/each}}
             </main>
         </div>
+        {{>custom-script}}
     </body>
 
 </html>
