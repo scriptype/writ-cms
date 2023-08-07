@@ -1,0 +1,12 @@
+{{#>m-doc}}
+  theme/post-photo.hbs
+
+  Photo post page template.
+  Display post content within the standard, outer shell.
+{{/m-doc}}
+{{#>base page="post"}}
+  {{#>layout-single-column}}
+    {{>nav}}
+    {{>content-post-photo}}
+  {{/layout-single-column}}
+{{/base}}
