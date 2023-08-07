@@ -112,9 +112,9 @@ const matchesExtension = (extension, acceptedExtensions) => {
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 const isPartial = ({ extension }) => matchesExtension(extension, partialExtensions)
 
-const parseTemplate = ({ content, extension, localAssets, permalink }) => {
+const parseTemplate = ({ content, extension, localAssets, permalink, isSubpage }) => {
   const { attributes, body } = frontMatter(content)
-  const type = attributes.type || 'text'
+  const type = attributes.type || (isSubpage ? 'subpage' : 'text')
   const HTMLContent = getHTMLContent(body, extension)
   return {
     type,

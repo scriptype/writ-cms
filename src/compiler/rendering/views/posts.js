@@ -21,7 +21,7 @@ const mkdirPostFolder = async (post) => {
   }
 }
 
-const renderPosts = (render, { posts, customTheme }) => {
+const renderPosts = (render, { categories, posts, customTheme }) => {
   const compilation = posts.map(async post => {
     if (post.foldered) {
       await mkdirPostFolder(post)
@@ -33,6 +33,7 @@ const renderPosts = (render, { posts, customTheme }) => {
       ),
       data: {
         ...post,
+        categories,
         customTheme,
         debug: Debug.getDebug()
       }

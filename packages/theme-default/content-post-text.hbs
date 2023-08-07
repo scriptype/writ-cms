@@ -1,0 +1,17 @@
+{{#>m-doc}}
+  theme/content-post-text.hbs
+
+  Content container for a text post page.
+  Displays title, the content and footer
+{{/m-doc}}
+<main class="content" id="posts-container">
+    <article class="post post--text">
+        <header class="post-header">
+            <h2>{{title}}</h2>
+        </header>
+        <section class="post-content">
+            {{> @partial-block }}
+        </section>
+        {{>content-post-footer}}
+    </article>
+</main>

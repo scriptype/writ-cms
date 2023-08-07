@@ -21,6 +21,7 @@ const renderCategoryPages = (render, { categories, customTheme }) => {
       path: join(dir, 'index.html'),
       content: await finaliseTemplate('{{>category}}'),
       data: {
+        categories,
         category,
         customTheme,
         posts: category.posts,

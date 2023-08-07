@@ -1,0 +1,12 @@
+{{#>m-doc}}
+  theme/categories.hbs
+
+  Lists each category as a text link.
+{{/m-doc}}
+<div class="categories">
+    {{#each categories as |category|}}
+        <a class="categories-item" href="{{category.permalink}}">
+            {{category.name}}
+        </a>
+    {{/each}}
+</div>

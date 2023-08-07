@@ -1,0 +1,42 @@
+{{#>m-doc}}
+  theme/content-post-footer.hbs
+
+  Post footer.
+  Displays metadata such as date, category and tags, as well as musiclist and
+  links to previous/next posts (if any).
+{{/m-doc}}
+<footer class="post-footer">
+    <section class="post-footer-section">
+        <table class="post-metadata">
+            <tr class="post-metadata-date">
+                <td>Published at</td>
+                <td>{{publishedAtMedium}}</td>
+            </tr>
+            {{#if category}}
+            <tr class="post-metadata-category">
+                <td>Category</td>
+                <td><a href="{{category.permalink}}">{{category.name}}</a></td>
+            </tr>
+            {{/if}}
+            {{#if tags}}
+            <tr class="post-metadata-tags">
+                <td>Tags</td>
+                <td>{{tags}}</td>
+            </tr>
+            {{/if}}
+        </table>
+    </section>
+    {{#if musiclist}}
+    <section class="post-footer-section">
+        <ul class="post-music-list">
+            {{{multiLineTextList musiclist}}}
+        </ul>
+    </section>
+    {{/if}}
+    {{#if links.prevPost}}
+        <a href="{{links.prevPost.permalink}}">&laquo; {{links.prevPost.title}}</a>
+    {{/if}}
+    {{#if links.nextPost}}
+        <a href="{{links.nextPost.permalink}}">{{links.nextPost.title}} &raquo;</a>
+    {{/if}}
+</footer>

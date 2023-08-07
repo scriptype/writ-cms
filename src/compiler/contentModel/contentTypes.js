@@ -104,7 +104,10 @@ const createSubpage = (fsObject) => {
     type: contentTypes.SUBPAGE,
     data: {
       title,
-      ...parseTemplate(fsObject),
+      ...parseTemplate({
+        ...fsObject,
+        isSubpage: true
+      }),
       slug: getSlug(title),
       site,
     }

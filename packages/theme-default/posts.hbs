@@ -1,0 +1,13 @@
+{{#>m-doc}}
+  theme/posts.hbs
+
+  List of posts.
+{{/m-doc}}
+{{#each posts as |post|}}
+  {{#if (isPostType 'photo' post.type)}}
+    {{>posts-photo post=post}}
+  {{/if}}
+  {{#if (isPostType 'text' post.type)}}
+    {{>posts-text post=post}}
+  {{/if}}
+{{/each}}

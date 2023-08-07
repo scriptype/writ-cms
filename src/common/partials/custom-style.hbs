@@ -1,3 +1,12 @@
 {{#if (hasCustomStyle)}}
-  <link rel="stylesheet" href="{{assetsPath}}/custom/style.css">
+{{#>m-doc}}
+  theme/style.css
+
+  Custom stylesheet.
+{{/m-doc}}
+<link rel="stylesheet" href="{{assetsPath}}/custom/style.css">
+{{else}}
+{{#>m-doc}}
+  If you create a style.css file inside theme folder, it will be loaded here.
+{{/m-doc}}
 {{/if}}

@@ -1,0 +1,11 @@
+{{#>m-doc}}
+  theme/page-script.hbs
+
+  Page-specific scripts.
+{{/m-doc}}
+{{#if (isPostPage) }}
+  <script type="text/javascript" src="{{assetsPath}}/default/scripts/post-text.js"></script>
+{{/if}}
+{{#if (isSubPage) }}
+  <script type="text/javascript" src="{{assetsPath}}/default/scripts/post-text.js"></script>
+{{/if}}
