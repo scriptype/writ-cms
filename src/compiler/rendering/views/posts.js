@@ -29,7 +29,7 @@ const renderPosts = (render, { categories, posts, customTheme }) => {
     return render({
       path: getExportPath(post),
       content: await finaliseTemplate(
-        `{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`
+        `{{>m-doc-greeting}}{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`
       ),
       data: {
         ...post,

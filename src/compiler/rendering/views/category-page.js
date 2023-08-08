@@ -19,7 +19,7 @@ const renderCategoryPages = (render, { categories, customTheme }) => {
     await mkdirCategoryFolder(dir)
     return render({
       path: join(dir, 'index.html'),
-      content: await finaliseTemplate('{{>category}}'),
+      content: await finaliseTemplate('{{>m-doc-greeting}}{{>category}}'),
       data: {
         categories,
         category,

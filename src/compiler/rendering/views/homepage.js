@@ -7,7 +7,7 @@ const renderHomePage = async (render, { categories, posts, customTheme }) => {
   const { site, out } = Settings.getSettings()
   return render({
     path: join(out, 'index.html'),
-    content: await finaliseTemplate('{{>index}}'),
+    content: await finaliseTemplate('{{>m-doc-greeting}}{{>index}}'),
     data: {
       site,
       posts,

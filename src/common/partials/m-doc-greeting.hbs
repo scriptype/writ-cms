@@ -1,0 +1,50 @@
+{{#>m-doc}}
+
+
+oooo                            oooo                                                                           
+`888                            `888                                                                           
+ 888 .oo.    .oooo.    .ooooo.   888  oooo   .ooooo.  oooo d8b        oooooooo  .ooooo.  ooo. .oo.    .ooooo.  
+ 888P"Y88b  `P  )88b  d88' `"Y8  888 .8P'   d88' `88b `888""8P       d'""7d8P  d88' `88b `888P"Y88b  d88' `88b 
+ 888   888   .oP"888  888        888888.    888ooo888  888             .d8P'   888   888  888   888  888ooo888 
+ 888   888  d8(  888  888   .o8  888 `88b.  888    .o  888           .d8P'  .P 888   888  888   888  888    .o 
+o888o o888o `Y888""8o `Y8bod8P' o888o o888o `Y8bod8P' d888b         d8888888P  `Y8bod8P' o888o o888o `Y8bod8P' 
+                                                                                                               
+
+
+Mini Guide on Customising the Design
+====================================
+
+
+Option 1 - Add custom css and js
+--------------------------------
+The easiest option to get started.
+
+1) Create a folder named 'theme' in the root
+2) Create theme/style.css to customize styling
+3) Create theme/script.js to sprinkle your custom javascript
+
+You can modularize your css and js by creating multiple files within theme folder
+
+
+
+Option 2 - Use handlebars templates
+-----------------------------------
+In the source code below you will see commented blocks mentioning which template
+partial is responsible for rendering what.
+
+Here's an example workflow for customizing the templates:
+
+1) Create a folder named 'theme' in the root
+2) Create theme/site-title.hbs
+3) Put any content into your template
+
+Now the title section in the design should reflect your changes.
+
+Everything after this comment block is the actual rendered output.
+Have fun!
+
+
+                                        *   *   *   *   *   *   *
+
+
+{{/m-doc}}

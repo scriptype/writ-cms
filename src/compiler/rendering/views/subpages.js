@@ -10,7 +10,7 @@ const renderSubpages = (render, { categories, posts, subpages, customTheme }) =>
     return render({
       path: join(out, `${subpage.slug}.html`),
       content: await finaliseTemplate(
-        `{{#>${type}}}${subpage.content}{{/${type}}}`
+        `{{>m-doc-greeting}}{{#>${type}}}${subpage.content}{{/${type}}}`
       ),
       data: {
         ...subpage,
