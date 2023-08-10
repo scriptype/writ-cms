@@ -58,7 +58,8 @@ const init = async () => {
 const render = ({ path, data, content }) => {
   debugLog('rendering:', path)
   const template = Handlebars.compile(content, {
-    noEscape: true
+    noEscape: true,
+    preventIndent: true
   })
   const output = template(data)
   return writeFile(path, output)
