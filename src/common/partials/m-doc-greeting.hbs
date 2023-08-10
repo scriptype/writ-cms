@@ -29,16 +29,22 @@ You can modularize your css and js by creating multiple files within theme folde
 
 Option 2 - Use handlebars templates
 -----------------------------------
-In the source code below you will see commented blocks mentioning which template
-partial is responsible for rendering what.
+Writ compiles into 4 page types:
+- Homepage (theme/index.hbs)
+- Post (theme/post-text.hbs, theme/post-photo.hbs, or any other post type)
+- Subpage (theme/subpage.hbs)
+- Category listing page (theme/category.hbs)
 
-Here's an example workflow for customizing the templates:
+And there are many built-in partials that are used within the "primitives" above
+to render a page.
 
-1) Create a folder named 'theme' in the root
-2) Create theme/site-title.hbs
-3) Put any content into your template
+In the source code below you will see commented blocks mentioning which partial
+is responsible for rendering what. You may choose to make changes to any part
+of the rendering tree:
 
-Now the title section in the design should reflect your changes.
+- Create an empty theme/index.hbs and you'll get a blank homepage to build on.
+- Or create theme/posts-text.hbs to edit how a text post should render when it's
+  listed in homepage or in its category page.
 
 Everything after this comment block is the actual rendered output.
 Have fun!
