@@ -14,7 +14,10 @@ const startUp = async ({ mode, rootDirectory, watch, debug }) => {
     rootDirectory
   })
   await Expansions.init()
+  await require('./custom-theme').init()
+  await require('./create-site-dir').createSiteDir()
   await require('./compiler').compile()
+  await require('./scaffolding').scaffoldSite()
   if (mode === 'start' && watch !== false) {
     return require('./preview').init()
   }

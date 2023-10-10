@@ -26,8 +26,8 @@ const defaultSettings = (rootDirectory) => ({
   ]
 })
 
-const getIgnoreRegExp = ({ ignorePaths, exportDirectory }) => {
-  return new RegExp(ignorePaths.concat(exportDirectory).join('|'), 'i')
+const getIgnoreRegExp = ({ ignorePaths, exportDirectory, themeDirectory }) => {
+  return new RegExp(ignorePaths.concat(exportDirectory, themeDirectory).join('|'), 'i')
 }
 
 let _defaultSettings = defaultSettings('.')

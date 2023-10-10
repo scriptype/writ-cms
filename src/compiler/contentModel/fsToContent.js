@@ -1,7 +1,6 @@
 const {
   pagesDirectory,
-  assetsDirectory,
-  themeDirectory
+  assetsDirectory
 } = require('../../settings').getSettings()
 
 const {
@@ -16,8 +15,7 @@ const {
   createFolderedPost,
   createFolderedPostIndex,
   createUnrecognizedDirectory,
-  createUnrecognizedFile,
-  createCustomTheme
+  createUnrecognizedFile
 } = require('./contentTypes')
 
 const mapFSIndexToContentTree = (fsTree) => {
@@ -37,9 +35,6 @@ const mapFSIndexToContentTree = (fsTree) => {
       }
       if (fsObject.name === pagesDirectory) {
         return createSubpages(fsObject)
-      }
-      if (fsObject.name === themeDirectory) {
-        return createCustomTheme(fsObject)
       }
       if (fsObject.name === assetsDirectory) {
         return createAssets(fsObject)

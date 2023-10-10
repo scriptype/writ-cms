@@ -1,30 +1,42 @@
-const { resolve } = require('path')
+const { join, resolve, extname } = require('path')
+const { readdir } = require('fs/promises')
 const { debugLog } = require('./debug')
 const Settings = require('./settings')
 
 module.exports = {
-  init(theme) {
-    this.customTheme = theme
-    return this
+  async init() {
+    const { themeDirectory, IGNORE_PATHS_REG_EXP } = Settings.getSettings()
+    try {
+      this.assets = (await readdir(themeDirectory))
+        .filter(path => {
+          return (
+            !path.startsWith('_') &&
+            !path.startsWith('.') &&
+            !path.match(IGNORE_PATHS_REG_EXP) &&
+            extname(path) !== '.hbs' &&
+            extname(path) !== '.handlebars' &&
+            path !== 'template-helpers.js'
+          )
+        })
+        .map(path => join(themeDirectory, path))
+    } catch {
+      this.assets = []
+    }
   },
 
   use(type, value) {
-    if (!this.customTheme) {
-      return value
-    }
-
-    const { rootDirectory } = Settings.getSettings()
+    const { themeDirectory } = Settings.getSettings()
 
     switch (type) {
       case "templatePartials":
         return [
           ...value,
-          resolve(rootDirectory, './theme')
+          resolve(themeDirectory)
         ]
 
       case "templateHelpers":
         let helpers = {}
-        const templateHelpersPath = resolve(rootDirectory, './theme', 'template-helpers.js')
+        const templateHelpersPath = resolve(themeDirectory, 'template-helpers.js')
         try {
           helpers = require(templateHelpersPath)
         } catch (e) {
@@ -38,8 +50,8 @@ module.exports = {
       case "assets":
         return [
           ...value,
-          ...this.customTheme.assets.map(asset => ({
-            src: resolve(rootDirectory, asset.path),
+          ...this.assets.map(path => ({
+            src: resolve(path),
             dest: 'custom',
             single: true
           }))

@@ -1,24 +1,8 @@
-const { rm, cp, mkdir } = require('fs/promises')
+const { cp, mkdir } = require('fs/promises')
 const { resolve, join, basename } = require('path')
-const { exec } = require('child_process')
-const { getSlug } = require('../helpers')
-const { mode, theme, exportDirectory, assetsDirectory, out } = require('../settings').getSettings()
-const Debug = require('../debug')
-const { finaliseAssets } = require('../routines')
-
-const createSiteDir = async () => {
-  Debug.debugLog('create site directory')
-  if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {
-    throw new Error(`Dangerous export directory: "${exportDirectory}". Won't continue.`)
-  }
-  try {
-    await rm(out, { recursive: true })
-  }
-  catch (ENOENT) {}
-  finally {
-    return mkdir(out)
-  }
-}
+const { mode, theme, assetsDirectory, out } = require('./settings').getSettings()
+const Debug = require('./debug')
+const { finaliseAssets } = require('./routines')
 
 const ensureDirectory = async (path) => {
   Debug.debugLog('ensure directory', path)
@@ -49,7 +33,7 @@ const copyAsset = async ({ src, dest }) => {
 const copyThemeAssets = () => {
   Debug.debugLog('copy theme assets')
   return copyAssetsDirectory({
-    src: join(__dirname, '..', '..', 'packages', `theme-${theme}`, 'assets'),
+    src: join(__dirname, '..', 'packages', `theme-${theme}`, 'assets'),
     dest: theme
   })
 }
@@ -57,7 +41,7 @@ const copyThemeAssets = () => {
 const copyCommonAssets = () => {
   Debug.debugLog('copy common assets')
   return copyAssetsDirectory({
-    src: join(__dirname, '..', 'common', 'assets'),
+    src: join(__dirname, 'common', 'assets'),
     dest: 'common'
   })
 }
@@ -81,7 +65,6 @@ module.exports = {
   scaffoldSite() {
     Debug.debugLog('scaffolding')
     this.scaffold = this.scaffold
-      .then(createSiteDir)
       .then(ensureAssetsDirectory)
       .then(() => {
         if (mode === 'build') {

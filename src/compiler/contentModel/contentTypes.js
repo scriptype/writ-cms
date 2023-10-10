@@ -2,7 +2,7 @@ const _ = require('lodash')
 const { dirname, join } = require('path')
 const { site, permalinkPrefix, defaultCategoryName } = require('../../settings').getSettings()
 const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
-const { isTemplate, isPartial, parseTemplate } = require('./templating')
+const { isTemplate, parseTemplate } = require('./templating')
 
 const contentTypes = {
   POST: 'post',
@@ -14,9 +14,7 @@ const contentTypes = {
   LOCAL_ASSET: 'localAsset',
   FOLDERED_POST_INDEX: 'folderedPostIndex',
   UNRECOGNIZED_DIRECTORY: 'unrecognizedDirecoty',
-  UNRECOGNIZED_FILE: 'unrecognizedFile',
-  CUSTOM_THEME_FOLDER: 'themeFolder',
-  CUSTOM_THEME_PARTIAL: 'customThemePartial'
+  UNRECOGNIZED_FILE: 'unrecognizedFile'
 }
 
 const isPost = (fsObject) => {
@@ -71,10 +69,6 @@ const isFolderedPostIndexFile = (fsObject) => {
   return isPostFile(fsObject) && fsObject.name.match(/^(index|post)\..+$/)
 }
 
-const isTemplateHelpersFile = (fsObject) => {
-  return fsObject.name === 'template-helpers.js'
-}
-
 const createAsset = (fsObject) => {
   return {
     ...fsObject,
@@ -119,29 +113,6 @@ const createSubpages = (fsObject) => {
     ...fsObject,
     type: contentTypes.SUBPAGES,
     data: fsObject.children.map(createSubpage)
-  }
-}
-
-const createCustomThemePartial = ({ name, path, content }) => {
-  return {
-    type: contentTypes.CUSTOM_THEME_PARTIAL,
-    partialName: name.split('.')[0],
-    name,
-    path,
-    content
-  }
-}
-
-const createCustomTheme = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.CUSTOM_THEME_FOLDER,
-    data: {
-      name: 'custom',
-      assets: fsObject.children.filter(c => !isPartial(c) && !isTemplateHelpersFile(c)).map(createLocalAsset),
-      partials: fsObject.children.filter(isPartial),
-      helpers: fsObject.children.find(isTemplateHelpersFile)
-    }
   }
 }
 
@@ -282,7 +253,6 @@ module.exports = {
   hasContent,
   isPostFile,
   isFolderedPostIndexFile,
-  isTemplateHelpersFile,
   createAsset,
   createAssets,
   createLocalAsset,
@@ -295,6 +265,5 @@ module.exports = {
   createDefaultCategoryPost,
   createPost,
   createUnrecognizedDirectory,
-  createUnrecognizedFile,
-  createCustomTheme
+  createUnrecognizedFile
 }

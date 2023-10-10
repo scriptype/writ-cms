@@ -28,8 +28,7 @@ const createContentModel = (contentTree) => {
     posts: [],
     unrecognized: [],
     localAssets: [],
-    postsJSON: [],
-    customTheme: null
+    postsJSON: []
   }
 
   contentTree.forEach(content => {
@@ -53,12 +52,6 @@ const createContentModel = (contentTree) => {
 
       case contentTypes.SUBPAGES:
         ContentModel.subpages.push(...content.data.map(({ data }) => data))
-        break
-
-      case contentTypes.CUSTOM_THEME_FOLDER:
-        ContentModel.customTheme = {
-          ...content.data
-        }
         break
 
       case contentTypes.ASSETS:

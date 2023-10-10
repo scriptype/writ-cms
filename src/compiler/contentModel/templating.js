@@ -7,7 +7,6 @@ marked.setOptions({
 
 const READ_MORE_DIVIDER = '{{seeMore}}'
 
-const partialExtensions = ['.hbs', '.handlebars']
 const templateExtensions = [
   '.hbs',
   '.handlebars',
@@ -110,7 +109,6 @@ const matchesExtension = (extension, acceptedExtensions) => {
 }
 
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
-const isPartial = ({ extension }) => matchesExtension(extension, partialExtensions)
 
 const parseTemplate = ({ content, extension, localAssets, permalink, isSubpage }) => {
   const { attributes, body } = frontMatter(content)
@@ -128,6 +126,5 @@ const parseTemplate = ({ content, extension, localAssets, permalink, isSubpage }
 
 module.exports = {
   isTemplate,
-  isPartial,
   parseTemplate
 }

@@ -12,7 +12,7 @@ const mkdirCategoryFolder = async (dirName) => {
   }
 }
 
-const renderCategoryPages = (render, { categories, customTheme }) => {
+const renderCategoryPages = (render, { categories }) => {
   const { site, out } = Settings.getSettings()
   const compilation = categories.map(async category => {
     const dir = join(out, category.slug)
@@ -23,7 +23,6 @@ const renderCategoryPages = (render, { categories, customTheme }) => {
       data: {
         categories,
         category,
-        customTheme,
         posts: category.posts,
         site,
         debug: Debug.getDebug()
