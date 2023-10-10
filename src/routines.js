@@ -17,7 +17,7 @@ const startUp = async ({ mode, rootDirectory, watch, debug }) => {
   await require('./custom-theme').init()
   await require('./create-site-dir').createSiteDir()
   await require('./compiler').compile()
-  await require('./scaffolding').scaffoldSite()
+  await require('./assets').copyAssets()
   if (mode === 'start' && watch !== false) {
     return require('./preview').init()
   }

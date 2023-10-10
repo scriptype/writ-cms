@@ -61,10 +61,10 @@ const copyExpandedAssets = async () => {
 }
 
 module.exports = {
-  scaffold: Promise.resolve(true),
-  scaffoldSite() {
-    Debug.debugLog('scaffolding')
-    this.scaffold = this.scaffold
+  promise: Promise.resolve(true),
+  copyAssets() {
+    Debug.debugLog('copying assets')
+    this.promise = this.promise
       .then(ensureAssetsDirectory)
       .then(() => {
         if (mode === 'build') {
@@ -76,6 +76,6 @@ module.exports = {
       .then(copyThemeAssets)
       .then(copyExpandedAssets)
 
-    return this.scaffold
+    return this.promise
   }
 }
