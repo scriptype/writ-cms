@@ -1,17 +1,14 @@
 const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
-const { finaliseTemplate } = require('../../../routines')
 
-const renderSubpages = (render, { categories, posts, subpages }) => {
+const renderSubpages = (Renderer, { categories, posts, subpages }) => {
   const { site, out } = Settings.getSettings()
-  const compilation = subpages.map(async (subpage) => {
+  const compilation = subpages.map((subpage) => {
     const type = subpage.type || 'subpage'
-    return render({
+    return Renderer.render({
       path: join(out, `${subpage.slug}.html`),
-      content: await finaliseTemplate(
-        `{{>m-doc-greeting}}{{#>${type}}}${subpage.content}{{/${type}}}`
-      ),
+      content: `{{>m-doc-greeting}}{{#>${type}}}${subpage.content}{{/${type}}}`,
       data: {
         ...subpage,
         site,

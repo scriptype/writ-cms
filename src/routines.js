@@ -2,6 +2,10 @@ const Debug = require('./debug')
 const Settings = require('./settings')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
+const CustomTheme = require('./custom-theme')
+const SiteDirectory = require('./site-directory')
+const Compiler = require('./compiler')
+const Assets = require('./assets')
 
 const startUp = async ({ mode, rootDirectory, watch, debug }) => {
   if (mode === 'start') {
@@ -14,10 +18,23 @@ const startUp = async ({ mode, rootDirectory, watch, debug }) => {
     rootDirectory
   })
   await Expansions.init()
-  await require('./custom-theme').init()
-  await require('./create-site-dir').createSiteDir()
-  await require('./compiler').compile()
-  await require('./assets').copyAssets()
+  await CustomTheme.init()
+  await SiteDirectory.create()
+  await Compiler.compile({
+    decorators: {
+      content: finalise('content'),
+      rendering: {
+        helpers: finalise('templateHelpers'),
+        partials: finalise('templatePartials'),
+        template: finalise('template')
+      }
+    }
+  })
+  await Assets.copyAssets({
+    decorators: {
+      assets: finalise('assets')
+    }
+  })
   if (mode === 'start' && watch !== false) {
     return require('./preview').init()
   }
@@ -31,19 +48,14 @@ const finalise =
       result = Expansions.expandBy(expansionHook)(value)
       result = Hooks.expand(expansionHook, result)
       result = require('./preview').use(expansionHook, result)
-      result = require('./custom-theme').use(expansionHook, result)
+      result = CustomTheme.use(expansionHook, result)
       return result
     }
   }
 
 const Routines = {
   startUp,
-  finaliseTemplate: finalise('template'),
-  finaliseTemplatePartials: finalise('templatePartials'),
-  finaliseTemplateHelpers: finalise('templateHelpers'),
-  finaliseAssets: finalise('assets'),
   finalisePreviewApi: finalise('previewApi'),
-  finaliseContent: finalise('content')
 }
 
 module.exports = Routines

@@ -2,7 +2,6 @@ const { mkdir } = require('fs/promises')
 const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
-const { finaliseTemplate } = require('../../../routines')
 
 const mkdirCategoryFolder = async (dirName) => {
   try {
@@ -12,14 +11,14 @@ const mkdirCategoryFolder = async (dirName) => {
   }
 }
 
-const renderCategoryPages = (render, { categories }) => {
+const renderCategoryPages = (Renderer, { categories }) => {
   const { site, out } = Settings.getSettings()
   const compilation = categories.map(async category => {
     const dir = join(out, category.slug)
     await mkdirCategoryFolder(dir)
-    return render({
+    return Renderer.render({
       path: join(dir, 'index.html'),
-      content: await finaliseTemplate('{{>m-doc-greeting}}{{>category}}'),
+      content: '{{>m-doc-greeting}}{{>category}}',
       data: {
         categories,
         category,

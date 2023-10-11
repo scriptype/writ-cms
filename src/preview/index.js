@@ -1,5 +1,5 @@
 const { resolve, join } = require('path')
-const settings = require('../settings')
+const Settings = require('../settings')
 const Watcher = require('./watcher')
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
     if (!this.started) {
       return value
     }
-    const { mode } = settings.getSettings()
+    const { mode } = Settings.getSettings()
     switch (type) {
       case "template":
         return value + (mode === 'start' ? '{{> preview }}' : '')

@@ -1,8 +1,9 @@
 const { rm, mkdir } = require('fs/promises')
-const { exportDirectory, out } = require('./settings').getSettings()
+const Settings = require('./settings')
 const Debug = require('./debug')
 
-const createSiteDir = async () => {
+const create = async () => {
+  const { exportDirectory, out } = Settings.getSettings()
   Debug.debugLog('create site directory', exportDirectory, out)
   if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {
     throw new Error(`Dangerous export directory: "${exportDirectory}". Won't continue.`)
@@ -17,5 +18,5 @@ const createSiteDir = async () => {
 }
 
 module.exports = {
-  createSiteDir
+  create
 }

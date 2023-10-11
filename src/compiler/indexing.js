@@ -1,10 +1,11 @@
 const fs = require('fs/promises')
 const { join, extname } = require('path')
 const { readFileContent, isDirectory } = require('../helpers')
-const { rootDirectory, IGNORE_PATHS_REG_EXP } = require('../settings').getSettings()
+const Settings = require('../settings')
 const { debugLog } = require('../debug')
 
 const shouldIncludePath = (path) => {
+  const { IGNORE_PATHS_REG_EXP } = Settings.getSettings()
   return (
     !path.startsWith('_') &&
     !path.startsWith('.') &&
@@ -30,6 +31,7 @@ const isTextFile = (extension) => {
 }
 
 const indexFileSystem = async (dir, depth = 0) => {
+  const { rootDirectory } = Settings.getSettings()
   const activePath = dir || rootDirectory
   debugLog('indexing activePath', activePath)
   return Promise.all(

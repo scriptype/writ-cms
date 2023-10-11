@@ -1,5 +1,4 @@
-const { finaliseContent } = require('../../routines')
-const { defaultCategoryName } = require('../../settings').getSettings()
+const Settings = require('../../settings')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
@@ -9,6 +8,7 @@ const sortPosts = (a, b) => {
 }
 
 const upsertDefaultCategory = (ContentModel, newContent) => {
+  const { defaultCategoryName } = Settings.getSettings()
   let defaultCategory = ContentModel.categories.find(
     category => category.name === defaultCategoryName
   )
@@ -77,9 +77,9 @@ const createContentModel = (contentTree) => {
 }
 
 module.exports = {
-  createContentModel(fileSystemIndex) {
+  createContentModel(fileSystemIndex, contentDecorator) {
     const contentTree = mapFSIndexToContentTree(fileSystemIndex)
     const contentModel = createContentModel(contentTree)
-    return finaliseContent(Linker.link(contentModel))
+    return contentDecorator(Linker.link(contentModel))
   },
 }

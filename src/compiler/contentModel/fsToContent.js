@@ -1,7 +1,4 @@
-const {
-  pagesDirectory,
-  assetsDirectory
-} = require('../../settings').getSettings()
+const Settings = require('../../settings')
 
 const {
   isPostFile,
@@ -19,6 +16,7 @@ const {
 } = require('./contentTypes')
 
 const mapFSIndexToContentTree = (fsTree) => {
+  const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return fsTree.map(fsObject => {
     const isDirectory = fsObject.children
     const isRootLevel = fsObject.depth === 0

@@ -1,6 +1,6 @@
 const Handlebars = require('handlebars')
 const { join } = require('path')
-const { permalinkPrefix, assetsDirectory, themeDirectory } = require('../settings').getSettings()
+const Settings = require('../settings')
 const CustomTheme = require('../custom-theme')
 
 module.exports = {
@@ -27,10 +27,12 @@ module.exports = {
   },
 
   assetsPath() {
+    const { permalinkPrefix, assetsDirectory } = Settings.getSettings()
     return join(permalinkPrefix, assetsDirectory)
   },
 
   permalinkPrefix() {
+    const { permalinkPrefix } = Settings.getSettings()
     return permalinkPrefix
   },
 
@@ -38,6 +40,7 @@ module.exports = {
     if (!CustomTheme.assets.length) {
       return false
     }
+    const { themeDirectory } = Settings.getSettings()
     return CustomTheme.assets.some((path) => path === `${themeDirectory}/style.css`)
   },
 
@@ -45,6 +48,7 @@ module.exports = {
     if (!CustomTheme.assets.length) {
       return false
     }
+    const { themeDirectory } = Settings.getSettings()
     return CustomTheme.assets.some((path) => path === `${themeDirectory}/script.js`)
   },
 

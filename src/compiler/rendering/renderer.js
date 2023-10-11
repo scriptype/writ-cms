@@ -3,23 +3,25 @@ const { readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../../helpers')
 const { debugLog } = require('../../debug')
-const { theme, mode, permalinkPrefix, assetsDirectory } = require('../../settings').getSettings()
-const { finaliseTemplatePartials, finaliseTemplateHelpers } = require('../../routines')
+const Settings = require('../../settings')
 
 const commonHelpers = require('../../common/template-helpers')
 
-const commonPartials = resolve(
+const commonPartialsPath = resolve(
   join(__dirname, '..', '..', 'common', 'partials')
 )
 
-const themePartials = resolve(
-  join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)
-)
+const getThemePartialsPath = () => {
+  const { theme } = Settings.getSettings()
+  return resolve(
+    join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)
+  )
+}
 
-const registerHelpers = () => {
+const registerHelpers = (helpersDecorator) => {
   const allHelpers = {
     ...commonHelpers,
-    ...finaliseTemplateHelpers(commonHelpers)
+    ...helpersDecorator(commonHelpers)
   }
   debugLog('registerHelpers', allHelpers)
   Handlebars.registerHelper(allHelpers)
@@ -44,28 +46,34 @@ const registerPartials = async (partialsPath) => {
   return Promise.all(register)
 }
 
-const init = async () => {
-  await Promise.all([
-    registerHelpers(),
-    registerPartials(commonPartials)
-  ])
-  await registerPartials(themePartials)
-  await Promise.all(
-    finaliseTemplatePartials([]).map(registerPartials)
-  )
-}
-
-const render = ({ path, data, content }) => {
-  debugLog('rendering:', path)
-  const template = Handlebars.compile(content, {
-    noEscape: true,
-    preventIndent: true
-  })
-  const output = template(data)
-  return writeFile(path, output)
-}
 
 module.exports = {
-  init,
-  render
+  decorators: {
+    helpers: _=>_,
+    partials: _=>_,
+    template: _=>_
+  },
+
+  async init (renderingDecorators) {
+    this.decorators = renderingDecorators
+    await Promise.all([
+      registerHelpers(renderingDecorators.helpers),
+      registerPartials(commonPartialsPath)
+    ])
+    await registerPartials(getThemePartialsPath())
+    await Promise.all(
+      renderingDecorators.partials([]).map(registerPartials)
+    )
+  },
+
+  async render({ path, data, content }) {
+    debugLog('rendering:', path)
+    const decoratedContent = await this.decorators.template(content)
+    const template = Handlebars.compile(decoratedContent, {
+      noEscape: true,
+      preventIndent: true
+    })
+    const output = template(data)
+    return writeFile(path, output)
+  }
 }

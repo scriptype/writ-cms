@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
-const { site, permalinkPrefix, defaultCategoryName } = require('../../settings').getSettings()
+const Settings = require('../../settings')
 const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
 const { isTemplate, parseTemplate } = require('./templating')
 
@@ -92,6 +92,7 @@ const createLocalAsset = (fsObject) => {
 }
 
 const createSubpage = (fsObject) => {
+  const { site } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   return {
     ...fsObject,
@@ -117,6 +118,7 @@ const createSubpages = (fsObject) => {
 }
 
 const createCategory = (fsObject) => {
+  const { permalinkPrefix } = Settings.getSettings()
   const slug = getSlug(fsObject.name)
   const data = {
     name: fsObject.name,
@@ -133,6 +135,7 @@ const createCategory = (fsObject) => {
 }
 
 const createDefaultCategory = () => {
+  const { defaultCategoryName } = Settings.getSettings()
   return createCategory({
     name: defaultCategoryName,
     children: []
@@ -147,6 +150,7 @@ const createFolderedPostIndex = (fsObject) => {
 }
 
 const createFolderedPost = (fsObject) => {
+  const { site, permalinkPrefix } = Settings.getSettings()
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
@@ -180,6 +184,7 @@ const createFolderedPost = (fsObject) => {
 }
 
 const createDefaultCategoryPost = (fsObject) => {
+  const { site, defaultCategoryName, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const permalink = replaceExtension(join(permalinkPrefix, slug), '.html')
@@ -202,6 +207,7 @@ const createDefaultCategoryPost = (fsObject) => {
 }
 
 const createPost = (fsObject) => {
+  const { site, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const category = dirname(fsObject.path)

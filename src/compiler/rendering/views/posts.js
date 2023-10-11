@@ -3,7 +3,6 @@ const { join, format, dirname } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 const { getSlug, replaceExtension } = require('../../../helpers')
-const { finaliseTemplate } = require('../../../routines')
 
 const getExportPath = (post) => {
   const { out } = Settings.getSettings()
@@ -21,16 +20,14 @@ const mkdirPostFolder = async (post) => {
   }
 }
 
-const renderPosts = (render, { categories, posts }) => {
+const renderPosts = (Renderer, { categories, posts }) => {
   const compilation = posts.map(async post => {
     if (post.foldered) {
       await mkdirPostFolder(post)
     }
-    return render({
+    return Renderer.render({
       path: getExportPath(post),
-      content: await finaliseTemplate(
-        `{{>m-doc-greeting}}{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`
-      ),
+      content: `{{>m-doc-greeting}}{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`,
       data: {
         ...post,
         categories,

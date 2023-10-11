@@ -1,4 +1,4 @@
-const { init, render } = require('./renderer')
+const Renderer = require('./renderer')
 
 const Views = {
   renderCategoryPages: require('./views/category-page'),
@@ -11,18 +11,18 @@ const Views = {
 
 module.exports = {
   renderPromise: Promise.resolve(true),
-  async render(contentModel) {
+  async render(contentModel, renderingDecorators) {
     await this.renderPromise
-    await init()
+    await Renderer.init(renderingDecorators)
 
     this.renderPromise = Promise.all([
-      Views.renderHomepage(render, contentModel),
-      Views.renderSubpages(render, contentModel),
+      Views.renderHomepage(Renderer, contentModel),
+      Views.renderSubpages(Renderer, contentModel),
       Views.renderPostsJSON(contentModel),
       Views.copyLocalAssets(contentModel),
-      Views.renderCategoryPages(render, contentModel),
+      Views.renderCategoryPages(Renderer, contentModel),
     ]).then(() =>
-      Views.renderPosts(render, contentModel)
+      Views.renderPosts(Renderer, contentModel)
     )
     return this.renderPromise
   }
