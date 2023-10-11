@@ -70,13 +70,7 @@ module.exports = {
     const { mode } = Settings.getSettings()
     this.promise = this.promise
       .then(ensureAssetsDirectory)
-      .then(() => {
-        if (mode === 'build') {
-          return copyCommonAssets()
-        }
-        Debug.debugLog('⚠️  Skipping copying common assets in watch mode.')
-        return Promise.resolve()
-      })
+      .then(copyCommonAssets)
       .then(copyThemeAssets)
       .then(decorateAssets(decorators.assets))
 

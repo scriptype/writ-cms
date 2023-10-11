@@ -6,13 +6,18 @@ const CustomTheme = require('./custom-theme')
 const SiteDirectory = require('./site-directory')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
+const Preview = require('./preview')
+const Watcher = require('./watcher')
 
-const startUp = async ({ mode, rootDirectory, watch, debug }) => {
-  if (mode === 'start') {
-    console.log('⚠️  Watch out for frustration.')
+const startUp = async ({ watch, ...rest }) => {
+  await run({ ...rest })
+  if (watch) {
+    startWatcher({ ...rest })
   }
+}
+
+const run = async ({ mode, rootDirectory, debug }) => {
   Debug.init(debug)
-  Debug.debugLog('startUp', { mode, rootDirectory, watch, debug })
   await Settings.init({
     mode,
     rootDirectory
@@ -35,10 +40,17 @@ const startUp = async ({ mode, rootDirectory, watch, debug }) => {
       assets: finalise('assets')
     }
   })
-  if (mode === 'start' && watch !== false) {
-    return require('./preview').init()
-  }
-  return Promise.resolve()
+}
+
+const startWatcher = (...args) => {
+  return Watcher.init({
+    decorators: {
+      previewApi: finalise('previewApi')
+    },
+    onChange() {
+      return run(...args)
+    }
+  })
 }
 
 const finalise =
@@ -47,7 +59,7 @@ const finalise =
       let result
       result = Expansions.expandBy(expansionHook)(value)
       result = Hooks.expand(expansionHook, result)
-      result = require('./preview').use(expansionHook, result)
+      result = Preview.use(expansionHook, result)
       result = CustomTheme.use(expansionHook, result)
       return result
     }
@@ -55,7 +67,8 @@ const finalise =
 
 const Routines = {
   startUp,
-  finalisePreviewApi: finalise('previewApi'),
+  run,
+  startWatcher
 }
 
 module.exports = Routines

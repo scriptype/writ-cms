@@ -1,6 +1,5 @@
 const bs = require('browser-sync').create()
 const { resolve } = require('path')
-const writ = require('../')
 const Settings = require('../settings')
 const Debug = require('../debug')
 const api = require('./api')
@@ -23,7 +22,7 @@ const watchOptions = {
 Debug.debugLog('watch options', watchOptions)
 
 module.exports = {
-  init() {
+  init({ decorators, onChange }) {
     const { rootDirectory, exportDirectory } = Settings.getSettings()
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
@@ -31,21 +30,11 @@ module.exports = {
     Debug.debugLog('watch', watchDir)
     Debug.debugLog('serve', serverDir)
 
-    let compilePromise = writ.start({
-      rootDirectory,
-      watch: false,
-      debug: Debug.getDebug()
-    })
+    let compilePromise = Promise.resolve()
 
     bs.watch(watchDir, watchOptions, (e, file) => {
       console.log(new Date(), file)
-      compilePromise = compilePromise.then(() => {
-        return writ.start({
-          rootDirectory,
-          watch: false,
-          debug: Debug.getDebug()
-        })
-      })
+      compilePromise = compilePromise.then(onChange)
       bs.reload()
     })
 
@@ -53,7 +42,7 @@ module.exports = {
       server: serverDir,
       watch: true,
       ui: false,
-      middleware: api.create(compilePromise, Settings),
+      middleware: api.create(compilePromise, decorators.previewApi),
       notify: false
     })
   }

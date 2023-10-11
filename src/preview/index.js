@@ -1,17 +1,8 @@
 const { resolve, join } = require('path')
 const Settings = require('../settings')
-const Watcher = require('./watcher')
 
 module.exports = {
-  init() {
-    Watcher.init()
-    this.started = true
-  },
-
   use(type, value) {
-    if (!this.started) {
-      return value
-    }
     const { mode } = Settings.getSettings()
     switch (type) {
       case "template":

@@ -2,12 +2,12 @@ const { getDefaultSettings } = require('./settings')
 const Hooks = require('./hooks')
 const { startUp } = require('./routines')
 
-const start = async ({ rootDirectory, watch, debug } = {}) => {
-  return startUp({
+const start = async ({ rootDirectory, debug } = {}) => {
+  await startUp({
     mode: 'start',
     rootDirectory,
-    watch,
-    debug
+    watch: true,
+    debug,
   })
 }
 
