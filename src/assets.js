@@ -49,11 +49,10 @@ const copyCommonAssets = () => {
   })
 }
 
-const decorateAssets = (assetsDecorator) => async () => {
+const decorateAssets = (assetsDecorator) => {
   Debug.debugLog('copy expanded assets')
-  const finalAssets = await assetsDecorator([])
-  return await Promise.all(
-    finalAssets.map((assetEntry) => {
+  return Promise.all(
+    assetsDecorator([]).map((assetEntry) => {
       if (assetEntry.single) {
         return copyAsset(assetEntry)
       } else {
@@ -70,9 +69,11 @@ module.exports = {
     const { mode } = Settings.getSettings()
     this.promise = this.promise
       .then(ensureAssetsDirectory)
-      .then(copyCommonAssets)
-      .then(copyThemeAssets)
-      .then(decorateAssets(decorators.assets))
+      .then(() => Promise.all([
+        copyCommonAssets(),
+        copyThemeAssets(),
+        decorateAssets(decorators.assets)
+      ]))
 
     return this.promise
   }

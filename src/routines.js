@@ -18,6 +18,7 @@ const startUp = async ({ watch, ...rest }) => {
 
 const run = async ({ mode, rootDirectory, debug }) => {
   Debug.init(debug)
+  Debug.timeStart('run')
   await Settings.init({
     mode,
     rootDirectory
@@ -40,6 +41,7 @@ const run = async ({ mode, rootDirectory, debug }) => {
       assets: finalise('assets')
     }
   })
+  Debug.timeEnd('run')
 }
 
 const startWatcher = (...args) => {
