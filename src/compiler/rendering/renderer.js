@@ -5,24 +5,8 @@ const { isDirectory, readFileContent } = require('../../helpers')
 const { debugLog } = require('../../debug')
 const Settings = require('../../settings')
 
-const commonHelpers = require('../../common/template-helpers')
-
-const commonPartialsPath = resolve(
-  join(__dirname, '..', '..', 'common', 'partials')
-)
-
-const getThemePartialsPath = () => {
-  const { theme } = Settings.getSettings()
-  return resolve(
-    join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)
-  )
-}
-
 const registerHelpers = (helpersDecorator) => {
-  const allHelpers = {
-    ...commonHelpers,
-    ...helpersDecorator(commonHelpers)
-  }
+  const allHelpers = helpersDecorator({})
   debugLog('registerHelpers', allHelpers)
   Handlebars.registerHelper(allHelpers)
 }
@@ -40,7 +24,7 @@ const registerPartials = async (partialsPath) => {
   const register = files.map(async (path) => {
     const name = path.replace(extname(path), '')
     const fileContent = await readFileContent(join(partialsPath, path))
-    debugLog('registerPartial', name, join(partialsPath, path))
+    debugLog('registerPartial', join(partialsPath, path), name)
     Handlebars.registerPartial(name, fileContent)
   })
   return Promise.all(register)
@@ -56,14 +40,11 @@ module.exports = {
 
   async init (renderingDecorators) {
     this.decorators = renderingDecorators
-    await Promise.all([
-      registerHelpers(renderingDecorators.helpers),
-      registerPartials(commonPartialsPath)
-    ])
-    await registerPartials(getThemePartialsPath())
-    await Promise.all(
-      renderingDecorators.partials([]).map(registerPartials)
-    )
+    registerHelpers(renderingDecorators.helpers)
+    const decoratedPartials = renderingDecorators.partials([])
+    await decoratedPartials.reduce((prev, path) => {
+      return prev.then(() => registerPartials(path))
+    }, Promise.resolve())
   },
 
   async render({ path, data, content }) {

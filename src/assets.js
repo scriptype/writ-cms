@@ -32,23 +32,6 @@ const copyAsset = async ({ src, dest }) => {
   return cp(src, join(targetDirectory, basename(src)))
 }
 
-const copyThemeAssets = () => {
-  Debug.debugLog('copy theme assets')
-  const { theme } = Settings.getSettings()
-  return copyAssetsDirectory({
-    src: join(__dirname, '..', 'packages', `theme-${theme}`, 'assets'),
-    dest: theme
-  })
-}
-
-const copyCommonAssets = () => {
-  Debug.debugLog('copy common assets')
-  return copyAssetsDirectory({
-    src: join(__dirname, 'common', 'assets'),
-    dest: 'common'
-  })
-}
-
 const decorateAssets = (assetsDecorator) => {
   Debug.debugLog('copy expanded assets')
   return Promise.all(
@@ -69,11 +52,7 @@ module.exports = {
     const { mode } = Settings.getSettings()
     this.promise = this.promise
       .then(ensureAssetsDirectory)
-      .then(() => Promise.all([
-        copyCommonAssets(),
-        copyThemeAssets(),
-        decorateAssets(decorators.assets)
-      ]))
+      .then(() => decorateAssets(decorators.assets))
 
     return this.promise
   }

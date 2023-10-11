@@ -62,7 +62,7 @@ const expandTemplateHelpers = (helpers) => {
 
 const expandTemplatePartials = (partials) => {
   return [
-    partials,
+    ...partials,
     ...hooks.templatePartials.map(_=>_())
   ]
 }

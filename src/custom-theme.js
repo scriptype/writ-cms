@@ -56,9 +56,7 @@ module.exports = {
         const templateHelpersPath = resolve(themeDirectory, 'template-helpers.js')
         try {
           helpers = require(templateHelpersPath)
-        } catch (e) {
-          debugLog('no custom template helpers')
-        }
+        } catch {}
         return {
           ...value,
           ...helpers

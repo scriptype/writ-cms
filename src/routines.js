@@ -1,5 +1,7 @@
 const Debug = require('./debug')
 const Settings = require('./settings')
+const Common = require('./common')
+const Theme = require('./theme')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 const CustomTheme = require('./custom-theme')
@@ -58,10 +60,12 @@ const startWatcher = (...args) => {
 const finalise =
   (expansionHook) => {
     return (value) => {
-      let result
-      result = Expansions.expandBy(expansionHook)(value)
-      result = Hooks.expand(expansionHook, result)
+      let result = value
+      result = Common.use(expansionHook, result)
+      result = Theme.use(expansionHook, result)
       result = Preview.use(expansionHook, result)
+      result = Expansions.expandBy(expansionHook)(result)
+      result = Hooks.expand(expansionHook, result)
       result = CustomTheme.use(expansionHook, result)
       return result
     }

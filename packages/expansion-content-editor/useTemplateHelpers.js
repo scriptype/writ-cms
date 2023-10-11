@@ -1,5 +1,6 @@
 const useTemplateHelpers = (mode) =>
   (helpers) => ({
+    ...helpers,
     seeMore: mode === 'start' ? `
         <img
           alt="writ summary divider"
