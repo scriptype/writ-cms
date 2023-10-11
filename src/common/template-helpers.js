@@ -18,6 +18,16 @@ module.exports = {
     return ''
   },
 
+  isStartMode() {
+    const { mode } = Settings.getSettings()
+    return mode === 'start'
+  },
+
+  isBuildMode() {
+    const { mode } = Settings.getSettings()
+    return mode === 'build'
+  },
+
   isPostType(string, type) {
     return string === type
   },
