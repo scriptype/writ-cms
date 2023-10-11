@@ -1,30 +1,47 @@
 const { join, resolve, extname } = require('path')
-const { readdir } = require('fs/promises')
+const { readdir, stat } = require('fs/promises')
 const { debugLog } = require('./debug')
 const Settings = require('./settings')
 
 module.exports = {
+  directory: null,
+  assets: [],
+
   async init() {
-    const { themeDirectory, IGNORE_PATHS_REG_EXP } = Settings.getSettings()
+    this.directory = await this.getDirectory()
+    this.assets = this.directory ? this.getAssets() : []
+  },
+
+  async getDirectory() {
+    const { themeDirectory } = Settings.getSettings()
     try {
-      this.assets = (await readdir(themeDirectory))
-        .filter(path => {
-          return (
-            !path.startsWith('_') &&
-            !path.startsWith('.') &&
-            !path.match(IGNORE_PATHS_REG_EXP) &&
-            extname(path) !== '.hbs' &&
-            extname(path) !== '.handlebars' &&
-            path !== 'template-helpers.js'
-          )
-        })
-        .map(path => join(themeDirectory, path))
+      const directory = await readdir(themeDirectory)
+      debugLog('has custom theme directory')
+      return directory
     } catch {
-      this.assets = []
+      debugLog('has no custom theme directory')
+      return null
     }
   },
 
+  getAssets() {
+    const { themeDirectory, IGNORE_PATHS_REG_EXP } = Settings.getSettings()
+    return this.directory.filter(path => (
+      !path.startsWith('_') &&
+      !path.startsWith('.') &&
+      !path.match(IGNORE_PATHS_REG_EXP) &&
+      extname(path) !== '.hbs' &&
+      extname(path) !== '.handlebars' &&
+      path !== 'template-helpers.js'
+    ))
+    .map(path => join(themeDirectory, path))
+  },
+
   use(type, value) {
+    if (!this.directory || !this.directory.length) {
+      return value
+    }
+
     const { themeDirectory } = Settings.getSettings()
 
     switch (type) {
