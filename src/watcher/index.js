@@ -11,7 +11,6 @@ module.exports = {
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
     const watchOptions = {
-      reloadDebounce: 100,
       ignoreInitial: true,
       ignored: new RegExp(
         [
@@ -36,6 +35,7 @@ module.exports = {
       compilePromise = compilePromise
         .then(onChange)
         .then(() => {
+          bs.reload()
           if (cb.cancel) {
             cb.cancel()
           }
@@ -47,7 +47,7 @@ module.exports = {
 
     bs.init({
       server: serverDir,
-      watch: true,
+      watch: false,
       ui: false,
       middleware: api.create(compilePromise, decorators.previewApi),
       notify: false
