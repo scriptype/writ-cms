@@ -38,13 +38,15 @@ const Category = (category) => {
 }
 
 const useContent = (mode) =>
-  (contentModel) =>
-    mode === 'start' ?
-      {
-        ...contentModel,
-        posts: contentModel.posts.map(Post),
-        categories: contentModel.categories.map(Category)
-      } :
-      contentModel
+  (contentModel) => {
+    if (mode !== 'start') {
+      return contentModel
+    }
+    return {
+      ...contentModel,
+      posts: contentModel.posts.map(Post),
+      categories: contentModel.categories.map(Category)
+    }
+  }
 
 module.exports = useContent
