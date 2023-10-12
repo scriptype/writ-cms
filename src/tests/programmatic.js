@@ -8,7 +8,7 @@ const randomNumber = () => {
 }
 
 const createTempDir = async () => {
-  const dirName = resolve(join(__dirname, '/test-dir' + randomNumber()))
+  const dirName = resolve(join(__dirname, 'test-dir-' + randomNumber()))
   await mkdir(dirName)
   return {
     name: dirName,
@@ -18,6 +18,7 @@ const createTempDir = async () => {
 
 test('builds in empty directory', async t => {
   const dir = await createTempDir()
+  t.teardown(dir.rm)
 
   const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
   await writ.build({
@@ -46,5 +47,4 @@ test('builds in empty directory', async t => {
     assetsDirectoryContents.includes('default'),
     'Assets directory has theme-default assets'
   )
-  await dir.rm(dir.name)
 })
