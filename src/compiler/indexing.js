@@ -42,6 +42,7 @@ const indexFileSystem = async (dir, depth = 0) => {
         const baseProperties = {
           name: path,
           path: fullPath.replace(rootDirectory + '/', ''),
+          stats: await fs.stat(fullPath),
           depth,
         }
         if (await isDirectory(fullPath)) {

@@ -84,9 +84,9 @@ const createAssets = (fsObject) => {
   }
 }
 
-const createLocalAsset = (fsObject) => {
+const createLocalAsset = ({ stats, ...restFsObject }) => {
   return {
-    ...fsObject,
+    ...restFsObject,
     type: contentTypes.LOCAL_ASSET
   }
 }

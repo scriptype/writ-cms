@@ -74,19 +74,18 @@ const getHTMLContent = (body, extension) => {
   return body
 }
 
-const attachDates = ({ date = '2022-11-12, 02:04', ...rest }) => {
+const attachDates = ({ publishDate }) => {
   const locale = 'en-US'
-  const publishedAt = new Date(date)
-  const publishedAtFull = publishedAt.toLocaleString(locale, { dateStyle: 'full' })
-  const publishedAtLong = publishedAt.toLocaleString(locale, { dateStyle: 'long' })
-  const publishedAtMedium = publishedAt.toLocaleString(locale, { dateStyle: 'medium' })
-  const publishedAtShort = publishedAt.toLocaleString(locale, { dateStyle: 'short' })
+  const publishDateFull = publishDate.toLocaleString(locale, { dateStyle: 'full' })
+  const publishDateLong = publishDate.toLocaleString(locale, { dateStyle: 'long' })
+  const publishDateMedium = publishDate.toLocaleString(locale, { dateStyle: 'medium' })
+  const publishDateShort = publishDate.toLocaleString(locale, { dateStyle: 'short' })
   return {
-    publishedAt,
-    publishedAtFull,
-    publishedAtLong,
-    publishedAtMedium,
-    publishedAtShort
+    publishDate,
+    publishDateFull,
+    publishDateLong,
+    publishDateMedium,
+    publishDateShort
   }
 }
 
@@ -110,7 +109,8 @@ const matchesExtension = (extension, acceptedExtensions) => {
 
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 
-const parseTemplate = ({ content, extension, localAssets, permalink, isSubpage }) => {
+const parseTemplate = ({ isSubpage, ...fsObject }) => {
+  const { content, extension, stats, localAssets, permalink } = fsObject
   const { attributes, body } = frontMatter(content)
   const type = attributes.type || (isSubpage ? 'subpage' : 'text')
   const HTMLContent = getHTMLContent(body, extension)
@@ -120,7 +120,9 @@ const parseTemplate = ({ content, extension, localAssets, permalink, isSubpage }
     summary: getSummary(HTMLContent, localAssets, permalink),
     ...attributes,
     ...attachTags(attributes),
-    ...attachDates(attributes),
+    ...attachDates({
+      publishDate: attributes.date ? new Date(attributes.date) : stats.birthtime
+    }),
   }
 }
 

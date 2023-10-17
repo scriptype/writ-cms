@@ -4,7 +4,7 @@ const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
 
 const sortPosts = (a, b) => {
-  return new Date(b.publishedAt) - new Date(a.publishedAt)
+  return new Date(b.publishDate) - new Date(a.publishDate)
 }
 
 const upsertDefaultCategory = (ContentModel, newContent) => {
