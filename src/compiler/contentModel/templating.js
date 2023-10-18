@@ -109,20 +109,28 @@ const matchesExtension = (extension, acceptedExtensions) => {
 
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 
-const parseTemplate = ({ isSubpage, ...fsObject }) => {
-  const { content, extension, stats, localAssets, permalink } = fsObject
+const parseTemplate = ({ isSubpage, ...fsObject }, cache) => {
+  const { path, content, extension, stats, localAssets, permalink } = fsObject
   const { attributes, body } = frontMatter(content)
   const type = attributes.type || (isSubpage ? 'subpage' : 'text')
   const HTMLContent = getHTMLContent(body, extension)
+  let publishDate = stats.birthtime
+  if (attributes.date) {
+    publishDate = new Date(attributes.date)
+  } else {
+    const cached = cache.find(path)
+    const cachedDate = cached.get('date')
+    if (cachedDate) {
+      publishDate = new Date(cachedDate)
+    }
+  }
   return {
     type,
     content: HTMLContent,
     summary: getSummary(HTMLContent, localAssets, permalink),
     ...attributes,
     ...attachTags(attributes),
-    ...attachDates({
-      publishDate: attributes.date ? new Date(attributes.date) : stats.birthtime
-    }),
+    ...attachDates({ publishDate }),
   }
 }
 

@@ -91,7 +91,7 @@ const createLocalAsset = ({ stats, ...restFsObject }) => {
   }
 }
 
-const createSubpage = (fsObject) => {
+const createSubpage = (fsObject, cache) => {
   const { site } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   return {
@@ -102,18 +102,18 @@ const createSubpage = (fsObject) => {
       ...parseTemplate({
         ...fsObject,
         isSubpage: true
-      }),
+      }, cache),
       slug: getSlug(title),
       site,
     }
   }
 }
 
-const createSubpages = (fsObject) => {
+const createSubpages = (fsObject, cache) => {
   return {
     ...fsObject,
     type: contentTypes.SUBPAGES,
-    data: fsObject.children.map(createSubpage)
+    data: fsObject.children.map(fsObject => createSubpage(fsObject, cache))
   }
 }
 
@@ -149,7 +149,7 @@ const createFolderedPostIndex = (fsObject) => {
   }
 }
 
-const createFolderedPost = (fsObject) => {
+const createFolderedPost = (fsObject, cache) => {
   const { site, permalinkPrefix } = Settings.getSettings()
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const title = removeExtension(fsObject.name)
@@ -168,7 +168,7 @@ const createFolderedPost = (fsObject) => {
         ...indexFile,
         localAssets,
         permalink
-      }),
+      }, cache),
       foldered: true,
       slug,
       permalink,
@@ -183,7 +183,7 @@ const createFolderedPost = (fsObject) => {
   }
 }
 
-const createDefaultCategoryPost = (fsObject) => {
+const createDefaultCategoryPost = (fsObject, cache) => {
   const { site, defaultCategoryName, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
@@ -193,7 +193,7 @@ const createDefaultCategoryPost = (fsObject) => {
     type: contentTypes.POST,
     data: {
       title,
-      ...parseTemplate(fsObject),
+      ...parseTemplate(fsObject, cache),
       slug,
       permalink,
       category: {
@@ -206,7 +206,7 @@ const createDefaultCategoryPost = (fsObject) => {
   }
 }
 
-const createPost = (fsObject) => {
+const createPost = (fsObject, cache) => {
   const { site, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
@@ -217,7 +217,7 @@ const createPost = (fsObject) => {
     type: contentTypes.POST,
     data: {
       title,
-      ...parseTemplate(fsObject),
+      ...parseTemplate(fsObject, cache),
       slug,
       permalink,
       category: {

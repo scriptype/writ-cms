@@ -1,6 +1,7 @@
 const Debug = require('./debug')
 const Settings = require('./settings')
 const Common = require('./common')
+const VersionControl = require('./version-control')
 const Theme = require('./theme')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
@@ -25,6 +26,7 @@ const run = async ({ mode, rootDirectory, debug }) => {
     mode,
     rootDirectory
   })
+  await VersionControl.init()
   await Expansions.init()
   await CustomTheme.init()
   await SiteDirectory.create()
@@ -36,7 +38,8 @@ const run = async ({ mode, rootDirectory, debug }) => {
         partials: finalise('templatePartials'),
         template: finalise('template')
       }
-    }
+    },
+    cache: VersionControl.createCache()
   })
   await Assets.copyAssets({
     decorators: {

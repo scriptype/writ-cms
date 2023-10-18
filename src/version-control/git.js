@@ -1,0 +1,32 @@
+const { execSync } = require('child_process')
+
+const getRevisionHistory = (path) => {
+  const result = execSync(`git log --follow "${path}"`).toString().trim()
+  if (!result.trim()) {
+    return null
+  }
+  return result.split('commit ').map(commit => {
+    const lines = commit.split('\n').map(l => l.trim()).filter(Boolean)
+    if (!lines[2]) {
+      return ''
+    }
+    const hash = lines[0]
+    
+    const [ authorName, authorEmail ] = lines[1].replace(/Author:\s+/, '').split(' ')
+    const date = lines[2].replace(/Date:\s+/, '')
+    const message = lines.slice(3).join('\n').trim()
+    return {
+      hash,
+      author: {
+        name: authorName,
+        email: authorEmail
+      },
+      date,
+      message
+    }
+  })
+}
+
+module.exports = {
+  getRevisionHistory
+}

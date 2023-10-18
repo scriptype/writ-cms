@@ -15,7 +15,7 @@ const {
   createUnrecognizedFile
 } = require('./contentTypes')
 
-const mapFSIndexToContentTree = (fsTree) => {
+const mapFSIndexToContentTree = (fsTree, cache) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return fsTree.map(fsObject => {
     const isDirectory = fsObject.children
@@ -29,29 +29,29 @@ const mapFSIndexToContentTree = (fsTree) => {
 
     if (isRootLevel) {
       if (isPostFile(fsObject)) {
-        return createDefaultCategoryPost(fsObject)
+        return createDefaultCategoryPost(fsObject, cache)
       }
       if (fsObject.name === pagesDirectory) {
-        return createSubpages(fsObject)
+        return createSubpages(fsObject, cache)
       }
       if (fsObject.name === assetsDirectory) {
         return createAssets(fsObject)
       }
       return createCategory({
         ...fsObject,
-        children: mapFSIndexToContentTree(fsObject.children)
+        children: mapFSIndexToContentTree(fsObject.children, cache)
       })
     }
 
     if (isCategoryLevel) {
       if (isPostFile(fsObject)) {
-        return createPost(fsObject)
+        return createPost(fsObject, cache)
       }
       if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
         return createFolderedPost({
           ...fsObject,
-          children: mapFSIndexToContentTree(fsObject.children)
-        })
+          children: mapFSIndexToContentTree(fsObject.children, cache)
+        }, cache)
       }
     }
 
@@ -67,7 +67,7 @@ const mapFSIndexToContentTree = (fsTree) => {
     if (isDirectory) {
       return createUnrecognizedDirectory({
         ...fsObject,
-        children: mapFSIndexToContentTree(fsObject.children)
+        children: mapFSIndexToContentTree(fsObject.children, cache)
       })
     }
 
