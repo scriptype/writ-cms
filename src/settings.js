@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { basename, join, resolve } = require('path')
 const { loadJSON } = require('./helpers')
-const { debugLog } = require('./debug')
+const Debug = require('./debug')
 
 const defaultSettings = (rootDirectory) => ({
   title: basename(resolve(rootDirectory)),
@@ -47,6 +47,7 @@ module.exports = {
     return _settings
   },
   async init({ mode, rootDirectory }) {
+    Debug.timeStart('settings')
     const root = resolve(rootDirectory)
     const settingsJSON = await loadJSON(join(root, 'settings.json'))
     _defaultSettings = {...defaultSettings(rootDirectory)}
@@ -65,6 +66,7 @@ module.exports = {
       out: join(root, userSettings.exportDirectory),
       mode
     }, ['title', 'description'])
-    debugLog('settings', { mode, rootDirectory, root, settingsJSON, userSettings, _settings })
+    Debug.debugLog('settings', { mode, rootDirectory, root, settingsJSON, userSettings, _settings })
+    Debug.timeEnd('settings')
   }
 }

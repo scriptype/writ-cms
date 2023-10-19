@@ -1,6 +1,10 @@
 const git = require('./git')
+const Debug = require('../debug')
 
-const init = () => {}
+const init = () => {
+  Debug.timeStart('version control')
+  Debug.timeEnd('version control')
+}
 
 const createCache = () => {
   return {

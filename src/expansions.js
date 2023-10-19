@@ -1,10 +1,11 @@
 const { join } = require('path')
-const { debugLog } = require('./debug')
+const Debug = require('./debug')
 const Settings = require('./settings')
 
 let expansions = []
 
 const init = async () => {
+  Debug.timeStart('expansions')
   const settings = Settings.getSettings()
   expansions = [...settings.expansions]
 
@@ -15,7 +16,8 @@ const init = async () => {
       return pkg(settings.mode)
     })
 
-  debugLog('expansions', expansions)
+  Debug.debugLog('expansions', expansions)
+  Debug.timeEnd('expansions')
 }
 
 const noop =_=>_

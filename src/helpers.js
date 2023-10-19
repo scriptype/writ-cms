@@ -53,6 +53,10 @@ const pipe = (initialValue, functions) => {
   return functions.reduce((acc, fn) => fn(acc), initialValue)
 }
 
+const rightPad = (str, amount, character = ' ') => {
+  return `${str}${character.repeat(amount)}`.slice(0, amount)
+}
+
 module.exports = {
   readFileContent,
   loadJSON,
@@ -60,5 +64,6 @@ module.exports = {
   getSlug,
   removeExtension,
   replaceExtension,
-  pipe
+  pipe,
+  rightPad
 }

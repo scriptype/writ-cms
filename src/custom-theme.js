@@ -1,6 +1,6 @@
 const { join, resolve, extname } = require('path')
 const { readdir, stat } = require('fs/promises')
-const { debugLog } = require('./debug')
+const Debug = require('./debug')
 const Settings = require('./settings')
 
 module.exports = {
@@ -8,18 +8,20 @@ module.exports = {
   assets: [],
 
   async init() {
+    Debug.timeStart('custom theme')
     this.directory = await this.getDirectory()
     this.assets = this.directory ? this.getAssets() : []
+    Debug.timeEnd('custom theme')
   },
 
   async getDirectory() {
     const { themeDirectory } = Settings.getSettings()
     try {
       const directory = await readdir(themeDirectory)
-      debugLog('has custom theme directory')
+      Debug.debugLog('has custom theme directory')
       return directory
     } catch {
-      debugLog('has no custom theme directory')
+      Debug.debugLog('has no custom theme directory')
       return null
     }
   },

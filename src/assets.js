@@ -48,12 +48,15 @@ const decorateAssets = (assetsDecorator) => {
 module.exports = {
   promise: Promise.resolve(true),
   copyAssets({ decorators }) {
+    Debug.timeStart('assets')
     Debug.debugLog('copying assets')
     const { mode } = Settings.getSettings()
     this.promise = this.promise
       .then(ensureAssetsDirectory)
       .then(() => decorateAssets(decorators.assets))
 
-    return this.promise
+    return this.promise.then(() => {
+      Debug.timeEnd('assets')
+    })
   }
 }
