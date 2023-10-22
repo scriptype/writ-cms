@@ -1,7 +1,14 @@
 const { execSync } = require('child_process')
+const Debug = require('../debug')
 
 const getRevisionHistory = (path) => {
-  const result = execSync(`git log --follow "${path}"`).toString().trim()
+  let result = ''
+  try {
+    result = execSync(`git log --follow "${path}"`).toString().trim()
+  } catch (e) {
+    Debug.debugLog('Error in getRevisionHistory')
+    return null
+  }
   if (!result.trim()) {
     return null
   }
