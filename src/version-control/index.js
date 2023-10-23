@@ -3,6 +3,12 @@ const Debug = require('../debug')
 
 const init = () => {
   Debug.timeStart('version control')
+  if (!git.hasInitialized()) {
+    git.init()
+  }
+  if (git.hasUncheckedFiles()) {
+    git.commit()
+  }
   Debug.timeEnd('version control')
 }
 
