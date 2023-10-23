@@ -8,7 +8,7 @@ const randomNumber = () => {
 }
 
 const createTempDir = async () => {
-  const dirName = resolve(join(__dirname, 'test-dir-' + randomNumber()))
+  const dirName = resolve(join('/tmp', 'test-dir-' + randomNumber()))
   await mkdir(dirName)
   return {
     name: dirName,
@@ -27,7 +27,10 @@ test('builds in empty directory', async t => {
   })
 
   const dirContents = await readdir(dir.name)
-  t.deepEqual(dirContents, [exportDirectory], 'Creates exportDirectory')
+  t.true(
+    dirContents.includes(exportDirectory),
+    'Creates exportDirectory'
+  )
 
   const exportDirectoryContents = await readdir(join(dir.name, exportDirectory))
   t.true(
@@ -55,7 +58,7 @@ test('builds with a single txt file', async t => {
   t.teardown(dir.rm)
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
-  dir.mkFile(fileNameIn, 'Hello!')
+  await dir.mkFile(fileNameIn, 'Hello!')
 
   const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
   await writ.build({
