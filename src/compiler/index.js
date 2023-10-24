@@ -6,7 +6,7 @@ const Rendering = require('./rendering')
 const compile = async ({ decorators, cache }) => {
   Debug.timeStart('compiler')
   const fileSystemIndex = await Indexer.indexFileSystem()
-  const contentModel = ContentModel.createContentModel(fileSystemIndex, decorators.content, cache)
+  const contentModel = await ContentModel.createContentModel(fileSystemIndex, decorators.content, cache)
   await Rendering.render(contentModel, decorators.rendering)
   Debug.timeEnd('compiler')
   return {

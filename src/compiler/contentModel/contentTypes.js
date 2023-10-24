@@ -91,7 +91,7 @@ const createLocalAsset = ({ stats, ...restFsObject }) => {
   }
 }
 
-const createSubpage = (fsObject, cache) => {
+const createSubpage = async (fsObject, cache) => {
   const { site } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   return {
@@ -99,21 +99,23 @@ const createSubpage = (fsObject, cache) => {
     type: contentTypes.SUBPAGE,
     data: {
       title,
-      ...parseTemplate({
+      ...(await parseTemplate({
         ...fsObject,
         isSubpage: true
-      }, cache),
+      }, cache)),
       slug: getSlug(title),
       site,
     }
   }
 }
 
-const createSubpages = (fsObject, cache) => {
+const createSubpages = async (fsObject, cache) => {
   return {
     ...fsObject,
     type: contentTypes.SUBPAGES,
-    data: fsObject.children.map(fsObject => createSubpage(fsObject, cache))
+    data: await Promise.all(
+      fsObject.children.map(fsObject => createSubpage(fsObject, cache))
+    )
   }
 }
 
@@ -149,7 +151,7 @@ const createFolderedPostIndex = (fsObject) => {
   }
 }
 
-const createFolderedPost = (fsObject, cache) => {
+const createFolderedPost = async (fsObject, cache) => {
   const { site, permalinkPrefix } = Settings.getSettings()
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const title = removeExtension(fsObject.name)
@@ -164,11 +166,11 @@ const createFolderedPost = (fsObject, cache) => {
     extension: indexFile.extension,
     data: {
       title,
-      ...parseTemplate({
+      ...(await parseTemplate({
         ...indexFile,
         localAssets,
         permalink
-      }, cache),
+      }, cache)),
       foldered: true,
       slug,
       permalink,
@@ -183,7 +185,7 @@ const createFolderedPost = (fsObject, cache) => {
   }
 }
 
-const createDefaultCategoryPost = (fsObject, cache) => {
+const createDefaultCategoryPost = async (fsObject, cache) => {
   const { site, defaultCategoryName, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
@@ -193,7 +195,7 @@ const createDefaultCategoryPost = (fsObject, cache) => {
     type: contentTypes.POST,
     data: {
       title,
-      ...parseTemplate(fsObject, cache),
+      ...(await parseTemplate(fsObject, cache)),
       slug,
       permalink,
       category: {
@@ -206,7 +208,7 @@ const createDefaultCategoryPost = (fsObject, cache) => {
   }
 }
 
-const createPost = (fsObject, cache) => {
+const createPost = async (fsObject, cache) => {
   const { site, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
@@ -217,7 +219,7 @@ const createPost = (fsObject, cache) => {
     type: contentTypes.POST,
     data: {
       title,
-      ...parseTemplate(fsObject, cache),
+      ...(await parseTemplate(fsObject, cache)),
       slug,
       permalink,
       category: {

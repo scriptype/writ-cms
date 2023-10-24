@@ -109,7 +109,7 @@ const matchesExtension = (extension, acceptedExtensions) => {
 
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 
-const parseTemplate = ({ isSubpage, ...fsObject }, cache) => {
+const parseTemplate = async ({ isSubpage, ...fsObject }, cache) => {
   const { path, content, extension, stats, localAssets, permalink } = fsObject
   const { attributes, body } = frontMatter(content)
   const type = attributes.type || (isSubpage ? 'subpage' : 'text')
@@ -118,7 +118,7 @@ const parseTemplate = ({ isSubpage, ...fsObject }, cache) => {
   if (attributes.date) {
     publishDate = new Date(attributes.date)
   } else {
-    const cached = cache.find(path)
+    const cached = await cache.find(path)
     const cachedDate = cached.get('date')
     if (cachedDate) {
       publishDate = new Date(cachedDate)

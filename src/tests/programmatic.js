@@ -1,4 +1,4 @@
-const { rm, mkdir, readdir, writeFile } = require('fs/promises')
+const { rm, mkdir, readdir, writeFile, readFile } = require('fs/promises')
 const { join, resolve } = require('path')
 const test = require('tape')
 const writ = require('..')

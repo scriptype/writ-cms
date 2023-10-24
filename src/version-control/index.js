@@ -1,28 +1,31 @@
 const git = require('./git')
 const Debug = require('../debug')
 
-const init = () => {
+let repo = null
+
+const init = async () => {
   Debug.timeStart('version control')
-  if (!git.hasInitialized()) {
-    git.init()
-  }
-  if (git.hasUncheckedFiles()) {
-    git.commit()
-  }
+  repo = await git.openRepo()
+  await git.commitChanges(repo)
   Debug.timeEnd('version control')
 }
 
 const createCache = () => {
   return {
-    find(path) {
-      const revisionHistory = git.getRevisionHistory(path)
-
+    async find(path) {
+      let fileRevisionHistory = null
+      try {
+        fileRevisionHistory = await git.getRevisionHistory(path)
+      }
+      catch (e) {
+        Debug.debugLog('error getting revision history of file', path, e)
+      }
       return {
         get(key) {
-          if (!revisionHistory) {
+          if (!fileRevisionHistory) {
             return null
           }
-          const firstEntry = revisionHistory[revisionHistory.length - 1]
+          const firstEntry = fileRevisionHistory[fileRevisionHistory.length - 1]
           return firstEntry[key] || null
         }
       }

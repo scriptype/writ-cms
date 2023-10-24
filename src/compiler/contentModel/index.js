@@ -77,8 +77,8 @@ const createContentModel = (contentTree) => {
 }
 
 module.exports = {
-  createContentModel(fileSystemIndex, contentDecorator, cache) {
-    const contentTree = mapFSIndexToContentTree(fileSystemIndex, cache)
+  async createContentModel(fileSystemIndex, contentDecorator, cache) {
+    const contentTree = await mapFSIndexToContentTree(fileSystemIndex, cache)
     const contentModel = createContentModel(contentTree)
     return contentDecorator(Linker.link(contentModel))
   },

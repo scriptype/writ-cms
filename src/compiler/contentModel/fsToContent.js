@@ -17,7 +17,7 @@ const {
 
 const mapFSIndexToContentTree = (fsTree, cache) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
-  return fsTree.map(fsObject => {
+  return Promise.all(fsTree.map(async fsObject => {
     const isDirectory = fsObject.children
     const isRootLevel = fsObject.depth === 0
     const isCategoryLevel = fsObject.depth === 1
@@ -29,28 +29,28 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
 
     if (isRootLevel) {
       if (isPostFile(fsObject)) {
-        return createDefaultCategoryPost(fsObject, cache)
+        return await createDefaultCategoryPost(fsObject, cache)
       }
       if (fsObject.name === pagesDirectory) {
-        return createSubpages(fsObject, cache)
+        return await createSubpages(fsObject, cache)
       }
       if (fsObject.name === assetsDirectory) {
         return createAssets(fsObject)
       }
       return createCategory({
         ...fsObject,
-        children: mapFSIndexToContentTree(fsObject.children, cache)
+        children: await mapFSIndexToContentTree(fsObject.children, cache)
       })
     }
 
     if (isCategoryLevel) {
       if (isPostFile(fsObject)) {
-        return createPost(fsObject, cache)
+        return await createPost(fsObject, cache)
       }
       if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
-        return createFolderedPost({
+        return await createFolderedPost({
           ...fsObject,
-          children: mapFSIndexToContentTree(fsObject.children, cache)
+          children: await mapFSIndexToContentTree(fsObject.children, cache)
         }, cache)
       }
     }
@@ -67,12 +67,12 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
     if (isDirectory) {
       return createUnrecognizedDirectory({
         ...fsObject,
-        children: mapFSIndexToContentTree(fsObject.children, cache)
+        children: await mapFSIndexToContentTree(fsObject.children, cache)
       })
     }
 
     return createUnrecognizedFile(fsObject)
-  })
+  }))
 }
 
 module.exports = mapFSIndexToContentTree

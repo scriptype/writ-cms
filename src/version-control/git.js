@@ -1,98 +1,93 @@
 const { resolve } = require('path')
-const { exec, execSync } = require('child_process')
+const NodeGit = require('nodegit')
 const Debug = require('../debug')
 const Settings = require('../settings')
 
-const init = () => {
+const initRepo = async () => {
   const { rootDirectory } = Settings.getSettings()
   try {
-    execSync('git init', { cwd: resolve(rootDirectory) })
-    Debug.debugLog('git.init has run without errors')
+    const repo = NodeGit.Repository.init(resolve(rootDirectory), 0)
+    Debug.debugLog('git.initRepo')
+    return repo
   } catch (initError) {
-    Debug.debugLog('git.init error', initError.message)
+    Debug.debugLog('git.initRepo error', initError)
   }
 }
 
-const hasInitialized = () => {
+const openRepo = async () => {
   const { rootDirectory } = Settings.getSettings()
   try {
-    execSync('git status', { cwd: resolve(rootDirectory) })
-    Debug.debugLog('git.hasInitialized has run without errors')
-  } catch (statusError) {
-    if (statusError.message.match('fatal: not a git repository')) {
-      return false
-    } else {
-      Debug.debugLog('git.hasInitialized error', statusError.message)
-    }
-  }
-  return true
-}
-
-const hasUncheckedFiles = () => {
-  const { rootDirectory } = Settings.getSettings()
-  try {
-    const output = execSync('git status', { cwd: resolve(rootDirectory) }).toString()
-    const hasUntracked = output.match('Untracked files:')
-    const hasUnchecked = output.match('Changes not staged for commit')
-    if (hasUntracked || hasUnchecked) {
-      return true
-    }
-    Debug.debugLog('git.hasUncheckedFiles has run without errors')
-  } catch (statusError) {
-    Debug.debugLog('git.hasUncheckedFiles error', statusError.message)
-  }
-  return false
-}
-
-const commit = (message) => {
-  const { rootDirectory } = Settings.getSettings()
-  const commitMessage = message || 'Check-in changes'
-  try {
-    execSync(`git add -A && git commit -m "${commitMessage}"`, { cwd: resolve(rootDirectory) })
-    Debug.debugLog('git.commit has run without errors')
-  } catch (commitError) {
-    Debug.debugLog('git.commit error', commitError.message)
+    const repo = await NodeGit.Repository.open(resolve(rootDirectory))
+    Debug.debugLog('git.openRepo')
+    return repo
+  } catch (openError) {
+    return initRepo()
   }
 }
 
-const getRevisionHistory = (path) => {
+const getDefaultConfig = async () => {
+  const config = await NodeGit.Config.openDefault()
+  Debug.debugLog('git.getDefaultConfig')
+  return {
+    name: (await config.getStringBuf('user.name')) || 'writ',
+    email: (await config.getStringBuf('user.email')) || 'writ@example.com'
+  }
+}
+
+const commitChanges = async (repo) => {
+  if (!repo) {
+    return Debug.debugLog('git.commitChanges no repo')
+  }
+  const changes = await repo.getStatus()
+  if (!changes.length) {
+    return Promise.resolve()
+  }
+  const paths = changes.map(file => file.path())
+  const index = await repo.refreshIndex()
+  await Promise.all(paths.map(pathToAdd => {
+    return index.addByPath(pathToAdd)
+  }))
+  await index.write()
+
+  const oid = await index.writeTree()
+  const parentCommit = await repo.getHeadCommit()
+  const defaultConfig = await getDefaultConfig()
+  const author = NodeGit.Signature.now(defaultConfig.name, defaultConfig.email)
+  const committer = NodeGit.Signature.now(defaultConfig.name, defaultConfig.email)
+  const message = 'Check-in changes'
+  const commitId = await repo.createCommit(
+    "HEAD", author, committer, message, oid, parentCommit ? [parentCommit] : []
+  )
+  return commitId
+}
+
+const getEntry = (commit) => {
+  const author = commit.author()
+  return {
+    hash: commit.sha(),
+    author: {
+      name: author.name(),
+      email: author.email()
+    },
+    date: commit.date(),
+    message: commit.message().trim()
+  }
+}
+
+const getRevisionHistory = async (filePath) => {
   const { rootDirectory } = Settings.getSettings()
-  let result = ''
-  try {
-    result = execSync(`git log --follow "${path}"`, { cwd: resolve(rootDirectory) }).toString().trim()
-  } catch (e) {
-    Debug.debugLog('Error in git.getRevisionHistory')
-    return null
-  }
-  if (!result.trim()) {
-    return null
-  }
-  return result.split('commit ').map(commit => {
-    const lines = commit.split('\n').map(l => l.trim()).filter(Boolean)
-    if (!lines[2]) {
-      return ''
-    }
-    const hash = lines[0]
-    
-    const [ authorName, authorEmail ] = lines[1].replace(/Author:\s+/, '').split(' ')
-    const date = lines[2].replace(/Date:\s+/, '')
-    const message = lines.slice(3).join('\n').trim()
-    return {
-      hash,
-      author: {
-        name: authorName,
-        email: authorEmail
-      },
-      date,
-      message
-    }
-  })
+  const repo = await NodeGit.Repository.open(resolve(rootDirectory))
+  const mostRecentCommit = await repo.getMasterCommit()
+  const walker = repo.createRevWalk()
+  walker.push(mostRecentCommit)
+  walker.sorting(NodeGit.Revwalk.SORT.TIME)
+  const historyEntries = await walker.fileHistoryWalk(filePath, 500)
+  return historyEntries.map(history => getEntry(history.commit))
 }
 
 module.exports = {
-  init,
-  hasInitialized,
-  hasUncheckedFiles,
-  commit,
+  initRepo,
+  openRepo,
+  commitChanges,
   getRevisionHistory
 }
