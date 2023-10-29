@@ -95,3 +95,34 @@ test('builds with a single txt file', async t => {
     'Assets directory has theme-default assets'
   )
 })
+
+test('builds after a file is deleted', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+  const fileNameIn = 'hello.txt'
+  const fileNameOut = 'hello.html'
+  await dir.mkFile(fileNameIn, 'Hello!')
+
+  const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const exportDirectoryContentsBefore = await readdir(join(dir.name, exportDirectory))
+  t.true(
+    exportDirectoryContentsBefore.includes(fileNameOut),
+    `Export directory has compiled ${fileNameOut} before deletion`
+  )
+
+  await rm(join(dir.name, fileNameIn))
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const exportDirectoryContentsAfter = await readdir(join(dir.name, exportDirectory))
+  t.false(
+    exportDirectoryContentsAfter.includes(fileNameOut),
+    `Export directory does not have ${fileNameOut} after deletion`
+  )
+})
