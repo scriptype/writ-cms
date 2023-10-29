@@ -42,11 +42,15 @@ const commitChanges = async (repo) => {
   if (!changes.length) {
     return Promise.resolve()
   }
-  const paths = changes.map(file => file.path())
   const index = await repo.refreshIndex()
-  await Promise.all(paths.map(pathToAdd => {
-    return index.addByPath(pathToAdd)
-  }))
+  await Promise.all(
+    changes.map(change => {
+      if (change.status().includes('WT_DELETED')) {
+        return index.removeAll([change.path()])
+      }
+      return index.addByPath(change.path())
+    })
+  )
   await index.write()
 
   const oid = await index.writeTree()
