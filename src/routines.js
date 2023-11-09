@@ -1,11 +1,9 @@
 const Debug = require('./debug')
 const Settings = require('./settings')
-const Common = require('./common')
 const VersionControl = require('./version-control')
 const Theme = require('./theme')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
-const CustomTheme = require('./custom-theme')
 const SiteDirectory = require('./site-directory')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
@@ -26,9 +24,9 @@ const run = async ({ mode, rootDirectory, debug }) => {
     mode,
     rootDirectory
   })
+  await Theme.init()
   await VersionControl.init()
   await Expansions.init()
-  await CustomTheme.init()
   await SiteDirectory.create()
   await Compiler.compile({
     decorators: {
@@ -65,12 +63,10 @@ const finalise =
   (expansionHook) => {
     return (value) => {
       let result = value
-      result = Common.use(expansionHook, result)
       result = Theme.use(expansionHook, result)
       result = Preview.use(expansionHook, result)
       result = Expansions.expandBy(expansionHook)(result)
       result = Hooks.expand(expansionHook, result)
-      result = CustomTheme.use(expansionHook, result)
       return result
     }
   }

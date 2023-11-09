@@ -1,7 +1,6 @@
 const Handlebars = require('handlebars')
 const { join } = require('path')
-const Settings = require('../settings')
-const CustomTheme = require('../custom-theme')
+const Settings = require('../../settings')
 
 module.exports = {
   multiLineTextList(list) {
@@ -47,19 +46,25 @@ module.exports = {
   },
 
   hasCustomStyle() {
+    return false
+    /*
     if (!CustomTheme.assets.length) {
       return false
     }
     const { themeDirectory } = Settings.getSettings()
     return CustomTheme.assets.some((path) => path === `${themeDirectory}/style.css`)
+    */
   },
 
   hasCustomScript() {
+    return false
+    /*
     if (!CustomTheme.assets.length) {
       return false
     }
     const { themeDirectory } = Settings.getSettings()
     return CustomTheme.assets.some((path) => path === `${themeDirectory}/script.js`)
+    */
   },
 
   pageTitle() {
