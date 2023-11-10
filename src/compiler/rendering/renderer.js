@@ -1,9 +1,8 @@
 const Handlebars = require('handlebars')
-const { readdir, writeFile } = require('fs/promises')
+const { stat, readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../../helpers')
 const { debugLog } = require('../../debug')
-const Settings = require('../../settings')
 
 const registerHelpers = (helpersDecorator) => {
   const allHelpers = helpersDecorator({})
@@ -12,6 +11,11 @@ const registerHelpers = (helpersDecorator) => {
 }
 
 const registerPartials = async (partialsPath) => {
+  try {
+    await stat(partialsPath)
+  } catch (e) {
+    return debugLog(`registerPartials: ${partialsPath} not found`)
+  }
   const paths = await Promise.all(
     (await readdir(partialsPath)).map(async path => ({
       path,
