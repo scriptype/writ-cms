@@ -107,6 +107,7 @@ module.exports = {
   use(type, value) {
     const { rootDirectory, theme, themeDirectory } = Settings.getSettings()
     const folderPath = join(rootDirectory, themeDirectory)
+    const themePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
 
     switch (type) {
       case "templateHelpers":
@@ -116,16 +117,15 @@ module.exports = {
 
         let themeTemplateHelpers = {}
         try {
-          themeTemplateHelpers = require(
-            join(
-              __dirname, '..', '..', 'packages', `theme-${theme}`, TEMPLATE_HELPERS
-            )
-          )
+          themeTemplateHelpers = require(join(themePath, TEMPLATE_HELPERS))
         } catch {}
 
-        const customTemplateHelpers = require(
-          join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
-        )
+        let customTemplateHelpers = {}
+        try {
+          customTemplateHelpers = require(
+            join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
+          )
+        } catch {}
 
         const customizers = this.customizers
         const customizerHelpers = {
@@ -151,6 +151,8 @@ module.exports = {
       case "templatePartials":
         return [
           ...value,
+          join(__dirname, 'common', PARTIALS),
+          join(themePath, PARTIALS),
           join(folderPath, TEMPLATES)
         ]
 
