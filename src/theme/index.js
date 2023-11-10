@@ -41,6 +41,10 @@ module.exports = {
         join(__dirname, 'common', PARTIALS),
         join(folderPath, TEMPLATES),
         { recursive: true }
+      ),
+      cp(
+        join(__dirname, 'common', 'template-helpers.js'),
+        join(folderPath, TEMPLATES, 'template-helpers.js')
       )
     ])
 
@@ -62,11 +66,6 @@ module.exports = {
     } catch (e) {
       Debug.debugLog(`⚠️  error copying theme resources: ${theme}`, e)
     }
-
-    await cp(
-      join(__dirname, 'template-helpers.js'),
-      join(folderPath, TEMPLATES, 'template-helpers.js')
-    )
   },
 
   use(type, value) {
@@ -87,7 +86,7 @@ module.exports = {
           )
         } catch {}
         const customTemplateHelpers = require(
-          join(__dirname, 'template-helpers.js')
+          join(folderPath, 'templates', 'template-helpers.js')
         )
         return {
           ...value,
