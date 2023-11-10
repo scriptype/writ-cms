@@ -1,4 +1,4 @@
-const { stat, mkdir, cp } = require('fs/promises')
+const { stat, mkdir, cp, readdir } = require('fs/promises')
 const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
@@ -13,9 +13,11 @@ module.exports = {
     Debug.timeStart('theme')
     const { rootDirectory, themeDirectory } = Settings.getSettings()
     const folderPath = join(rootDirectory, themeDirectory)
+    this.customizers = []
     try {
       await stat(folderPath)
       Debug.debugLog(`${folderPath} exists`)
+      this.customizers.push(...(await this.checkCustomizers(folderPath)))
       return
     } catch (e) {
       Debug.debugLog(`${folderPath} not found`)
@@ -24,15 +26,20 @@ module.exports = {
     Debug.timeEnd('theme')
   },
 
-  async makeThemeDirectory(folderPath) {
-    await mkdir(folderPath)
+  async checkCustomizers(folderPath) {
+    const paths = await readdir(folderPath)
+    return paths.filter(p => p.endsWith('.css') || p.endsWith('.js'))
+  },
 
-    await Promise.all([
+  makeThemeDirectorySubFolders(folderPath) {
+    return Promise.all([
       mkdir(join(folderPath, ASSETS)),
       mkdir(join(folderPath, TEMPLATES))
     ])
+  },
 
-    await Promise.all([
+  copyCommonResources(folderPath) {
+    return Promise.all([
       cp(
         join(__dirname, 'common', ASSETS),
         join(folderPath, ASSETS, 'common'),
@@ -48,25 +55,53 @@ module.exports = {
         join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
       )
     ])
+  },
 
+  copySelectedThemeResources(folderPath) {
     const { theme } = Settings.getSettings()
     const themeSrcPath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
-    try {
-      await Promise.all([
-        cp(
-          join(themeSrcPath, ASSETS),
-          join(folderPath, ASSETS, theme),
-          { recursive: true }
-        ),
-        cp(
-          join(themeSrcPath, PARTIALS),
-          join(folderPath, TEMPLATES),
-          { recursive: true }
-        )
-      ])
-    } catch (e) {
+    return Promise.all([
+      cp(
+        join(themeSrcPath, ASSETS),
+        join(folderPath, ASSETS, theme),
+        { recursive: true }
+      ),
+      cp(
+        join(themeSrcPath, PARTIALS),
+        join(folderPath, TEMPLATES),
+        { recursive: true }
+      )
+    ]).catch(e => {
       Debug.debugLog(`⚠️  error copying theme resources: ${theme}`, e)
-    }
+    })
+  },
+
+  async copyCustomizers(folderPath) {
+    const paths = await readdir(join(__dirname, 'customizers'))
+    const customizers = paths.filter(p => {
+      return p.endsWith('.css') || p.endsWith('.js')
+    })
+    this.customizers.push(...customizers)
+    return Promise.all(
+      paths.map(path => {
+        return cp(
+          join(__dirname, 'customizers', path),
+          join(folderPath, path)
+        )
+      })
+    )
+  },
+
+  async makeThemeDirectory(folderPath) {
+    await mkdir(folderPath)
+
+    await this.makeThemeDirectorySubFolders(folderPath)
+
+    await Promise.all([
+      this.copyCommonResources(folderPath),
+      this.copySelectedThemeResources(folderPath),
+      this.copyCustomizers(folderPath)
+    ])
   },
 
   use(type, value) {
@@ -78,6 +113,7 @@ module.exports = {
         const commonTemplateHelpers = require(
           join(__dirname, 'common', TEMPLATE_HELPERS)
         )
+
         let themeTemplateHelpers = {}
         try {
           themeTemplateHelpers = require(
@@ -86,14 +122,30 @@ module.exports = {
             )
           )
         } catch {}
+
         const customTemplateHelpers = require(
           join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
         )
+
+        const customizers = this.customizers
+        const customizerHelpers = {
+          hasCustomStyle() {
+            return customizers.includes('style.css')
+          },
+          hasThemeSettings() {
+            return customizers.includes('theme-settings.css')
+          },
+          hasCustomScript() {
+            return customizers.includes('script.js')
+          }
+        }
+
         return {
           ...value,
           ...commonTemplateHelpers,
           ...themeTemplateHelpers,
-          ...customTemplateHelpers
+          ...customTemplateHelpers,
+          ...customizerHelpers,
         }
 
       case "templatePartials":
@@ -108,7 +160,12 @@ module.exports = {
           {
             src: join(folderPath, ASSETS),
             dest: ''
-          }
+          },
+          ...this.customizers.map(path => ({
+            src: join(folderPath, path),
+            dest: 'custom',
+            single: true
+          }))
         ]
     }
     return value

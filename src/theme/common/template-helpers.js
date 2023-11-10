@@ -35,28 +35,6 @@ module.exports = {
     return prefix + '/' + assetsDirectory
   },
 
-  hasCustomStyle() {
-    return false
-    /*
-    if (!CustomTheme.assets.length) {
-      return false
-    }
-    const { themeDirectory } = Settings.getSettings()
-    return CustomTheme.assets.some((path) => path === `${themeDirectory}/style.css`)
-    */
-  },
-
-  hasCustomScript() {
-    return false
-    /*
-    if (!CustomTheme.assets.length) {
-      return false
-    }
-    const { themeDirectory } = Settings.getSettings()
-    return CustomTheme.assets.some((path) => path === `${themeDirectory}/script.js`)
-    */
-  },
-
   pageTitle() {
     if (this.page === 'post' || this.page === 'subpage') {
       return `${this.title} / ${this.settings.site.title}`
