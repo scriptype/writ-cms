@@ -3,6 +3,11 @@ const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
 
+const ASSETS = 'assets'
+const PARTIALS = 'partials'
+const TEMPLATES = 'templates'
+const TEMPLATE_HELPERS = 'template-helpers.js'
+
 module.exports = {
   async init() {
     Debug.timeStart('theme')
@@ -20,10 +25,6 @@ module.exports = {
   },
 
   async makeThemeDirectory(folderPath) {
-    const ASSETS = 'assets'
-    const PARTIALS = 'partials'
-    const TEMPLATES = 'templates'
-
     await mkdir(folderPath)
 
     await Promise.all([
@@ -43,8 +44,8 @@ module.exports = {
         { recursive: true }
       ),
       cp(
-        join(__dirname, 'common', 'template-helpers.js'),
-        join(folderPath, TEMPLATES, 'template-helpers.js')
+        join(__dirname, 'common', TEMPLATE_HELPERS),
+        join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
       )
     ])
 
@@ -75,18 +76,18 @@ module.exports = {
     switch (type) {
       case "templateHelpers":
         const commonTemplateHelpers = require(
-          join(__dirname, 'common', 'template-helpers.js')
+          join(__dirname, 'common', TEMPLATE_HELPERS)
         )
         let themeTemplateHelpers = {}
         try {
           themeTemplateHelpers = require(
             join(
-              __dirname, '..', '..', 'packages', `theme-${theme}`, 'template-helpers.js'
+              __dirname, '..', '..', 'packages', `theme-${theme}`, TEMPLATE_HELPERS
             )
           )
         } catch {}
         const customTemplateHelpers = require(
-          join(folderPath, 'templates', 'template-helpers.js')
+          join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
         )
         return {
           ...value,
@@ -98,14 +99,14 @@ module.exports = {
       case "templatePartials":
         return [
           ...value,
-          join(folderPath, 'templates')
+          join(folderPath, TEMPLATES)
         ]
 
       case "assets":
         return [
           ...value,
           {
-            src: join(folderPath, 'assets'),
+            src: join(folderPath, ASSETS),
             dest: ''
           }
         ]
