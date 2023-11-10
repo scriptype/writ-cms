@@ -1,13 +1,21 @@
 {{#>m-doc}}
-  theme/posts.hbs
-
   List of posts.
 {{/m-doc}}
 {{#each posts as |post|}}
+
   {{#if (isPostType 'photo' post.type)}}
-    {{>posts-photo post=post}}
+    <a href="{{post.permalink}}" class="photo-thumbnail">
+        <img src="{{post.permalink}}/{{post.thumbnailUrl}}" />
+    </a>
   {{/if}}
+
   {{#if (isPostType 'text' post.type)}}
-    {{>posts-text post=post}}
+    <div class="post">
+        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
+        {{{post.summary}}}
+        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
+        <p>{{post.publishDateMedium}}</p>
+    </div>
   {{/if}}
+
 {{/each}}

@@ -1,8 +1,6 @@
 {{#>m-doc}}
-  theme/base.hbs
-
   Contains the outer shell, the foundation, of the html.
-  e.g. doctype, &lt;html&gt;, &lt;head&gt;, &lt;body&gt;
+  e.g. doctype, html, head, body
   Everything else is rendered somewhere inside base.
 {{/m-doc}}
 <!DOCTYPE html>
@@ -23,7 +21,7 @@
     <body>
         {{>@partial-block}}
         {{>icons}}
-        <script>window.permalinkPrefix = "{{permalinkPrefix}}"</script>
+        <script>window.permalinkPrefix = "{{settings.permalinkPrefix}}"</script>
         {{>base-script}}
         {{>page-script}}
         {{>custom-script}}

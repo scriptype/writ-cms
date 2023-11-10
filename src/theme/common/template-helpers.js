@@ -1,7 +1,3 @@
-const Handlebars = require('handlebars')
-const { join } = require('path')
-const Settings = require('../../settings')
-
 module.exports = {
   multiLineTextList(list) {
     if (typeof list === 'string') {
@@ -9,7 +5,7 @@ module.exports = {
     }
     return list
       .map(s => s.trim()).filter(Boolean)
-      .map(s => `<li>${Handlebars.escapeExpression(s)}</li>`)
+      .map(s => `<li>${s}</li>`)
       .join('\n')
   },
 
@@ -18,13 +14,11 @@ module.exports = {
   },
 
   isStartMode() {
-    const { mode } = Settings.getSettings()
-    return mode === 'start'
+    return this.settings.mode === 'start'
   },
 
   isBuildMode() {
-    const { mode } = Settings.getSettings()
-    return mode === 'build'
+    return this.settings.mode === 'build'
   },
 
   isPostType(string, type) {
@@ -36,13 +30,9 @@ module.exports = {
   },
 
   assetsPath() {
-    const { permalinkPrefix, assetsDirectory } = Settings.getSettings()
-    return join(permalinkPrefix, assetsDirectory)
-  },
-
-  permalinkPrefix() {
-    const { permalinkPrefix } = Settings.getSettings()
-    return permalinkPrefix
+    const { permalinkPrefix, assetsDirectory } = this.settings
+    const prefix = permalinkPrefix === '/' ? '' : permalinkPrefix
+    return prefix + '/' + assetsDirectory
   },
 
   hasCustomStyle() {
@@ -69,12 +59,12 @@ module.exports = {
 
   pageTitle() {
     if (this.page === 'post' || this.page === 'subpage') {
-      return `${this.title} / ${this.site.title}`
+      return `${this.title} / ${this.settings.site.title}`
     }
     if (this.page === 'category') {
-      return `${this.category.name} / ${this.site.title}`
+      return `${this.category.name} / ${this.settings.site.title}`
     }
-    return `${this.site.title}`
+    return `${this.settings.site.title}`
   },
 
   isPostPage() {

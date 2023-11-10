@@ -12,9 +12,9 @@ const mkdirCategoryFolder = async (dirName) => {
 }
 
 const renderCategoryPages = (Renderer, { categories }) => {
-  const { site, out } = Settings.getSettings()
+  const settings = Settings.getSettings()
   const compilation = categories.map(async category => {
-    const dir = join(out, category.slug)
+    const dir = join(settings.out, category.slug)
     await mkdirCategoryFolder(dir)
     return Renderer.render({
       path: join(dir, 'index.html'),
@@ -23,7 +23,7 @@ const renderCategoryPages = (Renderer, { categories }) => {
         categories,
         category,
         posts: category.posts,
-        site,
+        settings,
         debug: Debug.getDebug()
       }
     })

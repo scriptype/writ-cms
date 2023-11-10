@@ -31,6 +31,7 @@ const renderPosts = (Renderer, { categories, posts }) => {
       data: {
         ...post,
         categories,
+        settings: Settings.getSettings(),
         debug: Debug.getDebug()
       }
     })
