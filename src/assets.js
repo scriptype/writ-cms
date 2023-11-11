@@ -1,4 +1,4 @@
-const { cp, mkdir } = require('fs/promises')
+const { stat, cp, mkdir } = require('fs/promises')
 const { resolve, join, basename } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
@@ -18,9 +18,15 @@ const ensureAssetsDirectory = () => {
   return ensureDirectory(join(out, assetsDirectory))
 }
 
-const copyAssetsDirectory = ({ src, dest }) => {
+const copyAssetsDirectory = async ({ src, dest }) => {
   Debug.debugLog('copy assets directory', src, dest)
   const { out, assetsDirectory } = Settings.getSettings()
+  try {
+    await stat(src)
+  } catch (e) {
+    Debug.debugLog(`copyAssetsDirectory: ${src} not found`)
+    return Promise.resolve()
+  }
   return cp(src, join(out, assetsDirectory, dest), { recursive: true })
 }
 
