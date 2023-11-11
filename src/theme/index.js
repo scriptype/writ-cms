@@ -76,7 +76,9 @@ module.exports = {
         join(themeSrcPath, THEME_SETTINGS),
         join(folderPath, THEME_SETTINGS)
       )
-    ]).catch(e => {
+    ]).then(() => {
+      this.customizers.push(THEME_SETTINGS)
+    }).catch(e => {
       Debug.debugLog(`⚠️  error copying theme resources: ${theme}`, e)
     })
   },
