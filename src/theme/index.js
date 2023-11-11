@@ -7,6 +7,7 @@ const ASSETS = 'assets'
 const PARTIALS = 'partials'
 const TEMPLATES = 'templates'
 const TEMPLATE_HELPERS = 'template-helpers.js'
+const THEME_SETTINGS = 'theme-settings.css'
 
 module.exports = {
   async init() {
@@ -70,6 +71,10 @@ module.exports = {
         join(themeSrcPath, PARTIALS),
         join(folderPath, TEMPLATES),
         { recursive: true }
+      ),
+      cp(
+        join(themeSrcPath, THEME_SETTINGS),
+        join(folderPath, THEME_SETTINGS)
       )
     ]).catch(e => {
       Debug.debugLog(`⚠️  error copying theme resources: ${theme}`, e)
