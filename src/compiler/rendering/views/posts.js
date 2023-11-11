@@ -27,7 +27,7 @@ const renderPosts = (Renderer, { categories, posts }) => {
     }
     return Renderer.render({
       path: getExportPath(post),
-      content: `{{>m-doc-greeting}}{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`,
+      content: `{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`,
       data: {
         ...post,
         categories,
