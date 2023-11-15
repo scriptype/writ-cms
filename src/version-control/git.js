@@ -1,96 +1,119 @@
 const { resolve } = require('path')
-const NodeGit = require('nodegit')
+const fs = require('fs')
+const git = require('isomorphic-git')
 const Debug = require('../debug')
 const Settings = require('../settings')
 
-const initRepo = async () => {
+const getRepoPath = () => {
   const { rootDirectory } = Settings.getSettings()
-  try {
-    const repo = NodeGit.Repository.init(resolve(rootDirectory), 0)
-    Debug.debugLog('git.initRepo')
-    return repo
-  } catch (initError) {
-    Debug.debugLog('git.initRepo error', initError)
-  }
+  return resolve(rootDirectory)
 }
 
 const openRepo = async () => {
-  const { rootDirectory } = Settings.getSettings()
   try {
-    const repo = await NodeGit.Repository.open(resolve(rootDirectory))
-    Debug.debugLog('git.openRepo')
-    return repo
-  } catch (openError) {
-    return initRepo()
+    await git.init({ fs, dir: getRepoPath() })
+    Debug.debugLog('git.init')
+  } catch (initError) {
+    Debug.debugLog('git.init error', initError)
   }
 }
 
-const getDefaultConfig = async () => {
-  const config = await NodeGit.Config.openDefault()
+const getConfig = async () => {
+  const name = await git.getConfig({
+    fs,
+    dir: getRepoPath(),
+    path: 'user.name'
+  })
+  const email = await git.getConfig({
+    fs,
+    dir: getRepoPath(),
+    path: 'user.email'
+  })
   Debug.debugLog('git.getDefaultConfig')
   return {
-    name: (await config.getStringBuf('user.name')) || 'writ',
-    email: (await config.getStringBuf('user.email')) || 'writ@example.com'
+    name: name || 'writ',
+    email: email || 'writ@example.com'
   }
 }
 
-const commitChanges = async (repo) => {
-  if (!repo) {
-    return Debug.debugLog('git.commitChanges no repo')
-  }
-  const changes = await repo.getStatus()
+const FILE = 0, HEAD = 1, WORKDIR = 2, STAGE = 3
+const isDeleted = row => row[WORKDIR] === 0
+
+const getDeletedFiles = (statusMatrix) => {
+  return statusMatrix.filter(isDeleted).map(row => row[FILE])
+}
+
+const commitChanges = async () => {
+  const changes = await git.statusMatrix({ fs, dir: getRepoPath() })
   if (!changes.length) {
     return Promise.resolve()
   }
-  const index = await repo.refreshIndex()
+  const deletedFiles = getDeletedFiles(changes)
   await Promise.all(
     changes.map(change => {
-      if (change.status().includes('WT_DELETED')) {
-        return index.removeAll([change.path()])
+      if (isDeleted(change)) {
+        return git.remove({ fs, dir: getRepoPath(), filepath: change[FILE] })
       }
-      return index.addByPath(change.path())
+      return git.add({ fs, dir: getRepoPath(), filepath: change[FILE] })
     })
   )
-  await index.write()
 
-  const oid = await index.writeTree()
-  const parentCommit = await repo.getHeadCommit()
-  const defaultConfig = await getDefaultConfig()
-  const author = NodeGit.Signature.now(defaultConfig.name, defaultConfig.email)
-  const committer = NodeGit.Signature.now(defaultConfig.name, defaultConfig.email)
+  const author = await getConfig()
   const message = 'Check-in changes'
-  const commitId = await repo.createCommit(
-    "HEAD", author, committer, message, oid, parentCommit ? [parentCommit] : []
-  )
+  const commitId = await git.commit({
+    fs,
+    dir: getRepoPath(),
+    author,
+    message
+  })
   return commitId
 }
 
-const getEntry = (commit) => {
-  const author = commit.author()
+const getRevision = ({ oid, commit }) => {
+  const author = commit.author
+  // timezoneOffset: -120
+  const date = new Date(author.timestamp)
   return {
-    hash: commit.sha(),
+    hash: oid,
     author: {
-      name: author.name(),
-      email: author.email()
+      name: author.name,
+      email: author.email
     },
-    date: commit.date(),
-    message: commit.message().trim()
+    date,
+    message: commit.message
   }
 }
 
 const getRevisionHistory = async (filePath) => {
-  const { rootDirectory } = Settings.getSettings()
-  const repo = await NodeGit.Repository.open(resolve(rootDirectory))
-  const mostRecentCommit = await repo.getMasterCommit()
-  const walker = repo.createRevWalk()
-  walker.push(mostRecentCommit)
-  walker.sorting(NodeGit.Revwalk.SORT.TIME)
-  const historyEntries = await walker.fileHistoryWalk(filePath, 500)
-  return historyEntries.map(history => getEntry(history.commit))
+  const commits = await git.log({ fs, dir: getRepoPath() })
+  let lastSHA = null
+  let lastCommit = null
+  const filepath = 'dir'
+  const entries = []
+  for (const commit of commits) {
+    try {
+      const o = await git.readObject({
+        fs,
+        dir: getRepoPath(),
+        oid: commit.oid,
+        filepath
+      })
+      if (o.oid !== lastSHA) {
+        if (lastSHA !== null) {
+          entries.push(lastCommit)
+        }
+        lastSHA = o.oid
+      }
+    } catch (err) {
+      entries.push(lastCommit)
+      break
+    }
+    lastCommit = commit
+  }
+  return entries.map(getRevision)
 }
 
 module.exports = {
-  initRepo,
   openRepo,
   commitChanges,
   getRevisionHistory

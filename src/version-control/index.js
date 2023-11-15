@@ -1,16 +1,27 @@
 const git = require('./git')
 const Debug = require('../debug')
+const Settings = require('../settings')
 
 let repo = null
 
 const init = async () => {
+  const { revisionHistory } = Settings.getSettings()
+  if (!revisionHistory) {
+    return
+  }
   Debug.timeStart('version control')
-  repo = await git.openRepo()
-  await git.commitChanges(repo)
+  await git.openRepo()
+  await git.commitChanges()
   Debug.timeEnd('version control')
 }
 
 const createCache = () => {
+  const { revisionHistory } = Settings.getSettings()
+  if (!revisionHistory) {
+    return {
+      find: () => ({ get: () => null })
+    }
+  }
   return {
     async find(path) {
       let fileRevisionHistory = null

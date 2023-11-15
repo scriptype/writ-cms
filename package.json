@@ -21,9 +21,9 @@
     "browser-sync": "^2.27.11",
     "front-matter": "^4.0.2",
     "handlebars": "^4.7.7",
+    "isomorphic-git": "^1.25.0",
     "lodash": "^4.17.21",
     "marked": "^4.2.5",
-    "nodegit": "^0.28.0-alpha.21",
     "turndown": "^7.1.1"
   },
   "devDependencies": {
