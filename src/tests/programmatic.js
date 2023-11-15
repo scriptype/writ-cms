@@ -17,40 +17,78 @@ const createTempDir = async () => {
   }
 }
 
+const hasExportDirectory = (t, paths, message) => {
+  const { exportDirectory } = writ.getDefaultSettings()
+  t.true(paths.includes(exportDirectory), message)
+}
+
+const hasThemeDirectory = (t, paths, message) => {
+  const { themeDirectory } = writ.getDefaultSettings()
+  t.true(paths.includes(themeDirectory), message)
+}
+
+const hasAssetsDirectory = (t, paths, message) => {
+  const { assetsDirectory } = writ.getDefaultSettings()
+  t.true(paths.includes(assetsDirectory), message)
+}
+
+const hasCommonDirectory = (t, paths, message) => {
+  t.true(paths.includes('common'), message)
+}
+
+const hasDefaultThemeDirectory = (t, paths, message) => {
+  t.true(paths.includes('default'), message)
+}
+
+const hasCustomDirectory = (t, paths, message) => {
+  t.true(paths.includes('custom'), message)
+}
+
+const hasTemplatesDirectory = (t, paths, message) => {
+  t.true(paths.includes('templates'), message)
+}
+
+const hasFiles = (t, paths, files, message) => {
+  t.true(files.every(f => paths.includes(f)), message)
+}
+
+const common = {
+  rootDirectoryContents(t, paths) {
+    hasExportDirectory(t, paths, 'Creates export directory')
+    hasThemeDirectory(t, paths, 'Creates theme directory')
+  },
+
+  exportDirectoryContents(t, paths) {
+    hasFiles(t, paths, ['index.html'], 'Export directory has index.html')
+    hasAssetsDirectory(t, paths, 'Export directory has assets directory')
+  },
+
+  assetsDirectoryContents(t, paths) {
+    hasCommonDirectory(t, paths, 'Assets directory has common assets')
+    hasDefaultThemeDirectory(t, paths, 'Assets directory has theme-default assets')
+    hasCustomDirectory(t, paths, 'Assets directory has custom assets')
+  },
+
+  themeDirectoryContents(t, paths) {
+    hasAssetsDirectory(t, paths, 'Theme directory has assets directory')
+    hasTemplatesDirectory(t, paths, 'Theme directory has templates directory')
+    hasFiles(t, paths, ['style.css', 'script.js'], 'Theme directory has style.css and script.js')
+  }
+}
+
 test('builds in empty directory', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
 
-  const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
+  const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
   await writ.build({
     rootDirectory: dir.name
   })
 
-  const dirContents = await readdir(dir.name)
-  t.true(
-    dirContents.includes(exportDirectory),
-    'Creates exportDirectory'
-  )
-
-  const exportDirectoryContents = await readdir(join(dir.name, exportDirectory))
-  t.true(
-    exportDirectoryContents.includes('index.html'),
-    'Export directory has index.html'
-  )
-  t.true(
-    exportDirectoryContents.includes(assetsDirectory),
-    'Export directory has assets directory'
-  )
-
-  const assetsDirectoryContents = await readdir(join(dir.name, exportDirectory, assetsDirectory))
-  t.true(
-    assetsDirectoryContents.includes('common'),
-    'Assets directory has common assets'
-  )
-  t.true(
-    assetsDirectoryContents.includes('default'),
-    'Assets directory has theme-default assets'
-  )
+  common.rootDirectoryContents(t, await readdir(dir.name))
+  common.exportDirectoryContents(t, await readdir(join(dir.name, exportDirectory)))
+  common.themeDirectoryContents(t, await readdir(join(dir.name, themeDirectory)))
+  common.assetsDirectoryContents(t, await readdir(join(dir.name, exportDirectory, assetsDirectory)))
 })
 
 test('builds with a single txt file', async t => {
@@ -60,40 +98,17 @@ test('builds with a single txt file', async t => {
   const fileNameOut = 'hello.html'
   await dir.mkFile(fileNameIn, 'Hello!')
 
-  const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
+  const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
   await writ.build({
     rootDirectory: dir.name
   })
 
-  const dirContents = await readdir(dir.name)
-  t.true(
-    dirContents.includes(fileNameIn),
-    `${fileNameIn} exists`
-  )
-  t.true(
-    dirContents.includes(exportDirectory),
-    'Creates exportDirectory'
-  )
-
-  const exportDirectoryContents = await readdir(join(dir.name, exportDirectory))
-  t.true(
-    exportDirectoryContents.includes(fileNameOut),
-    `Export directory has compiled ${fileNameOut}`
-  )
-  t.true(
-    exportDirectoryContents.includes(assetsDirectory),
-    'Export directory has assets directory'
-  )
-
-  const assetsDirectoryContents = await readdir(join(dir.name, exportDirectory, assetsDirectory))
-  t.true(
-    assetsDirectoryContents.includes('common'),
-    'Assets directory has common assets'
-  )
-  t.true(
-    assetsDirectoryContents.includes('default'),
-    'Assets directory has theme-default assets'
-  )
+  const rootDirectoryPaths = await readdir(dir.name)
+  t.true(rootDirectoryPaths.includes(fileNameIn), `${fileNameIn} exists`)
+  common.rootDirectoryContents(t, rootDirectoryPaths)
+  common.exportDirectoryContents(t, await readdir(join(dir.name, exportDirectory)))
+  common.themeDirectoryContents(t, await readdir(join(dir.name, themeDirectory)))
+  common.assetsDirectoryContents(t, await readdir(join(dir.name, exportDirectory, assetsDirectory)))
 })
 
 test('builds after a file is deleted', async t => {
