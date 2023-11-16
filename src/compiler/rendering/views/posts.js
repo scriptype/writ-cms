@@ -1,5 +1,5 @@
 const { mkdir } = require('fs/promises')
-const { join, format, dirname } = require('path')
+const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 const { getSlug, replaceExtension } = require('../../../helpers')
