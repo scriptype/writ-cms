@@ -6,7 +6,7 @@ let repo = null
 
 const init = async () => {
   const { revisionHistory } = Settings.getSettings()
-  if (!revisionHistory) {
+  if (revisionHistory !== "auto") {
     return
   }
   Debug.timeStart('version control')
@@ -17,7 +17,7 @@ const init = async () => {
 
 const createCache = () => {
   const { revisionHistory } = Settings.getSettings()
-  if (!revisionHistory) {
+  if (revisionHistory === "off") {
     return {
       find: () => ({ get: () => null })
     }

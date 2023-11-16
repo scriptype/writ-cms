@@ -24,7 +24,7 @@ const defaultSettings = (rootDirectory) => ({
   expansions: [
     "content-editor"
   ],
-  revisionHistory: false
+  revisionHistory: "manual" // auto | manual | off
 })
 
 const getIgnoreRegExp = ({ ignorePaths, exportDirectory, themeDirectory }) => {
