@@ -44,27 +44,33 @@ const hasTemplatesDirectory = (t, paths, message) => {
   t.true(paths.includes('templates'), message)
 }
 
-const hasPaths = (t, actualPaths, expectedPaths, message) => {
+const hasPaths = (t, actualPaths, expectedPaths, message, messagePrefix) => {
+  const prefix = messagePrefix ? (messagePrefix + ' ') : ''
+  const postfix = messagePrefix ? '' : ' exist(s)'
   t.true(
     expectedPaths.every(p => actualPaths.includes(p)),
-    message || `${expectedPaths.join(', ')} exist(s)`
+    message || `${prefix}${expectedPaths.join(', ')}${postfix}`
   )
 }
 
-const hasNotPaths = (t, actualPaths, unexpectedPaths, message) => {
+const hasNotPaths = (t, actualPaths, unexpectedPaths, message, messagePrefix) => {
+  const prefix = messagePrefix ? (messagePrefix + ' ') : ''
+  const postfix = messagePrefix ? '' : ' do not exist(s)'
   t.false(
     unexpectedPaths.some(p => actualPaths.includes(p)),
-    message || `${unexpectedPaths.join(', ')} do not exist(s)`
+    message || `${prefix}${unexpectedPaths.join(', ')}${postfix}`
   )
 }
 
-const expectPaths = (t, actualPaths, expectedPaths) => {
+const expectPaths = (t, actualPaths, expectedPaths, scope) => {
   if (expectedPaths) {
     if (expectedPaths.exists) {
-      hasPaths(t, actualPaths, expectedPaths.exists)
+      let prefix = scope ? `${scope} has` : undefined
+      hasPaths(t, actualPaths, expectedPaths.exists, '', prefix)
     }
     if (expectedPaths.notExists) {
-      hasNotPaths(t, actualPaths, expectedPaths.notExists)
+      let prefix = scope ? `${scope} does not have` : undefined
+      hasNotPaths(t, actualPaths, expectedPaths.notExists, '', prefix)
     }
   }
 }
@@ -83,25 +89,39 @@ const common = {
   },
 
   assetsDirectoryContents(t, actualPaths, expectedPaths) {
-    hasCommonDirectory(t, actualPaths, 'Assets directory has common assets')
-    hasDefaultThemeDirectory(t, actualPaths, 'Assets directory has theme-default assets')
-    hasCustomDirectory(t, actualPaths, 'Assets directory has custom assets')
-    expectPaths(t, actualPaths, expectedPaths)
+    if (!expectedPaths) {
+      hasCommonDirectory(t, actualPaths, 'Export/assets directory has common assets')
+      hasDefaultThemeDirectory(t, actualPaths, 'Export/assets directory has theme-default assets')
+      hasCustomDirectory(t, actualPaths, 'Export/assets directory has custom assets')
+    }
+    expectPaths(t, actualPaths, expectedPaths, 'Export/assets directory')
   },
 
   themeDirectoryContents(t, actualPaths, expectedPaths) {
-    hasAssetsDirectory(t, actualPaths, 'Theme directory has assets directory')
-    hasTemplatesDirectory(t, actualPaths, 'Theme directory has templates directory')
-    hasPaths(t, actualPaths, ['style.css', 'script.js'], 'Theme directory has style.css and script.js')
-    expectPaths(t, actualPaths, expectedPaths)
+    if (!expectedPaths) {
+      hasAssetsDirectory(t, actualPaths, 'Theme directory has assets directory')
+      hasTemplatesDirectory(t, actualPaths, 'Theme directory has templates directory')
+      hasPaths(t, actualPaths, ['style.css', 'script.js'], 'Theme directory has style.css and script.js')
+    }
+    expectPaths(t, actualPaths, expectedPaths, 'Theme directory')
   },
 
   async builds(t, rootDirectory, expectedPaths = {}) {
-    const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
-    common.rootDirectoryContents(t, await readdir(rootDirectory), expectedPaths.rootDirectoryPaths)
-    common.exportDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory)), expectedPaths.exportDirectoryPaths)
-    common.themeDirectoryContents(t, await readdir(join(rootDirectory, themeDirectory)), expectedPaths.themeDirectoryPaths)
-    common.assetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)), expectedPaths.assetsDirectoryPaths)
+    const {
+      exportDirectory,
+      assetsDirectory,
+      themeDirectory
+    } = writ.getDefaultSettings()
+    const {
+      rootDirectoryPaths,
+      exportDirectoryPaths,
+      assetsDirectoryPaths,
+      themeDirectoryPaths
+    } = expectedPaths
+    common.rootDirectoryContents(t, await readdir(rootDirectory), rootDirectoryPaths)
+    common.exportDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory)), exportDirectoryPaths)
+    common.assetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)), assetsDirectoryPaths)
+    common.themeDirectoryContents(t, await readdir(join(rootDirectory, themeDirectory)), themeDirectoryPaths)
   }
 }
 
@@ -131,6 +151,9 @@ test('builds with a single txt file', async t => {
   await common.builds(t, dir.name, {
     rootDirectoryPaths: {
       exists: [fileNameIn]
+    },
+    exportDirectoryPaths: {
+      exists: [fileNameOut]
     }
   })
 })
@@ -147,12 +170,6 @@ test('builds after a file is deleted', async t => {
     rootDirectory: dir.name
   })
 
-  await common.builds(t, dir.name, {
-    exportDirectoryPaths: {
-      exists: [fileNameOut]
-    }
-  })
-
   await rm(join(dir.name, fileNameIn))
 
   await writ.build({
@@ -160,8 +177,79 @@ test('builds after a file is deleted', async t => {
   })
 
   await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      notExists: [fileNameIn]
+    },
     exportDirectoryPaths: {
       notExists: [fileNameOut]
+    }
+  })
+})
+
+test('builds after theme folder is deleted', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { themeDirectory } = writ.getDefaultSettings()
+  await rm(join(dir.name, themeDirectory), { recursive: true })
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name)
+})
+
+test('builds after theme/assets folder is deleted', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { themeDirectory, assetsDirectory } = writ.getDefaultSettings()
+  await rm(join(dir.name, themeDirectory, assetsDirectory), { recursive: true })
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    assetsDirectoryPaths: {
+      exists: ['custom'],
+      notExists: ['common', 'default']
+    },
+    themeDirectoryPaths: {
+      exists: ['templates', 'style.css', 'script.js'],
+      notExists: [assetsDirectory]
+    }
+  })
+})
+
+test('builds after theme/templates folder is deleted', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { themeDirectory } = writ.getDefaultSettings()
+  await rm(join(dir.name, themeDirectory, 'templates'), { recursive: true })
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    themeDirectoryPaths: {
+      exists: ['assets', 'style.css', 'script.js'],
+      notExists: ['templates']
     }
   })
 })
