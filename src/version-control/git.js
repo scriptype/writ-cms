@@ -85,31 +85,11 @@ const getRevision = ({ oid, commit }) => {
 }
 
 const getRevisionHistory = async (filePath) => {
-  const commits = await git.log({ fs, dir: getRepoPath() })
-  let lastSHA = null
-  let lastCommit = null
-  const filepath = 'dir'
-  const entries = []
-  for (const commit of commits) {
-    try {
-      const o = await git.readObject({
-        fs,
-        dir: getRepoPath(),
-        oid: commit.oid,
-        filepath
-      })
-      if (o.oid !== lastSHA) {
-        if (lastSHA !== null) {
-          entries.push(lastCommit)
-        }
-        lastSHA = o.oid
-      }
-    } catch (err) {
-      entries.push(lastCommit)
-      break
-    }
-    lastCommit = commit
-  }
+  const entries = git.log({
+    fs,
+    dir: getRepoPath(),
+    filepath: filePath
+  })
   return entries.map(getRevision)
 }
 
