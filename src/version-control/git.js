@@ -38,13 +38,19 @@ const getConfig = async () => {
 
 const FILE = 0, HEAD = 1, WORKDIR = 2, STAGE = 3
 const isDeleted = row => row[WORKDIR] === 0
+const isChange = row => row[HEAD] !== 1 || row[WORKDIR] !== 1 || row[STAGE] !== 1
 
 const getDeletedFiles = (statusMatrix) => {
   return statusMatrix.filter(isDeleted).map(row => row[FILE])
 }
 
 const commitChanges = async () => {
-  const changes = await git.statusMatrix({ fs, dir: getRepoPath() })
+  const statusMatrix = await git.statusMatrix({
+    fs,
+    dir: getRepoPath(),
+    cache: {}
+  })
+  const changes = statusMatrix.filter(isChange)
   if (!changes.length) {
     return Promise.resolve()
   }
