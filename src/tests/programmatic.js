@@ -44,39 +44,64 @@ const hasTemplatesDirectory = (t, paths, message) => {
   t.true(paths.includes('templates'), message)
 }
 
-const hasFiles = (t, paths, files, message) => {
-  t.true(files.every(f => paths.includes(f)), message)
+const hasPaths = (t, actualPaths, expectedPaths, message) => {
+  t.true(
+    expectedPaths.every(p => actualPaths.includes(p)),
+    message || `${expectedPaths.join(', ')} exist(s)`
+  )
+}
+
+const hasNotPaths = (t, actualPaths, unexpectedPaths, message) => {
+  t.false(
+    unexpectedPaths.some(p => actualPaths.includes(p)),
+    message || `${unexpectedPaths.join(', ')} do not exist(s)`
+  )
+}
+
+const expectPaths = (t, actualPaths, expectedPaths) => {
+  if (expectedPaths) {
+    if (expectedPaths.exists) {
+      hasPaths(t, actualPaths, expectedPaths.exists)
+    }
+    if (expectedPaths.notExists) {
+      hasNotPaths(t, actualPaths, expectedPaths.notExists)
+    }
+  }
 }
 
 const common = {
-  rootDirectoryContents(t, paths) {
-    hasExportDirectory(t, paths, 'Creates export directory')
-    hasThemeDirectory(t, paths, 'Creates theme directory')
+  rootDirectoryContents(t, actualPaths, expectedPaths) {
+    hasExportDirectory(t, actualPaths, 'Creates export directory')
+    hasThemeDirectory(t, actualPaths, 'Creates theme directory')
+    expectPaths(t, actualPaths, expectedPaths)
   },
 
-  exportDirectoryContents(t, paths) {
-    hasFiles(t, paths, ['index.html'], 'Export directory has index.html')
-    hasAssetsDirectory(t, paths, 'Export directory has assets directory')
+  exportDirectoryContents(t, actualPaths, expectedPaths) {
+    hasAssetsDirectory(t, actualPaths, 'Export directory has assets directory')
+    hasPaths(t, actualPaths, ['index.html'], 'Export directory has index.html')
+    expectPaths(t, actualPaths, expectedPaths)
   },
 
-  assetsDirectoryContents(t, paths) {
-    hasCommonDirectory(t, paths, 'Assets directory has common assets')
-    hasDefaultThemeDirectory(t, paths, 'Assets directory has theme-default assets')
-    hasCustomDirectory(t, paths, 'Assets directory has custom assets')
+  assetsDirectoryContents(t, actualPaths, expectedPaths) {
+    hasCommonDirectory(t, actualPaths, 'Assets directory has common assets')
+    hasDefaultThemeDirectory(t, actualPaths, 'Assets directory has theme-default assets')
+    hasCustomDirectory(t, actualPaths, 'Assets directory has custom assets')
+    expectPaths(t, actualPaths, expectedPaths)
   },
 
-  themeDirectoryContents(t, paths) {
-    hasAssetsDirectory(t, paths, 'Theme directory has assets directory')
-    hasTemplatesDirectory(t, paths, 'Theme directory has templates directory')
-    hasFiles(t, paths, ['style.css', 'script.js'], 'Theme directory has style.css and script.js')
+  themeDirectoryContents(t, actualPaths, expectedPaths) {
+    hasAssetsDirectory(t, actualPaths, 'Theme directory has assets directory')
+    hasTemplatesDirectory(t, actualPaths, 'Theme directory has templates directory')
+    hasPaths(t, actualPaths, ['style.css', 'script.js'], 'Theme directory has style.css and script.js')
+    expectPaths(t, actualPaths, expectedPaths)
   },
 
-  async builds(t, rootDirectory) {
+  async builds(t, rootDirectory, expectedPaths = {}) {
     const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
-    common.rootDirectoryContents(t, await readdir(rootDirectory))
-    common.exportDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory)))
-    common.themeDirectoryContents(t, await readdir(join(rootDirectory, themeDirectory)))
-    common.assetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)))
+    common.rootDirectoryContents(t, await readdir(rootDirectory), expectedPaths.rootDirectoryPaths)
+    common.exportDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory)), expectedPaths.exportDirectoryPaths)
+    common.themeDirectoryContents(t, await readdir(join(rootDirectory, themeDirectory)), expectedPaths.themeDirectoryPaths)
+    common.assetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)), expectedPaths.assetsDirectoryPaths)
   }
 }
 
@@ -94,40 +119,39 @@ test('builds in empty directory', async t => {
 test('builds with a single txt file', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
+
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
   await dir.mkFile(fileNameIn, 'Hello!')
 
-  const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
   await writ.build({
     rootDirectory: dir.name
   })
 
-  await common.builds(t, dir.name)
-
-  const rootDirectoryPaths = await readdir(dir.name)
-  t.true(rootDirectoryPaths.includes(fileNameIn), `${fileNameIn} exists`)
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [fileNameIn]
+    }
+  })
 })
 
 test('builds after a file is deleted', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
+
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
   await dir.mkFile(fileNameIn, 'Hello!')
 
-  const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
   await writ.build({
     rootDirectory: dir.name
   })
 
-  await common.builds(t, dir.name)
-
-  const exportDirectoryContentsBefore = await readdir(join(dir.name, exportDirectory))
-  t.true(
-    exportDirectoryContentsBefore.includes(fileNameOut),
-    `Export directory has compiled ${fileNameOut} before deletion`
-  )
+  await common.builds(t, dir.name, {
+    exportDirectoryPaths: {
+      exists: [fileNameOut]
+    }
+  })
 
   await rm(join(dir.name, fileNameIn))
 
@@ -135,9 +159,9 @@ test('builds after a file is deleted', async t => {
     rootDirectory: dir.name
   })
 
-  const exportDirectoryContentsAfter = await readdir(join(dir.name, exportDirectory))
-  t.false(
-    exportDirectoryContentsAfter.includes(fileNameOut),
-    `Export directory does not have ${fileNameOut} after deletion`
-  )
+  await common.builds(t, dir.name, {
+    exportDirectoryPaths: {
+      notExists: [fileNameOut]
+    }
+  })
 })
