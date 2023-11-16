@@ -73,6 +73,14 @@ const common = {
     hasAssetsDirectory(t, paths, 'Theme directory has assets directory')
     hasTemplatesDirectory(t, paths, 'Theme directory has templates directory')
     hasFiles(t, paths, ['style.css', 'script.js'], 'Theme directory has style.css and script.js')
+  },
+
+  async builds(t, rootDirectory) {
+    const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
+    common.rootDirectoryContents(t, await readdir(rootDirectory))
+    common.exportDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory)))
+    common.themeDirectoryContents(t, await readdir(join(rootDirectory, themeDirectory)))
+    common.assetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)))
   }
 }
 
@@ -80,15 +88,11 @@ test('builds in empty directory', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
 
-  const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
   await writ.build({
     rootDirectory: dir.name
   })
 
-  common.rootDirectoryContents(t, await readdir(dir.name))
-  common.exportDirectoryContents(t, await readdir(join(dir.name, exportDirectory)))
-  common.themeDirectoryContents(t, await readdir(join(dir.name, themeDirectory)))
-  common.assetsDirectoryContents(t, await readdir(join(dir.name, exportDirectory, assetsDirectory)))
+  await common.builds(t, dir.name)
 })
 
 test('builds with a single txt file', async t => {
@@ -103,12 +107,10 @@ test('builds with a single txt file', async t => {
     rootDirectory: dir.name
   })
 
+  await common.builds(t, dir.name)
+
   const rootDirectoryPaths = await readdir(dir.name)
   t.true(rootDirectoryPaths.includes(fileNameIn), `${fileNameIn} exists`)
-  common.rootDirectoryContents(t, rootDirectoryPaths)
-  common.exportDirectoryContents(t, await readdir(join(dir.name, exportDirectory)))
-  common.themeDirectoryContents(t, await readdir(join(dir.name, themeDirectory)))
-  common.assetsDirectoryContents(t, await readdir(join(dir.name, exportDirectory, assetsDirectory)))
 })
 
 test('builds after a file is deleted', async t => {
@@ -122,6 +124,8 @@ test('builds after a file is deleted', async t => {
   await writ.build({
     rootDirectory: dir.name
   })
+
+  await common.builds(t, dir.name)
 
   const exportDirectoryContentsBefore = await readdir(join(dir.name, exportDirectory))
   t.true(
