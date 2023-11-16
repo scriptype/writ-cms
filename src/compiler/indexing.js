@@ -1,5 +1,5 @@
 const fs = require('fs/promises')
-const { join, extname } = require('path')
+const { join, relative, extname } = require('path')
 const { readFileContent, isDirectory } = require('../helpers')
 const Settings = require('../settings')
 const { debugLog } = require('../debug')
@@ -41,7 +41,7 @@ const indexFileSystem = async (dir, depth = 0) => {
         const fullPath = join(activePath, path)
         const baseProperties = {
           name: path,
-          path: fullPath.replace(rootDirectory + '/', ''),
+          path: relative(rootDirectory, fullPath),
           stats: await fs.stat(fullPath),
           depth,
         }
