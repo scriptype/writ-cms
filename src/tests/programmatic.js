@@ -1,10 +1,21 @@
 const { rm, mkdtemp, readdir, writeFile } = require('fs/promises')
 const { tmpdir } = require('os')
-const { join } = require('path')
+const { join, resolve } = require('path')
 const test = require('tape')
 const writ = require('..')
 
-const createTempDir = () => mkdtemp(join(tmpdir(), 'writ-test'))
+const randomNumber = () => {
+  return String(Date.now() * Math.random()).split('.')[0]
+}
+
+const createTempDir = async () => {
+  const dirName = await mkdtemp(join(tmpdir(), 'writ-test'))
+  return {
+    name: dirName,
+    mkFile: (name, content) => writeFile(join(dirName, name), content),
+    rm: () => rm(dirName, { recursive: true })
+  }
+}
 
 const hasExportDirectory = (t, paths, message) => {
   const { exportDirectory } = writ.getDefaultSettings()
@@ -75,60 +86,60 @@ const common = {
 
 test('builds in empty directory', async t => {
   const dir = await createTempDir()
-  t.teardown(() => rm(dir, { recursive: true }))
+  t.teardown(dir.rm)
 
   await writ.build({
-    rootDirectory: dir
+    rootDirectory: dir.name
   })
 
-  await common.builds(t, dir)
+  await common.builds(t, dir.name)
 })
 
 test('builds with a single txt file', async t => {
   const dir = await createTempDir()
-  t.teardown(() => rm(dir, { recursive: true }))
+  t.teardown(dir.rm)
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
-  await writeFile(join(dir, fileNameIn), 'Hello!')
+  await dir.mkFile(fileNameIn, 'Hello!')
 
   const { exportDirectory, assetsDirectory, themeDirectory } = writ.getDefaultSettings()
   await writ.build({
-    rootDirectory: dir
+    rootDirectory: dir.name
   })
 
-  await common.builds(t, dir)
+  await common.builds(t, dir.name)
 
-  const rootDirectoryPaths = await readdir(dir)
+  const rootDirectoryPaths = await readdir(dir.name)
   t.true(rootDirectoryPaths.includes(fileNameIn), `${fileNameIn} exists`)
 })
 
 test('builds after a file is deleted', async t => {
   const dir = await createTempDir()
-  t.teardown(() => rm(dir, { recursive: true }))
+  t.teardown(dir.rm)
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
-  await writeFile(join(dir, fileNameIn), 'Hello!')
+  await dir.mkFile(fileNameIn, 'Hello!')
 
   const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
   await writ.build({
-    rootDirectory: dir
+    rootDirectory: dir.name
   })
 
-  await common.builds(t, dir)
+  await common.builds(t, dir.name)
 
-  const exportDirectoryContentsBefore = await readdir(join(dir, exportDirectory))
+  const exportDirectoryContentsBefore = await readdir(join(dir.name, exportDirectory))
   t.true(
     exportDirectoryContentsBefore.includes(fileNameOut),
     `Export directory has compiled ${fileNameOut} before deletion`
   )
 
-  await rm(join(dir, fileNameIn))
+  await rm(join(dir.name, fileNameIn))
 
   await writ.build({
-    rootDirectory: dir
+    rootDirectory: dir.name
   })
 
-  const exportDirectoryContentsAfter = await readdir(join(dir, exportDirectory))
+  const exportDirectoryContentsAfter = await readdir(join(dir.name, exportDirectory))
   t.false(
     exportDirectoryContentsAfter.includes(fileNameOut),
     `Export directory does not have ${fileNameOut} after deletion`
