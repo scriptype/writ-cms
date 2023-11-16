@@ -1,4 +1,5 @@
-const { rm, mkdir, readdir, writeFile, readFile } = require('fs/promises')
+const { rm, mkdtemp, readdir, writeFile } = require('fs/promises')
+const { tmpdir } = require('os')
 const { join, resolve } = require('path')
 const test = require('tape')
 const writ = require('..')
@@ -8,8 +9,7 @@ const randomNumber = () => {
 }
 
 const createTempDir = async () => {
-  const dirName = resolve(join('/tmp', 'test-dir-' + randomNumber()))
-  await mkdir(dirName)
+  const dirName = await mkdtemp(join(tmpdir(), 'writ-test'))
   return {
     name: dirName,
     mkFile: (name, content) => writeFile(join(dirName, name), content),
