@@ -86,7 +86,7 @@ const getRevision = ({ oid, commit }) => {
 }
 
 const getRevisionHistory = async (filePath) => {
-  const entries = git.log({
+  const entries = await git.log({
     fs,
     dir: getRepoPath(),
     filepath: filePath
