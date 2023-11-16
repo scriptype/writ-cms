@@ -40,10 +40,6 @@ const FILE = 0, HEAD = 1, WORKDIR = 2, STAGE = 3
 const isDeleted = row => row[WORKDIR] === 0
 const isChange = row => row[HEAD] !== 1 || row[WORKDIR] !== 1 || row[STAGE] !== 1
 
-const getDeletedFiles = (statusMatrix) => {
-  return statusMatrix.filter(isDeleted).map(row => row[FILE])
-}
-
 const commitChanges = async () => {
   const statusMatrix = await git.statusMatrix({
     fs,
@@ -54,7 +50,6 @@ const commitChanges = async () => {
   if (!changes.length) {
     return Promise.resolve()
   }
-  const deletedFiles = getDeletedFiles(changes)
   await Promise.all(
     changes.map(change => {
       if (isDeleted(change)) {
