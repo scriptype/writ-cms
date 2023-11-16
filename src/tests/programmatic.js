@@ -4,12 +4,8 @@ const { join, resolve } = require('path')
 const test = require('tape')
 const writ = require('..')
 
-const randomNumber = () => {
-  return String(Date.now() * Math.random()).split('.')[0]
-}
-
 const createTempDir = async () => {
-  const dirName = await mkdtemp(join(tmpdir(), 'writ-test'))
+  const dirName = await mkdtemp(join(tmpdir(), 'writ-test-'))
   return {
     name: dirName,
     mkFile: (name, content) => writeFile(join(dirName, name), content),
