@@ -73,7 +73,7 @@ const commitChanges = async () => {
 const getRevision = ({ oid, commit }) => {
   const author = commit.author
   // timezoneOffset: -120
-  const date = new Date(author.timestamp)
+  const date = new Date(author.timestamp * 1000)
   return {
     hash: oid,
     author: {
