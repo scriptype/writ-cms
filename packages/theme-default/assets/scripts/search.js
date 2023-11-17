@@ -55,7 +55,7 @@
       content: `
         ${post.title}
         ${post.summary}
-        ${post.tags.join(' ')}
+        ${post.tags.map(t => t.tag).join(' ')}
       `,
       index
     }))

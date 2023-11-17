@@ -46,7 +46,10 @@ const attachRelevantPosts = (post, posts) => {
     if (otherPost === post) {
       return
     }
-    const tagsOverlapScore = getScoreByOverlap(post.tags, otherPost.tags)
+    const tagsOverlapScore = getScoreByOverlap(
+      post.tags.map(t => t.tag),
+      otherPost.tags.map(t => t.tag)
+    )
     const titleSimilarityScore = getScoreByTextSimilarity(
       normalizeText(post.title),
       normalizeText(otherPost.title)

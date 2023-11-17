@@ -2,6 +2,7 @@ const Settings = require('../../settings')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
+const makeTagList = require('./tagList')
 
 const sortPosts = (a, b) => {
   return new Date(b.publishDate) - new Date(a.publishDate)
@@ -28,7 +29,8 @@ const createContentModel = (contentTree) => {
     posts: [],
     unrecognized: [],
     localAssets: [],
-    postsJSON: []
+    postsJSON: [],
+    tags: []
   }
 
   contentTree.forEach(content => {
@@ -69,6 +71,15 @@ const createContentModel = (contentTree) => {
   })
 
   ContentModel.posts.sort(sortPosts)
+  ContentModel.tags = makeTagList(ContentModel.posts)
+  ContentModel.posts.forEach(post => {
+    if (post.tags && post.tags.length) {
+      post.tags = post.tags.map(tag => {
+        const { posts, ...rest } = ContentModel.tags.find(t => t.tag === tag)
+        return rest
+      })
+    }
+  })
   ContentModel.postsJSON.push(
     ...ContentModel.posts.map(({ content, ...rest }) => rest)
   )

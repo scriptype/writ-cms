@@ -3,6 +3,7 @@ const Renderer = require('./renderer')
 const Views = {
   renderCategoryPages: require('./views/category-page'),
   renderHomepage: require('./views/homepage'),
+  renderTagIndices: require('./views/tag-indices'),
   copyLocalAssets: require('./views/local-assets'),
   renderPostsJSON: require('./views/posts-json'),
   renderPosts: require('./views/posts'),
@@ -17,6 +18,7 @@ module.exports = {
 
     this.renderPromise = Promise.all([
       Views.renderHomepage(Renderer, contentModel),
+      Views.renderTagIndices(Renderer, contentModel),
       Views.renderSubpages(Renderer, contentModel),
       Views.renderPostsJSON(contentModel),
       Views.copyLocalAssets(contentModel),

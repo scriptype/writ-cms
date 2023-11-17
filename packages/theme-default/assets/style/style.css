@@ -133,6 +133,16 @@ body {
     padding-right: 5px;
 }
 
+.post-tags {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.post-tags-item {
+    display: inline-block;
+}
+
 .post-music-list {
     list-style: none;
     padding: 0;
