@@ -9,7 +9,9 @@
   "scripts": {
     "start": "node src",
     "prepare": "husky install",
-    "test": "tape src/tests/**/*.js | tap-spec"
+    "tape": "tape src/tests/**/*.js | tap-spec",
+    "test": "nyc --reporter=text-summary npm run tape",
+    "test:ci": "nyc npm run tape"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "husky": "^8.0.0",
+    "nyc": "^15.1.0",
     "tap-spec": "^5.0.0",
     "tape": "^5.7.2"
   }
