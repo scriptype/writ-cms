@@ -88,7 +88,7 @@ const common = {
     expectPaths(t, actualPaths, expectedPaths)
   },
 
-  assetsDirectoryContents(t, actualPaths, expectedPaths) {
+  exportAssetsDirectoryContents(t, actualPaths, expectedPaths) {
     if (!expectedPaths) {
       hasCommonDirectory(t, actualPaths, 'Export/assets directory has common assets')
       hasDefaultThemeDirectory(t, actualPaths, 'Export/assets directory has theme-default assets')
@@ -120,7 +120,7 @@ const common = {
     } = expectedPaths
     common.rootDirectoryContents(t, await readdir(rootDirectory), rootDirectoryPaths)
     common.exportDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory)), exportDirectoryPaths)
-    common.assetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)), assetsDirectoryPaths)
+    common.exportAssetsDirectoryContents(t, await readdir(join(rootDirectory, exportDirectory, assetsDirectory)), assetsDirectoryPaths)
     common.themeDirectoryContents(t, await readdir(join(rootDirectory, themeDirectory)), themeDirectoryPaths)
   }
 }
