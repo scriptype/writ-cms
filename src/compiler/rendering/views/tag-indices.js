@@ -12,6 +12,9 @@ const mkTagDir = async (dirName) => {
 }
 
 const renderBareTagPage = async (Renderer, { posts, categories, tags }) => {
+  if (!tags.length) {
+    return Promise.resolve()
+  }
   const settings = Settings.getSettings()
   await mkdir(join(settings.out, 'tag'))
   return Renderer.render({
