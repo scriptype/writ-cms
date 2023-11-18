@@ -1,11 +1,24 @@
 # Writ-CMS
 
-A spirited web engine for humans.
+A spirited web engine, in early development.
 
-🚧 **Work in progress.**
+## Contents
 
-<details>
-<summary><h2>The idea</h2></summary>
+- [The idea](#the-idea)
+- [Example websites](#example-websites)
+- [Usage](#usage)
+  - [Name your site](#1-name-your-site)
+  - [Create a post](#2-create-a-post)
+  - [Preview and edit](#3-preview-and-edit)
+- [Installation](#installation)
+- [Manual](#manual)
+  - [Entry formats](#entry-formats)
+  - [Categories](#categories)
+  - [Posts](#posts)
+  - [Subpages](#subpages)
+  - [Static assets](#static-assets)
+
+## The idea
 
 When I'm writing a blog post, I want to deal with the least amount of software complexity.
 
@@ -16,23 +29,15 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 - I should be able to easily customize it
 - I should be able to use it without remembering much
 - And, **everyone** also should be able to do all of the those.
-</details>
-<details>
-<summary><h2>Example sites</h2></summary>
+
+## Example websites
 
 Currently, only I'm using this system. Have a look at:
 
 - A simple writ project: https://github.com/scriptype/writ
 - The default frontend: https://writ.enes.in
-</details>
-<details>
-<summary><h2>Warnings</h2></summary>
 
-- This software is not ready for production use and, therefore, cannot be held accountable for any loss of value.
-  - It is generally advised to use [git](https://git-scm.com/doc) in text-heavy personal projects, such as a website, to avoid content loss.
-</details>
-<details>
-<summary><h2>Usage</h2></summary>
+## Usage
 
 ### 1) Name your site
 ```sh
@@ -45,25 +50,22 @@ cd "All about trees"
 echo "Pines are nice" > "Hello world.txt"
 ```
 
-### 3) Preview & live edit
+### 3) Preview and edit
 ```sh
 writ start
 ```
-</details>
-<details>
-<summary><h2>Installation</h2></summary>
+
+## Installation
 
 ```sh
 npm install -g scriptype/writ-cms
 ```
-</details>
-<details>
-<summary><h2>Manual</h2></summary>
+
+## Manual
 
 ### Entry formats
 
-- Any text file (.txt, .md, .markdown, .hbs, .html).
-- Live WYSIWYG editor
+- Accepted text file extensions: .txt, .md, .markdown, .hbs, .html.
 
 ### Categories
 
