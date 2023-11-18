@@ -253,3 +253,62 @@ test('builds after theme/templates folder is deleted', async t => {
     }
   })
 })
+
+test('creates tag indices', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const fileNameIn = 'hello.txt'
+  const fileNameOut = 'hello.html'
+  await dir.mkFile(fileNameIn, 'Hello!')
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    exportDirectoryPaths: {
+      notExists: ['tag']
+    }
+  })
+
+  const tags = ['test-tag', 'test-tag-2']
+  const frontMatter = `---\n` +
+    `tags: ${tags.join(', ')}\n` +
+    `---\n`
+
+  await dir.mkFile(fileNameIn, `${frontMatter}Hello!`)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    exportDirectoryPaths: {
+      exists: ['tag']
+    }
+  })
+
+  const { exportDirectory } = writ.getDefaultSettings()
+  const tagDirectoryContents = await readdir(join(dir.name, exportDirectory, 'tag'))
+  t.true(
+    tags.every(tag => tagDirectoryContents.includes(tag)),
+    'Creates tag indices'
+  )
+
+  t.true(
+    tagDirectoryContents.includes('index.html'),
+    'Creates bare tag page'
+  )
+
+  const tagIndexFolders = await Promise.all(
+    tagDirectoryContents
+      .filter(tagIndex => tagIndex !== 'index.html')
+      .map(tagIndex => readdir(join(dir.name, exportDirectory, 'tag', tagIndex)))
+  )
+
+  t.true(
+    tagIndexFolders.every(folder => folder.includes('index.html')),
+    'Tag indices are folders with index.html'
+  )
+})
