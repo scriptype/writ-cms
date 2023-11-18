@@ -7,16 +7,8 @@ A spirited web engine, in early development.
 - [The idea](#the-idea)
 - [Example websites](#example-websites)
 - [Usage](#usage)
-  - [Name your site](#1-name-your-site)
-  - [Create a post](#2-create-a-post)
-  - [Preview and edit](#3-preview-and-edit)
 - [Installation](#installation)
 - [Manual](#manual)
-  - [Entry formats](#entry-formats)
-  - [Categories](#categories)
-  - [Posts](#posts)
-  - [Subpages](#subpages)
-  - [Static assets](#static-assets)
 
 ## The idea
 
