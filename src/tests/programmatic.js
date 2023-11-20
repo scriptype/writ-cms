@@ -1,4 +1,4 @@
-const { rm, mkdtemp, readdir, writeFile } = require('fs/promises')
+const { rm, mkdtemp, mkdir, readdir, writeFile } = require('fs/promises')
 const { tmpdir } = require('os')
 const { join, resolve } = require('path')
 const test = require('tape')
@@ -9,6 +9,7 @@ const createTempDir = async () => {
   return {
     name: dirName,
     mkFile: (name, content) => writeFile(join(dirName, name), content),
+    mkDir: (name) => mkdir(join(dirName, name)),
     rm: () => rm(dirName, { recursive: true })
   }
 }
@@ -311,4 +312,32 @@ test('creates tag indices', async t => {
     tagIndexFolders.every(folder => folder.includes('index.html')),
     'Tag indices are folders with index.html'
   )
+})
+
+test('builds when contentDirectory exists', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const { contentDirectory } = writ.getDefaultSettings()
+  await dir.mkDir(contentDirectory)
+
+  const fileNameIn = 'hello.txt'
+  const fileNameOut = 'hello.html'
+  await dir.mkFile(join(contentDirectory, fileNameIn), 'Hello!')
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { exportDirectory } = writ.getDefaultSettings()
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [contentDirectory]
+    },
+    exportDirectoryPaths: {
+      notExists: [contentDirectory],
+      exists: [fileNameOut]
+    }
+  })
 })

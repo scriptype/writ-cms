@@ -30,29 +30,44 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const indexFileSystem = async (dir, depth = 0) => {
-  const { rootDirectory } = Settings.getSettings()
-  const activePath = dir || rootDirectory
-  debugLog('indexing activePath', activePath)
+const indexFileSystem = async (dir, { depth = 0, contentPath } = {}) => {
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  let basePath = contentPath || rootDirectory
+  let activePath = dir
+  if (!dir) {
+    try {
+      await fs.stat(join(rootDirectory, contentDirectory))
+      basePath = join(rootDirectory, contentDirectory)
+      activePath = join(rootDirectory, contentDirectory)
+      debugLog('contentDirectory found')
+    } catch (ENOENT) {
+      debugLog('contentDirectory not found')
+      activePath = rootDirectory
+    }
+  }
+  debugLog('indexing', { activePath, basePath })
   return Promise.all(
     (await fs.readdir(activePath))
       .filter(shouldIncludePath)
-      .map(async path => {
-        const fullPath = join(activePath, path)
+      .map(async fileName => {
+        const fullPath = join(activePath, fileName)
         const baseProperties = {
-          name: path,
-          path: relative(rootDirectory, fullPath),
+          name: fileName,
+          path: relative(basePath, fullPath),
           stats: await fs.stat(fullPath),
           depth,
         }
         if (await isDirectory(fullPath)) {
-          const children = await indexFileSystem(fullPath, depth + 1)
+          const children = await indexFileSystem(fullPath, {
+            depth: depth + 1,
+            contentPath: basePath
+          })
           return {
             ...baseProperties,
             children
           }
         }
-        const extension = extname(path)
+        const extension = extname(fileName)
         const fileProperties = {
           ...baseProperties,
           extension,
