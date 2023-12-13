@@ -1,4 +1,4 @@
-const { cp } = require('fs/promises')
+const { cp, stat } = require('fs/promises')
 const { join, dirname } = require('path')
 const Settings = require('../../../settings')
 const { getSlug } = require('../../../helpers')
@@ -6,28 +6,52 @@ const { debugLog } = require('../../../debug')
 
 const all = Promise.all.bind(Promise)
 
-const copyAsset = ({ path, name }) => {
-  const { rootDirectory, out } = Settings.getSettings()
-  const dirnameSlug = getSlug(dirname(path))
-  const newPath = join(out, join(dirnameSlug, name))
-  debugLog('copying:', newPath)
-  return cp(join(rootDirectory, path), newPath)
+const getBasePath = async () => {
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  try {
+    await stat(join(rootDirectory, contentDirectory))
+    return join(rootDirectory, contentDirectory)
+  } catch (ENOENT) {
+    return rootDirectory
+  }
 }
 
-const copyLocalAssets = ({ localAssets, posts, categories }) => {
+const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
+
+const copyAsset = ({ basePath, path, name }) => {
+  const { out } = Settings.getSettings()
+  const dirnameSlug = getSlug(dirname(path))
+  const outPath = join(out, join(dirnameSlug, name))
+  debugLog('copying:', path)
+  return cp(join(basePath, path), outPath)
+}
+
+const copyLocalAssets = async ({ localAssets, posts, categories }) => {
+  const basePath = await getBasePath()
+
   const copyRootAssets = all(
-    localAssets.map(copyAsset)
+    localAssets
+      .map(withBasePath(basePath))
+      .map(copyAsset)
   )
 
   const copyCategoryAssets = all(
     categories.map(({ localAssets }) => {
-      return all(localAssets.map(copyAsset))
+      return all(
+        localAssets
+          .map(withBasePath(basePath))
+          .map(copyAsset)
+      )
     })
   )
 
   const copyPostAssets = all(
     posts.map(({ localAssets = [] }) => {
-      return all(localAssets.map(copyAsset))
+      return all(
+        localAssets
+          .map(withBasePath(basePath))
+          .map(copyAsset)
+      )
     })
   )
 
