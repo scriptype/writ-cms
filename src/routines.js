@@ -5,6 +5,7 @@ const Theme = require('./theme')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
+const CNAME = require('./cname')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
@@ -28,6 +29,7 @@ const run = async ({ mode, rootDirectory, debug }) => {
   await VersionControl.init()
   await Expansions.init()
   await SiteDirectory.create()
+  await CNAME.create()
   await Compiler.compile({
     decorators: {
       content: finalise('content'),
