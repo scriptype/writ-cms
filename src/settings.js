@@ -21,7 +21,8 @@ const defaultSettings = (rootDirectory) => ({
     "README.md",
     ".DS_Store",
     "_.*",
-    "settings.json"
+    "settings.json",
+    "CNAME"
   ],
   expansions: [
     "content-editor"
