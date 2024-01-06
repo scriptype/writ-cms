@@ -1,4 +1,4 @@
-const useContent = require('./useContent')
+const useContentModel = require('./useContentModel')
 const useTemplate = require('./useTemplate')
 const useTemplateHelpers = require('./useTemplateHelpers')
 const useTemplatePartials = require('./useTemplatePartials')
@@ -10,7 +10,7 @@ module.exports = (mode) => {
     useTemplate: useTemplate(mode),
     useTemplateHelpers: useTemplateHelpers(mode),
     useTemplatePartials: useTemplatePartials(mode),
-    useContent: useContent(mode),
+    useContentModel: useContentModel(mode),
     useAssets: useAssets(mode),
     usePreviewApi: usePreviewApi(mode)
   }

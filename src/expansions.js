@@ -33,7 +33,7 @@ const expansionHookMap = {
   template: 'useTemplate',
   templatePartials: 'useTemplatePartials',
   templateHelpers: 'useTemplateHelpers',
-  content: 'useContent',
+  contentModel: 'useContentModel',
   assets: 'useAssets',
   previewApi: 'usePreviewApi',
 }
@@ -58,5 +58,5 @@ module.exports = {
   expandTemplateHelpers: expandBy('useTemplateHelpers'),
   expandAssets: expandBy('useAssets'),
   expandPreviewApi: expandBy('usePreviewApi'),
-  expandContent: expandBy('useContent')
+  expandContentModel: expandBy('useContentModel')
 }

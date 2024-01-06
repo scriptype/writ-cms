@@ -37,7 +37,7 @@ const Category = (category) => {
   }
 }
 
-const useContent = (mode) =>
+const useContentModel = (mode) =>
   (contentModel) => {
     if (mode !== 'start') {
       return contentModel
@@ -49,4 +49,4 @@ const useContent = (mode) =>
     }
   }
 
-module.exports = useContent
+module.exports = useContentModel

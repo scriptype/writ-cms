@@ -32,7 +32,7 @@ const run = async ({ mode, rootDirectory, debug }) => {
   await CNAME.create()
   await Compiler.compile({
     decorators: {
-      content: finalise('content'),
+      contentModel: finalise('contentModel'),
       rendering: {
         helpers: finalise('templateHelpers'),
         partials: finalise('templatePartials'),

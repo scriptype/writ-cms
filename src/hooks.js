@@ -1,6 +1,6 @@
 const hooks = {
   assets: [],
-  content: [],
+  contentModel: [],
   previewApi: [],
   templateHelpers: [],
   templatePartials: [],
@@ -22,8 +22,8 @@ const api = {
     return this
   },
 
-  useContent(fn) {
-    hooks.content.push(fn)
+  useContentModel(fn) {
+    hooks.contentModel.push(fn)
     return this
   },
 
@@ -67,8 +67,8 @@ const expandTemplatePartials = (partials) => {
   ]
 }
 
-const expandContent = (content) => {
-  return expand(content, hooks.content)
+const expandContentModel = (contentModel) => {
+  return expand(contentModel, hooks.contentModel)
 }
 
 const expandAssets = (assets) => {
@@ -93,7 +93,7 @@ module.exports = {
       template: expandTemplate,
       templatePartials: expandTemplatePartials,
       templateHelpers: expandTemplateHelpers,
-      content: expandContent,
+      contentModel: expandContentModel,
       assets: expandAssets,
       previewApi: expandPreviewApi,
     }[expansionHook](value)
@@ -102,7 +102,7 @@ module.exports = {
   expandTemplate,
   expandTemplatePartials,
   expandTemplateHelpers,
-  expandContent,
+  expandContentModel,
   expandAssets,
   expandPreviewApi,
 }
