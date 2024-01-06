@@ -13,30 +13,23 @@ module.exports = {
   async init() {
     Debug.timeStart('theme')
     const { rootDirectory, themeDirectory } = Settings.getSettings()
-    const folderPath = join(rootDirectory, themeDirectory)
+    const customThemePath = join(rootDirectory, themeDirectory)
     this.customizers = []
     try {
-      await stat(folderPath)
-      Debug.debugLog(`${folderPath} exists`)
-      this.customizers.push(...(await this.checkCustomizers(folderPath)))
+      await stat(customThemePath)
+      Debug.debugLog(`${customThemePath} exists`)
+      this.customizers.push(...(await this.getCustomizers(customThemePath)))
       return
     } catch (e) {
-      Debug.debugLog(`${folderPath} not found`)
+      Debug.debugLog(`${customThemePath} not found`)
     }
-    await this.makeThemeDirectory(folderPath)
+    await this.makeCustomThemeDirectory(customThemePath)
     Debug.timeEnd('theme')
   },
 
-  async checkCustomizers(folderPath) {
-    const paths = await readdir(folderPath)
+  async getCustomizers(customThemePath) {
+    const paths = await readdir(customThemePath)
     return paths.filter(p => p.endsWith('.css') || p.endsWith('.js'))
-  },
-
-  makeThemeDirectorySubFolders(folderPath) {
-    return Promise.all([
-      mkdir(join(folderPath, ASSETS)),
-      mkdir(join(folderPath, TEMPLATES))
-    ])
   },
 
   copyCommonResources(folderPath) {
@@ -58,23 +51,23 @@ module.exports = {
     ])
   },
 
-  copySelectedThemeResources(folderPath) {
+  copyBaseThemeResources(customThemePath) {
     const { theme } = Settings.getSettings()
     const themeSrcPath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
     return Promise.all([
       cp(
         join(themeSrcPath, ASSETS),
-        join(folderPath, ASSETS, theme),
+        join(customThemePath, ASSETS, theme),
         { recursive: true }
       ),
       cp(
         join(themeSrcPath, PARTIALS),
-        join(folderPath, TEMPLATES),
+        join(customThemePath, TEMPLATES),
         { recursive: true }
       ),
       cp(
         join(themeSrcPath, THEME_SETTINGS),
-        join(folderPath, THEME_SETTINGS)
+        join(customThemePath, THEME_SETTINGS)
       )
     ]).then(() => {
       this.customizers.push(THEME_SETTINGS)
@@ -83,7 +76,7 @@ module.exports = {
     })
   },
 
-  async copyCustomizers(folderPath) {
+  async copyCustomizers(customThemePath) {
     const paths = await readdir(join(__dirname, 'customizers'))
     const customizers = paths.filter(p => {
       return p.endsWith('.css') || p.endsWith('.js')
@@ -93,28 +86,31 @@ module.exports = {
       paths.map(path => {
         return cp(
           join(__dirname, 'customizers', path),
-          join(folderPath, path)
+          join(customThemePath, path)
         )
       })
     )
   },
 
-  async makeThemeDirectory(folderPath) {
-    await mkdir(folderPath)
-
-    await this.makeThemeDirectorySubFolders(folderPath)
+  async makeCustomThemeDirectory(customThemePath) {
+    await mkdir(customThemePath)
 
     await Promise.all([
-      this.copyCommonResources(folderPath),
-      this.copySelectedThemeResources(folderPath),
-      this.copyCustomizers(folderPath)
+      mkdir(join(customThemePath, ASSETS)),
+      mkdir(join(customThemePath, TEMPLATES))
+    ])
+
+    await Promise.all([
+      this.copyCommonResources(customThemePath),
+      this.copyBaseThemeResources(customThemePath),
+      this.copyCustomizers(customThemePath)
     ])
   },
 
   use(type, value) {
     const { rootDirectory, theme, themeDirectory } = Settings.getSettings()
-    const folderPath = join(rootDirectory, themeDirectory)
-    const themePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
+    const customThemePath = join(rootDirectory, themeDirectory)
+    const baseThemePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
 
     switch (type) {
       case "templateHelpers":
@@ -124,13 +120,13 @@ module.exports = {
 
         let themeTemplateHelpers = {}
         try {
-          themeTemplateHelpers = require(join(themePath, TEMPLATE_HELPERS))
+          themeTemplateHelpers = require(join(baseThemePath, TEMPLATE_HELPERS))
         } catch {}
 
         let customTemplateHelpers = {}
         try {
           customTemplateHelpers = require(
-            join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
+            join(customThemePath, TEMPLATES, TEMPLATE_HELPERS)
           )
         } catch {}
 
@@ -159,19 +155,19 @@ module.exports = {
         return [
           ...value,
           join(__dirname, 'common', PARTIALS),
-          join(themePath, PARTIALS),
-          join(folderPath, TEMPLATES)
+          join(baseThemePath, PARTIALS),
+          join(customThemePath, TEMPLATES)
         ]
 
       case "assets":
         return [
           ...value,
           {
-            src: join(folderPath, ASSETS),
+            src: join(customThemePath, ASSETS),
             dest: ''
           },
           ...this.customizers.map(path => ({
-            src: join(folderPath, path),
+            src: join(customThemePath, path),
             dest: 'custom',
             single: true
           }))
