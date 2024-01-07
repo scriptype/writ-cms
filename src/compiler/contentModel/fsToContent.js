@@ -21,13 +21,12 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
     const isDirectory = fsObject.children
     const { depth } = fsObject
 
-    if (!isDirectory && depth !== 2 && !isPostFile(fsObject)) {
-      return createLocalAsset(fsObject)
-    }
-
     if (depth === 0) {
       if (isPostFile(fsObject)) {
         return await createDefaultCategoryPost(fsObject, cache)
+      }
+      if (!isDirectory) {
+        return createLocalAsset(fsObject)
       }
       if (fsObject.name === pagesDirectory) {
         return await createSubpages(fsObject, cache)
@@ -35,7 +34,7 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
       if (fsObject.name === assetsDirectory) {
         return createAssets(fsObject)
       }
-      if (isDirectory && fsObject.children.some(isFolderedPostIndexFile)) {
+      if (fsObject.children.some(isFolderedPostIndexFile)) {
         return await createFolderedPost({
           ...fsObject,
           children: await mapFSIndexToContentTree(fsObject.children, cache)
@@ -54,7 +53,10 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
       if (isPostFile(fsObject)) {
         return await createPost(fsObject, cache)
       }
-      if (isDirectory && fsObject.children.some(isFolderedPostIndexFile)) {
+      if (!isDirectory) {
+        return createLocalAsset(fsObject)
+      }
+      if (fsObject.children.some(isFolderedPostIndexFile)) {
         return await createFolderedPost({
           ...fsObject,
           children: await mapFSIndexToContentTree(fsObject.children, cache)
