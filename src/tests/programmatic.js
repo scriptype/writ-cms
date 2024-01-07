@@ -9,6 +9,7 @@ const createTempDir = async () => {
   return {
     name: dirName,
     mkFile: (name, content) => writeFile(join(dirName, name), content),
+    mkAsset: (assetsDirectory, name, content) => writeFile(join(dirName, assetsDirectory, name), content),
     mkDir: (name) => mkdir(join(dirName, name), { recursive: true }),
     rm: () => rm(dirName, { recursive: true })
   }
@@ -358,4 +359,28 @@ test('builds when contentDirectory exists', async t => {
 
   const compiledPostFolder = await readdir(join(dir.name, exportDirectory, categoryName, postName))
   hasPaths(t, compiledPostFolder, ['index.html', postLocalAsset], 'Compiled test post folder has index.html and local asset')
+})
+
+test('passes through assets folder', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { assetsDirectory } = writ.getDefaultSettings()
+  await dir.mkDir(assetsDirectory)
+  const fileName = 'hey-asset.jpg'
+  await dir.mkAsset(assetsDirectory, fileName, '')
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    assetsDirectoryPaths: {
+      exists: [fileName]
+    }
+  })
 })

@@ -3,6 +3,16 @@ const { resolve, join, basename } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
 
+const getBasePath = async () => {
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  try {
+    await stat(join(rootDirectory, contentDirectory))
+    return join(rootDirectory, contentDirectory)
+  } catch (ENOENT) {
+    return rootDirectory
+  }
+}
+
 const ensureDirectory = async (path) => {
   Debug.debugLog('ensure directory', path)
   try {
@@ -18,13 +28,25 @@ const ensureAssetsDirectory = () => {
   return ensureDirectory(join(out, assetsDirectory))
 }
 
-const copyAssetsDirectory = async ({ src, dest }) => {
+const copyAssetsDirectory = async () => {
+  const { assetsDirectory, out } = Settings.getSettings()
+  const src = join(await getBasePath(), assetsDirectory)
+  try {
+    await stat(src)
+    const dest = join(out, assetsDirectory)
+    return cp(src, dest, { recursive: true })
+  } catch {
+    return Promise.resolve()
+  }
+}
+
+const copyAssetsAsFolder = async ({ src, dest }) => {
   Debug.debugLog('copy assets directory', src, dest)
   const { out, assetsDirectory } = Settings.getSettings()
   try {
     await stat(src)
   } catch (e) {
-    Debug.debugLog(`copyAssetsDirectory: ${src} not found`)
+    Debug.debugLog(`copyAssetsAsFolder: ${src} not found`)
     return Promise.resolve()
   }
   return cp(src, join(out, assetsDirectory, dest), { recursive: true })
@@ -45,7 +67,7 @@ const decorateAssets = (assetsDecorator) => {
       if (assetEntry.single) {
         return copyAsset(assetEntry)
       } else {
-        return copyAssetsDirectory(assetEntry)
+        return copyAssetsAsFolder(assetEntry)
       }
     })
   )
@@ -59,6 +81,7 @@ module.exports = {
     const { mode } = Settings.getSettings()
     this.promise = this.promise
       .then(ensureAssetsDirectory)
+      .then(copyAssetsDirectory)
       .then(() => decorateAssets(decorators.assets))
 
     return this.promise.then(() => {
