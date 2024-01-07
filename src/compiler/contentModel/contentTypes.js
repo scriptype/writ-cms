@@ -12,9 +12,7 @@ const contentTypes = {
   ASSET: 'asset',
   ASSETS: 'assets',
   LOCAL_ASSET: 'localAsset',
-  FOLDERED_POST_INDEX: 'folderedPostIndex',
-  UNRECOGNIZED_DIRECTORY: 'unrecognizedDirecoty',
-  UNRECOGNIZED_FILE: 'unrecognizedFile'
+  FOLDERED_POST_INDEX: 'folderedPostIndex'
 }
 
 const isPost = (fsObject) => {
@@ -47,14 +45,6 @@ const isLocalAsset = (fsObject) => {
 
 const isFolderedPostIndex = (fsObject) => {
   return fsObject.type === contentTypes.FOLDERED_POST_INDEX
-}
-
-const isUnrecozgnizedDirectory = (fsObject) => {
-  return fsObject.type === contentTypes.UNRECOGNIZED_DIRECTORY
-}
-
-const isUnrecozgnizedFile = (fsObject) => {
-  return fsObject.type === contentTypes.UNRECOGNIZED_FILE
 }
 
 const hasContent = (fsObject) => {
@@ -240,20 +230,6 @@ const createPost = async (fsObject, cache) => {
   }
 }
 
-const createUnrecognizedDirectory = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.UNRECOGNIZED_DIRECTORY
-  }
-}
-
-const createUnrecognizedFile = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.UNRECOGNIZED_FILE
-  }
-}
-
 module.exports = {
   ...contentTypes,
   isPost,
@@ -264,8 +240,6 @@ module.exports = {
   isAssets,
   isLocalAsset,
   isFolderedPostIndex,
-  isUnrecozgnizedDirectory,
-  isUnrecozgnizedFile,
   hasContent,
   isPostFile,
   isFolderedPostIndexFile,
@@ -279,7 +253,5 @@ module.exports = {
   createFolderedPostIndex,
   createFolderedPost,
   createDefaultCategoryPost,
-  createPost,
-  createUnrecognizedDirectory,
-  createUnrecognizedFile
+  createPost
 }

@@ -18,12 +18,12 @@ const getBasePath = async () => {
 
 const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
 
-const copyAsset = ({ basePath, path, name }) => {
+const copyAsset = ({ basePath, path, name, isFolder }) => {
   const { out } = Settings.getSettings()
   const dirnameSlug = getSlug(dirname(path))
   const outPath = join(out, join(dirnameSlug, name))
   debugLog('copying:', path)
-  return cp(join(basePath, path), outPath)
+  return cp(join(basePath, path), outPath, { recursive: !!isFolder })
 }
 
 const copyLocalAssets = async ({ localAssets, posts, categories }) => {

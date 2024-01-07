@@ -10,78 +10,63 @@ const {
   createCategory,
   createPost,
   createFolderedPost,
-  createFolderedPostIndex,
-  createUnrecognizedDirectory,
-  createUnrecognizedFile
+  createFolderedPostIndex
 } = require('./contentTypes')
 
 const mapFSIndexToContentTree = (fsTree, cache) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return Promise.all(fsTree.map(async fsObject => {
-    const isDirectory = fsObject.children
-    const { depth } = fsObject
-
-    if (depth === 0) {
-      if (isPostFile(fsObject)) {
-        return await createDefaultCategoryPost(fsObject, cache)
-      }
-      if (!isDirectory) {
-        return createLocalAsset(fsObject)
-      }
-      if (fsObject.name === pagesDirectory) {
-        return await createSubpages(fsObject, cache)
-      }
-      if (fsObject.name === assetsDirectory) {
-        return createAssets(fsObject)
-      }
-      if (fsObject.children.some(isFolderedPostIndexFile)) {
-        return await createFolderedPost({
-          ...fsObject,
-          children: await mapFSIndexToContentTree(fsObject.children, cache)
-        }, cache)
-      }
-      return createCategory({
+    if (isPostFile(fsObject)) {
+      return await createDefaultCategoryPost(fsObject, cache)
+    }
+    if (!fsObject.children) {
+      return createLocalAsset(fsObject)
+    }
+    if (fsObject.name === pagesDirectory) {
+      return await createSubpages(fsObject, cache)
+    }
+    if (fsObject.name === assetsDirectory) {
+      return createAssets(fsObject)
+    }
+    if (fsObject.children.some(isFolderedPostIndexFile)) {
+      return await createFolderedPost({
         ...fsObject,
-        children: await mapFSIndexToContentTree(fsObject.children, cache)
-      })
+        children: fsObject.children.map(mapFolderedPostTree)
+      }, cache)
     }
-
-    if (depth === 1) {
-      if (isFolderedPostIndexFile(fsObject)) {
-        return createFolderedPostIndex(fsObject)
-      }
-      if (isPostFile(fsObject)) {
-        return await createPost(fsObject, cache)
-      }
-      if (!isDirectory) {
-        return createLocalAsset(fsObject)
-      }
-      if (fsObject.children.some(isFolderedPostIndexFile)) {
-        return await createFolderedPost({
-          ...fsObject,
-          children: await mapFSIndexToContentTree(fsObject.children, cache)
-        }, cache)
-      }
-    }
-
-    if (depth === 2) {
-      if (isFolderedPostIndexFile(fsObject)) {
-        return createFolderedPostIndex(fsObject)
-      }
-      if (!isDirectory) {
-        return createLocalAsset(fsObject)
-      }
-    }
-
-    if (isDirectory) {
-      return createUnrecognizedDirectory({
-        ...fsObject,
-        children: await mapFSIndexToContentTree(fsObject.children, cache)
-      })
-    }
-
-    return createUnrecognizedFile(fsObject)
+    return createCategory({
+      ...fsObject,
+      children: await Promise.all(
+        fsObject.children.map(mapCategoryTree(cache))
+      )
+    })
   }))
+}
+
+const mapFolderedPostTree = (fsObject) => {
+  if (isFolderedPostIndexFile(fsObject)) {
+    return createFolderedPostIndex(fsObject)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
+  })
+}
+
+const mapCategoryTree = (cache) => async (fsObject) => {
+  if (isPostFile(fsObject)) {
+    return await createPost(fsObject, cache)
+  }
+  if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
+    return await createFolderedPost({
+      ...fsObject,
+      children: fsObject.children.map(mapFolderedPostTree)
+    }, cache)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
+  })
 }
 
 module.exports = mapFSIndexToContentTree

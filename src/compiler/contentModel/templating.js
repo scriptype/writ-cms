@@ -51,10 +51,11 @@ const getSummary = (content, localAssets, permalink) => {
     return summaryPart
   }
   localAssets.forEach(asset => {
-    const srcRe = new RegExp(`src=("|'|)(\.\/|)${asset.name}("|'|)`, 'g')
-    summaryPart = summaryPart.replace(srcRe, `src="${permalink}/${asset.name}"`)
-    const hrefRe = new RegExp(`href=("|'|)(\.\/|)${asset.name}("|'|)`, 'g')
-    summaryPart = summaryPart.replace(hrefRe, `href="${permalink}/${asset.name}"`)
+    const assetName = asset.isFolder ? asset.name + '/' : asset.name
+    const srcRe = new RegExp(`src=("|'|)(\.\/|)${assetName}`, 'g')
+    summaryPart = summaryPart.replace(srcRe, `src="${permalink}/${assetName}`)
+    const hrefRe = new RegExp(`href=("|'|)(\.\/|)${assetName}`, 'g')
+    summaryPart = summaryPart.replace(hrefRe, `href="${permalink}/${assetName}`)
   })
   return summaryPart
 }
