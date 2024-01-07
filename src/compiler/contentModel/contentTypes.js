@@ -152,12 +152,20 @@ const createFolderedPostIndex = (fsObject) => {
 }
 
 const createFolderedPost = async (fsObject, cache) => {
-  const { site, permalinkPrefix } = Settings.getSettings()
+  const { site, permalinkPrefix, defaultCategoryName } = Settings.getSettings()
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
-  const category = dirname(fsObject.path)
-  const permalink = replaceExtension(join(permalinkPrefix, getSlug(category), slug), '.html')
+  const isDefaultCategory = fsObject.depth === 0
+  const categoryName = isDefaultCategory ?
+    defaultCategoryName :
+    dirname(fsObject.path)
+  const permalinkPath = [permalinkPrefix]
+  if (!isDefaultCategory) {
+    permalinkPath.push(getSlug(categoryName))
+  }
+  permalinkPath.push(slug)
+  const permalink = replaceExtension(join(...permalinkPath), '.html')
   const localAssets = fsObject.children.filter(isLocalAsset)
   return {
     ..._.omit(fsObject, 'children'),
@@ -175,8 +183,8 @@ const createFolderedPost = async (fsObject, cache) => {
       slug,
       permalink,
       category: {
-        name: category,
-        permalink: join(permalinkPrefix, getSlug(category))
+        name: categoryName,
+        permalink: join(permalinkPrefix, getSlug(categoryName))
       },
       localAssets,
       site,
@@ -212,8 +220,8 @@ const createPost = async (fsObject, cache) => {
   const { site, permalinkPrefix } = Settings.getSettings()
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
-  const category = dirname(fsObject.path)
-  const permalink = replaceExtension(join(permalinkPrefix, getSlug(category), slug), '.html')
+  const categoryName = dirname(fsObject.path)
+  const permalink = replaceExtension(join(permalinkPrefix, getSlug(categoryName), slug), '.html')
   return {
     ...fsObject,
     type: contentTypes.POST,
@@ -223,8 +231,8 @@ const createPost = async (fsObject, cache) => {
       slug,
       permalink,
       category: {
-        name: category,
-        permalink: join(permalinkPrefix, getSlug(category))
+        name: categoryName,
+        permalink: join(permalinkPrefix, getSlug(categoryName))
       },
       site,
       path: fsObject.path

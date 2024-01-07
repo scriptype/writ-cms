@@ -19,15 +19,13 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return Promise.all(fsTree.map(async fsObject => {
     const isDirectory = fsObject.children
-    const isRootLevel = fsObject.depth === 0
-    const isCategoryLevel = fsObject.depth === 1
-    const isSubFolderLevel = fsObject.depth === 2
+    const { depth } = fsObject
 
-    if (!isDirectory && !isSubFolderLevel && !isPostFile(fsObject)) {
+    if (!isDirectory && depth !== 2 && !isPostFile(fsObject)) {
       return createLocalAsset(fsObject)
     }
 
-    if (isRootLevel) {
+    if (depth === 0) {
       if (isPostFile(fsObject)) {
         return await createDefaultCategoryPost(fsObject, cache)
       }
@@ -37,17 +35,26 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
       if (fsObject.name === assetsDirectory) {
         return createAssets(fsObject)
       }
+      if (isDirectory && fsObject.children.some(isFolderedPostIndexFile)) {
+        return await createFolderedPost({
+          ...fsObject,
+          children: await mapFSIndexToContentTree(fsObject.children, cache)
+        }, cache)
+      }
       return createCategory({
         ...fsObject,
         children: await mapFSIndexToContentTree(fsObject.children, cache)
       })
     }
 
-    if (isCategoryLevel) {
+    if (depth === 1) {
+      if (isFolderedPostIndexFile(fsObject)) {
+        return createFolderedPostIndex(fsObject)
+      }
       if (isPostFile(fsObject)) {
         return await createPost(fsObject, cache)
       }
-      if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
+      if (isDirectory && fsObject.children.some(isFolderedPostIndexFile)) {
         return await createFolderedPost({
           ...fsObject,
           children: await mapFSIndexToContentTree(fsObject.children, cache)
@@ -55,7 +62,7 @@ const mapFSIndexToContentTree = (fsTree, cache) => {
       }
     }
 
-    if (isSubFolderLevel) {
+    if (depth === 2) {
       if (isFolderedPostIndexFile(fsObject)) {
         return createFolderedPostIndex(fsObject)
       }
