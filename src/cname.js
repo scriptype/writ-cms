@@ -3,11 +3,11 @@ const { join } = require('path')
 const Settings = require('./settings')
 
 const create = async () => {
-  const { rootDirectory, domain, out } = Settings.getSettings()
+  const { rootDirectory, cname, out } = Settings.getSettings()
 
   const dest = join(out, 'CNAME')
-  if (domain) {
-    return writeFile(dest, domain)
+  if (cname) {
+    return writeFile(dest, cname)
   }
 
   const src = join(rootDirectory, 'CNAME')
