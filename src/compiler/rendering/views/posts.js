@@ -7,8 +7,11 @@ const { getSlug, replaceExtension } = require('../../../helpers')
 const getExportPath = (post) => {
   const { out } = Settings.getSettings()
   const pathWithHTMLExtension = replaceExtension(getSlug(post.path), '.html')
-  const pathWithCorrectFileName = pathWithHTMLExtension.replace(/\/post\.html$/i, '/index.html')
-  return join(out, pathWithCorrectFileName)
+  if (post.foldered) {
+    const pathWithCorrectFileName = pathWithHTMLExtension.replace(/post\.html$/i, 'index.html')
+    return join(out, pathWithCorrectFileName)
+  }
+  return join(out, pathWithHTMLExtension)
 }
 
 const mkdirPostFolder = async (post) => {
