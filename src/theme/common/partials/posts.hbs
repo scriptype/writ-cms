@@ -3,13 +3,13 @@
 {{/m-doc}}
 {{#each posts as |post|}}
 
-  {{#if (isPostType 'photo' post.type)}}
+  {{#if (is post.type 'photo')}}
     <a href="{{post.permalink}}" class="photo-thumbnail">
         <img src="{{post.permalink}}/{{post.thumbnailUrl}}" />
     </a>
   {{/if}}
 
-  {{#if (isPostType 'text' post.type)}}
+  {{#if (is post.type 'text')}}
     <div class="post">
         <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
         {{{post.summary}}}

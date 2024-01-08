@@ -13,18 +13,6 @@ module.exports = {
     return ''
   },
 
-  isStartMode() {
-    return this.settings.mode === 'start'
-  },
-
-  isBuildMode() {
-    return this.settings.mode === 'build'
-  },
-
-  isPostType(string, type) {
-    return string === type
-  },
-
   filterPostsByType(type) {
     return this.posts.filter(p => p.type === type)
   },
@@ -43,6 +31,18 @@ module.exports = {
       return `${this.category.name} / ${this.settings.site.title}`
     }
     return `${this.settings.site.title}`
+  },
+
+  is(value1, value2) {
+    return value1 === value2
+  },
+
+  isStartMode() {
+    return this.settings.mode === 'start'
+  },
+
+  isBuildMode() {
+    return this.settings.mode === 'build'
   },
 
   isPostPage() {
