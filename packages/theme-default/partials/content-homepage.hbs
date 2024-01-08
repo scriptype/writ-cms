@@ -1,7 +1,7 @@
 {{#>m-doc}}
   Content container for a homepage.
-  Lists all posts.
+  Lists all text posts.
 {{/m-doc}}
 <main class="content" id="posts-container">
-  {{>posts}}
+  {{>posts posts=(filterPostsByType 'text')}}
 </main>
