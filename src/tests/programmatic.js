@@ -315,73 +315,7 @@ test('creates tag indices', async t => {
   )
 })
 
-test('builds when contentDirectory exists', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
-
-  const { contentDirectory } = writ.getDefaultSettings()
-  await dir.mkDir(contentDirectory)
-
-  const fileNameIn = 'uncategorized-post-name.txt'
-  const fileNameOut = 'uncategorized-post-name.html'
-  await dir.mkFile(join(contentDirectory, fileNameIn), 'Hello!')
-
-  const rootAsset = 'asset-in-root.jpg'
-  await dir.mkFile(rootAsset, '')
-
-  const rootAssetInContent = 'asset-in-content-folder.jpg'
-  await dir.mkFile(join(contentDirectory, rootAssetInContent), '')
-
-  const categoryName = 'test-category'
-  const postName = 'test-post'
-  const postLocalAsset = 'post-local-asset.jpg'
-  await dir.mkDir(join(contentDirectory, categoryName, postName))
-  await Promise.all([
-    dir.mkFile(join(contentDirectory, categoryName, postName, 'post.md'), 'My test post'),
-    dir.mkFile(join(contentDirectory, categoryName, postName, postLocalAsset), ''),
-  ])
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  const { exportDirectory } = writ.getDefaultSettings()
-
-  await common.builds(t, dir.name, {
-    rootDirectoryPaths: {
-      exists: [contentDirectory, rootAsset]
-    },
-    exportDirectoryPaths: {
-      notExists: [contentDirectory, rootAsset],
-      exists: [fileNameOut, rootAssetInContent]
-    }
-  })
-
-  const compiledPostFolder = await readdir(join(dir.name, exportDirectory, categoryName, postName))
-  hasPaths(t, compiledPostFolder, ['index.html', postLocalAsset], 'Compiled test post folder has index.html and local asset')
-})
-
-test('passes through assets folder', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
-
-  const { assetsDirectory } = writ.getDefaultSettings()
-  await dir.mkDir(assetsDirectory)
-  const fileName = 'hey-asset.jpg'
-  await dir.mkAsset(assetsDirectory, fileName, '')
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    assetsDirectoryPaths: {
-      exists: [fileName]
-    }
-  })
-})
-
-test('allows foldered post in root', async t => {
+test('allows uncategorized foldered post', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
 
@@ -411,4 +345,78 @@ test('allows foldered post in root', async t => {
 
   const subFolder = await readdir(join(dir.name, exportDirectory, postName, subFolderName))
   hasPaths(t, subFolder, [subFolderAsset], 'Subfolder inside foldered post is passed-through')
+})
+
+test('builds when contentDirectory exists', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const { contentDirectory } = writ.getDefaultSettings()
+  await dir.mkDir(contentDirectory)
+
+  const uncategorizedPostFile = 'uncategorized-post-name.txt'
+  const uncategorizedPostFileOut = 'uncategorized-post-name.html'
+  await dir.mkFile(join(contentDirectory, uncategorizedPostFileOut), 'Hello!')
+
+  const uncategorizedFolderedPost = 'a new post'
+  const uncategorizedFolderedPostOut = 'a-new-post'
+  await dir.mkDir(join(contentDirectory, uncategorizedFolderedPost))
+  await dir.mkFile(join(contentDirectory, uncategorizedFolderedPost, 'post.md'), 'A new post')
+
+  const rootAsset = 'asset-in-root.jpg'
+  await dir.mkFile(rootAsset, '')
+
+  const rootAssetInContent = 'asset-in-content-folder.jpg'
+  await dir.mkFile(join(contentDirectory, rootAssetInContent), '')
+
+  const categoryName = 'test-category'
+  const categorizedPostName = 'test-post'
+  const categorizedPostLocalAsset = 'post-local-asset.jpg'
+  await dir.mkDir(join(contentDirectory, categoryName, categorizedPostName))
+  await Promise.all([
+    dir.mkFile(join(contentDirectory, categoryName, categorizedPostName, 'post.md'), 'My test post'),
+    dir.mkFile(join(contentDirectory, categoryName, categorizedPostName, categorizedPostLocalAsset), ''),
+  ])
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { exportDirectory } = writ.getDefaultSettings()
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [contentDirectory, rootAsset]
+    },
+    exportDirectoryPaths: {
+      notExists: [contentDirectory, rootAsset],
+      exists: [uncategorizedPostFileOut, uncategorizedFolderedPostOut, rootAssetInContent]
+    }
+  })
+
+  const categorizedPostFolder = await readdir(join(dir.name, exportDirectory, categoryName, categorizedPostName))
+  hasPaths(t, categorizedPostFolder, ['index.html', categorizedPostLocalAsset], 'Compiled test post folder has index.html and local asset')
+
+  const uncategorizedFolderedPostFolder = await readdir(join(dir.name, exportDirectory, uncategorizedFolderedPostOut))
+  hasPaths(t, uncategorizedFolderedPostFolder, ['index.html'], 'Compiled uncategorized foldered post folder has index.html')
+})
+
+test('passes through assets folder', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const { assetsDirectory } = writ.getDefaultSettings()
+  await dir.mkDir(assetsDirectory)
+  const fileName = 'hey-asset.jpg'
+  await dir.mkAsset(assetsDirectory, fileName, '')
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    assetsDirectoryPaths: {
+      exists: [fileName]
+    }
+  })
 })
