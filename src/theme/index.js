@@ -100,11 +100,9 @@ module.exports = {
       mkdir(join(customThemePath, TEMPLATES))
     ])
 
-    await Promise.all([
-      this.copyCommonResources(customThemePath),
-      this.copyBaseThemeResources(customThemePath),
-      this.copyCustomizers(customThemePath)
-    ])
+    await this.copyCommonResources(customThemePath)
+    await this.copyBaseThemeResources(customThemePath)
+    await this.copyCustomizers(customThemePath)
   },
 
   use(type, value) {
