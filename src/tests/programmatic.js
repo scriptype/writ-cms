@@ -365,10 +365,6 @@ test('passes through assets folder', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
 
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
   const { assetsDirectory } = writ.getDefaultSettings()
   await dir.mkDir(assetsDirectory)
   const fileName = 'hey-asset.jpg'
