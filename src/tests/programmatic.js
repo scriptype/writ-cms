@@ -380,3 +380,35 @@ test('passes through assets folder', async t => {
     }
   })
 })
+
+test('allows foldered post in root', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const postName = 'test-post'
+  const localAssetName = 'asset.jpg'
+  const subFolderName = 'some folder'
+  const subFolderAsset = 'note.txt'
+  await dir.mkDir(postName)
+  await dir.mkFile(join(postName, 'post.md'), 'a post')
+  await dir.mkFile(join(postName, localAssetName), '')
+  await dir.mkDir(join(postName, subFolderName))
+  await dir.mkFile(join(postName, subFolderName, subFolderAsset), 'an asset inside subfolder')
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    exportDirectoryPaths: {
+      exists: [postName]
+    }
+  })
+
+  const { exportDirectory } = writ.getDefaultSettings()
+  const compiledPostFolder = await readdir(join(dir.name, exportDirectory, postName))
+  hasPaths(t, compiledPostFolder, ['index.html', localAssetName, subFolderName], 'Compiled root post folder has index.html and local assets')
+
+  const subFolder = await readdir(join(dir.name, exportDirectory, postName, subFolderName))
+  hasPaths(t, subFolder, [subFolderAsset], 'Subfolder inside foldered post is passed-through')
+})
