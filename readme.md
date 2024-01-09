@@ -2,7 +2,7 @@
 
 A spirited web engine, in early development.
 
-![tests status badge](https://github.com/scriptype/writ-cms/actions/workflows/tests.yml/badge.svg)
+[![tests status badge](https://github.com/scriptype/writ-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/scriptype/writ-cms/actions/workflows/tests.yml)
 
 ## Contents
 
