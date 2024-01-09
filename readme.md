@@ -2,6 +2,8 @@
 
 A spirited web engine, in early development.
 
+![tests status badge](https://github.com/scriptype/writ-cms/actions/workflows/tests.yml/badge.svg)
+
 ## Contents
 
 - [The idea](#the-idea)
