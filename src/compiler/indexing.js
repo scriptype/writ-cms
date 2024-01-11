@@ -25,7 +25,8 @@ const isTextFile = (extension) => {
     'htm',
     'rtf',
     'rtfd',
-    'json'
+    'json',
+    'srt'
   ]
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
