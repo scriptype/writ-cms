@@ -36,11 +36,6 @@ module.exports = {
   copyCommonResources(targetPath) {
     return Promise.all([
       cp(
-        join(__dirname, 'common', ASSETS),
-        join(targetPath, ASSETS, 'common'),
-        { recursive: true }
-      ),
-      cp(
         join(__dirname, 'common', FEATURES),
         join(targetPath, FEATURES),
         { recursive: true }

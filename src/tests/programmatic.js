@@ -92,7 +92,6 @@ const common = {
 
   exportAssetsDirectoryContents(t, actualPaths, expectedPaths) {
     if (!expectedPaths) {
-      hasCommonDirectory(t, actualPaths, 'Export/assets directory has common assets')
       hasDefaultThemeDirectory(t, actualPaths, 'Export/assets directory has theme-default assets')
       hasCustomDirectory(t, actualPaths, 'Export/assets directory has custom assets')
     }
