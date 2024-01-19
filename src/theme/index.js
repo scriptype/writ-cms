@@ -4,6 +4,7 @@ const Debug = require('../debug')
 const Settings = require('../settings')
 
 const ASSETS = 'assets'
+const FEATURES = 'features'
 const PARTIALS = 'partials'
 const TEMPLATES = 'templates'
 const TEMPLATE_HELPERS = 'template-helpers.js'
@@ -32,21 +33,26 @@ module.exports = {
     return paths.filter(p => p.endsWith('.css') || p.endsWith('.js'))
   },
 
-  copyCommonResources(folderPath) {
+  copyCommonResources(targetPath) {
     return Promise.all([
       cp(
         join(__dirname, 'common', ASSETS),
-        join(folderPath, ASSETS, 'common'),
+        join(targetPath, ASSETS, 'common'),
+        { recursive: true }
+      ),
+      cp(
+        join(__dirname, 'common', FEATURES),
+        join(targetPath, FEATURES),
         { recursive: true }
       ),
       cp(
         join(__dirname, 'common', PARTIALS),
-        join(folderPath, TEMPLATES),
+        join(targetPath, TEMPLATES),
         { recursive: true }
       ),
       cp(
         join(__dirname, 'common', TEMPLATE_HELPERS),
-        join(folderPath, TEMPLATES, TEMPLATE_HELPERS)
+        join(targetPath, TEMPLATES, TEMPLATE_HELPERS)
       )
     ])
   },
@@ -106,7 +112,7 @@ module.exports = {
   },
 
   use(type, value) {
-    const { rootDirectory, theme, themeDirectory } = Settings.getSettings()
+    const { rootDirectory, theme, themeDirectory, ...restSettings } = Settings.getSettings()
     const customThemePath = join(rootDirectory, themeDirectory)
     const baseThemePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
 
@@ -158,12 +164,26 @@ module.exports = {
         ]
 
       case "assets":
+        const features = [
+          ['syntaxHighlighting', 'highlight']
+        ]
+
+        const enabledFeatures = features
+          .filter(([ settingsKey, dirName ]) => {
+            return restSettings[settingsKey] !== 'off'
+          })
+          .map(([, dirName]) => dirName)
+
         return [
           ...value,
           {
             src: join(customThemePath, ASSETS),
             dest: ''
           },
+          ...enabledFeatures.map(featureDirName => ({
+            src: join(customThemePath, FEATURES, featureDirName),
+            dest: join('common', featureDirName)
+          })),
           ...this.customizers.map(path => ({
             src: join(customThemePath, path),
             dest: 'custom',

@@ -37,6 +37,10 @@ module.exports = {
     return value1 === value2
   },
 
+  isNot(value1, value2) {
+    return value1 !== value2
+  },
+
   isStartMode() {
     return this.settings.mode === 'start'
   },

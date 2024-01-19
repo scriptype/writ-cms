@@ -1,0 +1,5 @@
+{{#if (isNot settings.syntaxHighlighting "off")}}
+  <link rel="stylesheet" href="{{assetsPath}}/common/highlight/styles/default.min.css">
+  <script src="{{assetsPath}}/common/highlight/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+{{/if}}
