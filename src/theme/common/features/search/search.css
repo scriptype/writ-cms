@@ -1,20 +1,19 @@
-.search {
+.feat-search {
     position: relative;
     height: 3em;
     width: 220px;
 }
 
-.search-form {
+.feat-search-form {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
     width: 100%;
-    background: var(--container-color);
     opacity: 0;
 }
 
-.search-toggle {
+.feat-search-toggle {
     position: absolute;
     top: 10px;
     left: 50%;
@@ -24,16 +23,28 @@
     transition: all .1s;
 }
 
-.search-toggle:focus {
+.feat-search-toggle:focus {
     background: var(--bg-color);
     box-shadow: 0 0 0 0.25em var(--bg-color), 0 0 4px 7px royalblue;
 }
 
-.search-toggle::-webkit-details-marker {
+.feat-search-toggle::-webkit-details-marker {
     display: none;
 }
 
-.search[open] .search-toggle::before {
+.feat-search-toggle::marker {
+    content: "";
+    display: none;
+}
+
+.feat-search-icon {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    fill: currentColor;
+}
+
+.feat-search[open] .feat-search-toggle::before {
     content: "";
     position: absolute;
     top: 0;
@@ -43,16 +54,25 @@
     transform: translate(-50%, -25%);
 }
 
-.search[open] .search-toggle {
+.feat-search[open] .feat-search-toggle {
     animation: fade-out .25s forwards;
 }
 
-.search[open] .search-form {
+.feat-search[open] .feat-search-form {
     animation: fade-in 1s forwards;
 }
 
-.search-result-item {
+.feat-search-result {
     margin-bottom: 2rem;
+}
+
+.feat-search-visual-card {
+    display: inline-flex;
+    gap: 1.5rem;
+}
+
+.feat-search-visual-card img {
+    width: 90px;
 }
 
 @keyframes fade-out {

@@ -16,6 +16,7 @@ const defaultSettings = (rootDirectory) => ({
   contentDirectory: "content",
   cname: "",
   syntaxHighlighting: "off",
+  search: "on",
   ignorePaths: [
     ".git",
     ".gitignore",

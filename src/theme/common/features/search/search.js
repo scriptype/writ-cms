@@ -31,23 +31,22 @@
   }
 
   const resultItemTemplate = (post) => {
-    if (post.type === 'photo') {
+    if (post.cover || post.thumbnailUrl) {
+      const imageUrl = post.permalink + '/' + (post.cover || post.thumbnailUrl)
       return `
-        <div class="search-result-item">
-          <a href="${post.permalink}" class="photo-thumbnail-mini">
-            <img src="${post.permalink}/${post.thumbnailUrl}" alt="${post.title}">
+        <div class="feat-search-result">
+          <a href="${post.permalink}" class="feat-search-visual-card">
+            <img src="${imageUrl}" alt="${post.title}">
             <h3>${post.title}</h3>
           </a>
         </div>
       `
     }
-    if (post.type === 'text') {
-      return `
-        <div class="search-result-item">
-          <h3><a href="${post.permalink}">${post.title}</a></h3>
-        </div>
-      `
-    }
+    return `
+      <div class="feat-search-result">
+        <h3><a href="${post.permalink}">${post.title}</a></h3>
+      </div>
+    `
   }
 
   const initSearch = ({ searchForm, resultsContainer }, posts) => {
@@ -84,8 +83,8 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     const UI = {
-      searchForm: document.querySelector('#search-form'),
-      resultsContainer: document.querySelector('#posts-container')
+      searchForm: document.querySelector('#feat-search-form'),
+      resultsContainer: document.querySelector('#feat-search-results')
     }
 
     const posts = await loadPosts('posts.json')

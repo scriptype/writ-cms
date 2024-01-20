@@ -223,7 +223,7 @@ test('builds after theme/assets folder is deleted', async t => {
   await common.builds(t, dir.name, {
     assetsDirectoryPaths: {
       exists: ['custom'],
-      notExists: ['common', 'default']
+      notExists: ['default']
     },
     themeDirectoryPaths: {
       exists: ['templates', 'style.css', 'script.js'],

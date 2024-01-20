@@ -33,13 +33,6 @@ body {
     display: none;
 }
 
-.search-icon {
-    width: 32px;
-    height: 32px;
-    vertical-align: middle;
-    fill: currentColor;
-}
-
 .music-icon {
     width: 24px;
     height: 24px;
@@ -110,15 +103,6 @@ body {
 .photo-thumbnail img {
     max-width: 200px;
     max-height: 200px;
-}
-
-.photo-thumbnail-mini {
-    display: inline-flex;
-    gap: 1.5rem;
-}
-
-.photo-thumbnail-mini img {
-    width: 90px;
 }
 
 .post {

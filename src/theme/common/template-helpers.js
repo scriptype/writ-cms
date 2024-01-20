@@ -41,6 +41,18 @@ module.exports = {
     return value1 !== value2
   },
 
+  isEnabled(featureName) {
+    const feature = this.settings[featureName]
+    switch (featureName) {
+      case 'syntaxHighlighting': return feature !== 'off'
+      case 'search': return feature !== 'off'
+    }
+  },
+
+  featSearchResults() {
+    return this.settings.search !== 'off' ? ' id="feat-search-results" ' : ''
+  },
+
   isStartMode() {
     return this.settings.mode === 'start'
   },

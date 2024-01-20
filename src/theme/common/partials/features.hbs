@@ -1,5 +1,10 @@
-{{#if (isNot settings.syntaxHighlighting "off")}}
+{{#if (isEnabled "syntaxHighlighting")}}
   <link rel="stylesheet" href="{{assetsPath}}/common/highlight/styles/default.min.css">
   <script src="{{assetsPath}}/common/highlight/highlight.min.js"></script>
   <script>hljs.highlightAll();</script>
+{{/if}}
+
+{{#if (isEnabled "search")}}
+  <link rel="stylesheet" href="{{assetsPath}}/common/search/search.css">
+  <script defer src="{{assetsPath}}/common/search/search.js"></script>
 {{/if}}

@@ -160,7 +160,8 @@ module.exports = {
 
       case "assets":
         const features = [
-          ['syntaxHighlighting', 'highlight']
+          ['syntaxHighlighting', 'highlight'],
+          ['search', 'search']
         ]
 
         const enabledFeatures = features
