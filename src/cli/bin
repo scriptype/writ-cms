@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-
 const writ = require('../')
 const manual = require('./manual')
+const Flag = require('./flag')
 
 const cli = process.argv.slice(2)
 
@@ -10,33 +10,27 @@ if (!cli.length) {
   process.exit(1)
 }
 
-let [ mode, rootDirectory, debug ] = cli
+let [ mode, ...opts ] = cli
 
-if (mode !== 'start' && mode !== 'build') {
+const modes = ['start', 'build']
+const flags = {
+  refreshTheme: new Flag('refresh-theme', 'r'),
+  debug: new Flag('debug', 'd')
+}
+
+if (!modes.includes(mode)) {
   console.log('Incorrect usage, see manual:\n' + manual)
   process.exit(1)
 }
 
-const DEBUG_FLAG = /(--|)debug/
-const secondParameterIsDebug = rootDirectory?.match(DEBUG_FLAG)
-if (!rootDirectory || secondParameterIsDebug) {
-  rootDirectory = '.'
+const options = {
+  rootDirectory: opts.find(Flag.isNotFlag) || '.',
+  refreshTheme: flags.refreshTheme.test(opts),
+  debug: flags.debug.test(opts)
 }
 
-const debugMode = !!(debug?.match(DEBUG_FLAG) || secondParameterIsDebug)
-
-if (secondParameterIsDebug && debug) {
-  console.log('Incorrect usage, see manual:\n' + manual)
-  process.exit(1)
+if (options.debug) {
+  console.log('cli', { mode, opts, options })
 }
 
-if (debugMode) {
-  console.log('cli debugMode', debugMode)
-  console.log('cli mode', mode)
-  console.log('cli rootDirectory', rootDirectory)
-}
-
-writ[mode]({
-  rootDirectory,
-  debug: debugMode
-})
+writ[mode](options)

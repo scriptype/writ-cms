@@ -1,27 +1,57 @@
 const { version: vn } = require('../../package.json')
 
 module.exports = `
-  writ (v${vn})
-  =============
+writ (v${vn})
+=============
 
-  Interface:
-  $ writ [start|build] [dir=.] [--debug]
+Interface
+---------
+$ writ <command> [<options>]
 
-  Start local development:
-  $ writ start
 
-  Produce a build output:
-  $ writ build
+Commands
+--------
+build: Run once to produce build output
+start: Start livereloading preview and rerun on changes
 
-  Use a different source directory:
-  $ writ <start|build> ../the-other-directory
 
-  Start local development in debug mode:
-  $ writ start --debug
+Options
+-------
+any path              | Target directory
+(default: .)          |
+———————————————————————————————————————————————————————
+--debug, -d           | Enable debug mode
+(default: false)      |
+———————————————————————————————————————————————————————
+--refresh-theme, -r   | Regenerate theme directory.
+(default: false)      |
+                      | Use with caution.
+                      |
+                      | Everything inside theme folder
+                      | (except theme/keep) is deleted
+                      | and re-created. Keep a copy of
+                      | your changes in keep folder not
+                      | to lose them.
+                      |
+                      | Useful for fetching updates of
+                      | chosen base theme during custom
+                      | theme development.
 
-  Start local development in debug mode in different source directory:
-  $ writ start ../the-other-directory --debug
 
-  Produce a build in debug mode:
-  $ writ build --debug
+Usage
+-----
+Start local development in current working directory:
+$ writ start
+
+Produce a build output in current working directory:
+$ writ build
+
+Target a different directory:
+$ writ start ../the-other-directory
+
+Start in a specified directory in debug mode:
+$ writ start ../the-other-directory --debug
+
+Refresh theme directory and start development
+$ writ start --refresh-theme
 `
