@@ -1,4 +1,5 @@
-const { stat, mkdir, cp, readdir } = require('fs/promises')
+const { tmpdir } = require('os')
+const { stat, rm, mkdir, mkdtemp, cp, readdir } = require('fs/promises')
 const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
@@ -9,28 +10,60 @@ const PARTIALS = 'partials'
 const TEMPLATES = 'templates'
 const TEMPLATE_HELPERS = 'template-helpers.js'
 const THEME_SETTINGS = 'theme-settings.css'
+const KEEP_PATH = 'keep'
 
 module.exports = {
-  async init() {
+  async init({ refresh }) {
     Debug.timeStart('theme')
     const { rootDirectory, themeDirectory } = Settings.getSettings()
     const customThemePath = join(rootDirectory, themeDirectory)
     this.customizers = []
-    try {
-      await stat(customThemePath)
+
+    if (await this.customThemeExists(customThemePath)) {
       Debug.debugLog(`${customThemePath} exists`)
-      this.customizers.push(...(await this.getCustomizers(customThemePath)))
-      return
-    } catch (e) {
+      if (refresh) {
+        Debug.debugLog('refresh theme')
+        await this.refreshCustomTheme(customThemePath)
+      } else {
+        await this.collectCustomizerPaths(customThemePath)
+      }
+    } else {
       Debug.debugLog(`${customThemePath} not found`)
+      await this.makeCustomThemeDirectory(customThemePath)
     }
-    await this.makeCustomThemeDirectory(customThemePath)
     Debug.timeEnd('theme')
   },
 
-  async getCustomizers(customThemePath) {
+  async customThemeExists(customThemePath) {
+    try {
+      return await stat(customThemePath)
+    } catch {
+      return false
+    }
+  },
+
+  async refreshCustomTheme(customThemePath) {
+    try {
+      const keepDir = join(customThemePath, KEEP_PATH)
+      const tempDir = await mkdtemp(join(tmpdir(), 'writ-theme-keep'))
+      Debug.debugLog('refresh theme temp dir', tempDir)
+      await cp(keepDir, tempDir, { recursive: true })
+      Debug.debugLog('rm -r', customThemePath)
+      await rm(customThemePath, { recursive: true })
+      await this.makeCustomThemeDirectory(customThemePath)
+      await cp(tempDir, keepDir, { recursive: true })
+    } catch (e) {
+      console.log('Failed refreshing theme')
+      throw e
+    }
+  },
+
+  async collectCustomizerPaths(customThemePath) {
     const paths = await readdir(customThemePath)
-    return paths.filter(p => p.endsWith('.css') || p.endsWith('.js'))
+    const customizerPaths = paths.filter(p => {
+      return p.endsWith('.css') || p.endsWith('.js')
+    })
+    this.customizers.push(...customizerPaths)
   },
 
   copyCommonResources(targetPath) {

@@ -11,21 +11,23 @@ const Assets = require('./assets')
 const Preview = require('./preview')
 const Watcher = require('./watcher')
 
-const startUp = async ({ watch, ...rest }) => {
-  await run({ ...rest })
+const startUp = async ({ watch, refreshTheme, ...rest }) => {
+  await run({ refreshTheme, ...rest })
   if (watch) {
     startWatcher({ ...rest })
   }
 }
 
-const run = async ({ mode, rootDirectory, debug }) => {
+const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
   Debug.init(debug)
   Debug.timeStart('> total')
   await Settings.init({
     mode,
     rootDirectory
   })
-  await Theme.init()
+  await Theme.init({
+    refresh: refreshTheme
+  })
   await VersionControl.init()
   await Expansions.init()
   await SiteDirectory.create()
