@@ -419,3 +419,38 @@ test('passes through assets folder', async t => {
     }
   })
 })
+
+test('refreshTheme option', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { themeDirectory } = writ.getDefaultSettings()
+
+  const deletedFileName = 'deleted.css'
+  await dir.mkFile(join(themeDirectory, deletedFileName), '')
+  const keptFileName = 'kept.css'
+  await dir.mkDir(join(themeDirectory, 'keep'))
+  await dir.mkFile(join(themeDirectory, 'keep', keptFileName), '')
+
+  await writ.build({
+    rootDirectory: dir.name,
+    refreshTheme: true
+  })
+
+  await common.builds(t, dir.name, {
+    themeDirectoryPaths: {
+      exists: ['keep'],
+      notExists: [deletedFileName]
+    }
+  })
+
+  const themeDirectoryContents = await readdir(join(dir.name, themeDirectory))
+  hasNotPaths(t, themeDirectoryContents, [deletedFileName], 'theme directory is refreshed')
+
+  const keepDirectoryContents = await readdir(join(dir.name, themeDirectory, 'keep'))
+  hasPaths(t, keepDirectoryContents, [keptFileName], 'theme/keep/file is preserved')
+})
