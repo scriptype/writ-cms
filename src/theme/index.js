@@ -43,19 +43,37 @@ module.exports = {
   },
 
   async refreshCustomTheme(customThemePath) {
-    try {
-      const keepDir = join(customThemePath, KEEP_PATH)
-      const tempDir = await mkdtemp(join(tmpdir(), 'writ-theme-keep'))
-      Debug.debugLog('refresh theme temp dir', tempDir)
-      await cp(keepDir, tempDir, { recursive: true })
-      Debug.debugLog('rm -r', customThemePath)
-      await rm(customThemePath, { recursive: true })
-      await this.makeCustomThemeDirectory(customThemePath)
-      await cp(tempDir, keepDir, { recursive: true })
-    } catch (e) {
-      console.log('Failed refreshing theme')
-      throw e
+    const backupKeepDir = async (keepPath) => {
+      try {
+        if (await stat(keepPath)) {
+          const tempPath = await mkdtemp(join(tmpdir(), 'writ-theme-keep'))
+          Debug.debugLog('refresh theme temp dir', tempPath)
+          await cp(keepPath, tempPath, { recursive: true })
+          return tempPath
+        }
+      } catch {
+        Debug.debugLog(`theme/${KEEP_PATH} not found`)
+        return null
+      }
     }
+
+    const refreshThemeDir = async (themePath, keepBackupPath, keepPath) => {
+      try {
+        Debug.debugLog('rm -r', themePath)
+        await rm(themePath, { recursive: true })
+        await this.makeCustomThemeDirectory(themePath)
+        if (keepBackupPath) {
+          await cp(keepBackupPath, keepPath, { recursive: true })
+        }
+      } catch (e) {
+        console.log(`Failed refreshing ${customThemePath}`)
+        throw e
+      }
+    }
+
+    const keepPath = join(customThemePath, KEEP_PATH)
+    const tempPath = await backupKeepDir(keepPath)
+    return refreshThemeDir(customThemePath, tempPath, keepPath)
   },
 
   async collectCustomizerPaths(customThemePath) {
