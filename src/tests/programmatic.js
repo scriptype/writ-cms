@@ -188,6 +188,68 @@ test('builds after a file is deleted', async t => {
   })
 })
 
+test('empty folder in root is a local asset', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const folderName = 'empty folder'
+  await dir.mkDir(folderName)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [folderName]
+    },
+    exportDirectoryPaths: {
+      notExists: [folderName, writ.helpers.getSlug(folderName)]
+    }
+  })
+})
+
+test('post files in a category', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const categoryName = 'my category'
+  const posts = [
+    'hbs in short.hbs',
+    'handlebars.handlebars',
+    'md is not managing director here.md',
+    'markdown.markdown',
+    'txt.txt',
+    'eyç tiğem el.html',
+  ]
+
+  await dir.mkDir(categoryName)
+  await Promise.all(posts.map(post => {
+    return dir.mkFile(join(categoryName, post), '')
+  }))
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { exportDirectory } = writ.getDefaultSettings()
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [categoryName]
+    },
+    exportDirectoryPaths: {
+      exists: [writ.helpers.getSlug(categoryName)]
+    }
+  })
+
+  const categoryDir = await readdir(join(dir.name, exportDirectory, writ.helpers.getSlug(categoryName)))
+  const compiledPostNames = posts.map(post => {
+    return writ.helpers.getSlug(post.split('.').slice(0, 1).concat('html').join('.'))
+  })
+  hasPaths(t, categoryDir, compiledPostNames)
+})
+
 test('builds after theme folder is deleted', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
