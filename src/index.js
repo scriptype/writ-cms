@@ -2,22 +2,24 @@ const { getDefaultSettings } = require('./settings')
 const Hooks = require('./hooks')
 const { startUp } = require('./routines')
 
-const start = async ({ rootDirectory, debug, refreshTheme } = {}) => {
-  await startUp({
+const start = async ({ rootDirectory, debug, refreshTheme, cli } = {}) => {
+  return startUp({
     mode: 'start',
     watch: true,
     rootDirectory,
     debug,
-    refreshTheme
+    refreshTheme,
+    cli
   })
 }
 
-const build = async ({ rootDirectory, debug, refreshTheme } = {}) => {
+const build = async ({ rootDirectory, debug, refreshTheme, cli } = {}) => {
   return startUp({
     mode: 'build',
     rootDirectory,
     debug,
-    refreshTheme
+    refreshTheme,
+    cli
   })
 }
 

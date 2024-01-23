@@ -26,7 +26,8 @@ if (!modes.includes(mode)) {
 const options = {
   rootDirectory: opts.find(Flag.isNotFlag) || '.',
   refreshTheme: flags.refreshTheme.test(opts),
-  debug: flags.debug.test(opts)
+  debug: flags.debug.test(opts),
+  cli: true
 }
 
 if (options.debug) {

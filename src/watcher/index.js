@@ -6,7 +6,7 @@ const Debug = require('../debug')
 const api = require('./api')
 
 module.exports = {
-  init({ decorators, onChange }) {
+  init({ decorators, onChange, silent }) {
     const { rootDirectory, exportDirectory } = Settings.getSettings()
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
@@ -43,14 +43,25 @@ module.exports = {
         })
     }, 2000, { leading: true })
 
-    bs.watch(watchDir, watchOptions, cb)
+    const watcher = bs.watch(watchDir, watchOptions, cb)
 
-    bs.init({
-      server: serverDir,
-      watch: false,
-      ui: false,
-      middleware: api.create(compilePromise, decorators.previewApi),
-      notify: false
+    return new Promise(resolve => {
+      bs.init({
+        server: serverDir,
+        watch: false,
+        ui: false,
+        middleware: api.create(compilePromise, decorators.previewApi),
+        notify: false,
+        open: false,
+        logLevel: silent ? 'silent' : 'info'
+      }, () => {
+        resolve({
+          stop() {
+            bs.exit()
+            watcher.close()
+          }
+        })
+      })
     })
   }
 }

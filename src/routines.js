@@ -14,7 +14,7 @@ const Watcher = require('./watcher')
 const startUp = async ({ watch, refreshTheme, ...rest }) => {
   await run({ refreshTheme, ...rest })
   if (watch) {
-    startWatcher({ ...rest })
+    return startWatcher({ ...rest })
   }
 }
 
@@ -52,14 +52,15 @@ const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
   Debug.logTimes()
 }
 
-const startWatcher = (...args) => {
+const startWatcher = (options) => {
   return Watcher.init({
     decorators: {
       previewApi: finalise('previewApi')
     },
     onChange() {
-      return run(...args)
-    }
+      return run(options)
+    },
+    silent: !options.cli
   })
 }
 

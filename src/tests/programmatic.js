@@ -1,4 +1,4 @@
-const { rm, mkdtemp, mkdir, readdir, writeFile } = require('fs/promises')
+const { rm, mkdtemp, mkdir, readdir, readFile, writeFile } = require('fs/promises')
 const { tmpdir } = require('os')
 const { join, resolve } = require('path')
 const test = require('tape')
@@ -481,4 +481,32 @@ test('refreshTheme option when there is no theme/keep', async t => {
 
   const themeDirectoryContents = await readdir(join(dir.name, themeDirectory))
   hasNotPaths(t, themeDirectoryContents, [deletedFileName], 'theme directory is refreshed')
+})
+
+test('start mode', t => {
+
+  t.test('starts a local server for preview', async tt => {
+    const dir = await createTempDir()
+
+    const { exportDirectory } = writ.getDefaultSettings()
+
+    const watcher = await writ.start({
+      rootDirectory: dir.name
+    })
+
+    const response = await fetch('http://localhost:3000')
+    const textResponse = await response.text()
+    const filePath = join(dir.name, exportDirectory, 'index.html')
+    const indexHTMLContent = await readFile(filePath, {
+      encoding: 'utf-8'
+    })
+
+    t.true(textResponse === indexHTMLContent, 'index.html is broadcast over localhost:3000')
+
+    t.teardown(() => {
+      watcher.stop()
+      dir.rm()
+    })
+  })
+
 })
