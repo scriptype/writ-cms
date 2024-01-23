@@ -1,0 +1,18 @@
+{{#>m-doc}}
+  Text post page template.
+{{/m-doc}}
+{{#>base page="post"}}
+  {{#>layout-single-column}}
+
+    {{>components/header}}
+
+    {{#if (is type 'audio')}}
+      {{>pages/post/audio-content}}
+    {{/if}}
+
+    {{#if (is type 'text')}}
+      {{>pages/post/text-content}}
+    {{/if}}
+
+  {{/layout-single-column}}
+{{/base}}

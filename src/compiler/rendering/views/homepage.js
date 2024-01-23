@@ -6,7 +6,7 @@ const renderHomePage = (Renderer, { categories, posts }) => {
   const settings = Settings.getSettings()
   return Renderer.render({
     path: join(settings.out, 'index.html'),
-    content: '{{>index}}',
+    content: '{{>pages/homepage}}',
     data: {
       posts,
       categories,

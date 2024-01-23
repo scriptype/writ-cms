@@ -1,6 +1,6 @@
 {{#>m-doc}}
-  Content container for a subpage.
-  Displays title, the content and footer.
+  Content container for a text post page.
+  Displays title, the content and footer
 {{/m-doc}}
 <main class="content" {{featSearchResults}}>
     <article class="post post--text">
@@ -10,6 +10,6 @@
         <section class="post-content">
             {{> @partial-block }}
         </section>
-        {{>content-post-footer}}
+        {{>pages/post/footer}}
     </article>
 </main>

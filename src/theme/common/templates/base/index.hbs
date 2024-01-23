@@ -8,19 +8,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="{{site.description}}" />
         <title>{{pageTitle}}</title>
-        {{>features}}
-        {{>base-style}}
-        {{>page-style}}
-        {{>custom-style}}
+        {{>base/features}}
+        {{>base/base-style}}
+        {{>base/page-style}}
+        {{>base/custom-style}}
     </head>
 
     <body>
         {{>@partial-block}}
-        {{>base-includes}}
+        {{>base/base-includes}}
         <script>window.permalinkPrefix = "{{settings.permalinkPrefix}}"</script>
-        {{>base-script}}
-        {{>page-script}}
-        {{>custom-script}}
+        {{>base/base-script}}
+        {{>base/page-script}}
+        {{>base/custom-script}}
     </body>
 
 </html>

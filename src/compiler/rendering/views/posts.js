@@ -30,7 +30,7 @@ const renderPosts = (Renderer, { categories, posts }) => {
     }
     return Renderer.render({
       path: getExportPath(post),
-      content: `{{#>post-${post.type}}}${post.content}{{/post-${post.type}}}`,
+      content: `{{#>pages/post}}${post.content}{{/pages/post}}`,
       data: {
         ...post,
         categories,

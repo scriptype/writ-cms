@@ -19,7 +19,7 @@ const renderBareTagPage = async (Renderer, { posts, categories, tags }) => {
   await mkdir(join(settings.out, 'tag'))
   return Renderer.render({
     path: join(settings.out, 'tag', 'index.html'),
-    content: '{{>index}}',
+    content: '{{>pages/homepage}}',
     data: {
       posts,
       categories,
@@ -41,7 +41,7 @@ const renderTagIndices = async (Renderer, contentModel) => {
     await mkTagDir(dir)
     return Renderer.render({
       path: join(dir, 'index.html'),
-      content: '{{>tag}}',
+      content: '{{>pages/tag}}',
       data: {
         tag,
         settings,

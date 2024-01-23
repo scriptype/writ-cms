@@ -10,30 +10,38 @@ const registerHelpers = (helpersDecorator) => {
   Handlebars.registerHelper(allHelpers)
 }
 
-const registerPartials = async (partialsPath) => {
+const registerPartials = async (rootPath) => {
   try {
-    await stat(partialsPath)
+    await stat(rootPath)
   } catch (e) {
-    return debugLog(`registerPartials: ${partialsPath} not found`)
+    return debugLog(`registerPartials: ${rootPath} not found`)
   }
-  const paths = await Promise.all(
-    (await readdir(partialsPath)).map(async path => ({
-      path,
-      isDirectory: await isDirectory(join(partialsPath, path))
-    }))
-  )
-  const files = paths
-    .filter(p => !p.isDirectory && /\.hbs$/i.test(p.path))
-    .map(({ path }) => path)
-  const register = files.map(async (path) => {
-    const name = path.replace(extname(path), '')
-    const fileContent = await readFileContent(join(partialsPath, path))
-    debugLog('registerPartial', join(partialsPath, path), name)
-    Handlebars.registerPartial(name, fileContent)
-  })
-  return Promise.all(register)
-}
 
+  const registerDeep = async (parentPath) => {
+    debugLog(`registerDeep: ${parentPath}`)
+    return Promise.all(
+      (await readdir(parentPath)).map(async name => {
+        const fullPath = join(parentPath, name)
+        if (await isDirectory(fullPath)) {
+          return registerDeep(fullPath)
+        }
+        if (extname(name) === '.hbs') {
+          const fullName = `${parentPath.replace(rootPath, '').replace(/\\/g, '/')}/${name}`
+          const partialName = fullName
+            .replace(extname(fullName), '')
+            .replace(/\/index$/, '')
+            .replace(/^(\/|\\)/, '')
+          debugLog(`registerPartial: ${partialName}`)
+          const partialContent = await readFileContent(fullPath)
+          Handlebars.registerPartial(partialName, partialContent)
+        }
+        return Promise.resolve()
+      })
+    )
+  }
+
+  return registerDeep(rootPath)
+}
 
 module.exports = {
   decorators: {

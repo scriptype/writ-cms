@@ -8,7 +8,7 @@ const renderSubpages = (Renderer, { categories, posts, subpages }) => {
     const type = subpage.type || 'subpage'
     return Renderer.render({
       path: join(settings.out, `${subpage.slug}.html`),
-      content: `{{#>${type}}}${subpage.content}{{/${type}}}`,
+      content: `{{#>pages/${type}}}${subpage.content}{{/pages/${type}}}`,
       data: {
         ...subpage,
         posts,
