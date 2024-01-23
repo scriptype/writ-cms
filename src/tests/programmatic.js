@@ -3,6 +3,7 @@ const { tmpdir } = require('os')
 const { join, resolve } = require('path')
 const test = require('tape')
 const writ = require('..')
+globalThis.fetch = globalThis.fetch || require('node-fetch')
 
 const createTempDir = async () => {
   const dirName = await mkdtemp(join(tmpdir(), 'writ-test-'))
