@@ -486,7 +486,7 @@ test('refreshTheme option when there is no theme/keep', async t => {
 
 test('start mode', t => {
 
-  t.test('starts a local server for preview', async tt => {
+  t.test('starts a local server for preview', async st => {
     const dir = await createTempDir()
 
     const { exportDirectory } = writ.getDefaultSettings()
@@ -502,9 +502,38 @@ test('start mode', t => {
       encoding: 'utf-8'
     })
 
-    t.true(textResponse === indexHTMLContent, 'index.html is broadcast over localhost:3000')
+    st.true(textResponse === indexHTMLContent, 'index.html is broadcast over localhost:3000')
 
-    t.teardown(() => {
+    st.teardown(() => {
+      watcher.stop()
+      dir.rm()
+    })
+  })
+
+  t.test('changes trigger a re-build', async st => {
+    const dir = await createTempDir()
+
+    const watcher = await writ.start({
+      rootDirectory: dir.name
+    })
+
+    const { exportDirectory } = writ.getDefaultSettings()
+
+    const response1 = await fetch('http://localhost:3000')
+    const textResponse1 = await response1.text()
+
+    const change = 'totally random text'
+    st.false(textResponse1.includes(change), 'Initially there is no change')
+
+    await dir.mkFile('a new file.md', change)
+    await new Promise(r => setTimeout(r, 600))
+
+    const response2 = await fetch('http://localhost:3000')
+    const textResponse2 = await response2.text()
+
+    st.true(textResponse2.includes(change), 'The change is reflected in the page')
+
+    st.teardown(() => {
       watcher.stop()
       dir.rm()
     })

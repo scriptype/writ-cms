@@ -31,7 +31,9 @@ module.exports = {
     let compilePromise = Promise.resolve()
 
     const cb = _.debounce((e, file) => {
-      console.log(new Date(), file)
+      if (!silent) {
+        console.log(new Date(), file)
+      }
       compilePromise = compilePromise
         .then(onChange)
         .then(() => {
