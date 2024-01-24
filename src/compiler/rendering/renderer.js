@@ -4,6 +4,11 @@ const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../../helpers')
 const { debugLog } = require('../../debug')
 
+const isTemplateFile = (fileName) => {
+  const extension = extname(fileName)
+  return extension === '.hbs' || extension === '.handlebars'
+}
+
 const registerHelpers = (helpersDecorator) => {
   const allHelpers = helpersDecorator({})
   debugLog('registerHelpers', allHelpers)
@@ -11,12 +16,6 @@ const registerHelpers = (helpersDecorator) => {
 }
 
 const registerPartials = async (rootPath) => {
-  try {
-    await stat(rootPath)
-  } catch (e) {
-    return debugLog(`registerPartials: ${rootPath} not found`)
-  }
-
   const registerDeep = async (parentPath) => {
     debugLog(`registerDeep: ${parentPath}`)
     return Promise.all(
@@ -25,8 +24,11 @@ const registerPartials = async (rootPath) => {
         if (await isDirectory(fullPath)) {
           return registerDeep(fullPath)
         }
-        if (extname(name) === '.hbs') {
-          const fullName = `${parentPath.replace(rootPath, '').replace(/\\/g, '/')}/${name}`
+        if (isTemplateFile(name)) {
+          const path = parentPath
+            .replace(rootPath, '')
+            .replace(/\\/g, '/')
+          const fullName = `${path}/${name}`
           const partialName = fullName
             .replace(extname(fullName), '')
             .replace(/\/index$/, '')
@@ -38,6 +40,12 @@ const registerPartials = async (rootPath) => {
         return Promise.resolve()
       })
     )
+  }
+
+  try {
+    await stat(rootPath)
+  } catch (e) {
+    return debugLog(`registerPartials: ${rootPath} not found`)
   }
 
   return registerDeep(rootPath)
