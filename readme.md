@@ -12,6 +12,7 @@ A spirited web engine, in early development.
 - [Usage](#usage)
 - [Installation](#installation)
 - [Manual](#manual)
+- [Development](#development)
 
 ## The idea
 
@@ -132,4 +133,24 @@ You can use a different folder for assets by adding this to `settings.json`:
 ```
 "assetsDirectory": "my-different-assets-folder"
 ```
-</details>
+
+## Development
+
+Clone writ-cms by running:
+
+```sh
+git clone git@github.com:scriptype/writ-cms.git
+```
+
+Then set it up:
+
+```sh
+cd writ-cms
+npm install
+
+# Sets up the git hooks
+npm run hookup
+
+# Recommended for being able to quickly test things in any directory
+npm i -g .
+```
