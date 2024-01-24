@@ -211,7 +211,7 @@ module.exports = {
           ...value,
           join(__dirname, 'common', PARTIALS.from),
           join(baseThemePath, PARTIALS.from),
-          join(customThemePath, PARTIALS.from)
+          join(customThemePath, PARTIALS.to)
         ]
 
       case "assets":
