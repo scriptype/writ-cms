@@ -141,6 +141,24 @@ const createFolderedPostIndex = (fsObject) => {
   }
 }
 
+const getTranscript = (post) => {
+  const paths = [
+    post.transcript,
+    /transcript\.(txt|srt|html)$/,
+    /.srt$/,
+  ]
+  const pathExpressions = paths.filter(Boolean).map(p => new RegExp(p))
+  const matchingAssets = pathExpressions
+    .map(path => {
+      return post.localAssets.find(({ name }) => {
+        return path.test(name)
+      })
+    })
+    .filter(Boolean)
+  const [firstMatch] = matchingAssets
+  return firstMatch && firstMatch.content
+}
+
 const createFolderedPost = async (fsObject, cache) => {
   const { site, permalinkPrefix, defaultCategoryName } = Settings.getSettings()
   const indexFile = fsObject.children.find(isFolderedPostIndex)
@@ -157,6 +175,15 @@ const createFolderedPost = async (fsObject, cache) => {
   permalinkPath.push(slug)
   const permalink = replaceExtension(join(...permalinkPath), '.html')
   const localAssets = fsObject.children.filter(isLocalAsset)
+  const metadata = await parseTemplate({
+    ...indexFile,
+    localAssets,
+    permalink
+  }, cache)
+  const transcript = getTranscript({
+    ...metadata,
+    localAssets
+  })
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
@@ -164,11 +191,7 @@ const createFolderedPost = async (fsObject, cache) => {
     extension: indexFile.extension,
     data: {
       title,
-      ...(await parseTemplate({
-        ...indexFile,
-        localAssets,
-        permalink
-      }, cache)),
+      ...metadata,
       foldered: true,
       slug,
       permalink,
@@ -177,6 +200,7 @@ const createFolderedPost = async (fsObject, cache) => {
         permalink: join(permalinkPrefix, getSlug(categoryName))
       },
       localAssets,
+      transcript,
       site,
       path: indexFile.path
     }

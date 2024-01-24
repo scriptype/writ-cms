@@ -1,30 +1,4 @@
-const getTranscript = (post) => {
-  const paths = [
-    post.transcript,
-    /transcript\.(txt|srt|html)$/,
-    /.srt$/,
-  ]
-  const pathExpressions = paths.filter(Boolean).map(p => new RegExp(p))
-  const matchingAssets = pathExpressions
-    .map(path => {
-      return post.localAssets.find(({ name }) => {
-        return path.test(name)
-      })
-    })
-    .filter(Boolean)
-  const [firstMatch] = matchingAssets
-  return firstMatch && firstMatch.content
-}
-
 module.exports = {
-  hasTranscript() {
-    return !!getTranscript(this)
-  },
-
-  transcript() {
-    return getTranscript(this)
-  },
-
   multiLineTextList(list) {
     if (typeof list === 'string') {
       return list
