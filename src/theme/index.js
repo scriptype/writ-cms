@@ -6,6 +6,7 @@ const Settings = require('../settings')
 
 const ASSETS = 'assets'
 const FEATURES = 'features'
+const PARTIALS = 'partials'
 const TEMPLATES = 'templates'
 const TEMPLATE_HELPERS = 'template-helpers.js'
 const THEME_SETTINGS = 'theme-settings.css'
@@ -91,7 +92,7 @@ module.exports = {
         { recursive: true }
       ),
       cp(
-        join(__dirname, 'common', TEMPLATES),
+        join(__dirname, 'common', PARTIALS),
         join(targetPath, TEMPLATES),
         { recursive: true }
       ),
@@ -112,7 +113,7 @@ module.exports = {
         { recursive: true }
       ),
       cp(
-        join(themeSrcPath, TEMPLATES),
+        join(themeSrcPath, PARTIALS),
         join(customThemePath, TEMPLATES),
         { recursive: true }
       ),
@@ -203,7 +204,7 @@ module.exports = {
       case "templatePartials":
         return [
           ...value,
-          join(__dirname, 'common', TEMPLATES),
+          join(__dirname, 'common', PARTIALS),
           join(baseThemePath, TEMPLATES),
           join(customThemePath, TEMPLATES)
         ]
