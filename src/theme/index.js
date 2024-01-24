@@ -6,9 +6,14 @@ const Settings = require('../settings')
 
 const ASSETS = 'assets'
 const FEATURES = 'features'
-const PARTIALS = 'partials'
-const TEMPLATES = 'templates'
-const TEMPLATE_HELPERS = 'template-helpers.js'
+const PARTIALS = {
+  from: 'partials',
+  to: 'templates'
+}
+const TEMPLATE_HELPERS = {
+  from: 'template-helpers.js',
+  to: 'helpers.js'
+}
 const THEME_SETTINGS = 'theme-settings.css'
 const KEEP_PATH = 'keep'
 
@@ -92,13 +97,13 @@ module.exports = {
         { recursive: true }
       ),
       cp(
-        join(__dirname, 'common', PARTIALS),
-        join(targetPath, TEMPLATES),
+        join(__dirname, 'common', PARTIALS.from),
+        join(targetPath, PARTIALS.to),
         { recursive: true }
       ),
       cp(
-        join(__dirname, 'common', TEMPLATE_HELPERS),
-        join(targetPath, TEMPLATES, TEMPLATE_HELPERS)
+        join(__dirname, 'common', TEMPLATE_HELPERS.from),
+        join(targetPath, PARTIALS.to, TEMPLATE_HELPERS.to)
       )
     ])
   },
@@ -113,8 +118,8 @@ module.exports = {
         { recursive: true }
       ),
       cp(
-        join(themeSrcPath, PARTIALS),
-        join(customThemePath, TEMPLATES),
+        join(themeSrcPath, PARTIALS.from),
+        join(customThemePath, PARTIALS.to),
         { recursive: true }
       ),
       cp(
@@ -149,7 +154,7 @@ module.exports = {
 
     await Promise.all([
       mkdir(join(customThemePath, ASSETS)),
-      mkdir(join(customThemePath, TEMPLATES))
+      mkdir(join(customThemePath, PARTIALS.to))
     ])
 
     await this.copyCommonResources(customThemePath)
@@ -165,18 +170,18 @@ module.exports = {
     switch (type) {
       case "templateHelpers":
         const commonTemplateHelpers = require(
-          join(__dirname, 'common', TEMPLATE_HELPERS)
+          join(__dirname, 'common', TEMPLATE_HELPERS.from)
         )
 
         let themeTemplateHelpers = {}
         try {
-          themeTemplateHelpers = require(join(baseThemePath, TEMPLATE_HELPERS))
+          themeTemplateHelpers = require(join(baseThemePath, TEMPLATE_HELPERS.from))
         } catch {}
 
         let customTemplateHelpers = {}
         try {
           customTemplateHelpers = require(
-            join(customThemePath, TEMPLATES, TEMPLATE_HELPERS)
+            join(customThemePath, PARTIALS.to, TEMPLATE_HELPERS.to)
           )
         } catch {}
 
@@ -204,9 +209,9 @@ module.exports = {
       case "templatePartials":
         return [
           ...value,
-          join(__dirname, 'common', PARTIALS),
-          join(baseThemePath, TEMPLATES),
-          join(customThemePath, TEMPLATES)
+          join(__dirname, 'common', PARTIALS.from),
+          join(baseThemePath, PARTIALS.from),
+          join(customThemePath, PARTIALS.from)
         ]
 
       case "assets":
