@@ -25,11 +25,12 @@ const noop =_=>_
 const expand =
   (initialValue, fns) =>
     fns.reduce(
-      (value, fn = noop) => fn(value),
+      (value, fn) => fn(value),
       initialValue
     )
 
 const expansionHookMap = {
+  dictionary: 'useDictionary',
   template: 'useTemplate',
   templatePartials: 'useTemplatePartials',
   templateHelpers: 'useTemplateHelpers',
@@ -44,7 +45,7 @@ const expandBy =
     return (initialValue) => {
       const expandedValue = expand(
         initialValue,
-        expansions.map(exp => exp[hookName].bind(exp))
+        expansions.map(exp => (exp[hookName] || noop).bind(exp))
       )
       return expandedValue
     }
@@ -53,6 +54,7 @@ const expandBy =
 module.exports = {
   init,
   expandBy,
+  expandDictionary: expandBy('useDictionary'),
   expandTemplate: expandBy('useTemplate'),
   expandTemplatePartials: expandBy('useTemplatePartials'),
   expandTemplateHelpers: expandBy('useTemplateHelpers'),

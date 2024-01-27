@@ -6,6 +6,7 @@ const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
 const CNAME = require('./cname')
+const Dictionary = require('./dictionary')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
@@ -30,6 +31,11 @@ const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
   })
   await VersionControl.init()
   await Expansions.init()
+  await Dictionary.init({
+    decorators: {
+      dictionary: finalise('dictionary')
+    }
+  })
   await SiteDirectory.create()
   await CNAME.create()
   await Compiler.compile({
@@ -68,6 +74,7 @@ const finalise =
   (expansionHook) => {
     return (value) => {
       let result = value
+      result = Dictionary.use(expansionHook, result)
       result = Theme.use(expansionHook, result)
       result = Preview.use(expansionHook, result)
       result = Expansions.expandBy(expansionHook)(result)

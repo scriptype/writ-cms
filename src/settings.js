@@ -4,6 +4,7 @@ const { loadJSON } = require('./helpers')
 const Debug = require('./debug')
 
 const defaultSettings = (rootDirectory) => ({
+  language: 'en',
   title: basename(resolve(rootDirectory)),
   description: "A future work",
   theme: "default",

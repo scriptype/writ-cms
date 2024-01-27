@@ -1,4 +1,5 @@
 const hooks = {
+  dictionary: [],
   assets: [],
   contentModel: [],
   previewApi: [],
@@ -14,6 +15,11 @@ const api = {
       const fn = expansion[key]
       apiMethod.call(api, fn)
     })
+    return this
+  },
+
+  useDictionary(fn) {
+    hooks.dictionary.push(...fn())
     return this
   },
 
@@ -71,6 +77,10 @@ const expandContentModel = (contentModel) => {
   return expand(contentModel, hooks.contentModel)
 }
 
+const expandDictionary = (dictionary) => {
+  return expand(dictionary, hooks.dictionary)
+}
+
 const expandAssets = (assets) => {
   return [
     ...assets,
@@ -94,6 +104,7 @@ module.exports = {
       templatePartials: expandTemplatePartials,
       templateHelpers: expandTemplateHelpers,
       contentModel: expandContentModel,
+      dictionary: expandDictionary,
       assets: expandAssets,
       previewApi: expandPreviewApi,
     }[expansionHook](value)
@@ -103,6 +114,7 @@ module.exports = {
   expandTemplatePartials,
   expandTemplateHelpers,
   expandContentModel,
+  expandDictionary,
   expandAssets,
   expandPreviewApi,
 }
