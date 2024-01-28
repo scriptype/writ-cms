@@ -5,6 +5,7 @@ const defaultLocale = 'en'
 
 module.exports = {
   dictionaries: {
+    // BCP 47 language tag
     en: require('./locales/en.json'),
     fi: require('./locales/fi.json'),
     tr: require('./locales/tr.json')
