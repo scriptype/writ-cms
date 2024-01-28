@@ -1,4 +1,5 @@
 const Settings = require('../../settings')
+const Dictionary = require('../../dictionary')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
@@ -9,12 +10,12 @@ const sortPosts = (a, b) => {
 }
 
 const upsertDefaultCategory = (ContentModel, newContent) => {
-  const { defaultCategoryName } = Settings.getSettings()
+  const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
   let defaultCategory = ContentModel.categories.find(
     category => category.name === defaultCategoryName
   )
   if (!defaultCategory) {
-    defaultCategory = contentTypes.createDefaultCategory().data
+    defaultCategory = contentTypes.createDefaultCategory(defaultCategoryName).data
     ContentModel.categories.push(defaultCategory)
   }
   defaultCategory.posts.push(newContent)

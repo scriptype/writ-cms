@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
 const Settings = require('../../settings')
+const Dictionary = require('../../dictionary')
 const { getSlug, removeExtension, replaceExtension } = require('../../helpers')
 const { isTemplate, parseTemplate } = require('./templating')
 
@@ -123,9 +124,8 @@ const createCategory = (fsObject) => {
 }
 
 const createDefaultCategory = () => {
-  const { defaultCategoryName } = Settings.getSettings()
   return createCategory({
-    name: defaultCategoryName,
+    name: Dictionary.lookup('defaultCategoryName'),
     children: []
   })
 }
@@ -156,13 +156,13 @@ const getTranscript = (post) => {
 }
 
 const createFolderedPost = async (fsObject, cache) => {
-  const { site, permalinkPrefix, defaultCategoryName } = Settings.getSettings()
+  const { site, permalinkPrefix } = Settings.getSettings()
   const indexFile = fsObject.children.find(isFolderedPostIndex)
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const isDefaultCategory = fsObject.depth === 0
   const categoryName = isDefaultCategory ?
-    defaultCategoryName :
+    Dictionary.lookup('defaultCategoryName') :
     dirname(fsObject.path)
   const permalinkPath = [permalinkPrefix]
   if (!isDefaultCategory) {
@@ -204,7 +204,8 @@ const createFolderedPost = async (fsObject, cache) => {
 }
 
 const createDefaultCategoryPost = async (fsObject, cache) => {
-  const { site, defaultCategoryName, permalinkPrefix } = Settings.getSettings()
+  const { site, permalinkPrefix } = Settings.getSettings()
+  const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
   const title = removeExtension(fsObject.name)
   const slug = getSlug(fsObject.name)
   const permalink = replaceExtension(join(permalinkPrefix, slug), '.html')

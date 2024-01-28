@@ -9,7 +9,6 @@ const defaultSettings = (rootDirectory) => ({
   description: "A future work",
   theme: "default",
   permalinkPrefix: "/",
-  defaultCategoryName: "Uncategorized",
   assetsDirectory: "assets",
   exportDirectory: "docs",
   pagesDirectory: "pages",

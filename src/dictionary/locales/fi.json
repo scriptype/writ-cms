@@ -1,5 +1,6 @@
 {
   "search": "hae",
   "nextPost": "seuraava postaus",
-  "prevPost": "edellinen postaus"
+  "prevPost": "edellinen postaus",
+  "defaultCategoryName": "luokittelematon"
 }

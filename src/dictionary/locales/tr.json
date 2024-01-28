@@ -1,5 +1,6 @@
 {
   "search": "ara",
   "nextPost": "sonraki gönderi",
-  "prevPost": "önceki gönderi"
+  "prevPost": "önceki gönderi",
+  "defaultCategoryName": "Karışık (Diğer)"
 }
