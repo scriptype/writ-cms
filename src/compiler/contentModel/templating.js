@@ -1,5 +1,6 @@
 const frontMatter = require('front-matter')
 const marked = require('marked')
+const Dictionary = require('../../dictionary')
 
 marked.setOptions({
   headerIds: false
@@ -76,7 +77,7 @@ const getHTMLContent = (body, extension) => {
 }
 
 const attachDates = ({ publishDate }) => {
-  const locale = 'en-US'
+  const locale = Dictionary.locale
   const publishDateFull = publishDate.toLocaleString(locale, { dateStyle: 'full' })
   const publishDateLong = publishDate.toLocaleString(locale, { dateStyle: 'long' })
   const publishDateMedium = publishDate.toLocaleString(locale, { dateStyle: 'medium' })
