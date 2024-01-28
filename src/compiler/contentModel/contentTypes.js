@@ -19,10 +19,6 @@ const isPost = (fsObject) => {
   return fsObject.type === contentTypes.POST
 }
 
-const isCategory = (fsObject) => {
-  return fsObject.type === contentTypes.CATEGORY
-}
-
 const isSubpage = (fsObject) => {
   return fsObject.type === contentTypes.SUBPAGE
 }
@@ -257,7 +253,6 @@ const createPost = async (fsObject, cache) => {
 module.exports = {
   ...contentTypes,
   isPost,
-  isCategory,
   isSubpage,
   isSubpages,
   isAsset,
