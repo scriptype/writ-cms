@@ -1,8 +1,3 @@
-{{#>m-doc}}
-  Post footer.
-  Displays metadata such as date, category and tags, as well as musiclist and
-  links to previous/next posts (if any).
-{{/m-doc}}
 <footer class="post-footer">
     <section class="post-footer-section">
         <table class="post-metadata">
@@ -24,13 +19,6 @@
             {{/if}}
         </table>
     </section>
-    {{#if musiclist}}
-    <section class="post-footer-section">
-        <ul class="post-music-list">
-            {{{multiLineTextList musiclist}}}
-        </ul>
-    </section>
-    {{/if}}
     {{#if links.prevPost}}
         <a href="{{links.prevPost.permalink}}">&laquo; {{links.prevPost.title}}</a>
     {{/if}}

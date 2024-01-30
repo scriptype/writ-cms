@@ -1,0 +1,11 @@
+{{#>base page="tag"}}
+  {{#>layouts/single-column}}
+    <header {{region "header"}}>
+      {{>components/header}}
+    </header>
+
+    <main {{region "main"}}>
+      {{>components/posts posts=tag.posts}}
+    </main>
+  {{/layouts/single-column}}
+{{/base}}

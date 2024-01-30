@@ -1,6 +1,9 @@
-{{#>m-doc}}
-  Lists each category as a text link.
-{{/m-doc}}
+<h1 class="site-title">{{settings.site.title}}</h1>
+
+{{#if (isEnabled "search")}}
+  {{>features/search}}
+{{/if}}
+
 <nav class="categories">
     {{#each categories as |category|}}
         <a class="categories-item" href="{{category.permalink}}">

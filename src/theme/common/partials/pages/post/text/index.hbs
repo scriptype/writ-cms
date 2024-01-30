@@ -1,0 +1,11 @@
+{{#>base page="post"}}
+  {{#>layouts/single-column}}
+    <header {{region "header"}}>
+      {{>components/header}}
+    </header>
+
+    <main {{region "main"}}>
+      {{>pages/post/text/content}}
+    </main>
+  {{/layouts/single-column}}
+{{/base}}

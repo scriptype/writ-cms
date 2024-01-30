@@ -1,8 +1,3 @@
-{{#>m-doc}}
-  Post footer.
-  Displays metadata such as date, category and tags, as well as musiclist and
-  links to previous/next posts (if any).
-{{/m-doc}}
 <footer class="post-footer">
     <section class="post-footer-section">
         <table class="post-metadata">
@@ -19,7 +14,7 @@
             {{#if tags}}
             <tr class="post-metadata-tags">
                 <td>Tags</td>
-                <td>{{>pages/subpage/tags}}</td>
+                <td>{{>pages/post/tags}}</td>
             </tr>
             {{/if}}
         </table>

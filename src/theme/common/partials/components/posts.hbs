@@ -1,16 +1,4 @@
-{{#>m-doc}}
-  List of posts.
-{{/m-doc}}
 {{#each posts as |post|}}
-
-  {{#if (is post.type 'text')}}
-    <div class="post">
-        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
-        {{{post.summary}}}
-        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
-        <p>{{post.publishDateMedium}}</p>
-    </div>
-  {{/if}}
 
   {{#if (is post.type 'audio')}}
     <div class="post">
@@ -20,6 +8,22 @@
             <img src="{{post.permalink}}/{{post.cover}}" alt="{{post.coverAlt}}">
           {{/if}}
         </a>
+        {{{post.summary}}}
+        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
+        <p>{{post.publishDateMedium}}</p>
+    </div>
+
+  {{else if (is post.type 'text')}}
+    <div class="post">
+        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
+        {{{post.summary}}}
+        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
+        <p>{{post.publishDateMedium}}</p>
+    </div>
+
+  {{else}}
+    <div class="post">
+        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
         {{{post.summary}}}
         <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
         <p>{{post.publishDateMedium}}</p>

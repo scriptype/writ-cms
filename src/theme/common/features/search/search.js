@@ -3,6 +3,10 @@
     return [...Array(n).keys()].map(() => what)
   }
 
+  const region = (regionName) => {
+    return document.querySelector(`[data-region-id="${regionName}"]`)
+  }
+
   const getRandomNoResultsMessage = () => {
     const messages = [
       ...times(5, 'No results 😴'),
@@ -83,8 +87,8 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     const UI = {
-      searchForm: document.querySelector('#feat-search-form'),
-      resultsContainer: document.querySelector('#feat-search-results')
+      searchForm: region('search-form'),
+      resultsContainer: region('main')
     }
 
     const posts = await loadPosts('posts.json')

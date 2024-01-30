@@ -1,0 +1,13 @@
+<article class="post post--photo">
+    <header class="post-header">
+        <h2>{{title}}</h2>
+    </header>
+    <section class="post-content">
+        <a href="{{originalUrl}}">
+            <img src="{{mediumUrl}}" alt="a photo" />
+        </a>
+        <pre>{{exif}}</pre>
+        {{> @partial-block }}
+    </section>
+    {{>pages/post/footer}}
+</article>

@@ -1,0 +1,15 @@
+<div class="topbar">
+  <h1 class="site-title" id="dark-toggle">{{settings.site.title}}</h1>
+
+  {{#if (isEnabled "search")}}
+    {{>features/search}}
+  {{/if}}
+
+  <nav class="categories">
+      {{#each categories as |category|}}
+          <a class="categories-item" href="{{category.permalink}}">
+              {{category.name}}
+          </a>
+      {{/each}}
+  </nav>
+</div>

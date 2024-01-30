@@ -1,22 +1,9 @@
-{{#>m-doc}}
-  Text post page template.
-{{/m-doc}}
-{{#>base page="post"}}
-  {{#>layout-single-column}}
-
-    {{>components/header}}
-
-    {{#if (is type 'audio')}}
-      {{>pages/post/audio-content}}
-    {{/if}}
-
-    {{#if (is type 'photo')}}
-      {{>pages/post/photo-content}}
-    {{/if}}
-
-    {{#if (is type 'text')}}
-      {{>pages/post/text-content}}
-    {{/if}}
-
-  {{/layout-single-column}}
-{{/base}}
+{{#if (is type 'audio')}}
+  {{>pages/post/audio}}
+{{else if (is type 'photo')}}
+  {{>pages/post/photo}}
+{{else if (is type 'text')}}
+  {{>pages/post/text}}
+{{else}}
+  {{>pages/post/text}}
+{{/if}}
