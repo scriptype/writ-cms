@@ -1,3 +1,4 @@
+const { join, resolve } = require('path')
 const Settings = require('../settings')
 const Debug = require('../debug')
 
@@ -27,16 +28,16 @@ module.exports = {
   },
 
   // can key be like 'my.nested.key'?
-  lookup(key, ...params) {
+  lookup(key, variables = {}) {
     if (!(key in this.dictionary)) {
       Debug.debugLog(`unrecognized word: ${key} in: ${this.locale}`)
       return ''
     }
-    const word = this.dictionary[key]
-    const variables = word.match(/\$(\w+)/g) || []
-    let result = word
-    variables.forEach((variable, i) => {
-      result = result.replace(new RegExp(`\\${variable}`), params[i] || '')
+    const translation = this.dictionary[key]
+    let result = translation
+    Object.keys(variables).forEach(key => {
+      const variable = variables[key]
+      result = result.replace('{{' + key + '}}', variable || '')
     })
     return result
   },
@@ -64,6 +65,22 @@ module.exports = {
             return that.lookup.call(that, key, ...params)
           }
         }
+
+      case "assets":
+        return [
+          ...value,
+          {
+            src: resolve(__dirname, './static', 'dictionary.js'),
+            dest: join('common'),
+            single: true
+          },
+          {
+            src: resolve(__dirname, 'locales', this.locale + '.json'),
+            dest: join('common'),
+            rename: 'dictionary.json',
+            single: true
+          }
+        ]
     }
     return value
   }

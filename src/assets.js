@@ -52,11 +52,14 @@ const copyAssetsAsFolder = async ({ src, dest }) => {
   return cp(src, join(out, assetsDirectory, dest), { recursive: true })
 }
 
-const copyAsset = async ({ src, dest }) => {
+const copyAsset = async ({ src, dest, rename }) => {
   Debug.debugLog('copy asset', src, dest)
   const { out, assetsDirectory } = Settings.getSettings()
   const targetDirectory = join(out, assetsDirectory, dest)
   await ensureDirectory(targetDirectory)
+  if (rename) {
+    return cp(src, join(targetDirectory, rename))
+  }
   return cp(src, join(targetDirectory, basename(src)))
 }
 

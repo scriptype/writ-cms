@@ -9,9 +9,9 @@
 
   const getRandomNoResultsMessage = () => {
     const messages = [
-      ...times(5, 'No results 😴'),
-      ...times(4, 'Nothing much 😐'),
-      ...times(3, 'Try searching for something else 🐙')
+      ...times(5, window.Dictionary.lookup('search-no-results-1')),
+      ...times(4, window.Dictionary.lookup('search-no-results-2')),
+      ...times(3, window.Dictionary.lookup('search-no-results-3'))
     ]
 
     return messages[Math.floor(Math.random() * messages.length)]
@@ -28,9 +28,14 @@
         <h2>${getRandomNoResultsMessage()}</h2>
       `
     }
+    const title = window.Dictionary.lookup('search-results-title', {
+      resultsCount: results.length,
+      query
+    })
+    const resultsHTML = results.map(resultItemTemplate).join('')
     return `
-      <h2>${results.length} posts found for <em>"${query}"</em>:</h2>
-      ${results.join('')}
+      <h2>${title}</h2>
+      ${resultsHTML}
     `
   }
 
@@ -79,7 +84,7 @@
         if (!isMatching) {
           return null
         }
-        return resultItemTemplate(post)
+        return post
       }).filter(Boolean)
       resultsContainer.innerHTML = resultsTemplate(results, query)
     })

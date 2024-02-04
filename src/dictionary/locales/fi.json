@@ -2,5 +2,10 @@
   "search": "hae",
   "nextPost": "seuraava postaus",
   "prevPost": "edellinen postaus",
-  "defaultCategoryName": "luokittelematon"
+  "defaultCategoryName": "luokittelematon",
+  "defaultCategoryName": "luokittelematon",
+  "search-results-title": "{{resultsCount}} tulosta löytyi sanalle <em>\"{{query}}\"</em>:",
+  "search-no-results-1": "Ei tuloksia 😴",
+  "search-no-results-2": "Ei paljoa 😐",
+  "search-no-results-3": "Yritä etsiä jotain muuta 🐙"
 }
