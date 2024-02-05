@@ -1,20 +1,5 @@
 {{#each posts as |post|}}
 
-  {{#if (is post.type 'photo')}}
-    <a href="{{post.permalink}}" class="photo-thumbnail">
-        <img src="{{post.permalink}}/{{post.thumbnailUrl}}" />
-    </a>
-  {{/if}}
-
-  {{#if (is post.type 'text')}}
-    <div class="post">
-        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
-        {{{post.summary}}}
-        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
-        <p>{{post.publishDateMedium}}</p>
-    </div>
-  {{/if}}
-
   {{#if (is post.type 'audio')}}
     <div class="post">
         <a href="{{post.permalink}}">
@@ -24,9 +9,35 @@
           {{/if}}
         </a>
         {{{post.summary}}}
-        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
+        <p><a class="category-link" href="{{post.category.permalink}}">{{post.category.name}}</a></p>
         <p>{{post.publishDateMedium}}</p>
     </div>
+  {{/if}}
+
+  {{#if (is post.type 'text')}}
+    <div class="post">
+        <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
+        {{#if post.cover}}
+          <a href="{{post.permalink}}/{{post.cover}}">
+            <img
+                class="post-cover {{#if post.coverShape}}shape-{{post.coverShape}}{{/if}}"
+                {{#if post.coverPosition}}
+                style="--cover-position: {{post.coverPosition}};"
+                {{/if}}
+                src="{{post.permalink}}/{{post.cover}}"
+                alt="{{post.coverAlt}}">
+          </a>
+        {{/if}}
+        {{{post.summary}}}
+        <p><a class="category-link" href="{{post.category.permalink}}">{{post.category.name}}</a></p>
+        <p>{{post.publishDateMedium}}</p>
+    </div>
+  {{/if}}
+
+  {{#if (is post.type 'photo')}}
+    <a href="{{post.permalink}}" class="photo-thumbnail">
+        <img src="{{post.permalink}}/{{post.thumbnailUrl}}" />
+    </a>
   {{/if}}
 
 {{/each}}

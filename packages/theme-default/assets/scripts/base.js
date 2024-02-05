@@ -11,7 +11,7 @@ function initDarkMode(darkToggle) {
 }
 
 const UI = {
-  darkToggle: document.querySelector('#dark-toggle')
+  darkToggle: document.querySelector('.site-title')
 }
 
 initDarkMode(UI.darkToggle)
