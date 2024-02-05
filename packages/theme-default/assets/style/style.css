@@ -75,8 +75,9 @@ a {
 }
 
 .site-title {
-    font-size: 3em;
+    font-size: 4em;
     cursor: alias;
+    letter-spacing: -0.05em;
 }
 
 .site-title:first-letter {
