@@ -86,10 +86,7 @@ const createSubpage = async (fsObject, cache) => {
     type: contentTypes.SUBPAGE,
     data: {
       title,
-      ...(await parseTemplate({
-        ...fsObject,
-        isSubpage: true
-      }, cache)),
+      ...(await parseTemplate(fsObject, cache, { subpage: true })),
       slug: getSlug(title),
       site,
     }
@@ -137,16 +134,19 @@ const createFolderedPostIndex = (fsObject) => {
   }
 }
 
-const getTranscript = (post) => {
+const getTranscript = (metadata, localAssets) => {
+  if (!localAssets || !localAssets.length) {
+    return undefined
+  }
   const paths = [
-    post.transcript,
+    metadata.transcript,
     /transcript\.(txt|srt|html)$/,
     /.srt$/,
   ]
   const pathExpressions = paths.filter(Boolean).map(p => new RegExp(p))
   const matchingAssets = pathExpressions
     .map(path => {
-      return post.localAssets.find(({ name }) => {
+      return localAssets.find(({ name }) => {
         return path.test(name)
       })
     })
@@ -155,100 +155,80 @@ const getTranscript = (post) => {
   return firstMatch && firstMatch.content
 }
 
-const createFolderedPost = async (fsObject, cache) => {
-  const { site, permalinkPrefix } = Settings.getSettings()
-  const indexFile = fsObject.children.find(isFolderedPostIndex)
-  const title = removeExtension(fsObject.name)
-  const slug = getSlug(fsObject.name)
-  const isDefaultCategory = fsObject.depth === 0
-  const categoryName = isDefaultCategory ?
-    Dictionary.lookup('defaultCategoryName') :
-    dirname(fsObject.path)
-  const permalinkPath = [permalinkPrefix]
-  if (!isDefaultCategory) {
-    permalinkPath.push(getSlug(categoryName))
+const getPostPermalink = (fsObject, isCategorized) => {
+  const { permalinkPrefix } = Settings.getSettings()
+  const permalink = join(
+    permalinkPrefix,
+    isCategorized ? getSlug(dirname(fsObject.path)) : '',
+    getSlug(fsObject.name)
+  )
+  return replaceExtension(permalink, '.html')
+}
+
+const getPostCategory = (fsObject, isCategorized) => {
+  const { permalinkPrefix } = Settings.getSettings()
+  const categoryName = isCategorized ?
+    dirname(fsObject.path) :
+    Dictionary.lookup('defaultCategoryName')
+  return {
+    name: categoryName,
+    permalink: join(permalinkPrefix, getSlug(categoryName))
   }
-  permalinkPath.push(slug)
-  const permalink = replaceExtension(join(...permalinkPath), '.html')
-  const localAssets = fsObject.children.filter(isLocalAsset)
-  const metadata = await parseTemplate({
-    ...indexFile,
+}
+
+const _createPost = async (fsObject, cache, { categorized, foldered }) => {
+  const postFile = foldered ?
+    fsObject.children.find(isFolderedPostIndex) :
+    fsObject
+
+  const localAssets = foldered ?
+    fsObject.children.filter(isLocalAsset) :
+    []
+
+  const permalink = getPostPermalink(fsObject, categorized)
+
+  const metadata = await parseTemplate(postFile, cache, {
     localAssets,
     permalink
-  }, cache)
-  const transcript = getTranscript({
-    ...metadata,
-    localAssets
   })
+
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
-    content: indexFile.content,
-    extension: indexFile.extension,
     data: {
-      title,
+      title: removeExtension(fsObject.name),
       ...metadata,
-      foldered: true,
-      slug,
+      slug: getSlug(fsObject.name),
       permalink,
-      category: {
-        name: categoryName,
-        permalink: join(permalinkPrefix, getSlug(categoryName))
-      },
+      category: getPostCategory(fsObject, categorized),
+      path: postFile.path,
+      site: Settings.getSettings().site,
+      foldered,
       localAssets,
-      transcript,
-      site,
-      path: indexFile.path
+      transcript: getTranscript(metadata, localAssets)
     }
   }
 }
 
-const createDefaultCategoryPost = async (fsObject, cache) => {
-  const { site, permalinkPrefix } = Settings.getSettings()
-  const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
-  const title = removeExtension(fsObject.name)
-  const slug = getSlug(fsObject.name)
-  const permalink = replaceExtension(join(permalinkPrefix, slug), '.html')
-  return {
-    ...fsObject,
-    type: contentTypes.POST,
-    data: {
-      title,
-      ...(await parseTemplate(fsObject, cache)),
-      slug,
-      permalink,
-      category: {
-        name: defaultCategoryName,
-        permalink: join(permalinkPrefix, getSlug(defaultCategoryName))
-      },
-      site,
-      path: fsObject.path
-    }
-  }
+const createFolderedPost = (fsObject, cache) => {
+  return _createPost(fsObject, cache, {
+    categorized: fsObject.depth > 0,
+    foldered: true
+  })
 }
 
-const createPost = async (fsObject, cache) => {
-  const { site, permalinkPrefix } = Settings.getSettings()
-  const title = removeExtension(fsObject.name)
-  const slug = getSlug(fsObject.name)
-  const categoryName = dirname(fsObject.path)
-  const permalink = replaceExtension(join(permalinkPrefix, getSlug(categoryName), slug), '.html')
-  return {
-    ...fsObject,
-    type: contentTypes.POST,
-    data: {
-      title,
-      ...(await parseTemplate(fsObject, cache)),
-      slug,
-      permalink,
-      category: {
-        name: categoryName,
-        permalink: join(permalinkPrefix, getSlug(categoryName))
-      },
-      site,
-      path: fsObject.path
-    }
-  }
+const createDefaultCategoryPost = (fsObject, cache) => {
+  return _createPost(fsObject, cache, {
+    categorized: false,
+    foldered: false
+  })
+}
+
+const createPost = (fsObject, cache) => {
+  return _createPost(fsObject, cache, {
+    categorized: true,
+    foldered: false
+  })
 }
 
 module.exports = {

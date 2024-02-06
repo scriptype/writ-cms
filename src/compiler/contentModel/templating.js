@@ -48,7 +48,7 @@ const MarkdownHelpers = {
 
 const getSummary = (content, localAssets, permalink) => {
   let summaryPart = content.split(READ_MORE_DIVIDER)[0]
-  if (!localAssets) {
+  if (!localAssets || !localAssets.length) {
     return summaryPart
   }
   localAssets.forEach(asset => {
@@ -111,10 +111,10 @@ const matchesExtension = (extension, acceptedExtensions) => {
 
 const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 
-const parseTemplate = async ({ isSubpage, ...fsObject }, cache) => {
-  const { path, content, extension, stats, localAssets, permalink } = fsObject
+const parseTemplate = async (fsObject, cache, { localAssets, permalink, subpage } = {}) => {
+  const { path, content, extension, stats } = fsObject
   const { attributes, body } = frontMatter(content)
-  const type = attributes.type || (isSubpage ? 'subpage' : 'text')
+  const type = attributes.type || (subpage ? 'subpage' : 'text')
   const HTMLContent = getHTMLContent(body, extension)
   let publishDate = stats.birthtime
   if (attributes.date) {
