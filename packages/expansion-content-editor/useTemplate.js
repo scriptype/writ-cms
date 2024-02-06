@@ -1,4 +1,4 @@
-const useTemplate = (mode) =>
+const useTemplate = ({ mode }) =>
   (template) => {
     if (mode !== 'start') {
       return template

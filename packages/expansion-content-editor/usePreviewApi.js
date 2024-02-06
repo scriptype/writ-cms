@@ -1,4 +1,4 @@
-const usePreviewApi = (mode) =>
+const usePreviewApi = ({ mode }) =>
   () => [
     {
       route: "/cms/post",

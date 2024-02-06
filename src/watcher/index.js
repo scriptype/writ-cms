@@ -6,7 +6,7 @@ const Debug = require('../debug')
 const api = require('./api')
 
 module.exports = {
-  init({ decorators, onChange, silent }) {
+  init({ onChange, silent }) {
     const { rootDirectory, exportDirectory } = Settings.getSettings()
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
@@ -52,7 +52,7 @@ module.exports = {
         server: serverDir,
         watch: false,
         ui: false,
-        middleware: api.create(compilePromise, decorators.previewApi),
+        middleware: api.create(compilePromise),
         notify: false,
         open: false,
         logLevel: silent ? 'silent' : 'info'

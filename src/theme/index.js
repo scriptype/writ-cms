@@ -3,51 +3,50 @@ const { stat, rm, mkdir, mkdtemp, cp, readdir } = require('fs/promises')
 const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
+const createDecorator = require('./decorator')
+const {
+  ASSETS,
+  FEATURES,
+  PARTIALS,
+  TEMPLATE_HELPERS,
+  THEME_SETTINGS,
+  KEEP_PATH
+} = require('./constants')
 
-const ASSETS = 'assets'
-const FEATURES = 'features'
-const PARTIALS = {
-  from: 'partials',
-  to: 'templates'
+const State = {
+  customizers: []
 }
-const TEMPLATE_HELPERS = {
-  from: 'template-helpers.js',
-  to: 'helpers.js'
-}
-const THEME_SETTINGS = 'theme-settings.css'
-const KEEP_PATH = 'keep'
 
-module.exports = {
-  async init({ refresh }) {
+const Methods = (() => {
+  const init = async ({ refresh }) => {
     Debug.timeStart('theme')
     const { rootDirectory, themeDirectory } = Settings.getSettings()
     const customThemePath = join(rootDirectory, themeDirectory)
-    this.customizers = []
 
-    if (await this.customThemeExists(customThemePath)) {
+    if (await customThemeExists(customThemePath)) {
       Debug.debugLog(`${customThemePath} exists`)
       if (refresh) {
         Debug.debugLog('refresh theme')
-        await this.refreshCustomTheme(customThemePath)
+        await refreshCustomTheme(customThemePath)
       } else {
-        await this.collectCustomizerPaths(customThemePath)
+        await collectCustomizerPaths(customThemePath)
       }
     } else {
       Debug.debugLog(`${customThemePath} not found`)
-      await this.makeCustomThemeDirectory(customThemePath)
+      await makeCustomThemeDirectory(customThemePath)
     }
     Debug.timeEnd('theme')
-  },
+  }
 
-  async customThemeExists(customThemePath) {
+  const customThemeExists = async (customThemePath) => {
     try {
       return await stat(customThemePath)
     } catch {
       return false
     }
-  },
+  }
 
-  async refreshCustomTheme(customThemePath) {
+  const refreshCustomTheme = async (customThemePath) => {
     const backupKeepDir = async (keepPath) => {
       try {
         if (await stat(keepPath)) {
@@ -66,7 +65,7 @@ module.exports = {
       try {
         Debug.debugLog('rm -r', themePath)
         await rm(themePath, { recursive: true })
-        await this.makeCustomThemeDirectory(themePath)
+        await makeCustomThemeDirectory(themePath)
         if (keepBackupPath) {
           await cp(keepBackupPath, keepPath, { recursive: true })
         }
@@ -79,17 +78,17 @@ module.exports = {
     const keepPath = join(customThemePath, KEEP_PATH)
     const tempPath = await backupKeepDir(keepPath)
     return refreshThemeDir(customThemePath, tempPath, keepPath)
-  },
+  }
 
-  async collectCustomizerPaths(customThemePath) {
+  const collectCustomizerPaths = async (customThemePath) => {
     const paths = await readdir(customThemePath)
     const customizerPaths = paths.filter(p => {
       return p.endsWith('.css') || p.endsWith('.js')
     })
-    this.customizers.push(...customizerPaths)
-  },
+    State.customizers.push(...customizerPaths)
+  }
 
-  copyCommonResources(targetPath) {
+  const copyCommonResources = (targetPath) => {
     return Promise.all([
       cp(
         join(__dirname, 'common', FEATURES),
@@ -106,9 +105,9 @@ module.exports = {
         join(targetPath, PARTIALS.to, TEMPLATE_HELPERS.to)
       )
     ])
-  },
+  }
 
-  copyBaseThemeResources(customThemePath) {
+  const copyBaseThemeResources = (customThemePath) => {
     const { theme } = Settings.getSettings()
     const themeSrcPath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
     return Promise.all([
@@ -127,18 +126,18 @@ module.exports = {
         join(customThemePath, THEME_SETTINGS)
       )
     ]).then(() => {
-      this.customizers.push(THEME_SETTINGS)
+      State.customizers.push(THEME_SETTINGS)
     }).catch(e => {
       Debug.debugLog(`⚠️  error copying theme resources: ${theme}`, e)
     })
-  },
+  }
 
-  async copyCustomizers(customThemePath) {
+  const copyCustomizers = async (customThemePath) => {
     const paths = await readdir(join(__dirname, 'customizers'))
     const customizers = paths.filter(p => {
       return p.endsWith('.css') || p.endsWith('.js')
     })
-    this.customizers.push(...customizers)
+    State.customizers.push(...customizers)
     return Promise.all(
       paths.map(path => {
         return cp(
@@ -147,9 +146,9 @@ module.exports = {
         )
       })
     )
-  },
+  }
 
-  async makeCustomThemeDirectory(customThemePath) {
+  const makeCustomThemeDirectory = async (customThemePath) => {
     await mkdir(customThemePath)
 
     await Promise.all([
@@ -157,92 +156,24 @@ module.exports = {
       mkdir(join(customThemePath, PARTIALS.to))
     ])
 
-    await this.copyCommonResources(customThemePath)
-    await this.copyBaseThemeResources(customThemePath)
-    await this.copyCustomizers(customThemePath)
-  },
-
-  use(type, value) {
-    const { rootDirectory, theme, themeDirectory, ...restSettings } = Settings.getSettings()
-    const customThemePath = join(rootDirectory, themeDirectory)
-    const baseThemePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
-
-    switch (type) {
-      case "templateHelpers":
-        const commonTemplateHelpers = require(
-          join(__dirname, 'common', TEMPLATE_HELPERS.from)
-        )
-
-        let themeTemplateHelpers = {}
-        try {
-          themeTemplateHelpers = require(join(baseThemePath, TEMPLATE_HELPERS.from))
-        } catch {}
-
-        let customTemplateHelpers = {}
-        try {
-          customTemplateHelpers = require(
-            join(customThemePath, PARTIALS.to, TEMPLATE_HELPERS.to)
-          )
-        } catch {}
-
-        const customizers = this.customizers
-        const customizerHelpers = {
-          hasCustomStyle() {
-            return customizers.includes('style.css')
-          },
-          hasThemeSettings() {
-            return customizers.includes('theme-settings.css')
-          },
-          hasCustomScript() {
-            return customizers.includes('script.js')
-          }
-        }
-
-        return {
-          ...value,
-          ...commonTemplateHelpers,
-          ...themeTemplateHelpers,
-          ...customTemplateHelpers,
-          ...customizerHelpers,
-        }
-
-      case "templatePartials":
-        return [
-          ...value,
-          join(__dirname, 'common', PARTIALS.from),
-          join(baseThemePath, PARTIALS.from),
-          join(customThemePath, PARTIALS.to)
-        ]
-
-      case "assets":
-        const features = [
-          ['syntaxHighlighting', 'highlight'],
-          ['search', 'search']
-        ]
-
-        const enabledFeatures = features
-          .filter(([ settingsKey, dirName ]) => {
-            return restSettings[settingsKey] !== 'off'
-          })
-          .map(([, dirName]) => dirName)
-
-        return [
-          ...value,
-          {
-            src: join(customThemePath, ASSETS),
-            dest: ''
-          },
-          ...enabledFeatures.map(featureDirName => ({
-            src: join(customThemePath, FEATURES, featureDirName),
-            dest: join('common', featureDirName)
-          })),
-          ...this.customizers.map(path => ({
-            src: join(customThemePath, path),
-            dest: 'custom',
-            single: true
-          }))
-        ]
-    }
-    return value
+    await copyCommonResources(customThemePath)
+    await copyBaseThemeResources(customThemePath)
+    await copyCustomizers(customThemePath)
   }
+
+  return {
+    init,
+    customThemeExists,
+    refreshCustomTheme,
+    collectCustomizerPaths,
+    copyCommonResources,
+    copyBaseThemeResources,
+    copyCustomizers,
+    makeCustomThemeDirectory
+  }
+})()
+
+module.exports = {
+  ...Methods,
+  decorator: createDecorator(State, Methods)
 }

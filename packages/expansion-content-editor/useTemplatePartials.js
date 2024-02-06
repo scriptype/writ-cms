@@ -1,6 +1,6 @@
 const { resolve } = require('path')
 
-const useTemplatePartials = (mode) =>
+const useTemplatePartials = ({ mode }) =>
   (value) => {
     if (mode !== 'start') {
       return value

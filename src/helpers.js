@@ -57,6 +57,10 @@ const rightPad = (str, amount, character = ' ') => {
   return `${str}${character.repeat(amount)}`.slice(0, amount)
 }
 
+const curry = (fn) => {
+  return (...args) => fn.bind(null, ...args)
+}
+
 module.exports = {
   readFileContent,
   loadJSON,
@@ -65,5 +69,6 @@ module.exports = {
   removeExtension,
   replaceExtension,
   pipe,
-  rightPad
+  rightPad,
+  curry
 }

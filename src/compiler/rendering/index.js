@@ -12,9 +12,9 @@ const Views = {
 
 module.exports = {
   renderPromise: Promise.resolve(true),
-  async render(contentModel, renderingDecorators) {
+  async render(contentModel) {
     await this.renderPromise
-    await Renderer.init(renderingDecorators)
+    await Renderer.init()
 
     this.renderPromise = Promise.all([
       Views.renderHomepage(Renderer, contentModel),

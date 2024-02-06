@@ -1,5 +1,6 @@
 const Settings = require('../../settings')
 const Dictionary = require('../../dictionary')
+const { decorate } = require('../../decorations')
 const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
@@ -89,10 +90,10 @@ const createContentModel = (contentTree) => {
 }
 
 module.exports = {
-  async createContentModel(fileSystemIndex, contentModelDecorator, cache) {
+  async createContentModel(fileSystemIndex, cache) {
     const contentTree = await mapFSIndexToContentTree(fileSystemIndex, cache)
     const contentModel = createContentModel(contentTree)
     const linkedContentModel = Linker.link(contentModel)
-    return contentModelDecorator(linkedContentModel)
+    return decorate('contentModel', linkedContentModel)
   },
 }

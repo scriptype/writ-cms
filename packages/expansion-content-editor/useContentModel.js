@@ -37,7 +37,7 @@ const Category = (category) => {
   }
 }
 
-const useContentModel = (mode) =>
+const useContentModel = ({ mode }) =>
   (contentModel) => {
     if (mode !== 'start') {
       return contentModel

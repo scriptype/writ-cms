@@ -3,14 +3,15 @@ const { stat, readdir, writeFile } = require('fs/promises')
 const { extname, join, resolve } = require('path')
 const { isDirectory, readFileContent } = require('../../helpers')
 const { debugLog } = require('../../debug')
+const { decorate } = require('../../decorations')
 
 const isTemplateFile = (fileName) => {
   const extension = extname(fileName)
   return extension === '.hbs' || extension === '.handlebars'
 }
 
-const registerHelpers = (helpersDecorator) => {
-  const allHelpers = helpersDecorator({})
+const registerHelpers = () => {
+  const allHelpers = decorate('templateHelpers', {})
   debugLog('registerHelpers', allHelpers)
   Handlebars.registerHelper(allHelpers)
 }
@@ -51,30 +52,26 @@ const registerPartials = async (rootPath) => {
   return registerDeep(rootPath)
 }
 
+const init = async () => {
+  registerHelpers()
+  const partials = decorate('templatePartials', [])
+  await partials.reduce((prev, path) => {
+    return prev.then(() => registerPartials(path))
+  }, Promise.resolve())
+}
+
+const render = async ({ path, data, content }) => {
+  debugLog('rendering:', path)
+  const decoratedContent = await decorate('template', content)
+  const template = Handlebars.compile(decoratedContent, {
+    noEscape: true,
+    preventIndent: true
+  })
+  const output = template(data)
+  return writeFile(path, output)
+}
+
 module.exports = {
-  decorators: {
-    helpers: _=>_,
-    partials: _=>_,
-    template: _=>_
-  },
-
-  async init (renderingDecorators) {
-    this.decorators = renderingDecorators
-    registerHelpers(renderingDecorators.helpers)
-    const decoratedPartials = renderingDecorators.partials([])
-    await decoratedPartials.reduce((prev, path) => {
-      return prev.then(() => registerPartials(path))
-    }, Promise.resolve())
-  },
-
-  async render({ path, data, content }) {
-    debugLog('rendering:', path)
-    const decoratedContent = await this.decorators.template(content)
-    const template = Handlebars.compile(decoratedContent, {
-      noEscape: true,
-      preventIndent: true
-    })
-    const output = template(data)
-    return writeFile(path, output)
-  }
+  init,
+  render
 }

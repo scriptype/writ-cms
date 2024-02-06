@@ -1,6 +1,6 @@
 const { resolve } = require('path')
 
-const useAssets = (mode) => (value) => {
+const useAssets = ({ mode }) => (value) => {
   if (mode !== 'start') {
     return value
   }

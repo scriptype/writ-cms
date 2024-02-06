@@ -2,6 +2,7 @@ const bodyParser = require('body-parser')
 const { debugLog } = require('../debug')
 const Settings = require('../settings')
 const { getSlug } = require('../helpers')
+const { decorate } = require('../decorations')
 
 const next = (promise, thenPromise) => {
   return async (...args) => {
@@ -10,13 +11,13 @@ const next = (promise, thenPromise) => {
   }
 }
 
-const getExpansionApis = (compilePromise, previewApiDecorator) => {
+const getExpansionApis = (compilePromise) => {
   const utils = {
     settings: Settings.getSettings(),
     debugLog,
     getSlug
   }
-  return previewApiDecorator([]).map(api => ({
+  return decorate('previewApi', []).map(api => ({
     ...api,
     handle: next(
       compilePromise, 
@@ -26,10 +27,10 @@ const getExpansionApis = (compilePromise, previewApiDecorator) => {
 }
 
 module.exports = {
-  create: (compilePromise, previewApiDecorator) => {
+  create: (compilePromise) => {
     return [
       bodyParser.json(),
-      ...getExpansionApis(compilePromise, previewApiDecorator)
+      ...getExpansionApis(compilePromise)
     ]
   }
 }

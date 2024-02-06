@@ -2,6 +2,7 @@ const { stat, cp, mkdir } = require('fs/promises')
 const { resolve, join, basename } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
+const { decorate } = require('./decorations')
 
 const getBasePath = async () => {
   const { rootDirectory, contentDirectory } = Settings.getSettings()
@@ -63,10 +64,10 @@ const copyAsset = async ({ src, dest, rename }) => {
   return cp(src, join(targetDirectory, basename(src)))
 }
 
-const decorateAssets = (assetsDecorator) => {
+const decorateAssets = () => {
   Debug.debugLog('copy expanded assets')
   return Promise.all(
-    assetsDecorator([]).map((assetEntry) => {
+    decorate('assets', []).map((assetEntry) => {
       if (assetEntry.single) {
         return copyAsset(assetEntry)
       } else {
@@ -78,14 +79,14 @@ const decorateAssets = (assetsDecorator) => {
 
 module.exports = {
   promise: Promise.resolve(true),
-  copyAssets({ decorators }) {
+  copyAssets() {
     Debug.timeStart('assets')
     Debug.debugLog('copying assets')
     const { mode } = Settings.getSettings()
     this.promise = this.promise
       .then(ensureAssetsDirectory)
       .then(copyAssetsDirectory)
-      .then(() => decorateAssets(decorators.assets))
+      .then(() => decorateAssets())
 
     return this.promise.then(() => {
       Debug.timeEnd('assets')

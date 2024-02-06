@@ -5,13 +5,13 @@ const useTemplatePartials = require('./useTemplatePartials')
 const useAssets = require('./useAssets')
 const usePreviewApi = require('./usePreviewApi')
 
-module.exports = (mode) => {
+module.exports = (settings) => {
   return {
-    useTemplate: useTemplate(mode),
-    useTemplateHelpers: useTemplateHelpers(mode),
-    useTemplatePartials: useTemplatePartials(mode),
-    useContentModel: useContentModel(mode),
-    useAssets: useAssets(mode),
-    usePreviewApi: usePreviewApi(mode)
+    template: useTemplate(settings),
+    templateHelpers: useTemplateHelpers(settings),
+    templatePartials: useTemplatePartials(settings),
+    contentModel: useContentModel(settings),
+    assets: useAssets(settings),
+    previewApi: usePreviewApi(settings)
   }
 }

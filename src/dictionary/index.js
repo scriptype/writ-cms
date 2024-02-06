@@ -1,87 +1,67 @@
-const { join, resolve } = require('path')
 const Settings = require('../settings')
 const Debug = require('../debug')
+const { decorate } = require('../decorations')
+const createDecorator = require('./decorator')
 
-const defaultLocale = 'en'
-
-module.exports = {
+const State = {
+  locale: 'en',
+  dictionary: {},
   dictionaries: {
     // BCP 47 language tag
     en: require('./locales/en.json'),
     fi: require('./locales/fi.json'),
     tr: require('./locales/tr.json')
-  },
+  }
+}
 
-  init({ decorators }) {
+const Methods = (() => {
+  const init = () => {
     Debug.timeStart('dictionary')
-    const dictionaryDecorator = decorators.dictionary
     const selectedLocale = Settings.getSettings().language
-    if (selectedLocale in this.dictionaries) {
-      this.locale = selectedLocale
-    } else {
-      this.locale = defaultLocale
+    if (selectedLocale in State.dictionaries) {
+      State.locale = selectedLocale
     }
-    Debug.debugLog('locale', this.locale)
-    this.dictionary = dictionaryDecorator(this.dictionaries[this.locale])
+    Debug.debugLog('locale', State.locale)
+    State.dictionary = decorate('dictionary', State.dictionaries[State.locale])
     Debug.timeEnd('dictionary')
-    return this
-  },
+  }
 
   // can key be like 'my.nested.key'?
-  lookup(key, variables = {}) {
-    if (!(key in this.dictionary)) {
-      Debug.debugLog(`unrecognized word: ${key} in: ${this.locale}`)
+  const lookup = (key, variables = {}) => {
+    if (!(key in State.dictionary)) {
+      Debug.debugLog(`unrecognized word: ${key} in: ${State.locale}`)
       return ''
     }
-    const translation = this.dictionary[key]
+    const translation = State.dictionary[key]
     let result = translation
     Object.keys(variables).forEach(key => {
       const variable = variables[key]
       result = result.replace('{{' + key + '}}', variable || '')
     })
     return result
-  },
+  }
 
-  lookupForeign(locale, key) {
-    if (!(locale in this.dictionaries)) {
+  const lookupForeign = (locale, key) => {
+    if (!(locale in State.dictionaries)) {
       Debug.debugLog(`unrecognized locale: ${locale}`)
       return ''
     }
-    const foreignLocale = this.dictionaries[locale]
+    const foreignLocale = State.dictionaries[locale]
     if (!(key in foreignLocale)) {
-      Debug.debugLog(`unrecognized word: ${key} in: ${this.locale}`)
+      Debug.debugLog(`unrecognized word: ${key} in: ${State.locale}`)
       return ''
     }
     return foreignLocale[key]
-  },
-
-  use(type, value) {
-    const that = this
-    switch (type) {
-      case "templateHelpers":
-        return {
-          ...value,
-          dictionary(key, ...params) {
-            return that.lookup.call(that, key, ...params)
-          }
-        }
-
-      case "assets":
-        return [
-          ...value,
-          {
-            src: resolve(__dirname, './static', 'dictionary.js'),
-            dest: join('common'),
-            single: true
-          },
-          {
-            src: resolve(__dirname, 'locales', this.locale + '.json'),
-            dest: join('common'),
-            rename: 'dictionary.json',
-            single: true
-          }
-        ]
-    }
-    return value
   }
+
+  return {
+    init,
+    lookup,
+    lookupForeign
+  }
+})()
+
+module.exports = {
+  ...Methods,
+  decorator: createDecorator(State, Methods)
 }
