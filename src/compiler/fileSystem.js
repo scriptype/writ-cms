@@ -1,8 +1,8 @@
-const fs = require('fs/promises')
-const { join, relative, extname } = require('path')
+const { stat, readdir } = require('fs/promises')
+const { join, relative, resolve, extname } = require('path')
 const { readFileContent, isDirectory } = require('../helpers')
 const Settings = require('../settings')
-const { debugLog } = require('../debug')
+const { debugLog, timeStart, timeEnd } = require('../debug')
 
 const shouldIncludePath = (path) => {
   const { IGNORE_PATHS_REG_EXP } = Settings.getSettings()
@@ -31,41 +31,40 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const indexFileSystem = async (dir, { depth = 0, contentPath } = {}) => {
+const contentRoot = async () => {
   const { rootDirectory, contentDirectory } = Settings.getSettings()
-  let basePath = contentPath || rootDirectory
-  let activePath = dir
-  if (!dir) {
-    try {
-      await fs.stat(join(rootDirectory, contentDirectory))
-      basePath = join(rootDirectory, contentDirectory)
-      activePath = join(rootDirectory, contentDirectory)
-      debugLog('contentDirectory found')
-    } catch (ENOENT) {
-      debugLog('contentDirectory not found')
-      activePath = rootDirectory
-    }
+  try {
+    await stat(join(rootDirectory, contentDirectory))
+    debugLog('contentRoot', join(rootDirectory, contentDirectory))
+    return join(rootDirectory, contentDirectory)
+  } catch (ENOENT) {
+    debugLog('contentRoot', rootDirectory)
+    return rootDirectory
   }
-  debugLog('indexing', { activePath, basePath })
+}
+
+const lookBack = (path, depth) => {
+  return resolve(path, ...Array(depth).fill('..'))
+}
+
+const _exploreTree = async (currentPath, depth = 0) => {
+  debugLog('exploring', currentPath)
   return Promise.all(
-    (await fs.readdir(activePath))
+    (await readdir(currentPath))
       .filter(shouldIncludePath)
       .map(async fileName => {
-        const fullPath = join(activePath, fileName)
+        const accumulatedPath = join(currentPath, fileName)
+        const rootPath = lookBack(accumulatedPath, depth + 1)
         const baseProperties = {
           name: fileName,
-          path: relative(basePath, fullPath),
-          stats: await fs.stat(fullPath),
+          path: relative(rootPath, accumulatedPath),
+          stats: await stat(accumulatedPath),
           depth,
         }
-        if (await isDirectory(fullPath)) {
-          const children = await indexFileSystem(fullPath, {
-            depth: depth + 1,
-            contentPath: basePath
-          })
+        if (await isDirectory(accumulatedPath)) {
           return {
             ...baseProperties,
-            children
+            children: await _exploreTree(accumulatedPath, depth + 1)
           }
         }
         const extension = extname(fileName)
@@ -74,7 +73,7 @@ const indexFileSystem = async (dir, { depth = 0, contentPath } = {}) => {
           extension,
         }
         if (isTextFile(extension)) {
-          const content = await readFileContent(fullPath)
+          const content = await readFileContent(accumulatedPath)
           return {
             ...fileProperties,
             content
@@ -87,5 +86,11 @@ const indexFileSystem = async (dir, { depth = 0, contentPath } = {}) => {
 }
 
 module.exports = {
-  indexFileSystem
+  shouldIncludePath,
+  isTextFile,
+  contentRoot,
+  lookBack,
+  async exploreTree() {
+    return _exploreTree(await contentRoot())
+  },
 }
