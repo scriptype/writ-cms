@@ -56,16 +56,16 @@ test('compiler/fileSystem', t => {
   })
 
   t.test('lookBack', async () => {
-    const path = join('/', 'lorem', 'ipsum', 'dolor')
+    const path = join('lorem', 'ipsum', 'dolor', 'sit')
     t.true(
-      lookBack(path, 1) === join('/', 'lorem', 'ipsum') &&
-      lookBack(path, 2) === join('/', 'lorem') &&
-      lookBack(path, 3) === join('/'),
+      lookBack(path, 1) === resolve(join('lorem', 'ipsum', 'dolor')) &&
+      lookBack(path, 2) === resolve(join('lorem', 'ipsum')) &&
+      lookBack(path, 3) === resolve(join('lorem')),
       'resolves parent path at given traverse distance'
     )
 
     t.true(
-      lookBack(path) === join('/', 'lorem', 'ipsum'),
+      lookBack(path) === resolve(join('lorem', 'ipsum', 'dolor')),
       'if depth parameter is missing, looks back just one level'
     )
 
