@@ -1,0 +1,63 @@
+const { tmpdir } = require('os')
+const { rm, mkdtemp, mkdir, readdir, readFile, writeFile } = require('fs/promises')
+const { resolve, join } = require('path')
+const test = require('tape')
+const { contentRoot } = require('../../compiler/fileSystem')
+
+const tempDir = () => {
+  return mkdtemp(join(tmpdir(), 'writ-test-'))
+}
+
+test('compiler/fileSystem', t => {
+  t.test('contentRoot', st => {
+    st.test('rootDirectory parameter is required', async () => {
+      const dir = await tempDir()
+      t.teardown(() => {
+        rm(dir, { recursive: true })
+      })
+      const actual = await contentRoot({
+        contentDirectory: 'content'
+      })
+      t.notOk(actual, 'otherwise contentRoot is undefined')
+    })
+
+    st.test('if contentDirectory is not found', async () => {
+      const dir = await tempDir()
+      t.teardown(() => {
+        rm(dir, { recursive: true })
+      })
+      const actual = await contentRoot({
+        rootDirectory: resolve(dir),
+        contentDirectory: 'content'
+      })
+      const expected = resolve(dir)
+      t.equal(actual, expected, 'contentRoot is rootDirectory')
+    })
+
+    st.test('if contentDirectory is missing', async () => {
+      const dir = await tempDir()
+      t.teardown(() => {
+        rm(dir, { recursive: true })
+      })
+      const actual = await contentRoot({
+        rootDirectory: resolve(dir)
+      })
+      const expected = resolve(dir)
+      t.equal(actual, expected, 'contentRoot is rootDirectory')
+    })
+
+    st.test('if contentDirectory is found', async () => {
+      const dir = await tempDir()
+      await mkdir(join(dir, 'content'))
+      t.teardown(() => {
+        rm(dir, { recursive: true })
+      })
+      const actual = await contentRoot({
+        rootDirectory: resolve(dir),
+        contentDirectory: 'content'
+      })
+      const expected = resolve(dir, 'content')
+      t.equal(actual, expected, 'contentRoot is contentDirectory')
+    })
+  })
+})

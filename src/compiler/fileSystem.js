@@ -31,8 +31,7 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const contentRoot = async () => {
-  const { rootDirectory, contentDirectory } = Settings.getSettings()
+const contentRoot = async ({ rootDirectory, contentDirectory }) => {
   try {
     await stat(join(rootDirectory, contentDirectory))
     debugLog('contentRoot', join(rootDirectory, contentDirectory))
@@ -47,7 +46,7 @@ const lookBack = (path, depth) => {
   return resolve(path, ...Array(depth).fill('..'))
 }
 
-const _exploreTree = async (currentPath, depth = 0) => {
+const _explore = async (currentPath, depth = 0) => {
   debugLog('exploring', currentPath)
   return Promise.all(
     (await readdir(currentPath))
@@ -64,7 +63,7 @@ const _exploreTree = async (currentPath, depth = 0) => {
         if (await isDirectory(accumulatedPath)) {
           return {
             ...baseProperties,
-            children: await _exploreTree(accumulatedPath, depth + 1)
+            children: await _explore(accumulatedPath, depth + 1)
           }
         }
         const extension = extname(fileName)
@@ -85,12 +84,16 @@ const _exploreTree = async (currentPath, depth = 0) => {
   )
 }
 
+const exploreTree = async () => {
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  const root = await contentRoot({ rootDirectory, contentDirectory })
+  return _explore(root)
+}
+
 module.exports = {
   shouldIncludePath,
   isTextFile,
   contentRoot,
   lookBack,
-  async exploreTree() {
-    return _exploreTree(await contentRoot())
-  },
+  exploreTree
 }
