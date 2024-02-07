@@ -32,6 +32,9 @@ const isTextFile = (extension) => {
 }
 
 const contentRoot = async (rootDirectory, contentDirectory) => {
+  if (!rootDirectory) {
+    throw new Error('rootDirectory is a required parameter')
+  }
   try {
     await stat(join(rootDirectory, contentDirectory))
     debugLog('contentRoot', join(rootDirectory, contentDirectory))
