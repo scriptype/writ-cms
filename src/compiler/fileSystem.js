@@ -31,7 +31,7 @@ const isTextFile = (extension) => {
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
 }
 
-const contentRoot = async ({ rootDirectory, contentDirectory }) => {
+const contentRoot = async (rootDirectory, contentDirectory) => {
   try {
     await stat(join(rootDirectory, contentDirectory))
     debugLog('contentRoot', join(rootDirectory, contentDirectory))
@@ -86,7 +86,7 @@ const _explore = async (currentPath, depth = 0) => {
 
 const exploreTree = async () => {
   const { rootDirectory, contentDirectory } = Settings.getSettings()
-  const root = await contentRoot({ rootDirectory, contentDirectory })
+  const root = await contentRoot(rootDirectory, contentDirectory)
   return _explore(root)
 }
 

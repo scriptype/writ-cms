@@ -10,15 +10,23 @@ const tempDir = () => {
 
 test('compiler/fileSystem', t => {
   t.test('contentRoot', st => {
-    st.test('rootDirectory parameter is required', async () => {
+    st.test('if rootDirectory parameter is missing', async () => {
       const dir = await tempDir()
       t.teardown(() => {
         rm(dir, { recursive: true })
       })
-      const actual = await contentRoot({
-        contentDirectory: 'content'
+      const actual = await contentRoot()
+      t.notOk(actual, 'contentRoot is undefined')
+    })
+
+    st.test('if contentDirectory parameter is missing', async () => {
+      const dir = await tempDir()
+      t.teardown(() => {
+        rm(dir, { recursive: true })
       })
-      t.notOk(actual, 'otherwise contentRoot is undefined')
+      const actual = await contentRoot(resolve(dir))
+      const expected = resolve(dir)
+      t.equal(actual, expected, 'contentRoot is rootDirectory')
     })
 
     st.test('if contentDirectory is not found', async () => {
@@ -26,22 +34,7 @@ test('compiler/fileSystem', t => {
       t.teardown(() => {
         rm(dir, { recursive: true })
       })
-      const actual = await contentRoot({
-        rootDirectory: resolve(dir),
-        contentDirectory: 'content'
-      })
-      const expected = resolve(dir)
-      t.equal(actual, expected, 'contentRoot is rootDirectory')
-    })
-
-    st.test('if contentDirectory is missing', async () => {
-      const dir = await tempDir()
-      t.teardown(() => {
-        rm(dir, { recursive: true })
-      })
-      const actual = await contentRoot({
-        rootDirectory: resolve(dir)
-      })
+      const actual = await contentRoot(resolve(dir), 'content')
       const expected = resolve(dir)
       t.equal(actual, expected, 'contentRoot is rootDirectory')
     })
@@ -52,10 +45,7 @@ test('compiler/fileSystem', t => {
       t.teardown(() => {
         rm(dir, { recursive: true })
       })
-      const actual = await contentRoot({
-        rootDirectory: resolve(dir),
-        contentDirectory: 'content'
-      })
+      const actual = await contentRoot(resolve(dir), 'content')
       const expected = resolve(dir, 'content')
       t.equal(actual, expected, 'contentRoot is contentDirectory')
     })
