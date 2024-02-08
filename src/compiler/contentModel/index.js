@@ -5,6 +5,7 @@ const Linker = require('./linking')
 const mapFSIndexToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
 const makeTagList = require('./tagList')
+const { createCategory } = require('./models/category')
 
 const sortPosts = (a, b) => {
   return new Date(b.publishDate) - new Date(a.publishDate)
@@ -16,7 +17,10 @@ const upsertDefaultCategory = (ContentModel, newContent) => {
     category => category.name === defaultCategoryName
   )
   if (!defaultCategory) {
-    defaultCategory = contentTypes.createDefaultCategory(defaultCategoryName).data
+    defaultCategory = createCategory({
+      name: defaultCategoryName,
+      children: []
+    }).data
     ContentModel.categories.push(defaultCategory)
   }
   defaultCategory.posts.push(newContent)

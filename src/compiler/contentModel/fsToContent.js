@@ -1,17 +1,40 @@
 const Settings = require('../../settings')
-
+const { createLocalAsset } = require('./models/localAsset')
+const { createAssets } = require('./models/asset')
+const { createSubpages } = require('./models/subpage')
+const { createCategory } = require('./models/category')
 const {
-  isPostFile,
-  isFolderedPostIndexFile,
-  createLocalAsset,
-  createDefaultCategoryPost,
-  createSubpages,
-  createAssets,
-  createCategory,
   createPost,
   createFolderedPost,
-  createFolderedPostIndex
-} = require('./contentTypes')
+  createFolderedPostIndex,
+  createDefaultCategoryPost
+} = require('./models/post')
+
+const templateExtensions = [
+  '.hbs',
+  '.handlebars',
+  '.md',
+  '.markdown',
+  '.txt',
+  '.text',
+  '.html'
+]
+
+const isTemplateFile = (fsObject) => {
+  return new RegExp(templateExtensions.join('|'), 'i').test(fsObject.extension)
+}
+
+const hasContent = (fsObject) => {
+  return typeof fsObject.content !== 'undefined'
+}
+
+const isPostFile = (fsObject) => {
+  return isTemplateFile(fsObject) && hasContent(fsObject)
+}
+
+const isFolderedPostIndexFile = (fsObject) => {
+  return isPostFile(fsObject) && fsObject.name.match(/^(index|post)\..+$/)
+}
 
 const mapFSIndexToContentTree = (fsTree, cache) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()

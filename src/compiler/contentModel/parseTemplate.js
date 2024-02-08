@@ -8,15 +8,6 @@ marked.setOptions({
 
 const READ_MORE_DIVIDER = '{{seeMore}}'
 
-const templateExtensions = [
-  '.hbs',
-  '.handlebars',
-  '.md',
-  '.markdown',
-  '.txt',
-  '.html'
-]
-
 const MarkdownHelpers = {
   trimExtraParagraphAroundSeeMore(html) {
     const paragraphContainingSeeMore = html.match(/<p>(\s+|)\{\{seeMore\}\}(\s+|)<\/p>/s)
@@ -44,7 +35,6 @@ const MarkdownHelpers = {
     return html
   }
 }
-
 
 const getSummary = (content, localAssets, permalink) => {
   let summaryPart = content.split(READ_MORE_DIVIDER)[0]
@@ -78,38 +68,22 @@ const getHTMLContent = (body, extension) => {
 
 const attachDates = ({ publishDate }) => {
   const locale = Dictionary.locale
-  const publishDateFull = publishDate.toLocaleString(locale, { dateStyle: 'full' })
-  const publishDateLong = publishDate.toLocaleString(locale, { dateStyle: 'long' })
-  const publishDateMedium = publishDate.toLocaleString(locale, { dateStyle: 'medium' })
-  const publishDateShort = publishDate.toLocaleString(locale, { dateStyle: 'short' })
   return {
     publishDate,
-    publishDateFull,
-    publishDateLong,
-    publishDateMedium,
-    publishDateShort
+    publishDateFull: publishDate.toLocaleString(locale, { dateStyle: 'full' }),
+    publishDateLong: publishDate.toLocaleString(locale, { dateStyle: 'long' }),
+    publishDateMedium: publishDate.toLocaleString(locale, { dateStyle: 'medium' }),
+    publishDateShort: publishDate.toLocaleString(locale, { dateStyle: 'short' })
   }
 }
 
-const attachTags = ({ tags }) => {
-  if (!tags) {
-    return {
-      tags: []
-    }
-  }
+const attachTags = ({ tags = [] }) => {
   return {
-    tags: typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : tags
+    tags: typeof tags === 'string' ?
+      tags.split(',').map(t => t.trim()) :
+      tags
   }
 }
-
-const matchesExtension = (extension, acceptedExtensions) => {
-  if (!extension) {
-    return false
-  }
-  return new RegExp(acceptedExtensions.join('|'), 'i').test(extension)
-}
-
-const isTemplate = ({ extension }) => matchesExtension(extension, templateExtensions)
 
 const parseTemplate = async (fsObject, cache, { localAssets, permalink, subpage } = {}) => {
   const { path, content, extension, stats } = fsObject
@@ -136,7 +110,4 @@ const parseTemplate = async (fsObject, cache, { localAssets, permalink, subpage 
   }
 }
 
-module.exports = {
-  isTemplate,
-  parseTemplate
-}
+module.exports = parseTemplate
