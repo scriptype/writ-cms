@@ -44,7 +44,7 @@ const normalizeText = (text = '') => {
 const attachRelevantPosts = (post, posts) => {
   const relevantPosts = []
   posts.forEach(otherPost => {
-    if (otherPost === post) {
+    if (otherPost.permalink === post.permalink) {
       return
     }
     const tagsOverlapScore = getScoreByOverlap(
@@ -80,21 +80,19 @@ const attachRelevantPosts = (post, posts) => {
   }
 }
 
-const linkCategoryPosts = (contentModel) => {
+const linkPosts = (contentModel) => {
   return {
     ...contentModel,
-    categories: contentModel.categories.map(category => {
+    posts: contentModel.posts.map((post) => {
+      const category = contentModel.categories.find(cat => cat.permalink === post.category.permalink)
+      const postInCategory = category.posts.find(p => p.permalink === post.permalink)
+      const postIndex = category.posts.indexOf(postInCategory)
       return {
-        ...category,
-        posts: category.posts.map((post, postIndex, posts) => {
-          return {
-            ...post,
-            links: {
-              ...attachPaging(post, postIndex, posts),
-              ...attachRelevantPosts(post, posts)
-            }
-          }
-        })
+        ...post,
+        links: {
+          ...attachPaging(post, postIndex, category.posts),
+          ...attachRelevantPosts(post, category.posts)
+        }
       }
     })
   }
@@ -126,6 +124,6 @@ const linkPostTags = (contentModel) => {
 module.exports = (contentModel) => {
   return pipe(contentModel, [
     linkPostTags,
-    linkCategoryPosts
+    linkPosts
   ])
 }

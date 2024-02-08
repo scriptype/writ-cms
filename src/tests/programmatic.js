@@ -188,7 +188,7 @@ test('builds after a file is deleted', async t => {
   })
 })
 
-test('empty folder in root is a local asset', async t => {
+test('empty folder in root is ignored', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
 
