@@ -1,8 +1,8 @@
 const { join } = require('path')
-const Settings = require('../../settings')
-const { getSlug } = require('../../helpers')
+const Settings = require('../../../settings')
+const { getSlug } = require('../../../helpers')
 
-module.exports = (posts) => {
+const getTags = (posts) => {
   const tags = posts.map((post) => {
     return post.tags.map((tag) => {
       return { tag, post }
@@ -34,4 +34,11 @@ module.exports = (posts) => {
       posts: tagsIndex[key]
     }
   })
+}
+
+module.exports = (contentModel) => {
+  return {
+    ...contentModel,
+    tags: getTags(contentModel.posts)
+  }
 }

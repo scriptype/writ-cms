@@ -1,15 +1,15 @@
+const _ = require('lodash')
 const Settings = require('../../settings')
 const Dictionary = require('../../dictionary')
 const { decorate } = require('../../decorations')
-const Linker = require('./linking')
-const mapFSIndexToContentTree = require('./fsToContent')
+const { pipe } = require('../../helpers')
+const mapFSTreeToContentTree = require('./fsToContent')
 const contentTypes = require('./contentTypes')
-const makeTagList = require('./tagList')
+const withLinkedPosts = require('./enhancers/links')
+const withTaggedPosts = require('./enhancers/tags')
+const withSortedPosts = require('./enhancers/sorting')
+const withPostsJSON = require('./enhancers/postsJSON')
 const { createCategory } = require('./models/category')
-
-const sortPosts = (a, b) => {
-  return new Date(b.publishDate) - new Date(a.publishDate)
-}
 
 const upsertDefaultCategory = (ContentModel, newContent) => {
   const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
@@ -24,7 +24,6 @@ const upsertDefaultCategory = (ContentModel, newContent) => {
     ContentModel.categories.push(defaultCategory)
   }
   defaultCategory.posts.push(newContent)
-  defaultCategory.posts.sort(sortPosts)
 }
 
 const createContentModel = (contentTree) => {
@@ -44,12 +43,11 @@ const createContentModel = (contentTree) => {
       case contentTypes.CATEGORY:
         if (content.data.posts.length) {
           const categoryPosts = content.data.posts.map(({ data }) => data)
-          const sortedCategoryPosts = categoryPosts.sort(sortPosts)
           ContentModel.categories.push({
             ...content.data,
-            posts: sortedCategoryPosts
+            posts: categoryPosts
           })
-          ContentModel.posts.push(...sortedCategoryPosts)
+          ContentModel.posts.push(...categoryPosts)
         }
         break
 
@@ -76,28 +74,19 @@ const createContentModel = (contentTree) => {
     }
   })
 
-  ContentModel.posts.sort(sortPosts)
-  ContentModel.tags = makeTagList(ContentModel.posts)
-  ContentModel.posts.forEach(post => {
-    if (post.tags && post.tags.length) {
-      post.tags = post.tags.map(tag => {
-        const { posts, ...rest } = ContentModel.tags.find(t => t.tag === tag)
-        return rest
-      })
-    }
-  })
-  ContentModel.postsJSON.push(
-    ...ContentModel.posts.map(({ content, ...rest }) => rest)
-  )
-
   return ContentModel
 }
 
 module.exports = {
-  async createContentModel(fileSystemIndex, cache) {
-    const contentTree = await mapFSIndexToContentTree(fileSystemIndex, cache)
-    const contentModel = createContentModel(contentTree)
-    const linkedContentModel = Linker.link(contentModel)
-    return decorate('contentModel', linkedContentModel)
+  async create(fileSystemTree, cache) {
+    const contentTree = await mapFSTreeToContentTree(fileSystemTree, cache)
+    const contentModel = pipe(contentTree, [
+      createContentModel,
+      withSortedPosts,
+      withTaggedPosts,
+      withLinkedPosts,
+      withPostsJSON
+    ])
+    return decorate('contentModel', contentModel)
   },
 }

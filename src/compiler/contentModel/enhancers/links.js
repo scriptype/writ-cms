@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const { pipe } = require('../../../helpers')
 
 const getScoreByOverlap = (arrayOfStrings1 = [], arrayOfStrings2 = []) => {
   const overlap = _.intersection(
@@ -79,19 +80,52 @@ const attachRelevantPosts = (post, posts) => {
   }
 }
 
-module.exports = {
-  link({ categories, ...rest }) {
-    categories.forEach(category => {
-      category.posts.forEach((post, postIndex, posts) => {
-        post.links = {
-          ...attachPaging(post, postIndex, posts),
-          ...attachRelevantPosts(post, posts)
-        }
-      })
+const linkCategoryPosts = (contentModel) => {
+  return {
+    ...contentModel,
+    categories: contentModel.categories.map(category => {
+      return {
+        ...category,
+        posts: category.posts.map((post, postIndex, posts) => {
+          return {
+            ...post,
+            links: {
+              ...attachPaging(post, postIndex, posts),
+              ...attachRelevantPosts(post, posts)
+            }
+          }
+        })
+      }
     })
-    return {
-      ...rest,
-      categories
-    }
   }
+}
+
+const _linkPostTags = (post, tags) => {
+  return {
+    ...post,
+    tags: post.tags.map(tag => {
+      const { posts, ...rest } = tags.find(t => t.tag === tag)
+      return rest
+    })
+  }
+}
+
+const linkPostTags = (contentModel) => {
+  return {
+    ...contentModel,
+    categories: contentModel.categories.map(category => {
+      return {
+        ...category,
+        posts: category.posts.map(post => _linkPostTags(post, contentModel.tags))
+      }
+    }),
+    posts: contentModel.posts.map(post => _linkPostTags(post, contentModel.tags))
+  }
+}
+
+module.exports = (contentModel) => {
+  return pipe(contentModel, [
+    linkPostTags,
+    linkCategoryPosts
+  ])
 }

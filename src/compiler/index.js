@@ -6,7 +6,7 @@ const Rendering = require('./rendering')
 const compile = async ({ cache }) => {
   Debug.timeStart('compiler')
   const fileSystemTree = await FileSystem.exploreTree()
-  const contentModel = await ContentModel.createContentModel(
+  const contentModel = await ContentModel.create(
     fileSystemTree,
     cache
   )
