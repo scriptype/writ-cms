@@ -23,14 +23,11 @@ const startUp = async ({ watch, refreshTheme, ...rest }) => {
 const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
   Debug.init(debug)
   Debug.timeStart('> total')
-
   await Settings.init({
     mode,
     rootDirectory
   })
-
   await Expansions.init()
-
   Decorations.register(
     Dictionary.decorator(),
     VersionControl.decorator(),
@@ -39,18 +36,15 @@ const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
     Expansions.decorator(),
     Hooks.decorator()
   )
-
   await Theme.init({
     refresh: refreshTheme
   })
-
   await VersionControl.init()
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
   await Compiler.compile()
   await Assets.copyAssets()
-
   Debug.timeEnd('> total')
   Debug.logTimes()
 }
