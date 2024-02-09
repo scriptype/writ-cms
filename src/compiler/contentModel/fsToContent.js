@@ -41,32 +41,6 @@ const isPostFolder = (fsObject) => {
   return fsObject.children && fsObject.children.some(isFolderedPostIndexFile)
 }
 
-const mapFolderedPostTree = (fsObject) => {
-  if (isFolderedPostIndexFile(fsObject)) {
-    return createFolderedPostIndex(fsObject)
-  }
-  return createLocalAsset({
-    ...fsObject,
-    isFolder: !!fsObject.children
-  })
-}
-
-const mapCategoryTree = (fsObject) => {
-  if (isPostFile(fsObject)) {
-    return createPost(fsObject)
-  }
-  if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
-    return createFolderedPost({
-      ...fsObject,
-      children: fsObject.children.map(mapFolderedPostTree)
-    })
-  }
-  return createLocalAsset({
-    ...fsObject,
-    isFolder: !!fsObject.children
-  })
-}
-
 const newEntry = ({
   contentModel,
   key,
@@ -94,43 +68,6 @@ const newEntry = ({
       ...entries
     ]
   }
-}
-
-const withFolderedPost = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'posts',
-    entryFn: () => {
-      const newPost = createFolderedPost({
-        ...fsObject,
-        children: fsObject.children.map(mapFolderedPostTree)
-      })
-      return newPost.data
-    }
-  })
-}
-
-const withCategory = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'categories',
-    entryFn: () => {
-      const newCategory = createCategory({
-        ...fsObject,
-        children: fsObject.children.map(mapCategoryTree)
-      })
-      return {
-        ...newCategory.data,
-        posts: newCategory.data.posts.map(({ data }) => data)
-      }
-    },
-    liftEntries: (category) => {
-      return {
-        key: 'posts',
-        entries: category.posts
-      }
-    }
-  })
 }
 
 const withAssets = (contentModel, fsObject) => {
@@ -178,6 +115,20 @@ const withDefaultCategoryPost = (contentModel, fsObject) => {
   })
 }
 
+const withFolderedPost = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'posts',
+    entryFn: () => {
+      const newPost = createFolderedPost({
+        ...fsObject,
+        children: fsObject.children.map(mapFolderedPostTree)
+      })
+      return newPost.data
+    }
+  })
+}
+
 const withDefaultCategory = (contentModel) => {
   const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
   const defaultCategory = contentModel.categories.find(
@@ -190,6 +141,55 @@ const withDefaultCategory = (contentModel) => {
     })
   }
   return contentModel
+}
+
+const withCategory = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'categories',
+    entryFn: () => {
+      const newCategory = createCategory({
+        ...fsObject,
+        children: fsObject.children.map(mapCategoryTree)
+      })
+      return {
+        ...newCategory.data,
+        posts: newCategory.data.posts.map(({ data }) => data)
+      }
+    },
+    liftEntries: (category) => {
+      return {
+        key: 'posts',
+        entries: category.posts
+      }
+    }
+  })
+}
+
+const mapCategoryTree = (fsObject) => {
+  if (isPostFile(fsObject)) {
+    return createPost(fsObject)
+  }
+  if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
+    return createFolderedPost({
+      ...fsObject,
+      children: fsObject.children.map(mapFolderedPostTree)
+    })
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
+  })
+}
+
+const mapFolderedPostTree = (fsObject) => {
+  if (isFolderedPostIndexFile(fsObject)) {
+    return createFolderedPostIndex(fsObject)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
+  })
 }
 
 const createContentModel = (fsTree) => {
@@ -216,7 +216,7 @@ const createContentModel = (fsTree) => {
         fsObject
       )
     }
-    if (fsObject.children.some(isPostFile) || fsObject.children.some(isPostFolder)) {
+    if (fsObject.children.some(c => isPostFile(c) || isPostFolder(c))) {
       return withCategory(contentModel, fsObject)
     }
     return contentModel
