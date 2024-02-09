@@ -57,7 +57,7 @@ const getPostCategory = (fsObject, isCategorized) => {
   }
 }
 
-const _createPost = async (fsObject, cache, { categorized, foldered }) => {
+const _createPost = (fsObject, { categorized, foldered }) => {
   const postFile = foldered ?
     fsObject.children.find(isFolderedPostIndex) :
     fsObject
@@ -68,7 +68,7 @@ const _createPost = async (fsObject, cache, { categorized, foldered }) => {
 
   const permalink = getPostPermalink(fsObject, categorized)
 
-  const metadata = await parseTemplate(postFile, cache, {
+  const metadata = parseTemplate(postFile, {
     localAssets,
     permalink
   })
@@ -77,8 +77,16 @@ const _createPost = async (fsObject, cache, { categorized, foldered }) => {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
     data: {
-      title: removeExtension(fsObject.name),
-      ...metadata,
+      type: metadata.type || 'text',
+      title: metadata.title || removeExtension(fsObject.name),
+      content: metadata.content,
+      summary: metadata.summary,
+      tags: metadata.tags,
+      publishDatePrototype: {
+        value: metadata.publishDate || fsObject.stats.birthtime,
+        checkCache: !metadata.publishDate
+      },
+      ...metadata.attributes,
       slug: getSlug(fsObject.name),
       permalink,
       category: getPostCategory(fsObject, categorized),
@@ -86,7 +94,7 @@ const _createPost = async (fsObject, cache, { categorized, foldered }) => {
       site: Settings.getSettings().site,
       foldered,
       localAssets,
-      transcript: getTranscript(metadata, localAssets)
+      transcript: getTranscript(metadata, localAssets),
     }
   }
 }
@@ -98,22 +106,22 @@ const createFolderedPostIndex = (fsObject) => {
   }
 }
 
-const createFolderedPost = (fsObject, cache) => {
-  return _createPost(fsObject, cache, {
+const createFolderedPost = (fsObject) => {
+  return _createPost(fsObject, {
     categorized: fsObject.depth > 0,
     foldered: true
   })
 }
 
-const createDefaultCategoryPost = (fsObject, cache) => {
-  return _createPost(fsObject, cache, {
+const createDefaultCategoryPost = (fsObject) => {
+  return _createPost(fsObject, {
     categorized: false,
     foldered: false
   })
 }
 
-const createPost = (fsObject, cache) => {
-  return _createPost(fsObject, cache, {
+const createPost = (fsObject) => {
+  return _createPost(fsObject, {
     categorized: true,
     foldered: false
   })

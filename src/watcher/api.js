@@ -11,13 +11,14 @@ const next = (promise, thenPromise) => {
   }
 }
 
-const getExpansionApis = (compilePromise) => {
+const decorateApi = async (compilePromise) => {
   const utils = {
     settings: Settings.getSettings(),
     debugLog,
     getSlug
   }
-  return decorate('previewApi', []).map(api => ({
+  const decoratedApi = await decorate('previewApi', [])
+  return decoratedApi.map(api => ({
     ...api,
     handle: next(
       compilePromise, 
@@ -27,10 +28,11 @@ const getExpansionApis = (compilePromise) => {
 }
 
 module.exports = {
-  create: (compilePromise) => {
+  create: async (compilePromise) => {
+    const api = await decorateApi(compilePromise)
     return [
       bodyParser.json(),
-      ...getExpansionApis(compilePromise)
+      ...api
     ]
   }
 }

@@ -3,28 +3,35 @@ const { getSlug, removeExtension } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 
-const createSubpage = async (fsObject, cache) => {
-  const { site } = Settings.getSettings()
-  const title = removeExtension(fsObject.name)
+const createSubpage = (fsObject) => {
+  const metadata = parseTemplate(fsObject)
+  const title = metadata.title || removeExtension(fsObject.name)
   return {
     ...fsObject,
     type: contentTypes.SUBPAGE,
     data: {
+      type: metadata.type || 'subpage',
       title,
-      ...(await parseTemplate(fsObject, cache, { subpage: true })),
+      content: metadata.content,
+      summary: metadata.summary,
+      tags: metadata.tags,
+      publishDatePrototype: {
+        value: metadata.publishDate || fsObject.stats.birthtime,
+        checkCache: !metadata.publishDate
+      },
+      ...metadata.attributes,
       slug: getSlug(title),
-      site,
+      path: fsObject.path,
+      site: Settings.getSettings().site
     }
   }
 }
 
-const createSubpages = async (fsObject, cache) => {
+const createSubpages = (fsObject) => {
   return {
     ...fsObject,
     type: contentTypes.SUBPAGES,
-    data: await Promise.all(
-      fsObject.children.map(fsObject => createSubpage(fsObject, cache))
-    )
+    data: fsObject.children.map(fsObject => createSubpage(fsObject))
   }
 }
 

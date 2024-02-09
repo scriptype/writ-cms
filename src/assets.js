@@ -64,10 +64,11 @@ const copyAsset = async ({ src, dest, rename }) => {
   return cp(src, join(targetDirectory, basename(src)))
 }
 
-const decorateAssets = () => {
+const decorateAssets = async () => {
   Debug.debugLog('copy expanded assets')
+  const decoratedAssets = await decorate('assets', [])
   return Promise.all(
-    decorate('assets', []).map((assetEntry) => {
+    decoratedAssets.map((assetEntry) => {
       if (assetEntry.single) {
         return copyAsset(assetEntry)
       } else {

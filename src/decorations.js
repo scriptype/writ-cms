@@ -1,5 +1,5 @@
 const Debug = require('./debug')
-const { curry } = require('./helpers')
+const { curry, pipe } = require('./helpers')
 
 const createDecorations = () => {
   const decorations = {
@@ -9,7 +9,8 @@ const createDecorations = () => {
     previewApi: [],
     templateHelpers: [],
     templatePartials: [],
-    template: []
+    template: [],
+    publishDate: []
   }
 
   return {
@@ -48,7 +49,7 @@ const register = (...decorators) => {
 
 const decorate = (key, initialValue) => {
   const decoration = decorations.get(key)
-  const decorated = decoration.reduce((value, fn) => fn(value), initialValue)
+  const decorated = pipe(initialValue, decoration)
   return decorated
 }
 

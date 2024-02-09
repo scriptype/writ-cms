@@ -15,14 +15,14 @@ const State = {
 }
 
 const Methods = (() => {
-  const init = () => {
+  const init = async () => {
     Debug.timeStart('dictionary')
     const selectedLocale = Settings.getSettings().language
     if (selectedLocale in State.dictionaries) {
       State.locale = selectedLocale
     }
     Debug.debugLog('locale', State.locale)
-    State.dictionary = decorate('dictionary', State.dictionaries[State.locale])
+    State.dictionary = await decorate('dictionary', State.dictionaries[State.locale])
     Debug.timeEnd('dictionary')
   }
 

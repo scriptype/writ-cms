@@ -1,6 +1,5 @@
 const frontMatter = require('front-matter')
 const marked = require('marked')
-const Dictionary = require('../../dictionary')
 
 marked.setOptions({
   headerIds: false
@@ -66,47 +65,28 @@ const getHTMLContent = (body, extension) => {
   return body
 }
 
-const attachDates = ({ publishDate }) => {
-  const locale = Dictionary.locale
-  return {
-    publishDate,
-    publishDateFull: publishDate.toLocaleString(locale, { dateStyle: 'full' }),
-    publishDateLong: publishDate.toLocaleString(locale, { dateStyle: 'long' }),
-    publishDateMedium: publishDate.toLocaleString(locale, { dateStyle: 'medium' }),
-    publishDateShort: publishDate.toLocaleString(locale, { dateStyle: 'short' })
-  }
+const parseTags = (tags = []) => {
+  return typeof tags === 'string' ?
+    tags.split(',').map(t => t.trim()) :
+    tags
 }
 
-const attachTags = ({ tags = [] }) => {
-  return {
-    tags: typeof tags === 'string' ?
-      tags.split(',').map(t => t.trim()) :
-      tags
-  }
-}
-
-const parseTemplate = async (fsObject, cache, { localAssets, permalink, subpage } = {}) => {
-  const { path, content, extension, stats } = fsObject
+const parseTemplate = (fsObject, { localAssets, permalink } = {}) => {
+  const { content, extension } = fsObject
   const { attributes, body } = frontMatter(content)
-  const type = attributes.type || (subpage ? 'subpage' : 'text')
+  const { type, title, tags, ...restAttributes } = attributes
   const HTMLContent = getHTMLContent(body, extension)
-  let publishDate = stats.birthtime
-  if (attributes.date) {
-    publishDate = new Date(attributes.date)
-  } else {
-    const cached = await cache.find(path)
-    const cachedDate = cached.get('date')
-    if (cachedDate) {
-      publishDate = new Date(cachedDate)
-    }
-  }
-  return {
+  const metadata = {
     type,
+    title,
     content: HTMLContent,
     summary: getSummary(HTMLContent, localAssets, permalink),
-    ...attributes,
-    ...attachTags(attributes),
-    ...attachDates({ publishDate }),
+    tags: parseTags(tags),
+    publishDate: attributes.date ? new Date(attributes.date) : null
+  }
+  return {
+    ...metadata,
+    attributes: restAttributes
   }
 }
 

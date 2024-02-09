@@ -50,7 +50,7 @@ const replaceExtension = (path, newExtension) => {
 }
 
 const pipe = (initialValue, functions) => {
-  return functions.reduce((acc, fn) => fn(acc), initialValue)
+  return functions.reduce(async (acc, fn) => fn(await acc), initialValue)
 }
 
 const rightPad = (str, amount, character = ' ') => {

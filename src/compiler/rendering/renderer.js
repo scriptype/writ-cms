@@ -10,8 +10,8 @@ const isTemplateFile = (fileName) => {
   return extension === '.hbs' || extension === '.handlebars'
 }
 
-const registerHelpers = () => {
-  const allHelpers = decorate('templateHelpers', {})
+const registerHelpers = async () => {
+  const allHelpers = await decorate('templateHelpers', {})
   debugLog('registerHelpers', allHelpers)
   Handlebars.registerHelper(allHelpers)
 }
@@ -53,8 +53,8 @@ const registerPartials = async (rootPath) => {
 }
 
 const init = async () => {
-  registerHelpers()
-  const partials = decorate('templatePartials', [])
+  await registerHelpers()
+  const partials = await decorate('templatePartials', [])
   await partials.reduce((prev, path) => {
     return prev.then(() => registerPartials(path))
   }, Promise.resolve())

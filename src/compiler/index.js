@@ -3,13 +3,10 @@ const FileSystem = require('./fileSystem')
 const ContentModel = require('./contentModel')
 const Rendering = require('./rendering')
 
-const compile = async ({ cache }) => {
+const compile = async () => {
   Debug.timeStart('compiler')
   const fileSystemTree = await FileSystem.exploreTree()
-  const contentModel = await ContentModel.create(
-    fileSystemTree,
-    cache
-  )
+  const contentModel = await ContentModel.create(fileSystemTree)
   await Rendering.render(contentModel)
   Debug.timeEnd('compiler')
   return {

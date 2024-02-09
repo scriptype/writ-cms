@@ -6,7 +6,7 @@ const Debug = require('../debug')
 const api = require('./api')
 
 module.exports = {
-  init({ onChange, silent }) {
+  async init({ onChange, silent }) {
     const { rootDirectory, exportDirectory } = Settings.getSettings()
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
@@ -47,12 +47,14 @@ module.exports = {
 
     const watcher = bs.watch(watchDir, watchOptions, cb)
 
+    const middleware = await api.create(compilePromise)
+
     return new Promise(resolve => {
       bs.init({
         server: serverDir,
         watch: false,
         ui: false,
-        middleware: api.create(compilePromise),
+        middleware,
         notify: false,
         open: false,
         logLevel: silent ? 'silent' : 'info'

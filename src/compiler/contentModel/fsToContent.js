@@ -1,6 +1,5 @@
 const Settings = require('../../settings')
 const Dictionary = require('../../dictionary')
-const contentTypes = require('./contentTypes')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
 const { createSubpages } = require('./models/subpage')
@@ -52,15 +51,15 @@ const mapFolderedPostTree = (fsObject) => {
   })
 }
 
-const mapCategoryTree = (cache) => (fsObject) => {
+const mapCategoryTree = (fsObject) => {
   if (isPostFile(fsObject)) {
-    return createPost(fsObject, cache)
+    return createPost(fsObject)
   }
   if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
     return createFolderedPost({
       ...fsObject,
       children: fsObject.children.map(mapFolderedPostTree)
-    }, cache)
+    })
   }
   return createLocalAsset({
     ...fsObject,
@@ -68,7 +67,7 @@ const mapCategoryTree = (cache) => (fsObject) => {
   })
 }
 
-const newEntry = async ({
+const newEntry = ({
   contentModel,
   key,
   entryFn,
@@ -76,11 +75,11 @@ const newEntry = async ({
   liftEntries,
   replace
 }) => {
-  const _entry = entry || await entryFn()
+  const _entry = entry || entryFn()
   const newContentModel = {
-    ...(await contentModel),
+    ...contentModel,
     [key]: replace ? _entry : [
-      ...(await contentModel)[key],
+      ...contentModel[key],
       _entry
     ]
   }
@@ -97,30 +96,28 @@ const newEntry = async ({
   }
 }
 
-const withFolderedPost = async (contentModel, fsObject, cache) => {
+const withFolderedPost = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'posts',
-    entryFn: async () => {
-      const newPost = await createFolderedPost({
+    entryFn: () => {
+      const newPost = createFolderedPost({
         ...fsObject,
         children: fsObject.children.map(mapFolderedPostTree)
-      }, cache)
+      })
       return newPost.data
     }
   })
 }
 
-const withCategory = async (contentModel, fsObject, cache) => {
+const withCategory = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'categories',
-    entryFn: async () => {
+    entryFn: () => {
       const newCategory = createCategory({
         ...fsObject,
-        children: await Promise.all(
-          fsObject.children.map(mapCategoryTree(cache))
-        )
+        children: fsObject.children.map(mapCategoryTree)
       })
       return {
         ...newCategory.data,
@@ -136,7 +133,7 @@ const withCategory = async (contentModel, fsObject, cache) => {
   })
 }
 
-const withAssets = async (contentModel, fsObject) => {
+const withAssets = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'assets',
@@ -145,19 +142,19 @@ const withAssets = async (contentModel, fsObject) => {
   })
 }
 
-const withSubpages = async (contentModel, fsObject, cache) => {
+const withSubpages = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'subpages',
-    entryFn: async () => {
-      const subpages = await createSubpages(fsObject, cache)
+    entryFn: () => {
+      const subpages = createSubpages(fsObject)
       return subpages.data.map(({ data }) => data)
     },
     replace: true
   })
 }
 
-const withLocalAsset = async (contentModel, fsObject) => {
+const withLocalAsset = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'localAssets',
@@ -165,25 +162,19 @@ const withLocalAsset = async (contentModel, fsObject) => {
   })
 }
 
-const withPost = async (contentModel, fsObject, cache) => {
-  return newEntry({
-    contentModel: await contentModel,
-    key: 'posts',
-    entryFn: async () => {
-      const post = await createPost(fsObject, cache)
-      return post.data
-    }
-  })
-}
-
-const withDefaultCategoryPost = async (contentModel, fsObject, cache) => {
+const withPost = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'posts',
-    entryFn: async () => {
-      const post = await createDefaultCategoryPost(fsObject, cache)
-      return post.data
-    }
+    entryFn: () => createPost(fsObject).data
+  })
+}
+
+const withDefaultCategoryPost = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'posts',
+    entryFn: () => createDefaultCategoryPost(fsObject).data
   })
 }
 
@@ -201,34 +192,32 @@ const withDefaultCategory = (contentModel) => {
   return contentModel
 }
 
-const mapFSTreeToContentModel = (fsTree, cache) => {
+const createContentModel = (fsTree) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
-  return fsTree.reduce(async (contentModel, fsObject) => {
+  return fsTree.reduce((contentModel, fsObject) => {
     if (isPostFile(fsObject)) {
       return withDefaultCategoryPost(
-        withDefaultCategory(await contentModel),
-        fsObject,
-        cache
+        withDefaultCategory(contentModel),
+        fsObject
       )
     }
     if (!fsObject.children) {
-      return withLocalAsset(await contentModel, fsObject)
+      return withLocalAsset(contentModel, fsObject)
     }
     if (fsObject.name === pagesDirectory) {
-      return withSubpages(await contentModel, fsObject, cache)
+      return withSubpages(contentModel, fsObject)
     }
     if (fsObject.name === assetsDirectory) {
-      return withAssets(await contentModel, fsObject)
+      return withAssets(contentModel, fsObject)
     }
     if (fsObject.children.some(isFolderedPostIndexFile)) {
       return withFolderedPost(
-        withDefaultCategory(await contentModel),
-        fsObject,
-        cache
+        withDefaultCategory(contentModel),
+        fsObject
       )
     }
     if (fsObject.children.some(isPostFile) || fsObject.children.some(isPostFolder)) {
-      return withCategory(await contentModel, fsObject, cache)
+      return withCategory(contentModel, fsObject)
     }
     return contentModel
   }, {
@@ -242,4 +231,4 @@ const mapFSTreeToContentModel = (fsTree, cache) => {
   })
 }
 
-module.exports = mapFSTreeToContentModel
+module.exports = createContentModel

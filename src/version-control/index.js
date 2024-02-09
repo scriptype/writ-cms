@@ -1,50 +1,45 @@
 const git = require('./git')
 const Debug = require('../debug')
 const Settings = require('../settings')
+const createDecorator = require('./decorator')
 
-let repo = null
-
-const init = async () => {
-  const { revisionHistory } = Settings.getSettings()
-  if (revisionHistory !== "auto") {
-    return
-  }
-  Debug.timeStart('version control')
-  await git.openRepo()
-  await git.commitChanges()
-  Debug.timeEnd('version control')
+const State = {
+  repo: null
 }
 
-const createCache = () => {
-  const { revisionHistory } = Settings.getSettings()
-  if (revisionHistory === "off") {
-    return {
-      find: () => ({ get: () => null })
+const Methods = (() => {
+  const init = async () => {
+    const { revisionHistory } = Settings.getSettings()
+    Debug.timeStart('version control')
+    if (revisionHistory !== "auto") {
+      Debug.timeEnd('version control')
+      return
+    }
+    State.repo = await git.openRepo()
+    await git.commitChanges()
+    Debug.timeEnd('version control')
+  }
+
+  const getFileHistory = async (path) => {
+    if (Settings.getSettings().revisionHistory === "off") {
+      return null
+    }
+    try {
+      const history = await git.getRevisionHistory(path)
+    } catch (e) {
+      Debug.debugLog('error getting revision history of file', path, e)
+      return null
     }
   }
+
   return {
-    async find(path) {
-      let fileRevisionHistory = null
-      try {
-        fileRevisionHistory = await git.getRevisionHistory(path)
-      }
-      catch (e) {
-        Debug.debugLog('error getting revision history of file', path, e)
-      }
-      return {
-        get(key) {
-          if (!fileRevisionHistory) {
-            return null
-          }
-          const firstEntry = fileRevisionHistory[fileRevisionHistory.length - 1]
-          return firstEntry[key] || null
-        }
-      }
-    }
+    init,
+    getFileHistory
   }
-}
+})()
+
 
 module.exports = {
-  init,
-  createCache
+  ...Methods,
+  decorator: createDecorator(State, Methods)
 }

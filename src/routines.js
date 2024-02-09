@@ -33,6 +33,7 @@ const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
 
   Decorations.register(
     Dictionary.decorator(),
+    VersionControl.decorator(),
     Theme.decorator(),
     Preview.decorator(),
     Expansions.decorator(),
@@ -47,11 +48,7 @@ const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
-
-  await Compiler.compile({
-    cache: VersionControl.createCache()
-  })
-
+  await Compiler.compile()
   await Assets.copyAssets()
 
   Debug.timeEnd('> total')
