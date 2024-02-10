@@ -61,6 +61,8 @@ const curry = (fn) => {
   return (...args) => fn.bind(null, ...args)
 }
 
+const last = (array) => array[array.length -1]
+
 module.exports = {
   readFileContent,
   loadJSON,
@@ -70,5 +72,6 @@ module.exports = {
   replaceExtension,
   pipe,
   rightPad,
-  curry
+  curry,
+  last
 }

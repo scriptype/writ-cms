@@ -1,5 +1,7 @@
+const _ = require('lodash')
 const Settings = require('../../settings')
 const Dictionary = require('../../dictionary')
+const { last } = require('../../helpers')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
 const { createSubpages } = require('./models/subpage')
@@ -134,13 +136,25 @@ const withDefaultCategory = (contentModel) => {
   const defaultCategory = contentModel.categories.find(
     category => category.name === defaultCategoryName
   )
-  if (!defaultCategory) {
-    return withCategory(contentModel, {
-      name: defaultCategoryName,
-      children: []
-    })
+  const post = _.cloneDeep(last(contentModel.posts))
+  if (defaultCategory) {
+    defaultCategory.posts.push(post)
+    return contentModel
   }
-  return contentModel
+  return newEntry({
+    contentModel,
+    key: 'categories',
+    entryFn: () => {
+      const newCategory = createCategory({
+        name: defaultCategoryName,
+        children: []
+      })
+      return {
+        ...newCategory.data,
+        posts: [post]
+      }
+    }
+  })
 }
 
 const withCategory = (contentModel, fsObject) => {
@@ -196,9 +210,8 @@ const createContentModel = (fsTree) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return fsTree.reduce((contentModel, fsObject) => {
     if (isPostFile(fsObject)) {
-      return withDefaultCategoryPost(
-        withDefaultCategory(contentModel),
-        fsObject
+      return withDefaultCategory(
+        withDefaultCategoryPost(contentModel, fsObject)
       )
     }
     if (!fsObject.children) {
@@ -211,9 +224,8 @@ const createContentModel = (fsTree) => {
       return withAssets(contentModel, fsObject)
     }
     if (fsObject.children.some(isFolderedPostIndexFile)) {
-      return withFolderedPost(
-        withDefaultCategory(contentModel),
-        fsObject
+      return withDefaultCategory(
+        withFolderedPost(contentModel, fsObject)
       )
     }
     if (fsObject.children.some(c => isPostFile(c) || isPostFolder(c))) {
