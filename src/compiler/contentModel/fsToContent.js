@@ -131,6 +131,21 @@ const withDefaultCategoryPost = (contentModel, fsObject) => {
   })
 }
 
+const withPostInCategory = (contentModel, category, post) => {
+  return {
+    ...contentModel,
+    categories: contentModel.categories.map(otherCategory => {
+      if (otherCategory.name !== category.name) {
+        return otherCategory
+      }
+      return {
+        ...otherCategory,
+        posts: otherCategory.posts.concat(post)
+      }
+    })
+  }
+}
+
 const withDefaultCategory = (contentModel) => {
   const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
   const defaultCategory = contentModel.categories.find(
@@ -138,8 +153,7 @@ const withDefaultCategory = (contentModel) => {
   )
   const post = _.cloneDeep(last(contentModel.posts))
   if (defaultCategory) {
-    defaultCategory.posts.push(post)
-    return contentModel
+    return withPostInCategory(contentModel, defaultCategory, post)
   }
   return newEntry({
     contentModel,
