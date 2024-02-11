@@ -24,7 +24,8 @@ const isDirectory = async (path) => {
 }
 
 const forbiddenChars = 'äÄåÅÉéi̇ıİİöÖüÜçÇğĞşŞ'
-const slugChars = 'aaaaeeiiiioouuccggss'
+const slugChars      = 'aaaaeeiiiioouuccggss'
+const forbiddenToEscape = '(){}[]'
 
 const getSlug = (string) => {
   string = string.trim()
@@ -33,6 +34,17 @@ const getSlug = (string) => {
     const regex = new RegExp(forbiddenChars[i], 'gi')
     string = string.replace(regex, slugChars[i])
   }
+  for (let i = 0; i < forbiddenToEscape.length - 1; i++) {
+    const regex = new RegExp(`\\${forbiddenToEscape[i]}`, 'gi')
+    string = string.replace(regex, '-')
+  }
+  string = string
+    .replace(/-{2,}/g, '-')
+    .replace(/-\./, '.')
+    .replace(/-\//g, '/')
+    .replace(/\/-/g, '/')
+    .replace(/^-/g, '')
+    .replace(/-$/g, '')
   return string.toLowerCase()
 }
 
