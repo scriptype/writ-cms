@@ -551,20 +551,29 @@ test('start mode', t => {
   t.test('starts a local server for preview', async st => {
     const dir = await createTempDir()
 
+    const previewPort = 5005
+
+    await dir.mkFile('settings.json', JSON.stringify({
+      previewPort
+    }))
+
     const { exportDirectory } = writ.getDefaultSettings()
 
     const watcher = await writ.start({
       rootDirectory: dir.name
     })
 
-    const response = await fetch('http://localhost:3000')
+    const response = await fetch(`http://localhost:${previewPort}`)
     const textResponse = await response.text()
     const filePath = join(dir.name, exportDirectory, 'index.html')
     const indexHTMLContent = await readFile(filePath, {
       encoding: 'utf-8'
     })
 
-    st.true(textResponse === indexHTMLContent, 'index.html is broadcast over localhost:3000')
+    st.true(
+      textResponse === indexHTMLContent,
+      `index.html is broadcast over localhost:${previewPort}`
+    )
 
     st.teardown(() => {
       watcher.stop()
@@ -575,13 +584,19 @@ test('start mode', t => {
   t.test('changes trigger a re-build', async st => {
     const dir = await createTempDir()
 
+    const previewPort = 5005
+
+    await dir.mkFile('settings.json', JSON.stringify({
+      previewPort
+    }))
+
     const watcher = await writ.start({
       rootDirectory: dir.name
     })
 
     const { exportDirectory } = writ.getDefaultSettings()
 
-    const response1 = await fetch('http://localhost:3000')
+    const response1 = await fetch(`http://localhost:${previewPort}`)
     const textResponse1 = await response1.text()
 
     const change = 'totally random text'
@@ -590,7 +605,7 @@ test('start mode', t => {
     await dir.mkFile('a new file.md', change)
     await new Promise(r => setTimeout(r, 600))
 
-    const response2 = await fetch('http://localhost:3000')
+    const response2 = await fetch(`http://localhost:${previewPort}`)
     const textResponse2 = await response2.text()
 
     st.true(textResponse2.includes(change), 'The change is reflected in the page')

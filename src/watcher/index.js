@@ -7,7 +7,7 @@ const api = require('./api')
 
 module.exports = {
   async init({ onChange, silent }) {
-    const { rootDirectory, exportDirectory } = Settings.getSettings()
+    const { rootDirectory, exportDirectory, previewPort } = Settings.getSettings()
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
     const watchOptions = {
@@ -52,6 +52,7 @@ module.exports = {
     return new Promise(resolve => {
       bs.init({
         server: serverDir,
+        port: previewPort,
         watch: false,
         ui: false,
         middleware,
