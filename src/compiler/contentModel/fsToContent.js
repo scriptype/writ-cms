@@ -109,14 +109,6 @@ const withPost = (contentModel, fsObject) => {
   })
 }
 
-const withDefaultCategoryPost = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'posts',
-    entryFn: () => createDefaultCategoryPost(fsObject).data
-  })
-}
-
 const withFolderedPost = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
@@ -128,6 +120,14 @@ const withFolderedPost = (contentModel, fsObject) => {
       })
       return newPost.data
     }
+  })
+}
+
+const withDefaultCategoryPost = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'posts',
+    entryFn: () => createDefaultCategoryPost(fsObject).data
   })
 }
 
