@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Writ studio</title>
+        <style>
+        body {
+            margin: 0;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            height: 100%;
+        }
+
+        .panel {
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            padding: 1em;
+            background: #0003;
+            backdrop-filter: blur(3px);
+            border-radius: 1em;
+        }
+
+        iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="panel">
+                <button type="button">create post</button>
+            </div>
+            <iframe id="preview" title="Site preview" frameborder="0"></iframe>
+        </div>
+        <!--<script type="module" src="app.js"></script>-->
+        <script>
+            let counter = 0
+            const onClick = () => {
+                const post = {
+                    title: `Hey ${++counter}`,
+                    content: `Heyo
+
+### Yea
+
+Sup`,
+                    extension: 'md',
+                    category: 'Türkçe',
+                    metadata: {
+                        tags: ['api tests', 'a new world', 'deneme']
+                    },
+                    localAssets: []
+                }
+                fetch('/api/posts', {
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    method: 'put',
+                    body: JSON.stringify(post)
+                })
+            }
+            document.querySelector('button').addEventListener('click', onClick)
+            const { hostname } = window.location
+            document.querySelector('#preview').src = `http://${hostname}:3000`
+        </script>
+    </body>
+
+</html>

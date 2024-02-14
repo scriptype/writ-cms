@@ -12,10 +12,12 @@ const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
 const Watcher = require('./watcher')
+const CMS = require('./cms/server')
 
 const startUp = async ({ watch, refreshTheme, ...rest }) => {
   await run({ refreshTheme, ...rest })
   if (watch) {
+    CMS.init()
     return startWatcher({ ...rest })
   }
 }
