@@ -1,7 +1,7 @@
 const { join } = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
-const api = require('./api')
+const apiRouter = require('./router/api')
 
 const port = 8080
 
@@ -10,9 +10,9 @@ const init = () => {
 
   app.use(express.static(join(__dirname, 'public')))
   app.use(bodyParser.json())
-  app.use('/api', api)
+  app.use('/api', apiRouter)
 
-  app.listen(port, () => {
+  app.listen(0, () => {
     console.log('Server has started listening on port:', port)
   })
 }
