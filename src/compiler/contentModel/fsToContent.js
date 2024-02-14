@@ -5,7 +5,12 @@ const { last } = require('../../helpers')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
 const { createSubpages } = require('./models/subpage')
-const { createCategory } = require('./models/category')
+
+const {
+  createCategory,
+  createCategoryIndex
+} = require('./models/category')
+
 const {
   createPost,
   createFolderedPost,
@@ -27,16 +32,12 @@ const isTemplateFile = (fsObject) => {
   return new RegExp(templateExtensions.join('|'), 'i').test(fsObject.extension)
 }
 
-const hasContent = (fsObject) => {
-  return typeof fsObject.content !== 'undefined'
-}
-
-const isPostFile = (fsObject) => {
-  return isTemplateFile(fsObject) && hasContent(fsObject)
-}
-
 const isFolderedPostIndexFile = (fsObject) => {
-  return isPostFile(fsObject) && fsObject.name.match(/^(index|post)\..+$/)
+  return isTemplateFile(fsObject) && fsObject.name.match(/^post\..+$/)
+}
+
+const isCategoryIndexFile = (fsObject) => {
+  return isTemplateFile(fsObject) && fsObject.name.match(/^category\..+$/)
 }
 
 const isPostFolder = (fsObject) => {
@@ -195,7 +196,10 @@ const withCategory = (contentModel, fsObject) => {
 }
 
 const mapCategoryTree = (fsObject) => {
-  if (isPostFile(fsObject)) {
+  if (isCategoryIndexFile(fsObject)) {
+    return createCategoryIndex(fsObject)
+  }
+  if (isTemplateFile(fsObject)) {
     return createPost(fsObject)
   }
   if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
@@ -223,7 +227,7 @@ const mapFolderedPostTree = (fsObject) => {
 const createContentModel = (fsTree) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return fsTree.reduce((contentModel, fsObject) => {
-    if (isPostFile(fsObject)) {
+    if (isTemplateFile(fsObject)) {
       return withDefaultCategory(
         withDefaultCategoryPost(contentModel, fsObject)
       )
@@ -242,7 +246,7 @@ const createContentModel = (fsTree) => {
         withFolderedPost(contentModel, fsObject)
       )
     }
-    if (fsObject.children.some(c => isPostFile(c) || isPostFolder(c))) {
+    if (fsObject.children.some(c => isTemplateFile(c) || isPostFolder(c))) {
       return withCategory(contentModel, fsObject)
     }
     return contentModel

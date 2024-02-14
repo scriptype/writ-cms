@@ -18,10 +18,10 @@ const renderCategoryPages = (Renderer, { categories }) => {
     await mkdirCategoryFolder(dir)
     return Renderer.render({
       path: join(dir, 'index.html'),
-      content: '{{>pages/category}}',
+      content: `{{#>pages/category}}${category.content}{{/pages/category}}`,
       data: {
-        categories,
         category,
+        categories,
         posts: category.posts,
         settings,
         debug: Debug.getDebug()

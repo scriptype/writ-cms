@@ -3,26 +3,56 @@ const _ = require('lodash')
 const Settings = require('../../../settings')
 const { getSlug } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
+const parseTemplate = require('../parseTemplate')
 const { isPost } = require('./post')
 const { isLocalAsset } = require('./localAsset')
 
+const isCategoryIndex = (fsObject) => {
+  return fsObject.type === contentTypes.CATEGORY_INDEX
+}
+
 const createCategory = (fsObject) => {
-  const { permalinkPrefix } = Settings.getSettings()
+  const indexFile = fsObject.children.find(isCategoryIndex)
+  const posts = fsObject.children.filter(isPost)
+
+  const localAssets = fsObject.children.filter(isLocalAsset)
   const slug = getSlug(fsObject.name)
-  const data = {
-    name: fsObject.name,
-    slug,
-    permalink: join(permalinkPrefix, slug),
-    posts: fsObject.children.filter(isPost),
-    localAssets: fsObject.children.filter(isLocalAsset)
-  }
+  const permalink = join(Settings.getSettings().permalinkPrefix, slug)
+
+  const metadata = indexFile ?
+    parseTemplate(indexFile, {
+      localAssets,
+      permalink
+    }) : {
+      attributes: {}
+    }
+
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.CATEGORY,
-    data
+    data: {
+      type: metadata.type || '',
+      name: metadata.title || fsObject.name,
+      content: metadata.content || '',
+      summary: metadata.summary || '',
+      ...metadata.attributes,
+      slug,
+      permalink,
+      posts,
+      localAssets
+    }
+  }
+}
+
+const createCategoryIndex = (fsObject) => {
+  return {
+    ...fsObject,
+    type: contentTypes.CATEGORY_INDEX
   }
 }
 
 module.exports = {
-  createCategory
+  isCategoryIndex,
+  createCategory,
+  createCategoryIndex
 }
