@@ -17,7 +17,7 @@ const CMS = require('./cms/server')
 const startUp = async ({ watch, refreshTheme, startCMS, ...rest }) => {
   await run({ refreshTheme, ...rest })
   if (watch) {
-    if (startCMS) {
+    if (startCMS !== false) {
       CMS.init({
         silent: !rest.cli
       })
