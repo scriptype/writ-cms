@@ -1,23 +1,15 @@
-const { writeFile, mkdir, readdir, readFile } = require('fs/promises')
-const { join } = require('path')
+const { writeFile, mkdir } = require('fs/promises')
+const { join, basename } = require('path')
+const frontMatter = require('front-matter')
 const Settings = require('../../settings')
 const { getSlug } = require('../../helpers')
-
-const buildFrontMatter = (metadata) => {
-  if (!metadata) {
-    return ''
-  }
-  const keyValues = Object.keys(metadata)
-    .map(key => {
-      const actualValue = metadata[key]
-      const value = Array.isArray(actualValue) ?
-        actualValue.join(', ') :
-        actualValue
-      return `${key}: ${value}`
-    })
-    .join('\n')
-  return ['---', keyValues, '---'].join('\n')
-}
+const {
+  buildFrontMatter,
+  removeExtension,
+  parseTags,
+  readPostFile,
+  contentRootPath
+} = require('./helpers')
 
 const createPost = async ({
   title,
@@ -27,13 +19,8 @@ const createPost = async ({
   metadata,
   localAssets
 }) => {
-  const { rootDirectory, contentDirectory } = Settings.getSettings()
-  const path = join(
-    rootDirectory,
-    await readdir(join(rootDirectory, contentDirectory)) ? contentDirectory : '',
-    category || '',
-    title
-  )
+  const root = await contentRootPath(Settings.getSettings())
+  const path = join(root, category || '', title)
   const frontMatter = buildFrontMatter(metadata)
   const fileContent = [frontMatter, content].join('\n')
   if (localAssets.length) {
@@ -44,15 +31,25 @@ const createPost = async ({
 }
 
 const getPost = async (path, options) => {
-  const { rootDirectory, contentDirectory } = Settings.getSettings()
-  const fullPath = join(
-    rootDirectory,
-    await readdir(join(rootDirectory, contentDirectory)) ? contentDirectory : '',
+  const root = await contentRootPath(Settings.getSettings())
+  const fullPath = join(root, path)
+  const { content, extension } = await readPostFile(fullPath, options)
+  const { attributes, body } = frontMatter(content)
+  const { type, title, tags, ...restAttributes } = attributes
+  const fsTitle = removeExtension(basename(path))
+  const category = basename(
     path
+      .replace(new RegExp('^' + root), '')
+      .replace(basename(path), '')
   )
-  const fileContent = await readFile(fullPath, { encoding: 'utf-8' })
   return {
-    fileContent
+    type: type || 'text',
+    title: title || fsTitle,
+    content: body,
+    tags: parseTags(tags),
+    extension,
+    category,
+    ...restAttributes
   }
 }
 
