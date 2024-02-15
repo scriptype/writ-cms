@@ -16,7 +16,7 @@ module.exports = express.Router()
     const postPath = decodeURI(req.path.replace(/\/posts\//, ''))
     try {
       res.status(200).json(
-        await posts.get(postPath, req.body)
+        await posts.get(postPath, req.query)
       )
     } catch (e) {
       console.log('Error getting post', e)

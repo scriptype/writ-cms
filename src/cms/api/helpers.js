@@ -31,7 +31,7 @@ const readPostFile = async (path, options) => {
   const extension = options.extension || extname(path)
   let fullPath = path
   if (options.foldered) {
-    fullPath = join(path, 'post', extension)
+    fullPath = join(path, `post${extension}`)
   }
   const content = await readFile(fullPath, { encoding: 'utf-8' })
   return {

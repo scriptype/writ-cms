@@ -5,9 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Writ studio</title>
         <style>
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
         body {
             margin: 0;
-            height: 100vh;
         }
 
         .container {
@@ -16,62 +20,68 @@
         }
 
         .panel {
-            display: inline-block;
+            box-sizing: border-box;
+        }
+
+        .explore-panel {
             position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4em;
             padding: 1em;
-            background: #0003;
-            backdrop-filter: blur(3px);
+            background: #0005;
+            backdrop-filter: blur(50px) saturate(3);
             border-radius: 1em;
         }
 
-        iframe {
-            position: absolute;
+        .preview-panel {
+            height: 100%;
+        }
+
+        #preview {
             width: 100%;
             height: 100%;
+        }
+
+        #dialog {
+            width: clamp(300px, 1000px, 80vw);
+            height: min-content;
+            max-height: 80vh;
+            padding: 2em;
+            background: #fff;
+            border: none;
+            box-shadow: 0 0 2em #0002;
+            box-sizing: border-box;
+        }
+
+        #dialog::backdrop {
+            backdrop-filter: blur(10px);
+        }
+
+        #dialog pre {
+            white-space: pre-wrap;
         }
         </style>
     </head>
 
     <body>
         <div class="container">
-            <div class="panel">
-                <button type="button">create post</button>
+            <div class="panel explore-panel">
+                <button type="button" id="create-post-btn">create post</button>
+                <br><br>
+                <button type="button" id="get-post-btn">get post</button>
             </div>
-            <iframe id="preview" title="Site preview" frameborder="0"></iframe>
+            <div class="panel preview-panel">
+                <iframe id="preview" title="Site preview" frameborder="0"></iframe>
+            </div>
         </div>
-        <!--<script type="module" src="app.js"></script>-->
-        <script>
-            let counter = 0
-            const onClick = () => {
-                const post = {
-                    title: `Hey ${++counter}`,
-                    content: `Heyo
-
-### Yea
-
-Sup`,
-                    extension: 'md',
-                    category: 'Türkçe',
-                    metadata: {
-                        tags: ['api tests', 'a new world', 'deneme']
-                    },
-                    localAssets: []
-                }
-                fetch('/api/posts', {
-                    headers: {
-                        'content-type': 'application/json'
-                    },
-                    method: 'put',
-                    body: JSON.stringify(post)
-                })
-            }
-            document.querySelector('button').addEventListener('click', onClick)
-            const { hostname } = window.location
-            document.querySelector('#preview').src = `http://${hostname}:3000`
-        </script>
+        <dialog id="dialog">
+            <form method="dialog">
+                <button autofocus>Close</button>
+            </form>
+            <div id="dialog-content"></div>
+        </dialog>
+        <script type="module" src="app.js"></script>
     </body>
 
 </html>
