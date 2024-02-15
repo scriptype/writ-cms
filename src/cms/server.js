@@ -5,15 +5,17 @@ const apiRouter = require('./router/api')
 
 const port = 8080
 
-const init = () => {
+const init = ({ silent }) => {
   const app = express()
 
   app.use(express.static(join(__dirname, 'public')))
   app.use(bodyParser.json())
   app.use('/api', apiRouter)
 
-  app.listen(0, () => {
-    console.log('Server has started listening on port:', port)
+  return app.listen(port, () => {
+    if (!silent) {
+      console.log('Server has started listening on port:', port)
+    }
   })
 }
 

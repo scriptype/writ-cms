@@ -14,10 +14,14 @@ const Preview = require('./preview')
 const Watcher = require('./watcher')
 const CMS = require('./cms/server')
 
-const startUp = async ({ watch, refreshTheme, ...rest }) => {
+const startUp = async ({ watch, refreshTheme, startCMS, ...rest }) => {
   await run({ refreshTheme, ...rest })
   if (watch) {
-    CMS.init()
+    if (startCMS) {
+      CMS.init({
+        silent: !rest.cli
+      })
+    }
     return startWatcher({ ...rest })
   }
 }
