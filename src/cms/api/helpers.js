@@ -1,4 +1,4 @@
-const { readdir, readFile } = require('fs/promises')
+const { readdir, readFile, lstat } = require('fs/promises')
 const { join, extname } = require('path')
 
 const buildFrontMatter = (metadata) => {
@@ -49,10 +49,25 @@ const contentRootPath = async ({ rootDirectory, contentDirectory }) => {
   return join(...rootPath)
 }
 
+const readFileContent = path => {
+  return readFile(path, { encoding: 'utf-8' })
+}
+
+const isDirectory = async (path) => {
+  try {
+    return (await lstat(path)).isDirectory()
+  }
+  catch (ENOENT) {
+    return false
+  }
+}
+
 module.exports = {
   buildFrontMatter,
   removeExtension,
   parseTags,
   readPostFile,
-  contentRootPath
+  contentRootPath,
+  readFileContent,
+  isDirectory
 }

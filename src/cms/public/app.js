@@ -1,9 +1,13 @@
 import createPost from './createPost.js'
 import getPost from './getPost.js'
+import exploreTree from './fileSystem.js'
 
 const query = document.querySelector.bind(document)
 
 const makeButtonsWork = () => {
+  const exploreTreeBtn = query('#explore-tree-btn')
+  exploreTreeBtn.addEventListener('click', exploreTree)
+
   const createPostBtn = query('#create-post-btn')
   createPostBtn.addEventListener('click', createPost)
 
