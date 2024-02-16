@@ -1,17 +1,17 @@
 const { tmpdir } = require('os')
-const { rm, mkdtemp, mkdir, readdir, readFile, writeFile } = require('fs/promises')
+const { rm, mkdtemp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const test = require('tape')
-const { contentRoot, lookBack } = require('../../compiler/fileSystem')
+const { contentRootPath, lookBack } = require('../../cms/api/helpers')
 
 const tempDir = () => {
   return mkdtemp(join(tmpdir(), 'writ-test-'))
 }
 
-test('compiler/fileSystem', t => {
-  t.test('contentRoot', async () => {
+test('cms/helpers', t => {
+  t.test('contentRootPath', async () => {
     try {
-      await contentRoot()
+      await contentRootPath()
       t.fail('if rootDirectory parameter is missing, throws exception')
     } catch (e) {
       t.pass('if rootDirectory parameter is missing, throws exception')
@@ -21,24 +21,24 @@ test('compiler/fileSystem', t => {
     t.teardown(() => {
       rm(dir1, { recursive: true })
     })
-    const actual1 = await contentRoot(resolve(dir1))
+    const actual1 = await contentRootPath(resolve(dir1))
     const expected1 = resolve(dir1)
     t.equal(
       actual1,
       expected1,
-      'if contentDirectory parameter is missing, contentRoot is rootDirectory'
+      'if contentDirectory parameter is missing, contentRootPath is rootDirectory'
     )
 
     const dir2 = await tempDir()
     t.teardown(() => {
       rm(dir2, { recursive: true })
     })
-    const actual2 = await contentRoot(resolve(dir2), 'content')
+    const actual2 = await contentRootPath(resolve(dir2), 'content')
     const expected2 = resolve(dir2)
     t.equal(
       actual2,
       expected2,
-      'if contentDirectory is not found, contentRoot is rootDirectory'
+      'if contentDirectory is not found, contentRootPath is rootDirectory'
     )
 
     const dir3 = await tempDir()
@@ -46,12 +46,12 @@ test('compiler/fileSystem', t => {
     t.teardown(() => {
       rm(dir3, { recursive: true })
     })
-    const actual3 = await contentRoot(resolve(dir3), 'content')
+    const actual3 = await contentRootPath(resolve(dir3), 'content')
     const expected3 = resolve(dir3, 'content')
     t.equal(
       actual3,
       expected3,
-      'if contentDirectory is found contentRoot is contentDirectory'
+      'if contentDirectory is found contentRootPath is contentDirectory'
     )
   })
 

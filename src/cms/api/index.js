@@ -1,4 +1,4 @@
 module.exports = {
   posts: require('./posts'),
-  fileSystem: require('./fileSystem')
+  fileSystemExplorer: require('./fileSystemExplorer')
 }

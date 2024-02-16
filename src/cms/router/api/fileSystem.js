@@ -1,11 +1,11 @@
 const express = require('express')
-const { fileSystem } = require('../../api')
+const api = require('../../api')
 
 module.exports = express.Router()
   .get('/', async (req, res, next) => {
     try {
       res.status(200).json(
-        await fileSystem.exploreTree(req.query)
+        await api.fileSystemExplorer.exploreTree(req.query)
       )
     } catch (e) {
       console.log('Error exploring fileSystem tree', e)

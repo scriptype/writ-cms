@@ -19,7 +19,8 @@ const createPost = async ({
   metadata,
   localAssets
 }) => {
-  const root = await contentRootPath(Settings.getSettings())
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  const root = await contentRootPath(rootDirectory, contentDirectory)
   const path = join(root, category || '', title)
   const frontMatter = buildFrontMatter(metadata)
   const fileContent = [frontMatter, content].join('\n')
@@ -31,7 +32,8 @@ const createPost = async ({
 }
 
 const getPost = async (path, options) => {
-  const root = await contentRootPath(Settings.getSettings())
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  const root = await contentRootPath(rootDirectory, contentDirectory)
   const fullPath = join(root, path)
   const { content, extension } = await readPostFile(fullPath, options)
   const { attributes, body } = frontMatter(content)

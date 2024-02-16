@@ -1,5 +1,5 @@
 const { readdir, readFile, lstat } = require('fs/promises')
-const { join, extname } = require('path')
+const { join, extname, resolve } = require('path')
 
 const buildFrontMatter = (metadata) => {
   if (!metadata) {
@@ -40,7 +40,10 @@ const readPostFile = async (path, options) => {
   }
 }
 
-const contentRootPath = async ({ rootDirectory, contentDirectory }) => {
+const contentRootPath = async (rootDirectory, contentDirectory) => {
+  if (!rootDirectory) {
+    throw new Error('rootDirectory is a required parameter')
+  }
   let rootPath = [rootDirectory]
   try {
     await readdir(join(rootDirectory, contentDirectory))
@@ -62,6 +65,10 @@ const isDirectory = async (path) => {
   }
 }
 
+const lookBack = (path, depth) => {
+  return resolve(path, ...Array(depth).fill('..'))
+}
+
 module.exports = {
   buildFrontMatter,
   removeExtension,
@@ -69,5 +76,6 @@ module.exports = {
   readPostFile,
   contentRootPath,
   readFileContent,
-  isDirectory
+  isDirectory,
+  lookBack
 }
