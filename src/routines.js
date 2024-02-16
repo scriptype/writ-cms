@@ -12,23 +12,43 @@ const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
 const Watcher = require('./watcher')
-const CMS = require('./cms/server')
+const createCMS = require('./cms')
 
-const startUp = async ({ watch, refreshTheme, startCMS, ...rest }) => {
-  await run({ refreshTheme, ...rest })
+const startUp = async ({ mode, rootDirectory, debug, watch, refreshTheme, startCMSServer, ...rest }) => {
+  Debug.init(debug)
+  Debug.timeStart('> total')
+
+  await Settings.init({
+    mode,
+    rootDirectory
+  })
+
+  const cms = createCMS(Settings.getSettings())
+
+  await run({
+    mode,
+    rootDirectory,
+    refreshTheme,
+    api: cms.api,
+    ...rest
+  })
+
   if (watch) {
-    if (startCMS !== false) {
-      CMS.init({
+    if (startCMSServer !== false) {
+      cms.server.start({
         silent: !rest.cli
       })
     }
-    return startWatcher({ ...rest })
+    return startWatcher({
+      mode,
+      rootDirectory,
+      api: cms.api,
+      ...rest
+    })
   }
 }
 
-const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
-  Debug.init(debug)
-  Debug.timeStart('> total')
+const run = async ({ mode, rootDirectory, refreshTheme, api }) => {
   await Settings.init({
     mode,
     rootDirectory
@@ -49,7 +69,9 @@ const run = async ({ mode, rootDirectory, debug, refreshTheme }) => {
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
-  await Compiler.compile()
+  await Compiler.compile({
+    api
+  })
   await Assets.copyAssets()
   Debug.timeEnd('> total')
   Debug.logTimes()

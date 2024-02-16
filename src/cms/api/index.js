@@ -1,4 +1,8 @@
-module.exports = {
-  posts: require('./posts'),
-  fileSystemExplorer: require('./fileSystemExplorer')
+const createAPI = (settings) => {
+  return {
+    posts: require('./models/posts')(settings),
+    fileSystemExplorer: require('./fileSystemExplorer')(settings)
+  }
 }
+
+module.exports = createAPI

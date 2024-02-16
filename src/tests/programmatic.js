@@ -561,7 +561,7 @@ test('start mode', t => {
 
     const watcher = await writ.start({
       rootDirectory: dir.name,
-      startCMS: false
+      startCMSServer: false
     })
 
     const response = await fetch(`http://localhost:${previewPort}`)
@@ -593,7 +593,7 @@ test('start mode', t => {
 
     const watcher = await writ.start({
       rootDirectory: dir.name,
-      startCMS: false
+      startCMSServer: false
     })
 
     const { exportDirectory } = writ.getDefaultSettings()

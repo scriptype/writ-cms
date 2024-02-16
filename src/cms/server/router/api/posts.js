@@ -1,11 +1,10 @@
 const express = require('express')
-const { posts } = require('../../api')
 
 module.exports = express.Router()
   .get('/', async (req, res, next) => {
     try {
       res.status(200).json(
-        await posts.getAll(req.body)
+        await req.api.posts.getAll(req.body)
       )
     } catch (e) {
       console.log('Error getting posts', e)
@@ -16,7 +15,7 @@ module.exports = express.Router()
     const postPath = decodeURI(req.path.replace(/\/posts\//, ''))
     try {
       res.status(200).json(
-        await posts.get(postPath, req.query)
+        await req.api.posts.get(postPath, req.query)
       )
     } catch (e) {
       console.log('Error getting post', e)
@@ -25,7 +24,7 @@ module.exports = express.Router()
   })
   .put('/', async (req, res, next) => {
     try {
-      await posts.create(req.body)
+      await req.api.posts.create(req.body)
       res.sendStatus(200)
     } catch (e) {
       console.log('Error creating new post', e)

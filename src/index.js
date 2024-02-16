@@ -3,7 +3,7 @@ const Hooks = require('./hooks')
 const { startUp } = require('./routines')
 const helpers = require('./helpers')
 
-const start = async ({ rootDirectory, debug, refreshTheme, cli, startCMS }) => {
+const start = async ({ rootDirectory, debug, refreshTheme, cli, startCMSServer }) => {
   return startUp({
     mode: 'start',
     watch: true,
@@ -11,18 +11,18 @@ const start = async ({ rootDirectory, debug, refreshTheme, cli, startCMS }) => {
     debug,
     refreshTheme,
     cli,
-    startCMS
+    startCMSServer
   })
 }
 
-const build = async ({ rootDirectory, debug, refreshTheme, cli, startCMS }) => {
+const build = async ({ rootDirectory, debug, refreshTheme, cli, startCMSServer }) => {
   return startUp({
     mode: 'build',
     rootDirectory,
     debug,
     refreshTheme,
     cli,
-    startCMS
+    startCMSServer
   })
 }
 
