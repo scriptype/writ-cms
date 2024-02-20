@@ -2,7 +2,7 @@ const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
-const renderHomePage = (Renderer, { categories, posts }) => {
+const renderHomePage = (Renderer, { categories, posts, subpages }) => {
   const settings = Settings.getSettings()
   return Renderer.render({
     path: join(settings.out, 'index.html'),
@@ -10,6 +10,7 @@ const renderHomePage = (Renderer, { categories, posts }) => {
     data: {
       posts,
       categories,
+      subpages,
       settings,
       debug: Debug.getDebug()
     }

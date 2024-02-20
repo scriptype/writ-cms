@@ -35,6 +35,7 @@ const createCategory = (fsObject) => {
       name: metadata.title || fsObject.name,
       content: metadata.content || '',
       summary: metadata.summary || '',
+      mentions: metadata.mentions || [],
       ...metadata.attributes,
       slug,
       permalink,

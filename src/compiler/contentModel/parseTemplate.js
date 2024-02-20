@@ -16,21 +16,16 @@ const MarkdownHelpers = {
     return html
   },
 
-  unescapePartialUsage(html) {
+  unescapeHandlebarsExpressions(html) {
     // partial greater sign
-    html = html.replace(/\{\{\&gt;/g, '{{>')
+    html = html.replace(/{{&gt;/g, '{{>')
 
-    // helper double quotes
-    html = html.replace(/\{\{(.+)&quot;(.+)&quot;(.+)\}\}/g, '{{\$1"\$2"\$3}}')
+    // helpers
+    html = html.replace(/{{(.+)(?:&quot;|&#39;)(.+)(?:&quot;|&#39;)(.*)}}/g, '{{\$1"\$2"\$3}}')
 
-    // helper single quotes
-    html = html.replace(/\{\{(.+)&#39;(.+)&#39;(.+)\}\}/g, "{{\$1'\$2'\$3}}")
+    // partials
+    html = html.replace(/{{>(.+)(?:&quot;|&#39;)(.+)(?:&quot;|&#39;).*}}/g, '{{>\$1"\$2"\$3}}')
 
-    // partial double quotes
-    html = html.replace(/\{\{>(.+)&quot;(.+)&quot;(.+|)\}\}/g, '{{>\$1"\$2"\$3}}')
-
-    // partial single quotes
-    html = html.replace(/\{\{>(.+)&#39;(.+)&#39;(.+|)\}\}/g, "{{>\$1'\$2'\$3}}")
     return html
   }
 }
@@ -50,6 +45,20 @@ const getSummary = (content, localAssets, permalink) => {
   return summaryPart
 }
 
+const getMentions = (content) => {
+  const pattern = /{{\s*#?mention (?:'|")(.+)(?:'|")\s*}}/
+  // Find all occurrences of mention helper
+  const matches = content.match(new RegExp(pattern, 'g'))
+  if (!matches) {
+    return []
+  }
+  // Map to permalinks
+  return matches.map(match => {
+    const permalink = match.match(pattern)[1]
+    return `/${permalink}`.replace(/^\/\//, '/')
+  })
+}
+
 const getHTMLContent = (body, extension) => {
   if (/^(\.html|\.htm)$/i.test(extension)) {
     return body
@@ -59,7 +68,7 @@ const getHTMLContent = (body, extension) => {
       body.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')
     )
     compiledHTML = MarkdownHelpers.trimExtraParagraphAroundSeeMore(compiledHTML)
-    compiledHTML = MarkdownHelpers.unescapePartialUsage(compiledHTML)
+    compiledHTML = MarkdownHelpers.unescapeHandlebarsExpressions(compiledHTML)
     return compiledHTML
   }
   return body
@@ -74,13 +83,16 @@ const parseTags = (tags = []) => {
 const parseTemplate = (fsObject, { localAssets, permalink } = {}) => {
   const { content, extension } = fsObject
   const { attributes, body } = frontMatter(content)
-  const { type, title, tags, ...restAttributes } = attributes
+  const { type, title, cover, media, tags, ...restAttributes } = attributes
   const HTMLContent = getHTMLContent(body, extension)
   const metadata = {
     type,
     title,
+    cover,
+    media,
     content: HTMLContent,
     summary: getSummary(HTMLContent, localAssets, permalink),
+    mentions: getMentions(HTMLContent),
     tags: parseTags(tags),
     publishDate: attributes.date ? new Date(attributes.date) : null
   }

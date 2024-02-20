@@ -23,7 +23,7 @@ const mkdirPostFolder = async (post) => {
   }
 }
 
-const renderPosts = (Renderer, { categories, posts }) => {
+const renderPosts = (Renderer, { categories, posts, subpages }) => {
   const compilation = posts.map(async post => {
     if (post.foldered) {
       await mkdirPostFolder(post)
@@ -33,7 +33,9 @@ const renderPosts = (Renderer, { categories, posts }) => {
       content: `{{#>pages/post}}${post.content}{{/pages/post}}`,
       data: {
         ...post,
+        posts,
         categories,
+        subpages,
         settings: Settings.getSettings(),
         debug: Debug.getDebug()
       }

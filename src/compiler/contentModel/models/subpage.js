@@ -19,6 +19,7 @@ const createSubpage = (fsObject) => {
         value: metadata.publishDate || fsObject.stats.birthtime,
         checkCache: !metadata.publishDate
       },
+      mentions: metadata.mentions,
       ...metadata.attributes,
       slug: getSlug(title),
       path: fsObject.path,

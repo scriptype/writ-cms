@@ -13,6 +13,7 @@ const renderSubpages = (Renderer, { categories, posts, subpages }) => {
         ...subpage,
         posts,
         categories,
+        subpages,
         settings,
         debug: Debug.getDebug()
       }

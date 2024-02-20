@@ -11,7 +11,7 @@ const mkTagDir = async (dirName) => {
   }
 }
 
-const renderBareTagPage = async (Renderer, { posts, categories, tags }) => {
+const renderBareTagPage = async (Renderer, { posts, categories, subpages, tags }) => {
   if (!tags.length) {
     return Promise.resolve()
   }
@@ -23,6 +23,7 @@ const renderBareTagPage = async (Renderer, { posts, categories, tags }) => {
     data: {
       posts,
       categories,
+      subpages,
       tags,
       settings,
       debug: Debug.getDebug()
@@ -44,6 +45,9 @@ const renderTagIndices = async (Renderer, contentModel) => {
       content: '{{>pages/tag}}',
       data: {
         tag,
+        categories: contentModel.categories,
+        posts: contentModel.posts,
+        subpages: contentModel.subpages,
         settings,
         debug: Debug.getDebug()
       }
