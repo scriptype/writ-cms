@@ -11,7 +11,7 @@ const mkTagDir = async (dirName) => {
   }
 }
 
-const renderBareTagPage = async (Renderer, { posts, categories, tags }) => {
+const renderBareTagPage = async (Renderer, { homepage, posts, categories, subpages, tags }) => {
   if (!tags.length) {
     return Promise.resolve()
   }
@@ -19,10 +19,11 @@ const renderBareTagPage = async (Renderer, { posts, categories, tags }) => {
   await mkdir(join(settings.out, 'tag'))
   return Renderer.render({
     path: join(settings.out, 'tag', 'index.html'),
-    content: '{{>pages/homepage}}',
+    content: `{{#>pages/homepage}}${homepage.content}{{/pages/homepage}}`,
     data: {
       posts,
       categories,
+      subpages,
       tags,
       settings,
       debug: Debug.getDebug()
@@ -44,6 +45,9 @@ const renderTagIndices = async (Renderer, contentModel) => {
       content: '{{>pages/tag}}',
       data: {
         tag,
+        categories: contentModel.categories,
+        posts: contentModel.posts,
+        subpages: contentModel.subpages,
         settings,
         debug: Debug.getDebug()
       }

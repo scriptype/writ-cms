@@ -79,6 +79,8 @@ const _createPost = (fsObject, { categorized, foldered }) => {
     data: {
       type: metadata.type || 'text',
       title: metadata.title || removeExtension(fsObject.name),
+      cover: metadata.cover ? [permalink, metadata.cover].join('/') : '',
+      media: metadata.media ? [permalink, metadata.media].join('/') : '',
       content: metadata.content,
       summary: metadata.summary,
       tags: metadata.tags,
@@ -86,6 +88,7 @@ const _createPost = (fsObject, { categorized, foldered }) => {
         value: metadata.publishDate || fsObject.stats.birthtime,
         checkCache: !metadata.publishDate
       },
+      mentions: metadata.mentions,
       ...metadata.attributes,
       slug: getSlug(fsObject.name),
       permalink,

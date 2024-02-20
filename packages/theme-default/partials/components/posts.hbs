@@ -5,7 +5,7 @@
         <a href="{{post.permalink}}">
           <h2>{{post.title}}</h2>
           {{#if post.cover}}
-            <img src="{{post.permalink}}/{{post.cover}}" alt="{{post.coverAlt}}">
+            <img src="{{post.cover}}" alt="{{post.coverAlt}}">
           {{/if}}
         </a>
         {{{post.summary}}}
@@ -18,13 +18,13 @@
     <div class="post">
         <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
         {{#if post.cover}}
-          <a href="{{post.permalink}}/{{post.cover}}">
+          <a href="{{post.cover}}">
             <img
                 class="post-cover {{#if post.coverShape}}shape-{{post.coverShape}}{{/if}}"
                 {{#if post.coverPosition}}
                 style="--cover-position: {{post.coverPosition}};"
                 {{/if}}
-                src="{{post.permalink}}/{{post.cover}}"
+                src="{{post.cover}}"
                 alt="{{post.coverAlt}}">
           </a>
         {{/if}}

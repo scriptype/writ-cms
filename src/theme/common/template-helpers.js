@@ -7,6 +7,20 @@ module.exports = {
     return ''
   },
 
+  mention(permalink, options) {
+    const pattern = new RegExp('^(|\/)' + permalink)
+    const entry = [
+      this.homepage,
+      ...this.posts,
+      ...this.categories,
+      ...this.subpages
+    ].find(e => pattern.test(e.permalink))
+    if (options.fn) {
+      return options.fn(entry)
+    }
+    return `<a href="${entry.permalink}">${entry.title}</a>`
+  },
+
   filterPostsByType(type) {
     return this.posts.filter(p => p.type === type)
   },
@@ -60,7 +74,7 @@ module.exports = {
   },
 
   isHomePage() {
-    return this.page === 'home'
+    return this.page === 'homepage'
   },
 
   isCategoryPage() {

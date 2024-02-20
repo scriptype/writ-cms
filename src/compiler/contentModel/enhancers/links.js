@@ -90,11 +90,57 @@ const linkPosts = (contentModel) => {
       return {
         ...post,
         links: {
+          ...(post.links || {}),
           ...attachPaging(post, postIndex, category.posts),
           ...attachRelevantPosts(post, category.posts)
         }
       }
     })
+  }
+}
+
+const attachMentionedEntries = (allEntries) => (entry) => {
+  const mention = (contentModelEntry) => ({
+    title: contentModelEntry.title || contentModelEntry.name,
+    permalink: contentModelEntry.permalink,
+    category: contentModelEntry.category
+  })
+
+  const otherEntries = allEntries.filter(otherEntry => {
+    return otherEntry.permalink !== entry.permalink
+  })
+
+  const entriesMentioned = otherEntries
+    .filter(otherEntry => entry.mentions.includes(otherEntry.permalink))
+    .map(mention)
+
+  const entriesMentionedBy = otherEntries
+    .filter(otherEntry => otherEntry.mentions.includes(entry.permalink))
+    .map(mention)
+
+  return {
+    ..._.omit(entry, 'mentions'),
+    links: {
+      ...(entry.links || {}),
+      mentionedTo: entriesMentioned,
+      mentionedBy: entriesMentionedBy
+    }
+  }
+}
+
+const linkMentionedEntries = (contentModel) => {
+  const attacher = attachMentionedEntries([
+    contentModel.homepage,
+    ...contentModel.posts,
+    ...contentModel.subpages,
+    ...contentModel.categories
+  ])
+  return {
+    ...contentModel,
+    homepage: attacher(contentModel.homepage),
+    categories: contentModel.categories.map(attacher),
+    posts: contentModel.posts.map(attacher),
+    subpages: contentModel.subpages.map(attacher)
   }
 }
 
@@ -124,6 +170,7 @@ const linkPostTags = (contentModel) => {
 module.exports = (contentModel) => {
   return pipe(contentModel, [
     linkPostTags,
-    linkPosts
+    linkPosts,
+    linkMentionedEntries
   ])
 }

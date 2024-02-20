@@ -5,7 +5,7 @@
         <a href="{{post.permalink}}">
           <h2>{{post.title}}</h2>
           {{#if post.cover}}
-            <img src="{{post.permalink}}/{{post.cover}}" alt="{{post.coverAlt}}">
+            <img src="{{post.cover}}" alt="{{post.coverAlt}}">
           {{/if}}
         </a>
         {{{post.summary}}}
@@ -16,8 +16,19 @@
   {{else if (is post.type 'text')}}
     <div class="post">
         <h2><a href="{{post.permalink}}">{{post.title}}</a></h2>
+        {{#if post.cover}}
+          <a href="{{post.cover}}">
+            <img
+                class="post-cover {{#if post.coverShape}}shape-{{post.coverShape}}{{/if}}"
+                {{#if post.coverPosition}}
+                style="--cover-position: {{post.coverPosition}};"
+                {{/if}}
+                src="{{post.cover}}"
+                alt="{{post.coverAlt}}">
+          </a>
+        {{/if}}
         {{{post.summary}}}
-        <p><a href="{{post.category.permalink}}">{{post.category.name}}</a></p>
+        <p><a class="category-link" href="{{post.category.permalink}}">{{post.category.name}}</a></p>
         <p>{{post.publishDateMedium}}</p>
     </div>
 

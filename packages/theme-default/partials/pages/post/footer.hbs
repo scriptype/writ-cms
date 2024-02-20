@@ -20,11 +20,23 @@
         </table>
     </section>
     {{#if musiclist}}
-    <section class="post-footer-section">
-        <ul class="post-music-list">
-            {{{multiLineTextList musiclist}}}
-        </ul>
-    </section>
+      <section class="post-footer-section">
+          <ul class="post-music-list">
+              {{{multiLineTextList musiclist}}}
+          </ul>
+      </section>
+    {{/if}}
+    {{#if links.mentionedBy}}
+      <section class="post-footer-section">
+            <h4>Mentioned in:</h4>
+            <ul>
+                {{#each links.mentionedBy as |mentioner|}}
+                    <li>
+                        <a href="{{mentioner.permalink}}">{{mentioner.title}}</a>
+                    </li>
+                {{/each}}
+            </ul>
+      </section>
     {{/if}}
     {{#if links.prevPost}}
         <a href="{{links.prevPost.permalink}}">&laquo; {{links.prevPost.title}}</a>

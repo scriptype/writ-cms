@@ -2,7 +2,7 @@ const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
-const renderSubpages = (Renderer, { categories, posts, subpages }) => {
+const renderSubpages = (Renderer, { homepage, categories, posts, subpages }) => {
   const settings = Settings.getSettings()
   const compilation = subpages.map((subpage) => {
     const type = subpage.type || 'subpage'
@@ -11,8 +11,10 @@ const renderSubpages = (Renderer, { categories, posts, subpages }) => {
       content: `{{#>pages/${type}}}${subpage.content}{{/pages/${type}}}`,
       data: {
         ...subpage,
+        homepage,
         posts,
         categories,
+        subpages,
         settings,
         debug: Debug.getDebug()
       }
