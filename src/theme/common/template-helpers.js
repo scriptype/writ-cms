@@ -10,6 +10,7 @@ module.exports = {
   mention(permalink, options) {
     const pattern = new RegExp('^(|\/)' + permalink)
     const entry = [
+      this.homepage,
       ...this.posts,
       ...this.categories,
       ...this.subpages
@@ -73,7 +74,7 @@ module.exports = {
   },
 
   isHomePage() {
-    return this.page === 'home'
+    return this.page === 'homepage'
   },
 
   isCategoryPage() {

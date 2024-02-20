@@ -130,12 +130,14 @@ const attachMentionedEntries = (allEntries) => (entry) => {
 
 const linkMentionedEntries = (contentModel) => {
   const attacher = attachMentionedEntries([
+    contentModel.homepage,
     ...contentModel.posts,
     ...contentModel.subpages,
     ...contentModel.categories
   ])
   return {
     ...contentModel,
+    homepage: attacher(contentModel.homepage),
     categories: contentModel.categories.map(attacher),
     posts: contentModel.posts.map(attacher),
     subpages: contentModel.subpages.map(attacher)

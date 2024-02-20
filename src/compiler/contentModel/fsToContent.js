@@ -5,6 +5,7 @@ const { last } = require('../../helpers')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
 const { createSubpages } = require('./models/subpage')
+const { createHomepage } = require('./models/homepage')
 
 const {
   createCategory,
@@ -38,6 +39,10 @@ const isFolderedPostIndexFile = (fsObject) => {
 
 const isCategoryIndexFile = (fsObject) => {
   return isTemplateFile(fsObject) && fsObject.name.match(/^category\..+$/)
+}
+
+const isHomepageFile = (fsObject) => {
+  return isTemplateFile(fsObject) && fsObject.name.match(/^(homepage|home)\..+$/)
 }
 
 const isPostFolder = (fsObject) => {
@@ -99,6 +104,15 @@ const withLocalAsset = (contentModel, fsObject) => {
     contentModel,
     key: 'localAssets',
     entryFn: () => createLocalAsset(fsObject)
+  })
+}
+
+const withHomepage = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'homepage',
+    entryFn: () => createHomepage(fsObject).data,
+    replace: true
   })
 }
 
@@ -227,6 +241,9 @@ const mapFolderedPostTree = (fsObject) => {
 const createContentModel = (fsTree) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return fsTree.reduce((contentModel, fsObject) => {
+    if (isHomepageFile(fsObject)) {
+      return withHomepage(contentModel, fsObject)
+    }
     if (isTemplateFile(fsObject)) {
       return withDefaultCategory(
         withDefaultCategoryPost(contentModel, fsObject)
@@ -255,6 +272,7 @@ const createContentModel = (fsTree) => {
     subpages: [],
     categories: [],
     posts: [],
+    homepage: createHomepage().data,
     localAssets: [],
     postsJSON: [],
     tags: []
