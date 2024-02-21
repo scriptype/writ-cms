@@ -94,6 +94,7 @@ const _createPost = (fsObject, { categorized, foldered }) => {
       permalink,
       category: getPostCategory(fsObject, categorized),
       path: postFile.path,
+      handle: removeExtension(fsObject.path),
       site: Settings.getSettings().site,
       foldered,
       localAssets,

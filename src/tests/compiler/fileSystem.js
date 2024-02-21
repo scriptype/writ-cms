@@ -2,16 +2,16 @@ const { tmpdir } = require('os')
 const { rm, mkdtemp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const test = require('tape')
-const { contentRootPath, lookBack } = require('../../cms/api/helpers')
+const { contentRoot, lookBack } = require('../../compiler/fileSystem')
 
 const tempDir = () => {
   return mkdtemp(join(tmpdir(), 'writ-test-'))
 }
 
-test('cms/helpers', t => {
+test('compiler/fileSystem', t => {
   t.test('contentRootPath', async () => {
     try {
-      await contentRootPath()
+      await contentRoot()
       t.fail('if rootDirectory parameter is missing, throws exception')
     } catch (e) {
       t.pass('if rootDirectory parameter is missing, throws exception')
@@ -21,7 +21,7 @@ test('cms/helpers', t => {
     t.teardown(() => {
       rm(dir1, { recursive: true })
     })
-    const actual1 = await contentRootPath(resolve(dir1))
+    const actual1 = await contentRoot(resolve(dir1))
     const expected1 = resolve(dir1)
     t.equal(
       actual1,
@@ -33,7 +33,7 @@ test('cms/helpers', t => {
     t.teardown(() => {
       rm(dir2, { recursive: true })
     })
-    const actual2 = await contentRootPath(resolve(dir2), 'content')
+    const actual2 = await contentRoot(resolve(dir2), 'content')
     const expected2 = resolve(dir2)
     t.equal(
       actual2,
@@ -46,7 +46,7 @@ test('cms/helpers', t => {
     t.teardown(() => {
       rm(dir3, { recursive: true })
     })
-    const actual3 = await contentRootPath(resolve(dir3), 'content')
+    const actual3 = await contentRoot(resolve(dir3), 'content')
     const expected3 = resolve(dir3, 'content')
     t.equal(
       actual3,

@@ -1,11 +1,11 @@
 const express = require('express')
 
 module.exports = express.Router()
-  .get('/*', async (req, res, next) => {
-    const postPath = decodeURI(req.path)
+  .get('/', async (req, res, next) => {
+    const postHandle = decodeURI(req.query.handle)
     try {
       res.status(200).json(
-        await req.api.post.get(postPath, req.query)
+        await req.api.post.get(postHandle)
       )
     } catch (e) {
       console.log('Error getting post', e)

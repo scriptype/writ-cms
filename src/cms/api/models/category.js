@@ -1,7 +1,7 @@
 const { writeFile, mkdir, readdir } = require('fs/promises')
 const { join } = require('path')
 const frontMatter = require('front-matter')
-const { readFileContent, contentRootPath } = require('../helpers')
+const { contentRootPath } = require('../helpers')
 
 const helpers = {
   buildFrontMatter(metadata) {
@@ -21,9 +21,7 @@ const helpers = {
   }
 }
 
-const createCategoryModel = ({ getSettings }) => {
-  const { rootDirectory, contentDirectory } = getSettings()
-
+const createCategoryModel = ({ getSettings, getContentModel }) => {
   const createCategory = async ({
     name,
     content,
@@ -31,6 +29,7 @@ const createCategoryModel = ({ getSettings }) => {
     metadata,
     localAssets
   }) => {
+    const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
     const path = join(root, name)
     await mkdir(path)
@@ -41,24 +40,8 @@ const createCategoryModel = ({ getSettings }) => {
     }
   }
 
-  const getCategory = async (name) => {
-    const root = await contentRootPath(rootDirectory, contentDirectory)
-    const fullPath = join(root, name)
-    const dir = await readdir(fullPath)
-    const posts = dir
-      .filter(p => p !== 'category.md')
-      .filter(p => {
-        return (
-          /\.(md|markdown|hbs|handlebars|txt|html)$/.test(p) ||
-          !p.includes('.')
-        )
-      })
-      .filter(Boolean)
-      .map(p => p.replace(/\..+$/, ''))
-    return {
-      name: name.replace(/^\//, ''),
-      posts
-    }
+  const getCategory = (name) => {
+    return getContentModel().categories.find(c => c.name === name)
   }
 
   return {

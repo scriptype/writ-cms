@@ -17,22 +17,7 @@ const readFileContent = path => {
   return readFile(path, { encoding: 'utf-8' })
 }
 
-const isDirectory = async (path) => {
-  try {
-    return (await lstat(path)).isDirectory()
-  }
-  catch (ENOENT) {
-    return false
-  }
-}
-
-const lookBack = (path, depth) => {
-  return resolve(path, ...Array(depth).fill('..'))
-}
-
 module.exports = {
   contentRootPath,
-  readFileContent,
-  isDirectory,
-  lookBack
+  readFileContent
 }

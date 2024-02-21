@@ -10,10 +10,10 @@ const makeQueryString = (params) => {
   return query.toString()
 }
 
-const loadPost = (path, options) => {
+const loadPost = (options) => {
   const query = makeQueryString(options)
   const queryString = query ? `?${query}` : ''
-  return fetch(`/api/post/${path}${queryString}`, {
+  return fetch(`/api/post/${queryString}`, {
     method: 'get',
     headers: {
       'content-type': 'application/json'
@@ -21,22 +21,15 @@ const loadPost = (path, options) => {
   }).then(r => r.json())
 }
 
-const getPost = async () => {
+export default async () => {
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
-  const post = await loadPost('Türkçe/Olay ve Olasılık', {
-    extension: '.md',
-    foldered: true
+  const post = await loadPost({
+    handle: encodeURI('Türkçe/Olay ve Olasılık')
   })
 
-  dialogContent.innerHTML = `
-<pre>
-${JSON.stringify(post, null, 2)}
-</pre>
-  `
+  dialogContent.textContent = JSON.stringify(post, null, 2)
 }
-
-export default getPost

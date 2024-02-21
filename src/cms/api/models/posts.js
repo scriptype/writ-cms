@@ -1,8 +1,6 @@
-const createPostsModel = ({ getSettings }) => {
-  const getPosts = async (options) => {
-    return {
-      not: 'implemented'
-    }
+const createPostsModel = ({ getContentModel }) => {
+  const getPosts = () => {
+    return getContentModel().posts
   }
 
   return {

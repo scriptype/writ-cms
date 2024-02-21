@@ -58,7 +58,7 @@
             backdrop-filter: blur(10px);
         }
 
-        #dialog pre {
+        #dialog-content {
             white-space: pre-wrap;
         }
         </style>
@@ -67,11 +67,13 @@
     <body>
         <div class="container">
             <div class="panel explore-panel">
-                <button type="button" id="explore-tree-btn">explore tree</button>
                 <button type="button" id="get-settings-btn">get settings</button>
+                <button type="button" id="get-file-system-tree-btn">get fileSystemTree</button>
+                <button type="button" id="get-content-model-btn">get contentModel</button>
                 <button type="button" id="update-settings-btn">update settings</button>
                 <button type="button" id="get-category-btn">get category</button>
                 <button type="button" id="create-category-btn">create category</button>
+                <button type="button" id="get-posts-btn">get posts</button>
                 <button type="button" id="get-post-btn">get post</button>
                 <button type="button" id="create-post-btn">create post</button>
             </div>
@@ -83,7 +85,7 @@
             <form method="dialog">
                 <button autofocus>Close</button>
             </form>
-            <div id="dialog-content"></div>
+            <pre id="dialog-content"></pre>
         </dialog>
         <script type="module" src="app.js"></script>
     </body>

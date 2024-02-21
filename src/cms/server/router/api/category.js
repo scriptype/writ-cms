@@ -1,8 +1,8 @@
 const express = require('express')
 
 module.exports = express.Router()
-  .get('/*', async (req, res, next) => {
-    const categoryName = decodeURI(req.path)
+  .get('/:name', async (req, res, next) => {
+    const categoryName = decodeURI(req.params.name)
     try {
       res.status(200).json(
         await req.api.category.get(categoryName)

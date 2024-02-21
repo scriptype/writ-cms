@@ -2,10 +2,8 @@ const { join } = require('path')
 const { readFile, writeFile } = require('fs/promises')
 
 const createSettingsModel = ({ getSettings }) => {
-  const { rootDirectory } = getSettings()
-
   const updateSettings = async (patch) => {
-    const settingsJSONPath = join(rootDirectory, 'settings.json')
+    const settingsJSONPath = join(getSettings().rootDirectory, 'settings.json')
     let settingsJSON = {}
     try {
       settingsJSON = JSON.parse(await readFile(settingsJSONPath))

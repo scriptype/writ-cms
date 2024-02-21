@@ -1,7 +1,7 @@
 const query = document.querySelector.bind(document)
 
-const loadFSTree = (options) => {
-  return fetch('/api/fileSystem', {
+const loadFileSystemTree = () => {
+  return fetch('/api/fileSystemTree', {
     method: 'get',
     headers: {
       'content-type': 'application/json'
@@ -9,15 +9,13 @@ const loadFSTree = (options) => {
   }).then(r => r.json())
 }
 
-const exploreTree = async () => {
+export default async () => {
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
-  const fsTree = await loadFSTree()
-  dialogContent.innerHTML = `<pre></pre>`
-  dialogContent.querySelector('pre').textContent = JSON.stringify(fsTree, null, 2)
-}
+  const fileSystemTree = await loadFileSystemTree()
 
-export default exploreTree
+  dialogContent.textContent = JSON.stringify(fileSystemTree, null, 2)
+}

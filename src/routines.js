@@ -17,16 +17,12 @@ const createCMS = require('./cms')
 const startUp = async ({ mode, rootDirectory, debug, watch, refreshTheme, startCMSServer, ...rest }) => {
   Debug.init(debug)
   Debug.timeStart('> total')
-  await Settings.init({
-    mode,
-    rootDirectory
-  })
-  const cms = createCMS(Settings.getSettings())
+  const cms = createCMS()
   await run({
     mode,
     rootDirectory,
     refreshTheme,
-    cms,
+    finishCallback: cms.setState,
     ...rest
   })
   if (watch) {
@@ -38,18 +34,17 @@ const startUp = async ({ mode, rootDirectory, debug, watch, refreshTheme, startC
     return startWatcher({
       mode,
       rootDirectory,
-      cms,
+      finishCallback: cms.setState,
       ...rest
     })
   }
 }
 
-const run = async ({ mode, rootDirectory, refreshTheme, cms }) => {
+const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await Settings.init({
     mode,
     rootDirectory
   })
-  cms.setSettings(Settings.getSettings())
   await Expansions.init()
   Decorations.register(
     Dictionary.decorator(),
@@ -66,10 +61,13 @@ const run = async ({ mode, rootDirectory, refreshTheme, cms }) => {
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
-  await Compiler.compile({
-    api: cms.api
-  })
+  const { fileSystemTree, contentModel } = await Compiler.compile()
   await Assets.copyAssets()
+  finishCallback({
+    settings: Settings.getSettings(),
+    fileSystemTree,
+    contentModel
+  })
   Debug.timeEnd('> total')
   Debug.logTimes()
 }

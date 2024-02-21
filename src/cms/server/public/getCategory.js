@@ -9,7 +9,8 @@ const loadCategory = (name) => {
   }).then(r => r.json())
 }
 
-const getCategory = async () => {
+
+export default async () => {
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
@@ -17,13 +18,7 @@ const getCategory = async () => {
 
   const values = ['Türkçe', 'Photography', 'Writings']
   const value = values[Math.floor(Math.random() * values.length)]
-  const category = await loadCategory(value)
+  const category = await loadCategory(encodeURI(value))
 
-  dialogContent.innerHTML = `
-<pre>
-${JSON.stringify(category, null, 2)}
-</pre>
-  `
+  dialogContent.textContent = JSON.stringify(category, null, 2)
 }
-
-export default getCategory

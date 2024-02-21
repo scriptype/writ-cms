@@ -1,7 +1,7 @@
 const query = document.querySelector.bind(document)
 
-const loadSettings = () => {
-  return fetch('/api/settings', {
+const loadPosts = (options) => {
+  return fetch('/api/posts', {
     method: 'get',
     headers: {
       'content-type': 'application/json'
@@ -15,7 +15,7 @@ export default async () => {
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
-  const settings = await loadSettings()
+  const posts = await loadPosts()
 
-  dialogContent.textContent = JSON.stringify(settings, null, 2)
+  dialogContent.textContent = JSON.stringify(posts, null, 2)
 }
