@@ -188,7 +188,7 @@ test('builds after a file is deleted', async t => {
   })
 })
 
-test('empty folder in root is ignored', async t => {
+test('empty folder in root is an empty category', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
 
@@ -204,7 +204,7 @@ test('empty folder in root is ignored', async t => {
       exists: [folderName]
     },
     exportDirectoryPaths: {
-      notExists: [folderName, writ.helpers.getSlug(folderName)]
+      exists: [writ.helpers.getSlug(folderName)]
     }
   })
 })

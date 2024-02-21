@@ -54,10 +54,6 @@ const isHomepageFile = (fsObject) => {
   return isTemplateFile(fsObject) && fsObject.name.match(/^(homepage|home)\..+$/)
 }
 
-const isPostFolder = (fsObject) => {
-  return fsObject.children && fsObject.children.some(isFolderedPostIndexFile)
-}
-
 const newEntry = ({
   contentModel,
   key,
@@ -291,7 +287,7 @@ const createContentModel = (fsTree) => {
         withFolderedPost(contentModel, fsObject)
       )
     }
-    if (fsObject.children.some(c => isTemplateFile(c) || isPostFolder(c))) {
+    if (fsObject.children) {
       return withCategory(contentModel, fsObject)
     }
     return contentModel
