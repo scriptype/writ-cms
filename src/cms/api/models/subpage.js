@@ -21,8 +21,8 @@ const helpers = {
   }
 }
 
-const createPostModel = ({ getSettings, getContentModel }) => {
-  const createPost = async ({
+const createSubpageModel = ({ getSettings, getContentModel }) => {
+  const createSubpage = async ({
     title,
     content,
     extension,
@@ -30,26 +30,26 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     metadata,
     localAssets
   }) => {
-    const { rootDirectory, contentDirectory } = getSettings()
+    const { rootDirectory, pagesDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
-    const path = join(root, category || '', title)
+    const path = join(root, pagesDirectory, title)
     const frontMatter = helpers.buildFrontMatter(metadata)
     const fileContent = [frontMatter, content].join('\n')
     if (localAssets.length) {
       await mkdir(path, { recursive: true })
-      return writeFile(join(path, `post.${extension}`), fileContent)
+      return writeFile(join(path, `page.${extension}`), fileContent)
     }
     return writeFile(`${path}.${extension}`, fileContent)
   }
 
-  const getPost = (handle) => {
-    return getContentModel().posts.find(p => p.handle === handle)
+  const getSubpage = (title) => {
+    return getContentModel().subpages.find(p => p.title === title)
   }
 
   return {
-    create: createPost,
-    get: getPost
+    create: createSubpage,
+    get: getSubpage
   }
 }
 
-module.exports = createPostModel
+module.exports = createSubpageModel
