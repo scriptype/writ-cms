@@ -6,7 +6,7 @@ const withDates = async (entry) => {
   if (!entry.publishDatePrototype) {
     return entry
   }
-  const locale = Dictionary.locale
+  const locale = Dictionary.getLocale()
   const decoratedEntry = await decorate('publishDate', entry)
   const publishDate = new Date(decoratedEntry.publishDatePrototype.value)
   return {

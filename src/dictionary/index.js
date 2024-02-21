@@ -54,10 +54,13 @@ const Methods = (() => {
     return foreignLocale[key]
   }
 
+  const getLocale = () => State.locale
+
   return {
     init,
     lookup,
-    lookupForeign
+    lookupForeign,
+    getLocale
   }
 })()
 
