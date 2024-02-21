@@ -4,13 +4,18 @@ const Dictionary = require('../../dictionary')
 const { last } = require('../../helpers')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
-const { createSubpages } = require('./models/subpage')
 const { createHomepage } = require('./models/homepage')
 
 const {
   createCategory,
   createCategoryIndex
 } = require('./models/category')
+
+const {
+  createSubpage,
+  createFolderedSubpage,
+  createFolderedSubpageIndex
+} = require('./models/subpage')
 
 const {
   createPost,
@@ -35,6 +40,10 @@ const isTemplateFile = (fsObject) => {
 
 const isFolderedPostIndexFile = (fsObject) => {
   return isTemplateFile(fsObject) && fsObject.name.match(/^post\..+$/)
+}
+
+const isFolderedSubpageIndexFile = (fsObject) => {
+  return isTemplateFile(fsObject) && fsObject.name.match(/^page\..+$/)
 }
 
 const isCategoryIndexFile = (fsObject) => {
@@ -78,23 +87,28 @@ const newEntry = ({
   }
 }
 
+const upsertEntry = ({
+  contentModel,
+  key,
+  entryFn,
+  upsert
+}) => {
+  const collection = contentModel[key]
+  const foundEntry = collection.find(entryFn)
+  const newCollection = foundEntry ?
+    collection.map(entry => entry === foundEntry ? upsert(foundEntry) : entry) :
+    collection.concat(upsert())
+  return {
+    ...contentModel,
+    [key]: newCollection
+  }
+}
+
 const withAssets = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'assets',
     entryFn: () => createAssets(fsObject).data,
-    replace: true
-  })
-}
-
-const withSubpages = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'subpages',
-    entryFn: () => {
-      const subpages = createSubpages(fsObject)
-      return subpages.data.map(({ data }) => data)
-    },
     replace: true
   })
 }
@@ -113,6 +127,40 @@ const withHomepage = (contentModel, fsObject) => {
     key: 'homepage',
     entryFn: () => createHomepage(fsObject).data,
     replace: true
+  })
+}
+
+const withSubpages = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'subpages',
+    entryFn: () => {
+      const subpages = fsObject.children.map(mapSubpagesTree)
+      return subpages.filter(Boolean).map(({ data }) => data)
+    },
+    replace: true
+  })
+}
+
+const mapSubpagesTree = (fsObject) => {
+  if (isTemplateFile(fsObject)) {
+    return createSubpage(fsObject)
+  }
+  if (fsObject.children && fsObject.children.some(isFolderedSubpageIndexFile)) {
+    return createFolderedSubpage({
+      ...fsObject,
+      children: fsObject.children.map(mapFolderedSubpageTree)
+    })
+  }
+}
+
+const mapFolderedSubpageTree = (fsObject) => {
+  if (isFolderedSubpageIndexFile(fsObject)) {
+    return createFolderedSubpageIndex(fsObject)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
   })
 }
 
@@ -146,41 +194,21 @@ const withDefaultCategoryPost = (contentModel, fsObject) => {
   })
 }
 
-const withPostInCategory = (contentModel, category, post) => {
-  return {
-    ...contentModel,
-    categories: contentModel.categories.map(otherCategory => {
-      if (otherCategory.name !== category.name) {
-        return otherCategory
-      }
-      return {
-        ...otherCategory,
-        posts: otherCategory.posts.concat(post)
-      }
-    })
-  }
-}
-
 const withDefaultCategory = (contentModel) => {
   const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
-  const defaultCategory = contentModel.categories.find(
-    category => category.name === defaultCategoryName
-  )
   const post = _.cloneDeep(last(contentModel.posts))
-  if (defaultCategory) {
-    return withPostInCategory(contentModel, defaultCategory, post)
-  }
-  return newEntry({
+  return upsertEntry({
     contentModel,
     key: 'categories',
-    entryFn: () => {
-      const newCategory = createCategory({
+    entryFn: (entry) => entry.name === defaultCategoryName,
+    upsert: (entry) => {
+      const defaultCategory = entry || createCategory({
         name: defaultCategoryName,
         children: []
-      })
+      }).data
       return {
-        ...newCategory.data,
-        posts: [post]
+        ...defaultCategory,
+        posts: defaultCategory.posts.concat(post)
       }
     }
   })

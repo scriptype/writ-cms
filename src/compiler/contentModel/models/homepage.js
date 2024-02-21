@@ -13,7 +13,7 @@ const createHomepage = (fsObject) => {
     ...(fsObject || {}),
     type: contentTypes.HOMEPAGE,
     data: {
-      type: metadata.type || '',
+      type: metadata.type || 'basic',
       name: metadata.title || '',
       content: metadata.content || '',
       mentions: metadata.mentions || [],

@@ -31,7 +31,7 @@ const createCategory = (fsObject) => {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.CATEGORY,
     data: {
-      type: metadata.type || '',
+      type: metadata.type || 'basic',
       name: metadata.title || fsObject.name,
       content: metadata.content || '',
       summary: metadata.summary || '',
