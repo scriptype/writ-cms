@@ -8,7 +8,8 @@ const createAPI = (providers) => {
     posts: require('./models/posts')(providers),
     post: require('./models/post')(providers),
     subpages: require('./models/subpages')(providers),
-    subpage: require('./models/subpage')(providers)
+    subpage: require('./models/subpage')(providers),
+    homepage: require('./models/homepage')(providers)
   }
 }
 

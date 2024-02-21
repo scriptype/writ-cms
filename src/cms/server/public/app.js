@@ -11,6 +11,8 @@ import createPost from './createPost.js'
 import getSubpages from './getSubpages.js'
 import getSubpage from './getSubpage.js'
 import createSubpage from './createSubpage.js'
+import getHomepage from './getHomepage.js'
+import createHomepage from './createHomepage.js'
 
 const query = document.querySelector.bind(document)
 
@@ -28,6 +30,8 @@ const makeButtonsWork = () => {
   query('#get-subpages-btn').addEventListener('click', getSubpages)
   query('#get-subpage-btn').addEventListener('click', getSubpage)
   query('#create-subpage-btn').addEventListener('click', createSubpage)
+  query('#get-homepage-btn').addEventListener('click', getHomepage)
+  query('#create-homepage-btn').addEventListener('click', createHomepage)
 }
 
 const setIframeSrc = () => {
