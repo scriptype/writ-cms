@@ -78,6 +78,23 @@ const newEntry = ({
   }
 }
 
+const upsertEntry = ({
+  contentModel,
+  key,
+  entryFn,
+  upsert
+}) => {
+  const collection = contentModel[key]
+  const foundEntry = collection.find(entryFn)
+  const newCollection = foundEntry ?
+    collection.map(entry => entry === foundEntry ? upsert(foundEntry) : entry) :
+    collection.concat(upsert())
+  return {
+    ...contentModel,
+    [key]: newCollection
+  }
+}
+
 const withAssets = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
@@ -146,41 +163,21 @@ const withDefaultCategoryPost = (contentModel, fsObject) => {
   })
 }
 
-const withPostInCategory = (contentModel, category, post) => {
-  return {
-    ...contentModel,
-    categories: contentModel.categories.map(otherCategory => {
-      if (otherCategory.name !== category.name) {
-        return otherCategory
-      }
-      return {
-        ...otherCategory,
-        posts: otherCategory.posts.concat(post)
-      }
-    })
-  }
-}
-
 const withDefaultCategory = (contentModel) => {
   const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
-  const defaultCategory = contentModel.categories.find(
-    category => category.name === defaultCategoryName
-  )
   const post = _.cloneDeep(last(contentModel.posts))
-  if (defaultCategory) {
-    return withPostInCategory(contentModel, defaultCategory, post)
-  }
-  return newEntry({
+  return upsertEntry({
     contentModel,
     key: 'categories',
-    entryFn: () => {
-      const newCategory = createCategory({
+    entryFn: (entry) => entry.name === defaultCategoryName,
+    upsert: (entry) => {
+      const defaultCategory = entry || createCategory({
         name: defaultCategoryName,
         children: []
-      })
+      }).data
       return {
-        ...newCategory.data,
-        posts: [post]
+        ...defaultCategory,
+        posts: defaultCategory.posts.concat(post)
       }
     }
   })
