@@ -51,7 +51,7 @@ const isCategoryIndexFile = (fsObject) => {
 }
 
 const isHomepageFile = (fsObject) => {
-  return isTemplateFile(fsObject) && fsObject.name.match(/^(homepage|home)\..+$/)
+  return isTemplateFile(fsObject) && fsObject.name.match(/^(homepage|home|index)\..+$/)
 }
 
 const newEntry = ({
