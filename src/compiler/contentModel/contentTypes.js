@@ -1,12 +1,13 @@
 module.exports = {
-  POST: 'post',
-  FOLDERED_POST_INDEX: 'folderedPostIndex',
+  HOMEPAGE: 'homepage',
   CATEGORY: 'category',
   CATEGORY_INDEX: 'categoryIndex',
-  HOMEPAGE: 'homepage',
-  SUBPAGE: 'subpage',
+  POST: 'post',
+  FOLDERED_POST_INDEX: 'folderedPostIndex',
   SUBPAGES: 'subpages',
-  ASSET: 'asset',
+  SUBPAGE: 'subpage',
+  FOLDERED_SUBPAGE_INDEX: 'folderedSubpageIndex',
+  LOCAL_ASSET: 'localAsset',
   ASSETS: 'assets',
-  LOCAL_ASSET: 'localAsset'
+  ASSET: 'asset'
 }

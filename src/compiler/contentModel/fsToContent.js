@@ -4,13 +4,18 @@ const Dictionary = require('../../dictionary')
 const { last } = require('../../helpers')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
-const { createSubpages } = require('./models/subpage')
 const { createHomepage } = require('./models/homepage')
 
 const {
   createCategory,
   createCategoryIndex
 } = require('./models/category')
+
+const {
+  createSubpage,
+  createFolderedSubpage,
+  createFolderedSubpageIndex
+} = require('./models/subpage')
 
 const {
   createPost,
@@ -35,6 +40,10 @@ const isTemplateFile = (fsObject) => {
 
 const isFolderedPostIndexFile = (fsObject) => {
   return isTemplateFile(fsObject) && fsObject.name.match(/^post\..+$/)
+}
+
+const isFolderedSubpageIndexFile = (fsObject) => {
+  return isTemplateFile(fsObject) && fsObject.name.match(/^page\..+$/)
 }
 
 const isCategoryIndexFile = (fsObject) => {
@@ -104,18 +113,6 @@ const withAssets = (contentModel, fsObject) => {
   })
 }
 
-const withSubpages = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'subpages',
-    entryFn: () => {
-      const subpages = createSubpages(fsObject)
-      return subpages.data.map(({ data }) => data)
-    },
-    replace: true
-  })
-}
-
 const withLocalAsset = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
@@ -130,6 +127,40 @@ const withHomepage = (contentModel, fsObject) => {
     key: 'homepage',
     entryFn: () => createHomepage(fsObject).data,
     replace: true
+  })
+}
+
+const withSubpages = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'subpages',
+    entryFn: () => {
+      const subpages = fsObject.children.map(mapSubpagesTree)
+      return subpages.filter(Boolean).map(({ data }) => data)
+    },
+    replace: true
+  })
+}
+
+const mapSubpagesTree = (fsObject) => {
+  if (isTemplateFile(fsObject)) {
+    return createSubpage(fsObject)
+  }
+  if (fsObject.children && fsObject.children.some(isFolderedSubpageIndexFile)) {
+    return createFolderedSubpage({
+      ...fsObject,
+      children: fsObject.children.map(mapFolderedSubpageTree)
+    })
+  }
+}
+
+const mapFolderedSubpageTree = (fsObject) => {
+  if (isFolderedSubpageIndexFile(fsObject)) {
+    return createFolderedSubpageIndex(fsObject)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
   })
 }
 
