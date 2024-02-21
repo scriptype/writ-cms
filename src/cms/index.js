@@ -2,11 +2,21 @@ const createAPI = require('./api')
 const createServer = require('./server')
 
 const createCMS = (settings) => {
-  const api = createAPI(settings)
-  const server = createServer({ api })
+  const state = {
+    settings
+  }
+  const api = createAPI({
+    getSettings: () => state.settings
+  })
+  const server = createServer({
+    api
+  })
   return {
     api,
-    server
+    server,
+    setSettings(newSettings) {
+      state.settings = newSettings
+    }
   }
 }
 

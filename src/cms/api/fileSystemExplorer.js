@@ -7,12 +7,12 @@ const {
   lookBack
 } = require('./helpers')
 
-const fileSystemExplorer = (settings) => {
+const fileSystemExplorer = ({ getSettings }) => {
   const {
     rootDirectory,
     contentDirectory,
     IGNORE_PATHS_REG_EXP
-  } = settings
+  } = getSettings()
 
   const shouldIncludePath = (path) => {
     return (

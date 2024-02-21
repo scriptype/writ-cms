@@ -17,22 +17,18 @@ const createCMS = require('./cms')
 const startUp = async ({ mode, rootDirectory, debug, watch, refreshTheme, startCMSServer, ...rest }) => {
   Debug.init(debug)
   Debug.timeStart('> total')
-
   await Settings.init({
     mode,
     rootDirectory
   })
-
   const cms = createCMS(Settings.getSettings())
-
   await run({
     mode,
     rootDirectory,
     refreshTheme,
-    api: cms.api,
+    cms,
     ...rest
   })
-
   if (watch) {
     if (startCMSServer !== false) {
       cms.server.start({
@@ -42,17 +38,18 @@ const startUp = async ({ mode, rootDirectory, debug, watch, refreshTheme, startC
     return startWatcher({
       mode,
       rootDirectory,
-      api: cms.api,
+      cms,
       ...rest
     })
   }
 }
 
-const run = async ({ mode, rootDirectory, refreshTheme, api }) => {
+const run = async ({ mode, rootDirectory, refreshTheme, cms }) => {
   await Settings.init({
     mode,
     rootDirectory
   })
+  cms.setSettings(Settings.getSettings())
   await Expansions.init()
   Decorations.register(
     Dictionary.decorator(),
@@ -70,7 +67,7 @@ const run = async ({ mode, rootDirectory, refreshTheme, api }) => {
   await SiteDirectory.create()
   await CNAME.create()
   await Compiler.compile({
-    api
+    api: cms.api
   })
   await Assets.copyAssets()
   Debug.timeEnd('> total')

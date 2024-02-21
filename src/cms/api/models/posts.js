@@ -44,8 +44,8 @@ const helpers = {
   }
 }
 
-const createPostModel = (settings) => {
-  const { rootDirectory, contentDirectory } = settings
+const createPostModel = ({ getSettings }) => {
+  const { rootDirectory, contentDirectory } = getSettings()
 
   const createPost = async ({
     title,

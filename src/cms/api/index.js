@@ -1,7 +1,8 @@
-const createAPI = (settings) => {
+const createAPI = (providers) => {
   return {
-    posts: require('./models/posts')(settings),
-    fileSystemExplorer: require('./fileSystemExplorer')(settings)
+    settings: require('./models/settings')(providers),
+    posts: require('./models/posts')(providers),
+    fileSystemExplorer: require('./fileSystemExplorer')(providers)
   }
 }
 

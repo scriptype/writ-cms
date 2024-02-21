@@ -1,18 +1,16 @@
+import exploreTree from './fileSystem.js'
+import getSettings from './getSettings.js'
+import updateSettings from './updateSettings.js'
 import createPost from './createPost.js'
 import getPost from './getPost.js'
-import exploreTree from './fileSystem.js'
 
 const query = document.querySelector.bind(document)
 
 const makeButtonsWork = () => {
-  const exploreTreeBtn = query('#explore-tree-btn')
-  exploreTreeBtn.addEventListener('click', exploreTree)
-
-  const createPostBtn = query('#create-post-btn')
-  createPostBtn.addEventListener('click', createPost)
-
-  const getPostBtn = query('#get-post-btn')
-  getPostBtn.addEventListener('click', getPost)
+  query('#explore-tree-btn').addEventListener('click', exploreTree)
+  query('#get-settings-btn').addEventListener('click', getSettings)
+  query('#update-settings-btn').addEventListener('click', updateSettings)
+  query('#get-post-btn').addEventListener('click', getPost)
 }
 
 const setIframeSrc = () => {
