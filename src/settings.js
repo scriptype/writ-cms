@@ -26,9 +26,7 @@ const defaultSettings = (rootDirectory) => ({
     "settings.json",
     "CNAME"
   ],
-  expansions: [
-    "content-editor"
-  ],
+  expansions: [],
   revisionHistory: "manual", // auto | manual | off
   previewPort: 3000
 })

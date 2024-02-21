@@ -8,4 +8,4 @@ window.Preview = {
   PrimaryAction
 }
 
-window.Preview.Toolbar.init()
+// window.Preview.Toolbar.init()
