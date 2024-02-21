@@ -34,6 +34,19 @@
             border-radius: 1em;
         }
 
+        .explore-panel p {
+            text-align: center;
+            color: white;
+            margin: 0;
+            margin-top: 0px;
+            font-family: monaco;
+            font-size: 0.7em;
+        }
+
+        .explore-panel p:not(:first-of-type) {
+            margin-top: 1em;
+        }
+
         .preview-panel {
             height: 100%;
         }
@@ -67,13 +80,19 @@
     <body>
         <div class="container">
             <div class="panel explore-panel">
+                <p>settings</p>
                 <button type="button" id="get-settings-btn">get settings</button>
-                <button type="button" id="get-file-system-tree-btn">get fileSystemTree</button>
-                <button type="button" id="get-content-model-btn">get contentModel</button>
                 <button type="button" id="update-settings-btn">update settings</button>
+                <p>fileSystemTree</p>
+                <button type="button" id="get-file-system-tree-btn">get fileSystemTree</button>
+                <p>contentModel</p>
+                <button type="button" id="get-content-model-btn">get contentModel</button>
+                <p>category</p>
                 <button type="button" id="get-category-btn">get category</button>
                 <button type="button" id="create-category-btn">create category</button>
+                <p>posts</p>
                 <button type="button" id="get-posts-btn">get posts</button>
+                <p>post</p>
                 <button type="button" id="get-post-btn">get post</button>
                 <button type="button" id="create-post-btn">create post</button>
             </div>
