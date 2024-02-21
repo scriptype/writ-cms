@@ -13,7 +13,7 @@ const makeQueryString = (params) => {
 const loadPost = (path, options) => {
   const query = makeQueryString(options)
   const queryString = query ? `?${query}` : ''
-  return fetch(`/api/posts/${path}${queryString}`, {
+  return fetch(`/api/post/${path}${queryString}`, {
     method: 'get',
     headers: {
       'content-type': 'application/json'

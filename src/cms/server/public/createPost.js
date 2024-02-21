@@ -13,11 +13,11 @@ Sup`,
     },
     localAssets: []
   }
-  fetch('/api/posts', {
+  fetch('/api/post', {
+    method: 'put',
     headers: {
       'content-type': 'application/json'
     },
-    method: 'put',
     body: JSON.stringify(post)
   })
 }

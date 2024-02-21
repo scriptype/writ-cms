@@ -1,8 +1,8 @@
 import exploreTree from './fileSystem.js'
 import getSettings from './getSettings.js'
 import updateSettings from './updateSettings.js'
-import createPost from './createPost.js'
 import getPost from './getPost.js'
+import createPost from './createPost.js'
 
 const query = document.querySelector.bind(document)
 
@@ -11,6 +11,7 @@ const makeButtonsWork = () => {
   query('#get-settings-btn').addEventListener('click', getSettings)
   query('#update-settings-btn').addEventListener('click', updateSettings)
   query('#get-post-btn').addEventListener('click', getPost)
+  query('#create-post-btn').addEventListener('click', createPost)
 }
 
 const setIframeSrc = () => {
