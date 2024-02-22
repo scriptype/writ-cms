@@ -28,10 +28,10 @@ const renderPosts = (Renderer, { homepage, categories, posts, subpages }) => {
     if (post.foldered) {
       await mkdirPostFolder(post)
     }
-    const type = post.type
+    const partial = `pages/post/${post.type}`
     return Renderer.render({
       path: getExportPath(post),
-      content: `{{#>pages/post/${type}}}${post.content}{{/pages/post/${type}}}`,
+      content: `{{#>${partial}}}${post.content}{{/${partial}}}`,
       data: {
         ...post,
         homepage,

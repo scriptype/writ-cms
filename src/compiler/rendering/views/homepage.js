@@ -4,10 +4,10 @@ const Debug = require('../../../debug')
 
 const renderHomepage = (Renderer, { homepage, categories, posts, subpages }) => {
   const settings = Settings.getSettings()
-  const type = homepage.type
+  const partial = `pages/homepage/${homepage.type}`
   return Renderer.render({
     path: join(settings.out, 'index.html'),
-    content: `{{#>pages/homepage/${type}}}${homepage.content}{{/pages/homepage/${type}}}`,
+    content: `{{#>${partial}}}${homepage.content}{{/${partial}}}`,
     data: {
       ...homepage,
       posts,

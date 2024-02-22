@@ -29,10 +29,10 @@ const renderSubpages = (Renderer, { homepage, categories, posts, subpages }) => 
     if (subpage.foldered) {
       await mkdirSubpageFolder(subpage)
     }
-    const type = subpage.type
+    const partial = `pages/subpage/${subpage.type}`
     return Renderer.render({
       path: getExportPath(subpage),
-      content: `{{#>pages/subpage/${type}}}${subpage.content}{{/pages/subpage/${type}}}`,
+      content: `{{#>${partial}}}${subpage.content}{{/${partial}}}`,
       data: {
         ...subpage,
         homepage,

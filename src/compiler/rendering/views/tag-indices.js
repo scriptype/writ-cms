@@ -17,9 +17,10 @@ const renderBareTagPage = async (Renderer, { homepage, posts, categories, subpag
   }
   const settings = Settings.getSettings()
   await mkdir(join(settings.out, 'tag'))
+  const partial = `pages/homepage/${homepage.type}`
   return Renderer.render({
     path: join(settings.out, 'tag', 'index.html'),
-    content: `{{#>pages/homepage/basic}}${homepage.content}{{/pages/homepage/basic}}`,
+    content: `{{#>${partial}}}${homepage.content}{{/${partial}}}`,
     data: {
       posts,
       categories,
