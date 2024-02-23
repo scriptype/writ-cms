@@ -9,7 +9,9 @@ const createAPI = (providers) => {
     post: require('./models/post')(providers),
     subpages: require('./models/subpages')(providers),
     subpage: require('./models/subpage')(providers),
-    homepage: require('./models/homepage')(providers)
+    homepage: require('./models/homepage')(providers),
+    tags: require('./models/tags')(providers),
+    tag: require('./models/tag')(providers),
   }
 }
 

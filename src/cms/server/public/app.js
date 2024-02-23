@@ -1,18 +1,20 @@
-import getSettings from './getSettings.js'
-import updateSettings from './updateSettings.js'
-import getFileSystemTree from './getFileSystemTree.js'
-import getContentModel from './getContentModel.js'
-import getCategories from './getCategories.js'
-import getCategory from './getCategory.js'
-import createCategory from './createCategory.js'
-import getPosts from './getPosts.js'
-import getPost from './getPost.js'
-import createPost from './createPost.js'
-import getSubpages from './getSubpages.js'
-import getSubpage from './getSubpage.js'
-import createSubpage from './createSubpage.js'
-import getHomepage from './getHomepage.js'
-import createHomepage from './createHomepage.js'
+import getSettings from './api/getSettings.js'
+import updateSettings from './api/updateSettings.js'
+import getFileSystemTree from './api/getFileSystemTree.js'
+import getContentModel from './api/getContentModel.js'
+import getCategories from './api/getCategories.js'
+import getCategory from './api/getCategory.js'
+import createCategory from './api/createCategory.js'
+import getPosts from './api/getPosts.js'
+import getPost from './api/getPost.js'
+import createPost from './api/createPost.js'
+import getSubpages from './api/getSubpages.js'
+import getSubpage from './api/getSubpage.js'
+import createSubpage from './api/createSubpage.js'
+import getHomepage from './api/getHomepage.js'
+import createHomepage from './api/createHomepage.js'
+import getTags from './api/getTags.js'
+import getTag from './api/getTag.js'
 
 const query = document.querySelector.bind(document)
 
@@ -32,6 +34,8 @@ const makeButtonsWork = () => {
   query('#create-subpage-btn').addEventListener('click', createSubpage)
   query('#get-homepage-btn').addEventListener('click', getHomepage)
   query('#create-homepage-btn').addEventListener('click', createHomepage)
+  query('#get-tags-btn').addEventListener('click', getTags)
+  query('#get-tag-btn').addEventListener('click', getTag)
 }
 
 const setIframeSrc = () => {
