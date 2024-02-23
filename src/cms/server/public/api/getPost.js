@@ -22,13 +22,14 @@ const loadPost = (options) => {
 }
 
 export default async () => {
+  const postHandle = prompt('Enter post handle (e.g. Category/Post name)')
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
   const post = await loadPost({
-    handle: encodeURI('Türkçe/Olay ve Olasılık')
+    handle: encodeURI(postHandle)
   })
 
   dialogContent.textContent = JSON.stringify(post, null, 2)

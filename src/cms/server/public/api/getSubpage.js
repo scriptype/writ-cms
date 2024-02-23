@@ -22,13 +22,14 @@ const loadSubpage = (options) => {
 }
 
 export default async () => {
+  const subpageName = prompt('Enter subpage name')
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
   const subpage = await loadSubpage({
-    title: encodeURI('ipsum page')
+    title: encodeURI(subpageName)
   })
 
   dialogContent.textContent = JSON.stringify(subpage, null, 2)

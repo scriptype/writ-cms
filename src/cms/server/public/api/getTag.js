@@ -22,13 +22,14 @@ const loadTag = (options) => {
 }
 
 export default async () => {
+  const tagName = prompt('Enter tag name')
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
   const tag = await loadTag({
-    tag: 'kendim'
+    tag: tagName
   })
 
   dialogContent.textContent = JSON.stringify(tag, null, 2)

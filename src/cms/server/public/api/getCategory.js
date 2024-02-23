@@ -11,14 +11,13 @@ const loadCategory = (name) => {
 
 
 export default async () => {
+  const categoryName = prompt('Enter category name')
   const dialog = query('#dialog')
   const dialogContent = query('#dialog-content')
   dialog.showModal()
   dialogContent.textContent = 'Loading'
 
-  const values = ['Türkçe', 'Photography', 'Writings']
-  const value = values[Math.floor(Math.random() * values.length)]
-  const category = await loadCategory(encodeURI(value))
+  const category = await loadCategory(encodeURI(categoryName))
 
   dialogContent.textContent = JSON.stringify(category, null, 2)
 }
