@@ -1,10 +1,11 @@
-{{#>base page="tag"}}
+{{#>base page="tag-index"}}
   {{#>layouts/single-column}}
     <header {{region "header"}}>
       {{>components/header}}
     </header>
 
     <main {{region "main"}}>
+      <h2>{{lookup "tagIndexHeader" (map 'tag' tag.tag)}}</h2>
       {{>components/posts posts=tag.posts}}
     </main>
   {{/layouts/single-column}}

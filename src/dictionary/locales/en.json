@@ -6,5 +6,8 @@
   "search-results-title": "{{resultsCount}} posts found for <em>\"{{query}}\"</em>:",
   "search-no-results-1": "No results 😴",
   "search-no-results-2": "Nothing much 😐",
-  "search-no-results-3": "Try searching for something else 🐙"
+  "search-no-results-3": "Try searching for something else 🐙",
+  "tagsFoundHeader": "{{number}} tags are found.",
+  "tagsNotFoundHeader": "No tags found.",
+  "tagIndexHeader": "Posts tagged as \"{{tag}}\":"
 }

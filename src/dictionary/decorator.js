@@ -6,8 +6,8 @@ const createDictionaryDecorator = new DecoratorFactory((state, methods) => {
     templateHelpers: (value) => {
       return {
         ...value,
-        dictionary(key, ...params) {
-          return methods.lookup(key, ...params)
+        lookup(key, params) {
+          return methods.lookup(key, params)
         }
       }
     },

@@ -6,5 +6,8 @@
   "search-results-title": "{{resultsCount}} tulosta löytyi sanalle <em>\"{{query}}\"</em>:",
   "search-no-results-1": "Ei tuloksia 😴",
   "search-no-results-2": "Ei paljoa 😐",
-  "search-no-results-3": "Yritä etsiä jotain muuta 🐙"
+  "search-no-results-3": "Yritä etsiä jotain muuta 🐙",
+  "tagsFoundHeader": "{{number}} tunnistetta löytyy.",
+  "tagsNotFoundHeader": "Tunnisteita ei löytynyt.",
+  "tagIndexHeader": "Viestit tunnisteella \"{{tag}}\":"
 }

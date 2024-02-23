@@ -11,16 +11,16 @@ const mkTagDir = async (dirName) => {
   }
 }
 
-const renderBareTagPage = async (Renderer, { homepage, posts, categories, subpages, tags }) => {
+const renderTagIndex = async (Renderer, { homepage, posts, categories, subpages, tags }) => {
   if (!tags.length) {
     return Promise.resolve()
   }
   const settings = Settings.getSettings()
-  await mkdir(join(settings.out, 'tag'))
-  const partial = `pages/homepage/${homepage.type}`
+  const outPath = join(settings.out, 'tags')
+  await mkdir(outPath)
   return Renderer.render({
-    path: join(settings.out, 'tag', 'index.html'),
-    content: `{{#>${partial}}}${homepage.content}{{/${partial}}}`,
+    path: join(outPath, 'index.html'),
+    content: `{{>pages/tags}}`,
     data: {
       posts,
       categories,
@@ -33,17 +33,17 @@ const renderBareTagPage = async (Renderer, { homepage, posts, categories, subpag
 }
 
 const renderTagIndices = async (Renderer, contentModel) => {
-  await renderBareTagPage(Renderer, contentModel)
+  await renderTagIndex(Renderer, contentModel)
 
   const { tags } = contentModel
   const settings = Settings.getSettings()
 
   const compilation = tags.map(async tag => {
-    const dir = join(settings.out, 'tag', tag.slug)
-    await mkTagDir(dir)
+    const outPath = join(settings.out, 'tags', tag.slug)
+    await mkTagDir(outPath)
     return Renderer.render({
-      path: join(dir, 'index.html'),
-      content: '{{>pages/tag}}',
+      path: join(outPath, 'index.html'),
+      content: '{{>pages/tags/tag}}',
       data: {
         tag,
         categories: contentModel.categories,

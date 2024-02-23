@@ -24,16 +24,19 @@ const getTags = (posts) => {
 
   const { permalinkPrefix } = Settings.getSettings()
 
-  return Object.keys(tagsIndex).map(key => {
-    const slug = getSlug(key)
-    const permalink = join(permalinkPrefix, 'tag', slug)
-    return {
-      tag: key,
-      slug,
-      permalink,
-      posts: tagsIndex[key]
-    }
-  })
+  return Object
+    .keys(tagsIndex)
+    .map(key => {
+      const slug = getSlug(key)
+      const permalink = join(permalinkPrefix, 'tags', slug)
+      return {
+        tag: key,
+        slug,
+        permalink,
+        posts: tagsIndex[key]
+      }
+    })
+    .sort((a, b) => b.posts.length - a.posts.length)
 }
 
 module.exports = (contentModel) => {

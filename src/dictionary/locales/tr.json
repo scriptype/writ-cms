@@ -6,5 +6,8 @@
   "search-results-title": "<em>\"{{query}}\"</em> için {{resultsCount}} sonuç bulundu:",
   "search-no-results-1": "Sonuç yok 😴",
   "search-no-results-2": "Bulamadık 😐",
-  "search-no-results-3": "Başka bir şey aramayı deneyin 🐙"
+  "search-no-results-3": "Başka bir şey aramayı deneyin 🐙",
+  "tagsFoundHeader": "{{number}} etiket bulundu.",
+  "tagsNotFoundHeader": "Hiç etiket bulunamadı.",
+  "tagIndexHeader": "\"{{tag}}\" etiketli gönderiler:"
 }

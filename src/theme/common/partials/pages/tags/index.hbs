@@ -1,0 +1,21 @@
+{{#>base page="tags"}}
+  {{#>layouts/single-column}}
+    <header {{region "header"}}>
+      {{>components/header}}
+    </header>
+
+    <main {{region "main"}}>
+      {{#if tags.length}}
+        <h2>{{lookup 'tagsFoundHeader' (map 'number' tags.length)}}</h2>
+        <ul>
+          {{#each tags as |tag|}}
+            <li><a href="{{tag.permalink}}">{{tag.tag}}</a> ({{tag.posts.length}})</li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <h2>{{lookup 'tagsNotFoundHeader'}}</h2>
+      {{/if}}
+      {{>components/posts posts=tag.posts}}
+    </main>
+  {{/layouts/single-column}}
+{{/base}}

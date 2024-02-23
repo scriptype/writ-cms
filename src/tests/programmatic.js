@@ -332,7 +332,7 @@ test('creates tag indices', async t => {
 
   await common.builds(t, dir.name, {
     exportDirectoryPaths: {
-      notExists: ['tag']
+      notExists: ['tags']
     }
   })
 
@@ -349,12 +349,12 @@ test('creates tag indices', async t => {
 
   await common.builds(t, dir.name, {
     exportDirectoryPaths: {
-      exists: ['tag']
+      exists: ['tags']
     }
   })
 
   const { exportDirectory } = writ.getDefaultSettings()
-  const tagDirectoryContents = await readdir(join(dir.name, exportDirectory, 'tag'))
+  const tagDirectoryContents = await readdir(join(dir.name, exportDirectory, 'tags'))
   t.true(
     tags.every(tag => tagDirectoryContents.includes(tag)),
     'Creates tag indices'
@@ -362,13 +362,13 @@ test('creates tag indices', async t => {
 
   t.true(
     tagDirectoryContents.includes('index.html'),
-    'Creates bare tag page'
+    'Creates tags listing page'
   )
 
   const tagIndexFolders = await Promise.all(
     tagDirectoryContents
       .filter(tagIndex => tagIndex !== 'index.html')
-      .map(tagIndex => readdir(join(dir.name, exportDirectory, 'tag', tagIndex)))
+      .map(tagIndex => readdir(join(dir.name, exportDirectory, 'tags', tagIndex)))
   )
 
   t.true(
