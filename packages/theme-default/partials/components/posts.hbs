@@ -41,3 +41,14 @@
   {{/if}}
 
 {{/each}}
+
+{{#with pagination}}
+  <div class="pagination">
+    {{#if prevPage}}
+      <a href="{{prevPage}}">« Previous page</a>
+    {{/if}}
+    {{#if nextPage}}
+      <a href="{{nextPage}}">Next page »</a>
+    {{/if}}
+  </div>
+{{/with}}

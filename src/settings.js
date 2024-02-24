@@ -28,7 +28,8 @@ const defaultSettings = (rootDirectory) => ({
   ],
   expansions: [],
   revisionHistory: "manual", // auto | manual | off
-  previewPort: 3000
+  previewPort: 3000,
+  postsPerPage: 15
 })
 
 const getIgnoreRegExp = ({ ignorePaths, exportDirectory, themeDirectory }) => {
