@@ -2,6 +2,8 @@
   "search": "search",
   "nextPost": "next post",
   "prevPost": "previous post",
+  "nextPage": "Next page",
+  "previousPage": "Previous page",
   "defaultCategoryName": "Unclassified",
   "search-results-title": "{{resultsCount}} posts found for <em>\"{{query}}\"</em>:",
   "search-no-results-1": "No results 😴",

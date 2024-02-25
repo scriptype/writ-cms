@@ -4,6 +4,23 @@ const _ = require('lodash')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
+const getPageUrl = (baseUrl, pageIndex, pagination, isNextPage) => {
+  if (isNextPage && pageIndex === pagination.length - 1) {
+    return undefined
+  }
+  if (!isNextPage && pageIndex === 0) {
+    return undefined
+  }
+  if (!isNextPage && pageIndex === 1) {
+    return baseUrl
+  }
+  const pageNumber = isNextPage ? pageIndex + 2 : pageIndex
+  if (baseUrl === '/') {
+    return baseUrl + ['page', String(pageNumber)].join('/')
+  }
+  return [baseUrl, 'page', String(pageNumber)].join('/')
+}
+
 const renderHomepage = async (Renderer, { homepage, categories, posts, subpages }) => {
   const render = (outPath, pagination, paginationData) => {
     const partial = `pages/homepage/${homepage.type}`
@@ -66,16 +83,8 @@ const renderHomepage = async (Renderer, { homepage, categories, posts, subpages 
    * and pagination[n] as /page/n+1 */
   return pagination.map(async (page, i) => {
     const paginationData = {
-      prevPage: i === 0 ?
-        undefined :
-        i === 1 ?
-          homepage.permalink :
-          homepage.permalink + ['page', String(i)].join('/'),
-
-      nextPage: i === pagination.length - 1 ?
-        undefined :
-        homepage.permalink + ['page', String(i + 2)].join('/'),
-
+      prevPage: getPageUrl(homepage.permalink, i),
+      nextPage: getPageUrl(homepage.permalink, i, pagination, true),
       numberOfPages: pagination.length
     }
 
@@ -83,6 +92,7 @@ const renderHomepage = async (Renderer, { homepage, categories, posts, subpages 
       return render(indexOutPath, page, paginationData)
     }
 
+    // TODO: i18n
     const outPath = join(settings.out, 'page', String(i + 1))
     await mkdir(outPath, { recursive: true })
     return render(join(outPath, 'index.html'), page, paginationData)

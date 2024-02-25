@@ -45,10 +45,10 @@
 {{#with pagination}}
   <div class="pagination">
     {{#if prevPage}}
-      <a href="{{prevPage}}">« Previous page</a>
+      <a href="{{prevPage}}">« {{lookup "previousPage"}}</a>
     {{/if}}
     {{#if nextPage}}
-      <a href="{{nextPage}}">Next page »</a>
+      <a href="{{nextPage}}">{{lookup "nextPage"}} »</a>
     {{/if}}
   </div>
 {{/with}}

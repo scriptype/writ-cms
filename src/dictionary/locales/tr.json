@@ -2,6 +2,8 @@
   "search": "ara",
   "nextPost": "sonraki gönderi",
   "prevPost": "önceki gönderi",
+  "nextPage": "Sonraki sayfa",
+  "previousPage": "Önceki sayfa",
   "defaultCategoryName": "Karışık (Diğer)",
   "search-results-title": "<em>\"{{query}}\"</em> için {{resultsCount}} sonuç bulundu:",
   "search-no-results-1": "Sonuç yok 😴",
