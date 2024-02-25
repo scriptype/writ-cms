@@ -287,10 +287,7 @@ const createContentModel = (fsTree) => {
         withFolderedPost(contentModel, fsObject)
       )
     }
-    if (fsObject.children) {
-      return withCategory(contentModel, fsObject)
-    }
-    return contentModel
+    return withCategory(contentModel, fsObject)
   }, {
     assets: [],
     subpages: [],
