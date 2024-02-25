@@ -22,11 +22,11 @@ const getPageUrl = (baseUrl, pageIndex, pagination, isNextPage) => {
 }
 
 const renderHomepage = async (Renderer, { homepage, categories, posts, subpages }) => {
-  const render = (outPath, pagination, paginationData) => {
-    const partial = `pages/homepage/${homepage.type}`
+  const render = (outputPath, pagination, paginationData) => {
     return Renderer.render({
-      path: outPath,
-      content: `{{#>${partial}}}${homepage.content}{{/${partial}}}`,
+      template: `pages/homepage/${homepage.type}`,
+      outputPath: outputPath,
+      content: homepage.content,
       data: {
         ...homepage,
         pagination: paginationData,

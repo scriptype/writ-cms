@@ -16,11 +16,11 @@ const renderTagIndex = async (Renderer, { homepage, posts, categories, subpages,
     return Promise.resolve()
   }
   const settings = Settings.getSettings()
-  const outPath = join(settings.out, 'tags')
-  await mkdir(outPath)
+  const outputDir = join(settings.out, 'tags')
+  await mkdir(outputDir)
   return Renderer.render({
-    path: join(outPath, 'index.html'),
-    content: `{{>pages/tags}}`,
+    template: 'pages/tags',
+    outputPath: join(outputDir, 'index.html'),
     data: {
       posts,
       categories,
@@ -39,11 +39,11 @@ const renderTagIndices = async (Renderer, contentModel) => {
   const settings = Settings.getSettings()
 
   const compilation = tags.map(async tag => {
-    const outPath = join(settings.out, 'tags', tag.slug)
-    await mkTagDir(outPath)
+    const outputDir = join(settings.out, 'tags', tag.slug)
+    await mkTagDir(outputDir)
     return Renderer.render({
-      path: join(outPath, 'index.html'),
-      content: '{{>pages/tags/tag}}',
+      template: 'pages/tags/tag',
+      outputPath: join(outputDir, 'index.html'),
       data: {
         tag,
         categories: contentModel.categories,

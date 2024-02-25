@@ -60,15 +60,19 @@ const init = async () => {
   }, Promise.resolve())
 }
 
-const render = async ({ path, data, content }) => {
-  debugLog('rendering:', path)
-  const decoratedContent = await decorate('template', content)
-  const template = Handlebars.compile(decoratedContent, {
+const render = async ({ template: partial, outputPath, content, data }) => {
+  debugLog('rendering:', outputPath)
+
+  const templateToCompile = `{{#>${partial}}}${content}{{/${partial}}}`
+  const decoratedTemplate = await decorate('template', templateToCompile)
+
+  const template = Handlebars.compile(decoratedTemplate, {
     noEscape: true,
     preventIndent: true
   })
+
   const output = template(data)
-  return writeFile(path, output)
+  return writeFile(outputPath, output)
 }
 
 module.exports = {

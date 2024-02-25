@@ -16,10 +16,10 @@ const renderCategoryPages = (Renderer, { homepage, categories, posts, subpages }
   const compilation = categories.map(async category => {
     const dir = join(settings.out, category.slug)
     await mkdirCategoryFolder(dir)
-    const partial = `pages/category/${category.type}`
     return Renderer.render({
-      path: join(dir, 'index.html'),
-      content: `{{#>${partial}}}${category.content}{{/${partial}}}`,
+      template: `pages/category/${category.type}`,
+      outputPath: join(dir, 'index.html'),
+      content: category.content,
       data: {
         homepage,
         category,
