@@ -26,7 +26,7 @@ const attachPaging = (post, postIndex, posts) => {
     }
   }
   if (postIndex < posts.length - 1) {
-    paging.prevPost = {
+    paging.previousPost = {
       title: posts[postIndex + 1].title,
       permalink: posts[postIndex + 1].permalink
     }

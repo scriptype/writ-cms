@@ -83,7 +83,7 @@ const renderHomepage = async (Renderer, { homepage, categories, posts, subpages 
    * and pagination[n] as /page/n+1 */
   return pagination.map(async (page, i) => {
     const paginationData = {
-      prevPage: getPageUrl(homepage.permalink, i),
+      previousPage: getPageUrl(homepage.permalink, i),
       nextPage: getPageUrl(homepage.permalink, i, pagination, true),
       numberOfPages: pagination.length
     }

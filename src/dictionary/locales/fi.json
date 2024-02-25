@@ -1,7 +1,7 @@
 {
   "search": "hae",
   "nextPost": "seuraava postaus",
-  "prevPost": "edellinen postaus",
+  "previousPost": "edellinen postaus",
   "nextPage": "Seuraava sivu",
   "previousPage": "edellinen sivu",
   "defaultCategoryName": "Luokittelematon",
