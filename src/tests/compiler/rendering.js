@@ -1,4 +1,5 @@
-const { join } = require('path').posix
+const { join } = require('path')
+const { join: joinPosix } = require('path').posix
 const test = require('tape')
 const { getPageUrl, paginate } = require('../../compiler/rendering/helpers/pagination')
 const { filterPosts } = require('../../compiler/rendering/helpers/filterPosts')
@@ -18,26 +19,26 @@ const casesForGetPageUrl = (t, basePermalink) => {
 
   t.equal(
     getPageUrl(basePermalink, 0, ['a', 'b'], true),
-    join(basePermalink, '/page/2'),
+    joinPosix(basePermalink, '/page/2'),
     `${basePermalink} has correct nextPage url if there is next page`
   )
 
   t.equal(
     getPageUrl(basePermalink, 1),
     basePermalink,
-    `${join(basePermalink, '/page/2')} has correct previousPage url`
+    `${joinPosix(basePermalink, '/page/2')} has correct previousPage url`
   )
 
   t.equal(
     getPageUrl(basePermalink, 1, ['a', 'b'], true),
     undefined,
-    `${join(basePermalink, '/page/2')} does not have nextPage url if it is the last page`
+    `${joinPosix(basePermalink, '/page/2')} does not have nextPage url if it is the last page`
   )
 
   t.equal(
     getPageUrl(basePermalink, 1, ['a', 'b', 'c'], true),
-    join(basePermalink, '/page/3'),
-    `${join(basePermalink, '/page/2')} has correct nextPage url if there is next page`
+    joinPosix(basePermalink, '/page/3'),
+    `${joinPosix(basePermalink, '/page/2')} has correct nextPage url if there is next page`
   )
 }
 
@@ -56,11 +57,12 @@ test('compiler/rendering', t => {
 
   t.test('pagination.paginate (postsPerPage from settings)', async () => {
     let pageNumber = 0
+    const out = join('/', 'some', 'absolute', 'path', 'to', 'lorem')
     paginate({
       page: { permalink: '/lorem' },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
-      outPath: '/some/absolute/path/to/lorem',
+      outPath: out,
       render({ outputDir, outputPath, pageOfPosts, paginationData }) {
         if (pageNumber === 0) {
           t.equal(
@@ -71,7 +73,7 @@ test('compiler/rendering', t => {
 
           t.equal(
             outputPath,
-            '/some/absolute/path/to/lorem/index.html',
+            join(out, 'index.html'),
             'First page is rendered at the base outPath'
           )
 
@@ -100,7 +102,7 @@ test('compiler/rendering', t => {
 
           t.equal(
             outputPath,
-            '/some/absolute/path/to/lorem/page/2/index.html',
+            join(out, 'page', '2', 'index.html'),
             'Second page is rendered at the correct path'
           )
 
@@ -129,7 +131,7 @@ test('compiler/rendering', t => {
 
           t.equal(
             outputPath,
-            '/some/absolute/path/to/lorem/page/3/index.html',
+            join(out, 'page', '3', 'index.html'),
             'Third page is rendered at the correct path'
           )
 
@@ -159,11 +161,12 @@ test('compiler/rendering', t => {
 
   t.test('pagination.paginate (postsPerPage override from frontMatter)', async () => {
     let pageNumber = 0
+    const out = join('/', 'some', 'absolute', 'path', 'to', 'lorem')
     paginate({
       page: { permalink: '/lorem', 'posts per page': 3 },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
-      outPath: '/some/absolute/path/to/lorem',
+      outPath: out,
       render({ outputDir, outputPath, pageOfPosts, paginationData }) {
         if (pageNumber === 0) {
           t.equal(
@@ -174,7 +177,7 @@ test('compiler/rendering', t => {
 
           t.equal(
             outputPath,
-            '/some/absolute/path/to/lorem/index.html',
+            join(out, 'index.html'),
             'First page is rendered at the base outPath'
           )
 
@@ -203,7 +206,7 @@ test('compiler/rendering', t => {
 
           t.equal(
             outputPath,
-            '/some/absolute/path/to/lorem/page/2/index.html',
+            join(out, 'page', '2', 'index.html'),
             'Second page is rendered at the correct path'
           )
 
