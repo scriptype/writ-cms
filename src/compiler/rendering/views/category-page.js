@@ -1,24 +1,13 @@
-const { mkdir } = require('fs/promises')
 const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
-const mkdirCategoryFolder = async (dirName) => {
-  try {
-    return await mkdir(dirName)
-  } catch (EEXIST) {
-    return Promise.resolve(true)
-  }
-}
-
 const renderCategoryPages = (Renderer, { homepage, categories, posts, subpages }) => {
   const settings = Settings.getSettings()
-  const compilation = categories.map(async category => {
-    const dir = join(settings.out, category.slug)
-    await mkdirCategoryFolder(dir)
+  const compilation = categories.map(category => {
     return Renderer.render({
       template: `pages/category/${category.type}`,
-      outputPath: join(dir, 'index.html'),
+      outputPath: join(settings.out, category.slug, 'index.html'),
       content: category.content,
       data: {
         homepage,
@@ -32,7 +21,6 @@ const renderCategoryPages = (Renderer, { homepage, categories, posts, subpages }
       }
     })
   })
-
   return Promise.all(compilation)
 }
 

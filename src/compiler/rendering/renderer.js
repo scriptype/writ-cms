@@ -1,9 +1,9 @@
 const Handlebars = require('handlebars')
 const { stat, readdir, writeFile } = require('fs/promises')
-const { extname, join, resolve } = require('path')
-const { isDirectory, readFileContent } = require('../../helpers')
+const { dirname, extname, join } = require('path')
 const { debugLog } = require('../../debug')
 const { decorate } = require('../../decorations')
+const { isDirectory, readFileContent, ensureDirectory } = require('../../helpers')
 
 const isTemplateFile = (fileName) => {
   const extension = extname(fileName)
@@ -72,6 +72,7 @@ const render = async ({ template: partial, outputPath, content, data }) => {
   })
 
   const output = template(data)
+  await ensureDirectory(dirname(outputPath))
   return writeFile(outputPath, output)
 }
 

@@ -23,6 +23,14 @@ const isDirectory = async (path) => {
   }
 }
 
+const ensureDirectory = async (path) => {
+  try {
+    return await fs.mkdir(path)
+  } catch (e) { } finally {
+    return Promise.resolve(true)
+  }
+}
+
 const forbiddenChars = 'äÄåÅÉéi̇ıİİöÖüÜçÇğĞşŞ'
 const slugChars      = 'aaaaeeiiiioouuccggss'
 const forbiddenToEscape = '(){}[]'
@@ -79,6 +87,7 @@ module.exports = {
   readFileContent,
   loadJSON,
   isDirectory,
+  ensureDirectory,
   getSlug,
   removeExtension,
   replaceExtension,

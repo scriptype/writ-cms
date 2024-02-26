@@ -3,6 +3,7 @@ const { resolve, join, basename } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
 const { decorate } = require('./decorations')
+const { ensureDirectory } = require('./helpers')
 
 const getBasePath = async () => {
   const { rootDirectory, contentDirectory } = Settings.getSettings()
@@ -14,18 +15,9 @@ const getBasePath = async () => {
   }
 }
 
-const ensureDirectory = async (path) => {
-  Debug.debugLog('ensure directory', path)
-  try {
-    return await mkdir(path)
-  } catch (e) { } finally {
-    return Promise.resolve()
-  }
-}
-
 const ensureAssetsDirectory = () => {
-  Debug.debugLog('ensure assets directory')
   const { out, assetsDirectory } = Settings.getSettings()
+  Debug.debugLog('ensure assets directory', join(out, assetsDirectory))
   return ensureDirectory(join(out, assetsDirectory))
 }
 
@@ -57,6 +49,7 @@ const copyAsset = async ({ src, dest, rename }) => {
   Debug.debugLog('copy asset', src, dest)
   const { out, assetsDirectory } = Settings.getSettings()
   const targetDirectory = join(out, assetsDirectory, dest)
+  Debug.debugLog('ensure directory', targetDirectory)
   await ensureDirectory(targetDirectory)
   if (rename) {
     return cp(src, join(targetDirectory, rename))
