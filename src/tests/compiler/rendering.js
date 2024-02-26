@@ -157,6 +157,7 @@ test('compiler/rendering', t => {
         pageNumber++
       }
     })
+
     paginate({
       page: { permalink: '/lorem' },
       posts: ['a', 'b', 'c', 'd', 'e'],
@@ -185,6 +186,38 @@ test('compiler/rendering', t => {
           paginationData,
           undefined,
           'paginationData is not available when postsPerPage is 0'
+        )
+      }
+    })
+
+    paginate({
+      page: { permalink: '/lorem' },
+      posts: ['a', 'b', 'c', 'd', 'e'],
+      postsPerPage: 'something',
+      outPath: out,
+      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
+        t.equal(
+          outputDir,
+          undefined,
+          'No page folder is created when postsPerPage is not a number'
+        )
+
+        t.equal(
+          outputPath,
+          join(out, 'index.html'),
+          'Index page is rendered at the base outPath when postsPerPage is not a number'
+        )
+
+        t.deepEqual(
+          pageOfPosts,
+          ['a', 'b', 'c', 'd', 'e'],
+          'Index page gets all posts when postsPerPage is not a number'
+        )
+
+        t.deepEqual(
+          paginationData,
+          undefined,
+          'paginationData is not available when postsPerPage is not a number'
         )
       }
     })
@@ -263,6 +296,7 @@ test('compiler/rendering', t => {
         pageNumber++
       }
     })
+
     paginate({
       page: { permalink: '/lorem', 'posts per page': 0 },
       posts: ['a', 'b', 'c', 'd', 'e'],
@@ -291,6 +325,38 @@ test('compiler/rendering', t => {
           paginationData,
           undefined,
           'paginationData is not available when postsPerPage is 0 (override)'
+        )
+      }
+    })
+
+    paginate({
+      page: { permalink: '/lorem', 'posts per page': 'anything' },
+      posts: ['a', 'b', 'c', 'd', 'e'],
+      postsPerPage: 2,
+      outPath: out,
+      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
+        t.equal(
+          outputDir,
+          undefined,
+          'No page folder is created when postsPerPage is not a number (override)'
+        )
+
+        t.equal(
+          outputPath,
+          join(out, 'index.html'),
+          'Index page is rendered at the base outPath when postsPerPage is not a number (override)'
+        )
+
+        t.deepEqual(
+          pageOfPosts,
+          ['a', 'b', 'c', 'd', 'e'],
+          'Index page gets all posts when postsPerPage is not a number (override)'
+        )
+
+        t.deepEqual(
+          paginationData,
+          undefined,
+          'paginationData is not available when postsPerPage is not a number (override)'
         )
       }
     })

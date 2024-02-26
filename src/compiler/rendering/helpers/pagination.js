@@ -22,7 +22,8 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outPath, render })
   // TODO: i18n
   const paginationSettingOverride = page['posts per page']
 
-  const postsPerPage = typeof paginationSettingOverride === 'number' ?
+  // Override should take effect and either work or turn off pagination completely
+  const postsPerPage = (paginationSettingOverride || typeof paginationSettingOverride === 'number') ?
     paginationSettingOverride :
     _postsPerPage
 
