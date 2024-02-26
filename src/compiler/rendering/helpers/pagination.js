@@ -1,8 +1,5 @@
-const { mkdir } = require('fs/promises')
 const { join } = require('path')
-const { join: posixJoin } = require('path').posix
 const _ = require('lodash')
-const Settings = require('../../../settings')
 
 const getPageUrl = (basePermalink, pageIndex, pagination, isNextPage) => {
   if (isNextPage && pageIndex === pagination.length - 1) {
@@ -21,24 +18,28 @@ const getPageUrl = (basePermalink, pageIndex, pagination, isNextPage) => {
   return [basePermalink, 'page', String(pageNumber)].join('/')
 }
 
-const paginate = ({ page, posts, outPath, render }) => {
-  const settings = Settings.getSettings()
-
+const paginate = ({ page, posts, postsPerPage: _postsPerPage, outPath, render }) => {
   // TODO: i18n
   const paginationSettingOverride = page['posts per page']
 
   const postsPerPage = typeof paginationSettingOverride === 'number' ?
     paginationSettingOverride :
-    settings.postsPerPage
+    _postsPerPage
 
   if (postsPerPage <= 0 || typeof postsPerPage !== 'number') {
-    return render(join(outPath, 'index.html'), posts)
+    return render({
+      outputPath: join(outPath, 'index.html'),
+      pageOfPosts: posts
+    })
   }
 
   const pagination = _.chunk(posts, postsPerPage)
 
   if (!pagination.length) {
-    return render(join(outPath, 'index.html'), [])
+    return render({
+      outputPath: join(outPath, 'index.html'),
+      pageOfPosts: []
+    })
   }
 
   const basePermalink = page.permalink
@@ -53,13 +54,21 @@ const paginate = ({ page, posts, outPath, render }) => {
     }
 
     if (i === 0) {
-      return render(join(outPath, 'index.html'), pageOfPosts, paginationData)
+      return render({
+        outputPath: join(outPath, 'index.html'),
+        pageOfPosts,
+        paginationData
+      })
     }
 
     // TODO: i18n
-    const pageOutPath = join(outPath, 'page', String(i + 1))
-    await mkdir(pageOutPath, { recursive: true })
-    return render(join(pageOutPath, 'index.html'), pageOfPosts, paginationData)
+    const outputDir = join(outPath, 'page', String(i + 1))
+    return render({
+      outputDir,
+      outputPath: join(outputDir, 'index.html'),
+      pageOfPosts,
+      paginationData
+    })
   })
 }
 
