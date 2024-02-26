@@ -96,7 +96,7 @@ test('compiler/rendering', t => {
         if (pageNumber === 1) {
           t.equal(
             outputDir,
-            '/some/absolute/path/to/lorem/page/2',
+            join(out, 'page', '2'),
             'Correct page folder is created for second page'
           )
 
@@ -125,7 +125,7 @@ test('compiler/rendering', t => {
         if (pageNumber === 2) {
           t.equal(
             outputDir,
-            '/some/absolute/path/to/lorem/page/3',
+            join(out, 'page', '3'),
             'Correct page folder is created for third page'
           )
 
@@ -200,7 +200,7 @@ test('compiler/rendering', t => {
         if (pageNumber === 1) {
           t.equal(
             outputDir,
-            '/some/absolute/path/to/lorem/page/2',
+            join(out, 'page', '2'),
             'Correct page folder is created for second page'
           )
 
