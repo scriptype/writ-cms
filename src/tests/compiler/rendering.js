@@ -157,6 +157,37 @@ test('compiler/rendering', t => {
         pageNumber++
       }
     })
+    paginate({
+      page: { permalink: '/lorem' },
+      posts: ['a', 'b', 'c', 'd', 'e'],
+      postsPerPage: 0,
+      outPath: out,
+      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
+        t.equal(
+          outputDir,
+          undefined,
+          'No page folder is created when postsPerPage is 0'
+        )
+
+        t.equal(
+          outputPath,
+          join(out, 'index.html'),
+          'Index page is rendered at the base outPath when postsPerPage is 0'
+        )
+
+        t.deepEqual(
+          pageOfPosts,
+          ['a', 'b', 'c', 'd', 'e'],
+          'Index page gets all posts when postsPerPage is 0'
+        )
+
+        t.deepEqual(
+          paginationData,
+          undefined,
+          'paginationData is not available when postsPerPage is 0'
+        )
+      }
+    })
   })
 
   t.test('pagination.paginate (postsPerPage override from frontMatter)', async () => {
@@ -230,6 +261,37 @@ test('compiler/rendering', t => {
           t.fail('There should not be a third page')
         }
         pageNumber++
+      }
+    })
+    paginate({
+      page: { permalink: '/lorem', 'posts per page': 0 },
+      posts: ['a', 'b', 'c', 'd', 'e'],
+      postsPerPage: 2,
+      outPath: out,
+      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
+        t.equal(
+          outputDir,
+          undefined,
+          'No page folder is created when postsPerPage is 0 (override)'
+        )
+
+        t.equal(
+          outputPath,
+          join(out, 'index.html'),
+          'Index page is rendered at the base outPath when postsPerPage is 0 (override)'
+        )
+
+        t.deepEqual(
+          pageOfPosts,
+          ['a', 'b', 'c', 'd', 'e'],
+          'Index page gets all posts when postsPerPage is 0 (override)'
+        )
+
+        t.deepEqual(
+          paginationData,
+          undefined,
+          'paginationData is not available when postsPerPage is 0 (override)'
+        )
       }
     })
   })
