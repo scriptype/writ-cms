@@ -31,7 +31,7 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
     const path = join(root, 'homepage')
-    const frontMatter = helpers.buildFrontMatter(metadata)
+    const frontMatter = helpers.buildFrontMatter({ title, ...metadata })
     const fileContent = [frontMatter, content].join('\n')
     return writeFile(`${path}.${extension}`, fileContent)
   }

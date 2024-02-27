@@ -53,6 +53,9 @@ module.exports = {
     if (this.page === 'tag') {
       return `#${this.tag.tag} / ${this.settings.site.title}`
     }
+    if (this.page === 'homepage' && this.homepage.title) {
+      return `${this.homepage.title} / ${this.settings.site.title}`
+    }
     return `${this.settings.site.title}`
   },
 

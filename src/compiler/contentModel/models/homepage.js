@@ -14,7 +14,7 @@ const createHomepage = (fsObject) => {
     type: contentTypes.HOMEPAGE,
     data: {
       type: metadata.type || 'basic',
-      name: metadata.title || '',
+      title: metadata.title || '',
       content: metadata.content || '',
       mentions: metadata.mentions || [],
       ...metadata.attributes,
