@@ -5,15 +5,13 @@ const withDates = require('./enhancers/dates')
 const withSortedPosts = require('./enhancers/sorting')
 const withTags = require('./enhancers/tags')
 const withLinkedPosts = require('./enhancers/links')
-const withPostsJSON = require('./enhancers/postsJSON')
 
 const create = async (fileSystemTree) => {
   const contentModel = pipe(await createContentModel(fileSystemTree), [
     withDates,
     withSortedPosts,
     withTags,
-    withLinkedPosts,
-    withPostsJSON
+    withLinkedPosts
   ])
   return decorate('contentModel', contentModel)
 }

@@ -295,7 +295,6 @@ const createContentModel = (fsTree) => {
     posts: [],
     homepage: createHomepage().data,
     localAssets: [],
-    postsJSON: [],
     tags: []
   })
 }
