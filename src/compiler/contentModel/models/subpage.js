@@ -36,7 +36,7 @@ const getTranscript = (metadata, localAssets) => {
 }
 
 const _createSubpage = (fsObject, { foldered }) => {
-  const { permalinkPrefix, pagesDirectory, site } = Settings.getSettings()
+  const { permalinkPrefix, pagesDirectory } = Settings.getSettings()
 
   const pageFile = foldered ?
     fsObject.children.find(isFolderedSubpageIndex) :
@@ -70,7 +70,6 @@ const _createSubpage = (fsObject, { foldered }) => {
       slug,
       permalink,
       path: pageFile.path.replace(new RegExp(`^${pagesDirectory}`), ''),
-      site,
       foldered,
       localAssets,
       transcript: getTranscript(metadata, localAssets)

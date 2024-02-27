@@ -95,7 +95,6 @@ const _createPost = (fsObject, { categorized, foldered }) => {
       category: getPostCategory(fsObject, categorized),
       path: postFile.path,
       handle: removeExtension(fsObject.path),
-      site: Settings.getSettings().site,
       foldered,
       localAssets,
       transcript: getTranscript(metadata, localAssets),
