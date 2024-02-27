@@ -11,12 +11,9 @@ const Views = {
 }
 
 module.exports = {
-  renderPromise: Promise.resolve(true),
   async render(contentModel) {
-    await this.renderPromise
     await Renderer.init()
-
-    this.renderPromise = Promise.all([
+    return Promise.all([
       Views.renderHomepage(Renderer, contentModel),
       Views.renderTags(Renderer, contentModel),
       Views.renderSubpages(Renderer, contentModel),
@@ -25,7 +22,5 @@ module.exports = {
       Views.renderCategoryPages(Renderer, contentModel)
         .then(() => Views.renderPosts(Renderer, contentModel))
     ])
-
-    return this.renderPromise
   }
 }
