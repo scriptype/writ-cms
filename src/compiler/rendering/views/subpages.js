@@ -2,9 +2,9 @@ const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
-const renderSubpages = (Renderer, { homepage, categories, posts, subpages }) => {
+const renderSubpages = (Renderer, contentModel) => {
   const settings = Settings.getSettings()
-  const compilation = subpages.map(subpage => {
+  const compilation = contentModel.subpages.map(subpage => {
     const outputPath = join(
       settings.out,
       subpage.permalink,
@@ -15,11 +15,8 @@ const renderSubpages = (Renderer, { homepage, categories, posts, subpages }) => 
       outputPath,
       content: subpage.content,
       data: {
-        ...subpage,
-        homepage,
-        posts,
-        categories,
-        subpages,
+        ...contentModel,
+        subpage,
         settings,
         debug: Debug.getDebug()
       }

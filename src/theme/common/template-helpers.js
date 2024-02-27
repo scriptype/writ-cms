@@ -45,7 +45,7 @@ module.exports = {
 
   pageTitle() {
     if (this.page === 'post' || this.page === 'subpage') {
-      return `${this.title} / ${this.settings.site.title}`
+      return `${this.post.title} / ${this.settings.site.title}`
     }
     if (this.page === 'category') {
       return `${this.category.name} / ${this.settings.site.title}`

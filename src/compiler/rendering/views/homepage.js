@@ -3,8 +3,9 @@ const Debug = require('../../../debug')
 const { paginate } = require('../helpers/pagination')
 const { filterPosts } = require('../helpers/filterPosts')
 
-const renderHomepage = async (Renderer, { homepage, categories, posts, subpages }) => {
+const renderHomepage = async (Renderer, contentModel) => {
   const settings = Settings.getSettings()
+  const { homepage, posts } = contentModel
   return paginate({
     page: homepage,
     posts: filterPosts(homepage, posts),
@@ -16,11 +17,10 @@ const renderHomepage = async (Renderer, { homepage, categories, posts, subpages 
         outputPath,
         content: homepage.content,
         data: {
-          ...homepage,
+          ...contentModel,
+          homepage,
           pagination: paginationData,
           posts: pageOfPosts,
-          categories,
-          subpages,
           settings,
           debug: Debug.getDebug()
         }
