@@ -62,19 +62,13 @@ test('compiler/rendering', t => {
       page: { permalink: '/lorem' },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
-      outPath: out,
-      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
+      outputDir: out,
+      render({ outputPath, pageOfPosts, paginationData }) {
         if (pageNumber === 0) {
-          t.equal(
-            outputDir,
-            undefined,
-            'No page folder is created for index page'
-          )
-
           t.equal(
             outputPath,
             join(out, 'index.html'),
-            'First page is rendered at the base outPath'
+            'First page is rendered at the base outputDir'
           )
 
           t.deepEqual(
@@ -94,12 +88,6 @@ test('compiler/rendering', t => {
           )
         }
         if (pageNumber === 1) {
-          t.equal(
-            outputDir,
-            join(out, 'page', '2'),
-            'Correct page folder is created for second page'
-          )
-
           t.equal(
             outputPath,
             join(out, 'page', '2', 'index.html'),
@@ -123,12 +111,6 @@ test('compiler/rendering', t => {
           )
         }
         if (pageNumber === 2) {
-          t.equal(
-            outputDir,
-            join(out, 'page', '3'),
-            'Correct page folder is created for third page'
-          )
-
           t.equal(
             outputPath,
             join(out, 'page', '3', 'index.html'),
@@ -162,18 +144,12 @@ test('compiler/rendering', t => {
       page: { permalink: '/lorem' },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 0,
-      outPath: out,
-      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputDir,
-          undefined,
-          'No page folder is created when postsPerPage is 0'
-        )
-
+      outputDir: out,
+      render({ outputPath, pageOfPosts, paginationData }) {
         t.equal(
           outputPath,
           join(out, 'index.html'),
-          'Index page is rendered at the base outPath when postsPerPage is 0'
+          'Index page is rendered at the base outputDir when postsPerPage is 0'
         )
 
         t.deepEqual(
@@ -194,18 +170,12 @@ test('compiler/rendering', t => {
       page: { permalink: '/lorem' },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 'something',
-      outPath: out,
-      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputDir,
-          undefined,
-          'No page folder is created when postsPerPage is not a number'
-        )
-
+      outputDir: out,
+      render({ outputPath, pageOfPosts, paginationData }) {
         t.equal(
           outputPath,
           join(out, 'index.html'),
-          'Index page is rendered at the base outPath when postsPerPage is not a number'
+          'Index page is rendered at the base outputDir when postsPerPage is not a number'
         )
 
         t.deepEqual(
@@ -230,19 +200,13 @@ test('compiler/rendering', t => {
       page: { permalink: '/lorem', 'posts per page': 3 },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
-      outPath: out,
-      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
+      outputDir: out,
+      render({ outputPath, pageOfPosts, paginationData }) {
         if (pageNumber === 0) {
-          t.equal(
-            outputDir,
-            undefined,
-            'No page folder is created for index page'
-          )
-
           t.equal(
             outputPath,
             join(out, 'index.html'),
-            'First page is rendered at the base outPath'
+            'First page is rendered at the base outputDir'
           )
 
           t.deepEqual(
@@ -262,12 +226,6 @@ test('compiler/rendering', t => {
           )
         }
         if (pageNumber === 1) {
-          t.equal(
-            outputDir,
-            join(out, 'page', '2'),
-            'Correct page folder is created for second page'
-          )
-
           t.equal(
             outputPath,
             join(out, 'page', '2', 'index.html'),
@@ -301,18 +259,12 @@ test('compiler/rendering', t => {
       page: { permalink: '/lorem', 'posts per page': 0 },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
-      outPath: out,
-      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputDir,
-          undefined,
-          'No page folder is created when postsPerPage is 0 (override)'
-        )
-
+      outputDir: out,
+      render({ outputPath, pageOfPosts, paginationData }) {
         t.equal(
           outputPath,
           join(out, 'index.html'),
-          'Index page is rendered at the base outPath when postsPerPage is 0 (override)'
+          'Index page is rendered at the base outputDir when postsPerPage is 0 (override)'
         )
 
         t.deepEqual(
@@ -333,18 +285,12 @@ test('compiler/rendering', t => {
       page: { permalink: '/lorem', 'posts per page': 'anything' },
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
-      outPath: out,
-      render({ outputDir, outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputDir,
-          undefined,
-          'No page folder is created when postsPerPage is not a number (override)'
-        )
-
+      outputDir: out,
+      render({ outputPath, pageOfPosts, paginationData }) {
         t.equal(
           outputPath,
           join(out, 'index.html'),
-          'Index page is rendered at the base outPath when postsPerPage is not a number (override)'
+          'Index page is rendered at the base outputDir when postsPerPage is not a number (override)'
         )
 
         t.deepEqual(

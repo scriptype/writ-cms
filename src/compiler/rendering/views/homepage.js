@@ -1,4 +1,3 @@
-const { mkdir } = require('fs/promises')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 const { paginate } = require('../helpers/pagination')
@@ -10,11 +9,8 @@ const renderHomepage = async (Renderer, { homepage, categories, posts, subpages 
     page: homepage,
     posts: filterPosts(homepage, posts),
     postsPerPage: settings.postsPerPage,
-    outPath: settings.out,
-    render: async ({ outputDir, outputPath, pageOfPosts, paginationData }) => {
-      if (outputDir) {
-        await mkdir(outputDir, { recursive: true })
-      }
+    outputDir: settings.out,
+    render: async ({ outputPath, pageOfPosts, paginationData }) => {
       return Renderer.render({
         template: `pages/homepage/${homepage.type}`,
         outputPath,

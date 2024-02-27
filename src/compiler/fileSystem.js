@@ -1,8 +1,8 @@
 const { stat, readdir } = require('fs/promises')
 const { join, relative, resolve, extname } = require('path')
-const { readFileContent, isDirectory } = require('../helpers')
+const { readFileContent, contentRoot, isDirectory } = require('../helpers')
 const Settings = require('../settings')
-const { debugLog, timeStart, timeEnd } = require('../debug')
+const { debugLog } = require('../debug')
 
 const shouldIncludePath = (path) => {
   const { IGNORE_PATHS_REG_EXP } = Settings.getSettings()
@@ -29,20 +29,6 @@ const isTextFile = (extension) => {
     'srt'
   ]
   return new RegExp(`\.(${acceptedExtensions.join('|')})`, 'i').test(extension)
-}
-
-const contentRoot = async (rootDirectory, contentDirectory) => {
-  if (!rootDirectory) {
-    throw new Error('rootDirectory is a required parameter')
-  }
-  try {
-    await stat(join(rootDirectory, contentDirectory))
-    debugLog('contentRoot', join(rootDirectory, contentDirectory))
-    return join(rootDirectory, contentDirectory)
-  } catch (ENOENT) {
-    debugLog('contentRoot', rootDirectory)
-    return rootDirectory
-  }
 }
 
 const lookBack = (path, depth) => {
@@ -90,13 +76,13 @@ const _explore = async (currentPath, depth = 0) => {
 const exploreTree = async () => {
   const { rootDirectory, contentDirectory } = Settings.getSettings()
   const root = await contentRoot(rootDirectory, contentDirectory)
+  debugLog('contentRoot', root)
   return _explore(root)
 }
 
 module.exports = {
   shouldIncludePath,
   isTextFile,
-  contentRoot,
   lookBack,
   exploreTree
 }

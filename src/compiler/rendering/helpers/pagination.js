@@ -18,7 +18,7 @@ const getPageUrl = (basePermalink, pageIndex, pagination, isNextPage) => {
   return [basePermalink, 'page', String(pageNumber)].join('/')
 }
 
-const paginate = ({ page, posts, postsPerPage: _postsPerPage, outPath, render }) => {
+const paginate = ({ page, posts, postsPerPage: _postsPerPage, outputDir, render }) => {
   // TODO: i18n
   const paginationSettingOverride = page['posts per page']
 
@@ -29,7 +29,7 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outPath, render })
 
   if (postsPerPage <= 0 || typeof postsPerPage !== 'number') {
     return render({
-      outputPath: join(outPath, 'index.html'),
+      outputPath: join(outputDir, 'index.html'),
       pageOfPosts: posts
     })
   }
@@ -38,7 +38,7 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outPath, render })
 
   if (!pagination.length) {
     return render({
-      outputPath: join(outPath, 'index.html'),
+      outputPath: join(outputDir, 'index.html'),
       pageOfPosts: []
     })
   }
@@ -56,17 +56,15 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outPath, render })
 
     if (i === 0) {
       return render({
-        outputPath: join(outPath, 'index.html'),
+        outputPath: join(outputDir, 'index.html'),
         pageOfPosts,
         paginationData
       })
     }
 
     // TODO: i18n
-    const outputDir = join(outPath, 'page', String(i + 1))
     return render({
-      outputDir,
-      outputPath: join(outputDir, 'index.html'),
+      outputPath: join(outputDir, 'page', String(i + 1), 'index.html'),
       pageOfPosts,
       paginationData
     })

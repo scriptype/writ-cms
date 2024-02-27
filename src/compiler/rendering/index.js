@@ -22,10 +22,10 @@ module.exports = {
       Views.renderSubpages(Renderer, contentModel),
       Views.renderPostsJSON(contentModel),
       Views.copyLocalAssets(contentModel),
-      Views.renderCategoryPages(Renderer, contentModel),
-    ]).then(() =>
-      Views.renderPosts(Renderer, contentModel)
-    )
+      Views.renderCategoryPages(Renderer, contentModel)
+        .then(() => Views.renderPosts(Renderer, contentModel))
+    ])
+
     return this.renderPromise
   }
 }

@@ -1,5 +1,18 @@
+const { join } = require('path')
 const fs = require('fs/promises')
 const { extname } = require('path')
+
+const contentRoot = async (rootDirectory, contentDirectory) => {
+  if (!rootDirectory) {
+    throw new Error('rootDirectory is a required parameter')
+  }
+  try {
+    await fs.stat(join(rootDirectory, contentDirectory))
+    return join(rootDirectory, contentDirectory)
+  } catch (ENOENT) {
+    return rootDirectory
+  }
+}
 
 const readFileContent = path => {
   return fs.readFile(path, { encoding: 'utf-8' })
@@ -25,7 +38,7 @@ const isDirectory = async (path) => {
 
 const ensureDirectory = async (path) => {
   try {
-    return await fs.mkdir(path)
+    return await fs.mkdir(path, { recursive: true })
   } catch (e) { } finally {
     return Promise.resolve(true)
   }
@@ -84,6 +97,7 @@ const curry = (fn) => {
 const last = (array) => array[array.length -1]
 
 module.exports = {
+  contentRoot,
   readFileContent,
   loadJSON,
   isDirectory,

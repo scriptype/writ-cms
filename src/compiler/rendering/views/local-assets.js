@@ -1,20 +1,10 @@
-const { cp, stat } = require('fs/promises')
+const { cp } = require('fs/promises')
 const { join, dirname } = require('path')
 const Settings = require('../../../settings')
-const { getSlug } = require('../../../helpers')
+const { contentRoot, getSlug } = require('../../../helpers')
 const { debugLog } = require('../../../debug')
 
 const all = Promise.all.bind(Promise)
-
-const getBasePath = async () => {
-  const { rootDirectory, contentDirectory } = Settings.getSettings()
-  try {
-    await stat(join(rootDirectory, contentDirectory))
-    return join(rootDirectory, contentDirectory)
-  } catch (ENOENT) {
-    return rootDirectory
-  }
-}
 
 const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
 
@@ -27,7 +17,8 @@ const copyAsset = ({ basePath, path, name, isFolder }) => {
 }
 
 const copyLocalAssets = async ({ localAssets, posts, categories }) => {
-  const basePath = await getBasePath()
+  const { rootDirectory, contentDirectory } = Settings.getSettings()
+  const basePath = await contentRoot(rootDirectory, contentDirectory)
 
   const copyRootAssets = all(
     localAssets
