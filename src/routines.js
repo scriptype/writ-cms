@@ -14,29 +14,27 @@ const Preview = require('./preview')
 const Watcher = require('./watcher')
 const createCMS = require('./cms')
 
-const startUp = async ({ mode, rootDirectory, debug, watch, refreshTheme, startCMSServer, ...rest }) => {
+const startUp = async ({ debug, watch, startCMSServer, ...rest }) => {
   Debug.init(debug)
   Debug.timeStart('> total')
   const cms = createCMS()
-  await run({
-    mode,
-    rootDirectory,
-    refreshTheme,
-    finishCallback: cms.setState,
+  const runOptions = {
+    finishCallback: (state) => {
+      cms.setState(state)
+      Debug.timeEnd('> total')
+      Debug.logTimes()
+    },
+    debug,
     ...rest
-  })
+  }
+  await run(runOptions)
   if (watch) {
     if (startCMSServer !== false) {
       cms.server.start({
         silent: !rest.cli
       })
     }
-    return startWatcher({
-      mode,
-      rootDirectory,
-      finishCallback: cms.setState,
-      ...rest
-    })
+    return startWatcher(runOptions)
   }
 }
 
@@ -68,13 +66,13 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
     fileSystemTree,
     contentModel
   })
-  Debug.timeEnd('> total')
-  Debug.logTimes()
 }
 
 const startWatcher = (options) => {
   return Watcher.init({
     onChange() {
+      Debug.init(options.debug)
+      Debug.timeStart('> total')
       return run(options)
     },
     silent: !options.cli
