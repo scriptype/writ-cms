@@ -271,6 +271,22 @@ test('subpages', async t => {
     return dir.mkFile(join(pagesDirectory, subpage), '')
   }))
 
+  const folderedSubpage = {
+    folderName: 'foldered subpage',
+    pageFileName: 'page.md',
+    localAssets: [
+      'hey.txt',
+      'demo.html',
+      'a photo.jpg'
+    ]
+  }
+  const folderPath = join(pagesDirectory, folderedSubpage.folderName)
+  await dir.mkDir(folderPath)
+  await dir.mkFile(join(folderPath, folderedSubpage.pageFileName), '')
+  await Promise.all(folderedSubpage.localAssets.map(localAsset => {
+    return dir.mkFile(join(folderPath, localAsset), '')
+  }))
+
   await writ.build({
     rootDirectory: dir.name
   })
@@ -279,15 +295,21 @@ test('subpages', async t => {
     rootDirectoryPaths: {
       exists: [pagesDirectory]
     },
-    pagesDirectoryPaths: {
-      exists: subpages
-    },
     exportDirectoryPaths: {
-      exists: subpages.map(s => replaceExtension(getSlug(s), '.html'))
+      exists: [
+        ...subpages.map(s => replaceExtension(getSlug(s), '.html')),
+        getSlug(folderedSubpage.folderName)
+      ]
     }
   })
-  const pagesDir = await readdir(join(dir.name, pagesDirectory))
-  expectPaths(t, pagesDir, subpages, 'Pages directory')
+
+  const exportFolderDir = await readdir(join(dir.name, exportDirectory, getSlug(folderedSubpage.folderName)))
+  expectPaths(t, exportFolderDir, {
+    exists: [
+      'index.html',
+      ...folderedSubpage.localAssets
+    ]
+  }, 'Foldered subpage directory')
 })
 
 test('builds after theme folder is deleted', async t => {
