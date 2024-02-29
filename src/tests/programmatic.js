@@ -250,6 +250,46 @@ test('post files in a category', async t => {
   hasPaths(t, categoryDir, compiledPostNames)
 })
 
+test('subpages', async t => {
+  const dir = await createTempDir()
+  t.teardown(dir.rm)
+
+  const subpages = [
+    'test subpage.hbs',
+    'another subpage.handlebars',
+    'this is a sub page.md',
+    'markdown page.markdown',
+    'txt page.txt',
+    'boş page.html',
+  ]
+
+  const { exportDirectory, pagesDirectory } = writ.getDefaultSettings()
+  const { getSlug, replaceExtension } = writ.helpers
+
+  await dir.mkDir(pagesDirectory)
+  await Promise.all(subpages.map(subpage => {
+    return dir.mkFile(join(pagesDirectory, subpage), '')
+  }))
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [pagesDirectory]
+    },
+    pagesDirectoryPaths: {
+      exists: subpages
+    },
+    exportDirectoryPaths: {
+      exists: subpages.map(s => replaceExtension(getSlug(s), '.html'))
+    }
+  })
+  const pagesDir = await readdir(join(dir.name, pagesDirectory))
+  expectPaths(t, pagesDir, subpages, 'Pages directory')
+})
+
 test('builds after theme folder is deleted', async t => {
   const dir = await createTempDir()
   t.teardown(dir.rm)
