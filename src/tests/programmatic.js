@@ -5,15 +5,19 @@ const test = require('tape')
 const writ = require('..')
 globalThis.fetch = globalThis.fetch || require('node-fetch')
 
-const createTempDir = async () => {
+const createTempDir = async (t) => {
   const dirName = await mkdtemp(join(tmpdir(), 'writ-test-'))
-  return {
+  const methods = {
     name: dirName,
     mkFile: (name, content) => writeFile(join(dirName, name), content),
     mkAsset: (assetsDirectory, name, content) => writeFile(join(dirName, assetsDirectory, name), content),
     mkDir: (name) => mkdir(join(dirName, name), { recursive: true }),
     rm: () => rm(dirName, { recursive: true })
   }
+  if (t) {
+    t.teardown(methods.rm)
+  }
+  return methods
 }
 
 const hasExportDirectory = (t, paths, message) => {
@@ -128,8 +132,7 @@ const common = {
 }
 
 test('builds in empty directory', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   await writ.build({
     rootDirectory: dir.name
@@ -139,8 +142,7 @@ test('builds in empty directory', async t => {
 })
 
 test('builds with a single txt file', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
@@ -161,8 +163,7 @@ test('builds with a single txt file', async t => {
 })
 
 test('builds after a file is deleted', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
@@ -189,8 +190,7 @@ test('builds after a file is deleted', async t => {
 })
 
 test('empty folder in root is an empty category', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const folderName = 'empty folder'
   await dir.mkDir(folderName)
@@ -210,8 +210,7 @@ test('empty folder in root is an empty category', async t => {
 })
 
 test('post files in a category', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const categoryName = 'my category'
   const posts = [
@@ -251,8 +250,7 @@ test('post files in a category', async t => {
 })
 
 test('subpages', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const subpages = [
     'test subpage.hbs',
@@ -313,8 +311,7 @@ test('subpages', async t => {
 })
 
 test('builds after theme folder is deleted', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   await writ.build({
     rootDirectory: dir.name
@@ -331,8 +328,7 @@ test('builds after theme folder is deleted', async t => {
 })
 
 test('builds after theme/assets folder is deleted', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   await writ.build({
     rootDirectory: dir.name
@@ -358,8 +354,7 @@ test('builds after theme/assets folder is deleted', async t => {
 })
 
 test('builds after theme/templates folder is deleted', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   await writ.build({
     rootDirectory: dir.name
@@ -381,8 +376,7 @@ test('builds after theme/templates folder is deleted', async t => {
 })
 
 test('creates tag indices', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const fileNameIn = 'hello.txt'
   const fileNameOut = 'hello.html'
@@ -440,8 +434,7 @@ test('creates tag indices', async t => {
 })
 
 test('allows uncategorized foldered post', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const postName = 'test-post'
   const localAssetName = 'asset.jpg'
@@ -472,8 +465,7 @@ test('allows uncategorized foldered post', async t => {
 })
 
 test('builds when contentDirectory exists', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const { contentDirectory } = writ.getDefaultSettings()
   await dir.mkDir(contentDirectory)
@@ -526,8 +518,7 @@ test('builds when contentDirectory exists', async t => {
 })
 
 test('passes through assets folder', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   const { assetsDirectory } = writ.getDefaultSettings()
   await dir.mkDir(assetsDirectory)
@@ -546,8 +537,7 @@ test('passes through assets folder', async t => {
 })
 
 test('refreshTheme option when there is theme/keep', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   await writ.build({
     rootDirectory: dir.name
@@ -581,8 +571,7 @@ test('refreshTheme option when there is theme/keep', async t => {
 })
 
 test('refreshTheme option when there is no theme/keep', async t => {
-  const dir = await createTempDir()
-  t.teardown(dir.rm)
+  const dir = await createTempDir(t)
 
   await writ.build({
     rootDirectory: dir.name
