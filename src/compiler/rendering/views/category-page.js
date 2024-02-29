@@ -1,4 +1,3 @@
-const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
@@ -7,7 +6,7 @@ const renderCategoryPages = (Renderer, contentModel) => {
   const compilation = contentModel.categories.map(category => {
     return Renderer.render({
       template: `pages/category/${category.type}`,
-      outputPath: join(settings.out, category.slug, 'index.html'),
+      outputPath: category.outputPath,
       content: category.content,
       data: {
         ...contentModel,

@@ -35,6 +35,19 @@ const getTranscript = (metadata, localAssets) => {
   return firstMatch && firstMatch.content
 }
 
+const getSubpageOutputPath = (fsObject, foldered) => {
+  const { out } = Settings.getSettings()
+  const slug = getSlug(fsObject.name)
+  return replaceExtension(
+    join(
+      out,
+      slug,
+      foldered ? 'index.html' : ''
+    ),
+    '.html'
+  )
+}
+
 const _createSubpage = (fsObject, { foldered }) => {
   const { permalinkPrefix, pagesDirectory } = Settings.getSettings()
 
@@ -70,6 +83,7 @@ const _createSubpage = (fsObject, { foldered }) => {
       slug,
       permalink,
       path: pageFile.path.replace(new RegExp(`^${pagesDirectory}`), ''),
+      outputPath: getSubpageOutputPath(fsObject, foldered),
       foldered,
       localAssets,
       transcript: getTranscript(metadata, localAssets)

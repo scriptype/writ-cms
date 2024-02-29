@@ -68,6 +68,7 @@ module.exports = {
         description: userSettings.description,
       },
       IGNORE_PATHS_REG_EXP: getIgnoreRegExp(userSettings),
+      permalinkPrefix: mode === 'start' ? '/' : userSettings.permalinkPrefix,
       rootDirectory: root,
       out: join(root, userSettings.exportDirectory),
       mode

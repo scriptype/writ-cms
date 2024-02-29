@@ -36,19 +36,34 @@ const getTranscript = (metadata, localAssets) => {
   return firstMatch && firstMatch.content
 }
 
-const getPostPermalink = (fsObject, isCategorized) => {
+const getPostPermalink = (fsObject, categorized) => {
   const { permalinkPrefix } = Settings.getSettings()
   const permalink = join(
     permalinkPrefix,
-    isCategorized ? getSlug(dirname(fsObject.path)) : '',
+    categorized ? getSlug(dirname(fsObject.path)) : '',
     getSlug(fsObject.name)
   )
   return replaceExtension(permalink, '.html')
 }
 
-const getPostCategory = (fsObject, isCategorized) => {
+const getPostOutputPath = (fsObject, categorized, foldered) => {
+  const { out } = Settings.getSettings()
+  const categorySlug = categorized ? getSlug(dirname(fsObject.path)) : ''
+  const postSlug = getSlug(fsObject.name)
+  return replaceExtension(
+    join(
+      out,
+      categorySlug,
+      postSlug,
+      foldered ? 'index.html' : ''
+    ),
+    '.html'
+  )
+}
+
+const getPostCategory = (fsObject, categorized) => {
   const { permalinkPrefix } = Settings.getSettings()
-  const categoryName = isCategorized ?
+  const categoryName = categorized ?
     dirname(fsObject.path) :
     Dictionary.lookup('defaultCategoryName')
   return {
@@ -94,6 +109,7 @@ const _createPost = (fsObject, { categorized, foldered }) => {
       permalink,
       category: getPostCategory(fsObject, categorized),
       path: postFile.path,
+      outputPath: getPostOutputPath(fsObject, categorized, foldered),
       handle: removeExtension(fsObject.path),
       foldered,
       localAssets,
