@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { join } = require('path')
 const Settings = require('../../../settings')
-const { getSlug, removeExtension } = require('../../../helpers')
+const { getSlug, removeExtension, replaceExtension } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -47,7 +47,7 @@ const _createSubpage = (fsObject, { foldered }) => {
     []
 
   const slug = getSlug(fsObject.name)
-  const permalink = join(permalinkPrefix, slug)
+  const permalink = replaceExtension(join(permalinkPrefix, slug), '.html')
   const metadata = parseTemplate(pageFile)
 
   return {
