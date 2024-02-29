@@ -8,16 +8,16 @@ const all = Promise.all.bind(Promise)
 
 const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
 
-const copyAsset = ({ basePath, path, name, isFolder }) => {
+const copyAsset = ({ basePath, destPath, path, name, isFolder }) => {
   const { out } = Settings.getSettings()
-  const dirnameSlug = getSlug(dirname(path))
+  const dirnameSlug = getSlug(dirname(destPath || path))
   const outPath = join(out, join(dirnameSlug, name))
   debugLog('copying:', path)
   return cp(join(basePath, path), outPath, { recursive: !!isFolder })
 }
 
-const copyLocalAssets = async ({ localAssets, posts, categories }) => {
-  const { rootDirectory, contentDirectory } = Settings.getSettings()
+const copyLocalAssets = async ({ localAssets, posts, subpages, categories }) => {
+  const { rootDirectory, contentDirectory, pagesDirectory } = Settings.getSettings()
   const basePath = await contentRoot(rootDirectory, contentDirectory)
 
   const copyRootAssets = all(
@@ -46,10 +46,25 @@ const copyLocalAssets = async ({ localAssets, posts, categories }) => {
     })
   )
 
+  const copySubpageAssets = all(
+    subpages.map(({ localAssets = [] }) => {
+      return all(
+        localAssets
+          .map(withBasePath(basePath))
+          .map(a => ({
+            ...a,
+            destPath: a.path.replace(new RegExp('^' + pagesDirectory), '')
+          }))
+          .map(copyAsset)
+      )
+    })
+  )
+
   return all([
     copyRootAssets,
     copyCategoryAssets,
-    copyPostAssets
+    copyPostAssets,
+    copySubpageAssets
   ])
 }
 
