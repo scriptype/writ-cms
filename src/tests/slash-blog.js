@@ -75,10 +75,18 @@ test('properly builds to be served at /blog in build mode', async t => {
     encoding: 'utf-8'
   })
 
-  t.true(
-    indexHTMLContent.match(/href=(?:"|')\/blog\/test-category\/post-in-category.html(?:"|')/) &&
-    !indexHTMLContent.match(/href=(?:"|')\/test-category\/post-in-category.html(?:"|')/),
-    'post permalinks are still pointing to /blog/whatever'
+  const expectedPattern = /href=(?:"|')\/blog\/test-category\/post-in-category.html(?:"|')/
+  t.match(
+    indexHTMLContent,
+    expectedPattern,
+    'post permalinks are pointing to /blog/whatever'
+  )
+
+  const unexpectedPattern = /href=(?:"|')\/test-category\/post-in-category.html(?:"|')/
+  t.doesNotMatch(
+    indexHTMLContent,
+    unexpectedPattern,
+    'post permalinks are really pointing to /blog/whatever'
   )
 })
 
@@ -113,9 +121,10 @@ test('properly builds to be served at /blog in start mode', async t => {
     encoding: 'utf-8'
   })
 
-  t.true(
-    !indexHTMLContent.match(/href=(?:"|')\/blog\/test-category\/post-in-category.html(?:"|')/) &&
-    indexHTMLContent.match(/href=(?:"|')\/test-category\/post-in-category.html(?:"|')/),
+  const expectedPattern = /href=(?:"|')\/test-category\/post-in-category.html(?:"|')/
+  t.match(
+    indexHTMLContent,
+    expectedPattern,
     'post permalinks are ignoring permalinkPrefix in start mode'
   )
 
