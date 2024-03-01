@@ -7,7 +7,7 @@ const renderPostsJSON = ({ posts, categories }) => {
   const { out } = Settings.getSettings()
   const outPath = join(out, 'posts.json')
   debugLog('creating:', outPath)
-  const postsJSON = posts.map(({ content, ...rest }) => rest)
+  const postsJSON = posts.map(({ content, outputPath, ...rest }) => rest)
   const writes = [
     writeFile(
       outPath,
