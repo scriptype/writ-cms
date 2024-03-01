@@ -1,6 +1,6 @@
 const { join } = require('path')
 const Settings = require('../../../settings')
-const { getSlug } = require('../../../helpers')
+const { getSlug, makePermalink } = require('../../../helpers')
 
 const getTags = (posts) => {
   const tags = posts.map((post) => {
@@ -27,11 +27,13 @@ const getTags = (posts) => {
   return Object
     .keys(tagsIndex)
     .map(key => {
-      const slug = getSlug(key)
-      const permalink = join(permalinkPrefix, 'tags', slug)
+      const permalink = makePermalink({
+        prefix: permalinkPrefix,
+        parts: ['tags', key]
+      })
       return {
         tag: key,
-        slug,
+        slug: getSlug(key),
         permalink,
         posts: tagsIndex[key]
       }

@@ -64,13 +64,18 @@ const getPostOutputPath = (fsObject, categorized, foldered) => {
 }
 
 const getPostCategory = (fsObject, categorized) => {
-  const { permalinkPrefix } = Settings.getSettings()
-  const categoryName = categorized ?
+  const name = categorized ?
     dirname(fsObject.path) :
     Dictionary.lookup('defaultCategoryName')
+
+  const permalink = makePermalink({
+    prefix: Settings.getSettings().permalinkPrefix,
+    parts: [name]
+  })
+
   return {
-    name: categoryName,
-    permalink: join(permalinkPrefix, getSlug(categoryName))
+    name,
+    permalink
   }
 }
 

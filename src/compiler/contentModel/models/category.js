@@ -20,7 +20,7 @@ const getCategoryPermalink = (fsObject) => {
 }
 
 const createCategory = (fsObject) => {
-  const { permalinkPrefix, out } = Settings.getSettings()
+  const { out } = Settings.getSettings()
   const indexFile = fsObject.children.find(isCategoryIndex)
   const posts = fsObject.children.filter(isPost)
 

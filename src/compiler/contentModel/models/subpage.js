@@ -58,7 +58,7 @@ const getSubpageOutputPath = (fsObject, foldered) => {
 }
 
 const _createSubpage = (fsObject, { foldered }) => {
-  const { permalinkPrefix, pagesDirectory } = Settings.getSettings()
+  const { pagesDirectory } = Settings.getSettings()
 
   const pageFile = foldered ?
     fsObject.children.find(isFolderedSubpageIndex) :
