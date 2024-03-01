@@ -35,11 +35,10 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     const path = join(root, pagesDirectory, title)
     const frontMatter = helpers.buildFrontMatter(metadata)
     const fileContent = [frontMatter, content].join('\n')
-    if (localAssets.length) {
+    try {
       await mkdir(path, { recursive: true })
-      return writeFile(join(path, `page.${extension}`), fileContent)
-    }
-    return writeFile(`${path}.${extension}`, fileContent)
+    } catch {}
+    return writeFile(`${join(path, 'page')}.${extension}`, fileContent)
   }
 
   const getSubpage = (title) => {
