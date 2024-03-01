@@ -2,7 +2,7 @@ const { tmpdir } = require('os')
 const { rm, mkdtemp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const test = require('tape')
-const { contentRoot } = require('../helpers')
+const { contentRoot, makePermalink } = require('../helpers')
 
 const tempDir = () => {
   return mkdtemp(join(tmpdir(), 'writ-test-'))
@@ -53,5 +53,77 @@ test('helpers', t => {
       expected3,
       'if contentDirectory is found contentRootPath is contentDirectory'
     )
+  })
+
+  t.test('makePermalink', async () => {
+    const examples = (prefix) => {
+      const pre = prefix === '/' ? '' : prefix
+      return [{
+        actual: makePermalink({
+          prefix,
+          parts: ['category name', 'post name.md'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/category-name/post-name.html`,
+        message: `Categorized post gets proper permalink when prefix is ${prefix}`
+      }, {
+        actual: makePermalink({
+          prefix,
+          parts: ['category name', 'post name'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/category-name/post-name`,
+        message: `Categorized foldered post gets proper permalink when prefix is ${prefix}`
+      }, {
+        actual: makePermalink({
+          prefix,
+          parts: ['', 'post name.md'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/post-name.html`,
+        message: `Uncategorized post gets proper permalink when prefix is ${prefix}`
+      }, {
+        actual: makePermalink({
+          prefix,
+          parts: ['post name.md'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/post-name.html`,
+        message: `Uncategorized post 2 gets proper permalink when prefix is ${prefix}`
+      }, {
+        actual: makePermalink({
+          prefix,
+          parts: ['post name'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/post-name`,
+        message: `Uncategorized foldered post gets proper permalink when prefix is ${prefix}`
+      }, {
+        actual: makePermalink({
+          prefix,
+          parts: ['category name'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/category-name`,
+        message: `Category gets proper permalink when prefix is ${prefix}`
+      }, {
+        actual: makePermalink({
+          prefix,
+          parts: ['some page.md'],
+          replaceExtensionWithHTML: true
+        }),
+        expected: `${pre}/some-page.html`,
+        message: `Subpage gets proper permalink when prefix is ${prefix}`
+      }]
+    }
+
+    const allExamples = [
+      ...examples('/'),
+      ...examples('/blog')
+    ]
+
+    allExamples.forEach(({ actual, expected, message }) => {
+      t.equal(actual, expected, message)
+    })
   })
 })

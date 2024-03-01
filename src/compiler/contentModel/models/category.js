@@ -1,7 +1,7 @@
 const { join } = require('path')
 const _ = require('lodash')
 const Settings = require('../../../settings')
-const { getSlug } = require('../../../helpers')
+const { getSlug, makePermalink } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isPost } = require('./post')
@@ -11,14 +11,22 @@ const isCategoryIndex = (fsObject) => {
   return fsObject.type === contentTypes.CATEGORY_INDEX
 }
 
+const getCategoryPermalink = (fsObject) => {
+  const { permalinkPrefix } = Settings.getSettings()
+  return makePermalink({
+    prefix: permalinkPrefix,
+    parts: [fsObject.name]
+  })
+}
+
 const createCategory = (fsObject) => {
   const { permalinkPrefix, out } = Settings.getSettings()
   const indexFile = fsObject.children.find(isCategoryIndex)
   const posts = fsObject.children.filter(isPost)
 
   const localAssets = fsObject.children.filter(isLocalAsset)
+  const permalink = getCategoryPermalink(fsObject)
   const slug = getSlug(fsObject.name)
-  const permalink = join(permalinkPrefix, slug)
 
   const metadata = indexFile ?
     parseTemplate(indexFile, {

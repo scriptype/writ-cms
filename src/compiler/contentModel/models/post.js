@@ -2,7 +2,7 @@ const _ = require('lodash')
 const { dirname, join } = require('path')
 const Settings = require('../../../settings')
 const Dictionary = require('../../../dictionary')
-const { getSlug, removeExtension, replaceExtension } = require('../../../helpers')
+const { getSlug, makePermalink, removeExtension, replaceExtension } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -38,12 +38,14 @@ const getTranscript = (metadata, localAssets) => {
 
 const getPostPermalink = (fsObject, categorized) => {
   const { permalinkPrefix } = Settings.getSettings()
-  const permalink = join(
-    permalinkPrefix,
-    categorized ? getSlug(dirname(fsObject.path)) : '',
-    getSlug(fsObject.name)
-  )
-  return replaceExtension(permalink, '.html')
+  return makePermalink({
+    prefix: permalinkPrefix,
+    parts: [
+      categorized ? dirname(fsObject.path) : '',
+      fsObject.name
+    ],
+    replaceExtensionWithHTML: true
+  })
 }
 
 const getPostOutputPath = (fsObject, categorized, foldered) => {

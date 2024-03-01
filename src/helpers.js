@@ -69,6 +69,18 @@ const getSlug = (string) => {
   return string.toLowerCase()
 }
 
+const makePermalink = ({ prefix, parts, replaceExtensionWithHTML }) => {
+  const permalink  = [
+    prefix === '/' ? '' : prefix,
+    ...parts.filter(Boolean).map(getSlug)
+  ].join('/')
+
+  if (!replaceExtensionWithHTML) {
+    return permalink
+  }
+  return replaceExtension(permalink, '.html')
+}
+
 const removeExtension = (fileName) => {
   return fileName.replace(extname(fileName), '')
 }
@@ -103,6 +115,7 @@ module.exports = {
   isDirectory,
   ensureDirectory,
   getSlug,
+  makePermalink,
   removeExtension,
   replaceExtension,
   pipe,
