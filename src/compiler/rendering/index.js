@@ -7,7 +7,8 @@ const Views = {
   copyLocalAssets: require('./views/local-assets'),
   renderPostsJSON: require('./views/posts-json'),
   renderPosts: require('./views/posts'),
-  renderSubpages: require('./views/subpages')
+  renderSubpages: require('./views/subpages'),
+  renderFeeds: require('./views/feeds')
 }
 
 module.exports = {
@@ -20,7 +21,10 @@ module.exports = {
       Views.renderPostsJSON(contentModel),
       Views.copyLocalAssets(contentModel),
       Views.renderCategoryPages(Renderer, contentModel)
-        .then(() => Views.renderPosts(Renderer, contentModel))
+        .then(() => Promise.all([
+          Views.renderPosts(Renderer, contentModel),
+          Views.renderFeeds(Renderer, contentModel)
+        ]))
     ])
   }
 }

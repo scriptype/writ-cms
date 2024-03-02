@@ -4,9 +4,11 @@ const { loadJSON } = require('./helpers')
 const Debug = require('./debug')
 
 const defaultSettings = (rootDirectory) => ({
-  language: 'en',
+  language: "en",
   title: basename(resolve(rootDirectory)),
   description: "A future work",
+  url: "",
+  icon: "assets/common/writ-icon-512.png",
   theme: "default",
   permalinkPrefix: "/",
   assetsDirectory: "assets",
@@ -17,6 +19,7 @@ const defaultSettings = (rootDirectory) => ({
   cname: "",
   syntaxHighlighting: "off",
   search: "on",
+  rss: "on",
   ignorePaths: [
     ".git",
     ".gitignore",
@@ -66,6 +69,8 @@ module.exports = {
       site: {
         title: userSettings.title,
         description: userSettings.description,
+        url: userSettings.url,
+        icon: userSettings.icon
       },
       IGNORE_PATHS_REG_EXP: getIgnoreRegExp(userSettings),
       permalinkPrefix: mode === 'start' ? '/' : userSettings.permalinkPrefix,

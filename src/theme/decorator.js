@@ -90,7 +90,11 @@ const createThemeDecorator = new DecoratorFactory((state, methods) => {
           src: join(customThemePath, path),
           dest: 'custom',
           single: true
-        }))
+        })),
+        {
+          src: join(__dirname, 'common', 'assets'),
+          dest: 'common'
+        }
       ]
     }
   }

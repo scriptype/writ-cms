@@ -71,11 +71,7 @@ module.exports = {
   },
 
   isEnabled(featureName) {
-    const feature = this.settings[featureName]
-    switch (featureName) {
-      case 'syntaxHighlighting': return feature !== 'off'
-      case 'search': return feature !== 'off'
-    }
+    return this.settings[featureName] !== 'off'
   },
 
   isStartMode() {

@@ -60,7 +60,7 @@ const init = async () => {
   }, Promise.resolve())
 }
 
-const render = async ({ template: partial, outputPath, content, data }) => {
+const render = async ({ template: partial, outputPath, callback, content, data }) => {
   debugLog('rendering:', outputPath)
 
   const templateToCompile = `{{#>${partial}}}${content}{{/${partial}}}`
@@ -76,7 +76,20 @@ const render = async ({ template: partial, outputPath, content, data }) => {
   return writeFile(outputPath, output)
 }
 
+const compile = ({ data, content, options = {} }) => {
+  debugLog('rendering template')
+
+  const template = Handlebars.compile(content, {
+    noEscape: true,
+    preventIndent: true,
+    ...options
+  })
+
+  return template(data)
+}
+
 module.exports = {
   init,
-  render
+  render,
+  compile
 }

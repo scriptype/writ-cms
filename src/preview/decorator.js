@@ -7,6 +7,7 @@ const createPreviewDecorator = new DecoratorFactory((state, methods) => {
   if (mode !== 'start') {
     return {}
   }
+  return {}
   return {
     template: (value) => {
       return value + '{{> preview }}'
