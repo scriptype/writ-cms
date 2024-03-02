@@ -78,15 +78,16 @@ Create a categorized post:
 1) Go to a category folder
 2) Create a text file inside the folder
 
+#### Foldered posts
+
+If you need to refer/embed static assets, such as photos or demo iframes, within the post,
+the easiest way is to have a folder for everything the post needs, including the post itself.
+
 Create a foldered post:
-1) Go to a category folder
-2) Create a folder inside the category
-3) Create a text file with name "index" or "post". e.g index.md, post.txt
+1) Create a folder
+2) Inside the folder, create a text file named "post". e.g post.md, post.txt
 
 Human readable name of the folder will be the post title.
-
-If the post needs static resources, such as photos, they can be kept in the same
-folder as the post.
 
 A post file can look like this:
 
@@ -96,7 +97,7 @@ My new post starts like this.
 And it ends like this.
 ```
 
-You can also add metadata like this at the beginning of a post file
+You can also add metadata like this in the beginning of a post file
 ```
 ---
 type: text
@@ -116,6 +117,13 @@ And it ends like this.
 
 1) Create a folder named "pages"
 2) Create a text file inside the folder
+
+#### Foldered subpages
+
+Just like with foldered posts, foldered subpages is the easiest way to manage local assets.
+
+1) Create a folder inside the "pages" directory
+2) Inside the folder, create a text file named "page". e.g. page.txt, page.md, page.html
 
 You can use a different folder for pages by adding this to `settings.json`:
 
