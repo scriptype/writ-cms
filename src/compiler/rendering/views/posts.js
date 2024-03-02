@@ -2,7 +2,6 @@ const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
 const renderPosts = (Renderer, contentModel) => {
-  const settings = Settings.getSettings()
   const compilation = contentModel.posts.map(post => {
     return Renderer.render({
       template: `pages/post/${post.type}`,
@@ -11,7 +10,7 @@ const renderPosts = (Renderer, contentModel) => {
       data: {
         ...contentModel,
         post,
-        settings,
+        settings: Settings.getSettings(),
         debug: Debug.getDebug()
       }
     })

@@ -2,7 +2,6 @@ const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
 const renderSubpages = (Renderer, contentModel) => {
-  const settings = Settings.getSettings()
   const compilation = contentModel.subpages.map(subpage => {
     return Renderer.render({
       template: `pages/subpage/${subpage.type}`,
@@ -11,7 +10,7 @@ const renderSubpages = (Renderer, contentModel) => {
       data: {
         ...contentModel,
         subpage,
-        settings,
+        settings: Settings.getSettings(),
         debug: Debug.getDebug()
       }
     })

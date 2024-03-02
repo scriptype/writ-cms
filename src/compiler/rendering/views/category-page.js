@@ -2,7 +2,6 @@ const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
 const renderCategoryPages = (Renderer, contentModel) => {
-  const settings = Settings.getSettings()
   const compilation = contentModel.categories.map(category => {
     return Renderer.render({
       template: `pages/category/${category.type}`,
@@ -11,7 +10,7 @@ const renderCategoryPages = (Renderer, contentModel) => {
       data: {
         ...contentModel,
         category,
-        settings,
+        settings: Settings.getSettings(),
         debug: Debug.getDebug()
       }
     })
