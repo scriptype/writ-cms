@@ -3,6 +3,7 @@
   "nextPost": "next post",
   "previousPost": "previous post",
   "nextPage": "Next page",
+  "mentioned-in": "Mentioned in:",
   "previousPage": "Previous page",
   "defaultCategoryName": "Unclassified",
   "search-results-title": "{{resultsCount}} posts found for <em>\"{{query}}\"</em>:",
