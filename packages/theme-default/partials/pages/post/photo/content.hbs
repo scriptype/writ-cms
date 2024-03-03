@@ -1,3 +1,4 @@
+{{#with post}}
 <article class="post post--photo">
     <header class="post-header">
         <h2>{{title}}</h2>
@@ -7,7 +8,8 @@
             <img src="{{mediumUrl}}" alt="a photo" />
         </a>
         <pre>{{exif}}</pre>
-        {{> @partial-block }}
+        {{> @partial-block .. }}
     </section>
     {{>pages/post/footer}}
 </article>
+{{/with}}

@@ -1,3 +1,4 @@
+{{#with post}}
 <article class="post post--episode">
     <header class="post-header">
         <h2>{{title}}</h2>
@@ -12,7 +13,7 @@
           </section>
         {{/if}}
 
-        {{> @partial-block }}
+        {{> @partial-block .. }}
 
         {{#if transcript}}
           <section>
@@ -24,3 +25,4 @@
 
     {{>pages/post/footer}}
 </article>
+{{/with}}

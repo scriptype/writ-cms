@@ -1,13 +1,13 @@
-{{#with post}}
-<article class="post post--text">
-    <header class="post-header">
+{{#with subpage}}
+<article class="subpage subpage--basic">
+    <header class="subpage-header">
         <h2>{{title}}</h2>
     </header>
-    <section class="post-content">
+    <section class="subpage-content">
         {{#if cover}}
           <a href="{{cover}}">
             <img
-                class="post-cover {{#if coverShape}}shape-{{coverShape}}{{/if}}"
+                class="subpage-cover {{#if coverShape}}shape-{{coverShape}}{{/if}}"
                 {{#if coverPosition}}
                 style="--cover-position: {{coverPosition}};"
                 {{/if}}
@@ -17,6 +17,6 @@
         {{/if}}
         {{> @partial-block .. }}
     </section>
-    {{>pages/post/footer}}
+    {{>pages/subpage/footer}}
 </article>
 {{/with}}
