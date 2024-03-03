@@ -1,5 +1,5 @@
 const { cp } = require('fs/promises')
-const { join, dirname } = require('path')
+const { join, dirname, sep } = require('path')
 const Settings = require('../../../settings')
 const { contentRoot, getSlug } = require('../../../helpers')
 const { debugLog } = require('../../../debug')
@@ -10,7 +10,10 @@ const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
 
 const copyAsset = ({ basePath, destPath, path, name, isFolder }) => {
   const { out } = Settings.getSettings()
-  const dirnameSlug = getSlug(dirname(destPath || path))
+  const outputDir = dirname(destPath || path)
+  const dirnameSlug = outputDir === '.' ?
+    outputDir :
+    outputDir.split(sep).map(getSlug).join(sep)
   const outPath = join(out, join(dirnameSlug, name))
   debugLog('copying:', path)
   return cp(join(basePath, path), outPath, { recursive: !!isFolder })

@@ -63,7 +63,7 @@ test('properly builds to be served at /blog in build mode', async t => {
   await common.builds(t, dir.name, {
     exportDirectoryPaths: {
       exists: [
-        replaceExtension(getSlug(subpage.name), '.html'),
+        getSlug(subpage.name) + '.html',
         getSlug(category1.name)
       ],
       notExists: ['blog']
@@ -109,7 +109,7 @@ test('properly builds to be served at /blog in start mode', async t => {
   await common.builds(t, dir.name, {
     exportDirectoryPaths: {
       exists: [
-        replaceExtension(getSlug(subpage.name), '.html'),
+        getSlug(subpage.name) + '.html',
         getSlug(category1.name)
       ],
       notExists: ['blog']

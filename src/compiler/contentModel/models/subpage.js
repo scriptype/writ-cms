@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { join } = require('path')
 const Settings = require('../../../settings')
-const { getSlug, makePermalink, removeExtension, replaceExtension } = require('../../../helpers')
+const { getSlug, makePermalink, removeExtension } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -35,26 +35,20 @@ const getTranscript = (metadata, localAssets) => {
   return firstMatch && firstMatch.content
 }
 
-const getSubpagePermalink = (fsObject) => {
+const getSubpagePermalink = (fsObject, foldered) => {
   const { permalinkPrefix } = Settings.getSettings()
   return makePermalink({
     prefix: permalinkPrefix,
     parts: [fsObject.name],
-    replaceExtensionWithHTML: true
+    addHTMLExtension: !foldered
   })
 }
 
 const getSubpageOutputPath = (fsObject, foldered) => {
   const { out } = Settings.getSettings()
   const slug = getSlug(fsObject.name)
-  return replaceExtension(
-    join(
-      out,
-      slug,
-      foldered ? 'index.html' : ''
-    ),
-    '.html'
-  )
+  const parts = [out, slug, foldered ? 'index' : ''].filter(Boolean)
+  return join(...parts) + '.html'
 }
 
 const _createSubpage = (fsObject, { foldered }) => {
@@ -68,7 +62,7 @@ const _createSubpage = (fsObject, { foldered }) => {
     fsObject.children.filter(isLocalAsset) :
     []
 
-  const permalink = getSubpagePermalink(fsObject)
+  const permalink = getSubpagePermalink(fsObject, foldered)
   const metadata = parseTemplate(pageFile)
 
   return {

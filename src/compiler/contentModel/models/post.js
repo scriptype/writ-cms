@@ -2,7 +2,7 @@ const _ = require('lodash')
 const { dirname, join } = require('path')
 const Settings = require('../../../settings')
 const Dictionary = require('../../../dictionary')
-const { getSlug, makePermalink, removeExtension, replaceExtension } = require('../../../helpers')
+const { getSlug, makePermalink, removeExtension } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -36,7 +36,7 @@ const getTranscript = (metadata, localAssets) => {
   return firstMatch && firstMatch.content
 }
 
-const getPostPermalink = (fsObject, categorized) => {
+const getPostPermalink = (fsObject, categorized, foldered) => {
   const { permalinkPrefix } = Settings.getSettings()
   return makePermalink({
     prefix: permalinkPrefix,
@@ -44,23 +44,19 @@ const getPostPermalink = (fsObject, categorized) => {
       categorized ? dirname(fsObject.path) : '',
       fsObject.name
     ],
-    replaceExtensionWithHTML: true
+    addHTMLExtension: !foldered
   })
 }
 
 const getPostOutputPath = (fsObject, categorized, foldered) => {
   const { out } = Settings.getSettings()
-  const categorySlug = categorized ? getSlug(dirname(fsObject.path)) : ''
-  const postSlug = getSlug(fsObject.name)
-  return replaceExtension(
-    join(
-      out,
-      categorySlug,
-      postSlug,
-      foldered ? 'index.html' : ''
-    ),
-    '.html'
-  )
+  const parts = [
+    out,
+    categorized ? getSlug(dirname(fsObject.path)) : '',
+    getSlug(fsObject.name),
+    foldered ? 'index' : ''
+  ].filter(Boolean)
+  return join(...parts) + '.html'
 }
 
 const getPostCategory = (fsObject, categorized) => {
@@ -88,7 +84,7 @@ const _createPost = (fsObject, { categorized, foldered }) => {
     fsObject.children.filter(isLocalAsset) :
     []
 
-  const permalink = getPostPermalink(fsObject, categorized)
+  const permalink = getPostPermalink(fsObject, categorized, foldered)
 
   const metadata = parseTemplate(postFile, {
     localAssets,

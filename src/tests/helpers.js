@@ -62,15 +62,14 @@ test('helpers', t => {
         actual: makePermalink({
           prefix,
           parts: ['category name', 'post name.md'],
-          replaceExtensionWithHTML: true
+          addHTMLExtension: true
         }),
         expected: `${pre}/category-name/post-name.html`,
         message: `Categorized post gets proper permalink when prefix is ${prefix}`
       }, {
         actual: makePermalink({
           prefix,
-          parts: ['category name', 'post name'],
-          replaceExtensionWithHTML: true
+          parts: ['category name', 'post name']
         }),
         expected: `${pre}/category-name/post-name`,
         message: `Categorized foldered post gets proper permalink when prefix is ${prefix}`
@@ -78,7 +77,7 @@ test('helpers', t => {
         actual: makePermalink({
           prefix,
           parts: ['', 'post name.md'],
-          replaceExtensionWithHTML: true
+          addHTMLExtension: true
         }),
         expected: `${pre}/post-name.html`,
         message: `Uncategorized post gets proper permalink when prefix is ${prefix}`
@@ -86,23 +85,21 @@ test('helpers', t => {
         actual: makePermalink({
           prefix,
           parts: ['post name.md'],
-          replaceExtensionWithHTML: true
+          addHTMLExtension: true
         }),
         expected: `${pre}/post-name.html`,
         message: `Uncategorized post 2 gets proper permalink when prefix is ${prefix}`
       }, {
         actual: makePermalink({
           prefix,
-          parts: ['post name'],
-          replaceExtensionWithHTML: true
+          parts: ['post name']
         }),
         expected: `${pre}/post-name`,
         message: `Uncategorized foldered post gets proper permalink when prefix is ${prefix}`
       }, {
         actual: makePermalink({
           prefix,
-          parts: ['category name'],
-          replaceExtensionWithHTML: true
+          parts: ['category name']
         }),
         expected: `${pre}/category-name`,
         message: `Category gets proper permalink when prefix is ${prefix}`
@@ -110,7 +107,7 @@ test('helpers', t => {
         actual: makePermalink({
           prefix,
           parts: ['some page.md'],
-          replaceExtensionWithHTML: true
+          addHTMLExtension: true
         }),
         expected: `${pre}/some-page.html`,
         message: `Subpage gets proper permalink when prefix is ${prefix}`

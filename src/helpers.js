@@ -1,6 +1,7 @@
 const { join } = require('path')
 const fs = require('fs/promises')
 const { extname } = require('path')
+const slug = require('slug')
 
 const contentRoot = async (rootDirectory, contentDirectory) => {
   if (!rootDirectory) {
@@ -44,41 +45,14 @@ const ensureDirectory = async (path) => {
   }
 }
 
-const forbiddenChars = 'äÄåÅÉéi̇ıİİöÖüÜçÇğĞşŞ'
-const slugChars      = 'aaaaeeiiiioouuccggss'
-const forbiddenToEscape = '(){}[]'
+const getSlug = (string) => slug(removeExtension(string), '-')
 
-const getSlug = (string) => {
-  string = string.trim()
-  string = string.replace(/\s+/g, '-')
-  for (let i = 0; i < forbiddenChars.length - 1; i++) {
-    const regex = new RegExp(forbiddenChars[i], 'gi')
-    string = string.replace(regex, slugChars[i])
-  }
-  for (let i = 0; i < forbiddenToEscape.length - 1; i++) {
-    const regex = new RegExp(`\\${forbiddenToEscape[i]}`, 'gi')
-    string = string.replace(regex, '-')
-  }
-  string = string
-    .replace(/-{2,}/g, '-')
-    .replace(/-\./, '.')
-    .replace(/-\//g, '/')
-    .replace(/\/-/g, '/')
-    .replace(/^-/g, '')
-    .replace(/-$/g, '')
-  return string.toLowerCase()
-}
-
-const makePermalink = ({ prefix, parts, replaceExtensionWithHTML }) => {
-  const permalink  = [
+const makePermalink = ({ prefix, parts, addHTMLExtension }) => {
+  const permalink = [
     prefix === '/' ? '' : prefix,
     ...parts.filter(Boolean).map(getSlug)
   ].join('/')
-
-  if (!replaceExtensionWithHTML) {
-    return permalink
-  }
-  return replaceExtension(permalink, '.html')
+  return addHTMLExtension ? permalink + '.html' : permalink
 }
 
 const removeExtension = (fileName) => {

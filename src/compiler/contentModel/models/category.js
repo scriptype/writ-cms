@@ -48,7 +48,7 @@ const createCategory = (fsObject) => {
       ...metadata.attributes,
       slug,
       permalink,
-      outputPath: join(out, slug, 'index.html'),
+      outputPath: join(out, getSlug(fsObject.name), 'index.html'),
       posts,
       localAssets
     }

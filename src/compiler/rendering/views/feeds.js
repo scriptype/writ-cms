@@ -2,7 +2,6 @@ const { join } = require('path')
 const { writeFile, mkdir } = require('fs/promises')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
-const { getSlug } = require('../../../helpers')
 const { urls, inlineMedia } = require('../helpers/processContent')
 
 const POST_COUNT = 25

@@ -124,7 +124,7 @@ test('post files in a category', async t => {
 
   const categoryDir = await readdir(join(dir.name, exportDirectory, writ.helpers.getSlug(categoryName)))
   const compiledPostNames = posts.map(post => {
-    return writ.helpers.getSlug(post.split('.').slice(0, 1).concat('html').join('.'))
+    return writ.helpers.getSlug(post).concat('.html')
   })
   hasPaths(t, categoryDir, compiledPostNames)
 })
@@ -175,7 +175,7 @@ test('subpages', async t => {
     },
     exportDirectoryPaths: {
       exists: [
-        ...subpages.map(s => replaceExtension(getSlug(s), '.html')),
+        ...subpages.map(s => getSlug(s) + '.html'),
         getSlug(folderedSubpage.folderName)
       ]
     }
@@ -352,7 +352,7 @@ test('builds when contentDirectory exists', async t => {
 
   const uncategorizedPostFile = 'uncategorized-post-name.txt'
   const uncategorizedPostFileOut = 'uncategorized-post-name.html'
-  await dir.mkFile(join(contentDirectory, uncategorizedPostFileOut), 'Hello!')
+  await dir.mkFile(join(contentDirectory, uncategorizedPostFile), 'Hello!')
 
   const uncategorizedFolderedPost = 'a new post'
   const uncategorizedFolderedPostOut = 'a-new-post'
@@ -365,9 +365,11 @@ test('builds when contentDirectory exists', async t => {
   const rootAssetInContent = 'asset-in-content-folder.jpg'
   await dir.mkFile(join(contentDirectory, rootAssetInContent), '')
 
-  const categoryName = 'test-category'
-  const categorizedPostName = 'test-post'
-  const categorizedPostLocalAsset = 'post-local-asset.jpg'
+  const categoryName = 'test category'
+  const categoryNameOut = 'test-category'
+  const categorizedPostName = 'test post'
+  const categorizedPostNameOut = 'test-post'
+  const categorizedPostLocalAsset = 'post local asset.jpg'
   await dir.mkDir(join(contentDirectory, categoryName, categorizedPostName))
   await Promise.all([
     dir.mkFile(join(contentDirectory, categoryName, categorizedPostName, 'post.md'), 'My test post'),
@@ -380,6 +382,8 @@ test('builds when contentDirectory exists', async t => {
 
   const { exportDirectory } = writ.getDefaultSettings()
 
+  const exportDir = await readdir(join(dir.name, exportDirectory))
+
   await common.builds(t, dir.name, {
     rootDirectoryPaths: {
       exists: [contentDirectory, rootAsset]
@@ -390,7 +394,7 @@ test('builds when contentDirectory exists', async t => {
     }
   })
 
-  const categorizedPostFolder = await readdir(join(dir.name, exportDirectory, categoryName, categorizedPostName))
+  const categorizedPostFolder = await readdir(join(dir.name, exportDirectory, categoryNameOut, categorizedPostNameOut))
   hasPaths(t, categorizedPostFolder, ['index.html', categorizedPostLocalAsset], 'Compiled test post folder has index.html and local asset')
 
   const uncategorizedFolderedPostFolder = await readdir(join(dir.name, exportDirectory, uncategorizedFolderedPostOut))
