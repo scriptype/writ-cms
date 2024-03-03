@@ -1,4 +1,4 @@
-const { cp } = require('fs/promises')
+const { cp, stat } = require('fs/promises')
 const { join, dirname, sep } = require('path')
 const Settings = require('../../../settings')
 const { contentRoot, getSlug } = require('../../../helpers')
@@ -8,7 +8,7 @@ const all = Promise.all.bind(Promise)
 
 const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
 
-const copyAsset = ({ basePath, destPath, path, name, isFolder }) => {
+const copyAsset = async ({ basePath, destPath, path, name, isFolder }) => {
   const { out } = Settings.getSettings()
   const outputDir = dirname(destPath || path)
   const dirnameSlug = outputDir === '.' ?
@@ -16,7 +16,16 @@ const copyAsset = ({ basePath, destPath, path, name, isFolder }) => {
     outputDir.split(sep).map(getSlug).join(sep)
   const outPath = join(out, join(dirnameSlug, name))
   debugLog('copying:', path)
-  return cp(join(basePath, path), outPath, { recursive: !!isFolder })
+  try {
+    return await cp(join(basePath, path), outPath, { recursive: !!isFolder })
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      debugLog('failed copying asset that no longer exists', e)
+    } else {
+      debugLog('failed copying asset', e)
+    }
+    return Promise.resolve()
+  }
 }
 
 const copyLocalAssets = async ({ localAssets, posts, subpages, categories }) => {
