@@ -6,32 +6,28 @@ const { urls, inlineMedia } = require('../helpers/processContent')
 
 const POST_COUNT = 25
 
-const processPartialBlock = (compiledBlockContent, entry) => {
-  const { site } = Settings.getSettings()
-  return Promise.resolve(compiledBlockContent)
-    .then(content => inlineMedia(content, entry))
-    .then(content => {
-      const baseUrl = new URL(entry.permalink, site.url).toString()
-      return urls(content, baseUrl)
-    })
+const processPartialBlock = async (compiledBlockContent, entry) => {
 }
 
 const processPosts = (Renderer, contentModel) => {
+  const { site } = Settings.getSettings()
   return Promise.all(contentModel.posts.map(async post => {
-    const compiledContent = await Renderer.compile({
+    const compiledContent = inlineMedia(await Renderer.compile({
       data: contentModel,
       content: post.content
-    })
+    }), post)
 
     const compiledSummary = await Renderer.compile({
       data: contentModel,
       content: post.summary
     })
 
+    const baseUrl = new URL(post.permalink, site.url).toString()
+
     return {
       ...post,
-      content: processPartialBlock(compiledContent, post),
-      summary: processPartialBlock(compiledSummary, post)
+      content: await urls(compiledContent, baseUrl),
+      summary: await urls(compiledSummary, baseUrl)
     }
   }))
 }
