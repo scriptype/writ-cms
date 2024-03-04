@@ -1,5 +1,5 @@
 const { rm, readdir, readFile } = require('fs/promises')
-const { join } = require('path')
+const { join, resolve } = require('path')
 const test = require('tape')
 const writ = require('..')
 const {
@@ -310,6 +310,86 @@ test('creates tag indices', async t => {
   t.true(
     tagIndexFolders.every(folder => folder.includes('index.html')),
     'Tag indices are folders with index.html'
+  )
+})
+
+test('creates tag indices', async t => {
+  const dir = await createTempDir(t)
+
+  const mentioned = {
+    title: 'hello',
+    nameIn: 'post.md',
+    nameOut: 'index.html',
+    lorem: 'ipsum',
+    cover: 'hey.jpg',
+    get content() {
+      return `---
+lorem: ${this.lorem}
+cover: ${this.cover}
+---
+Hello`
+    }
+  }
+
+  const mentioner = {
+    title: 'world',
+    nameIn: 'world.txt',
+    nameOut: 'world.html',
+    content: `
+    {{mention "/hello"}} world.
+
+    {{#mention "/hello"}}
+      {{lorem}}
+    {{/mention}}
+
+    {{#mention "/hello"}}
+      <img src="{{cover}}">
+    {{/mention}}
+    `
+  }
+
+  await dir.mkDir(mentioned.title)
+  await dir.mkFile(join(mentioned.title, mentioned.nameIn), mentioned.content)
+  await dir.mkFile(mentioner.nameIn, mentioner.content)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { exportDirectory } = writ.getDefaultSettings()
+
+  const mentionerHTML = await readFile(join(dir.name, exportDirectory, mentioner.nameOut), { encoding: 'utf-8' })
+  const expectedPattern1FromMentioner = new RegExp(`href=(?:"|')\/${mentioned.title}(?:"|')`)
+  const expectedPattern2FromMentioner = new RegExp(mentioned.lorem)
+  const expectedPattern3FromMentioner = new RegExp(`${mentioned.title}/${mentioned.cover}`)
+  t.match(
+    mentionerHTML,
+    expectedPattern1FromMentioner,
+    'Mentioner post has a link to the mentioned post in its content'
+  )
+  t.match(
+    mentionerHTML,
+    expectedPattern2FromMentioner,
+    'Mentioner post retrieves any metadata of mentioned post using mention block helper'
+  )
+  t.match(
+    mentionerHTML,
+    expectedPattern3FromMentioner,
+    'Mentioner post retreives cover image of the mentioned post with an absolute url'
+  )
+
+  const mentionedHTML = await readFile(join(dir.name, exportDirectory, mentioned.title, mentioned.nameOut), { encoding: 'utf-8' })
+  const expectedPattern1FromMentioned = new RegExp(`href=(?:"|')\/${mentioner.nameOut}(?:"|')`)
+  const expectedPattern2FromMentioned = new RegExp(mentioner.title)
+  t.match(
+    mentionerHTML,
+    expectedPattern1FromMentioner,
+    'Mentioned post has a link to the mentioner post in its content'
+  )
+  t.match(
+    mentionerHTML,
+    expectedPattern1FromMentioner,
+    'Mentioned post content includes the mentioner post\'s title'
   )
 })
 
