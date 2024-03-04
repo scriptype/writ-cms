@@ -11,17 +11,27 @@ const Methods = (() => {
   const init = async () => {
     const { revisionHistory } = Settings.getSettings()
     Debug.timeStart('version control')
-    if (revisionHistory !== "auto") {
+    if (revisionHistory === "off") {
       Debug.timeEnd('version control')
       return
     }
     State.repo = await git.openRepo()
+    if (!State.repo) {
+      Debug.debugLog('git repository not found')
+    }
+    if (revisionHistory === "manual") {
+      Debug.timeEnd('version control')
+      return
+    }
     await git.commitChanges()
     Debug.timeEnd('version control')
   }
 
   const getFileHistory = async (path) => {
     if (Settings.getSettings().revisionHistory === "off") {
+      return null
+    }
+    if (!State.repo) {
       return null
     }
     try {
