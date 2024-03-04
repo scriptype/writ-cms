@@ -43,10 +43,11 @@ const _explore = async (currentPath, depth = 0) => {
       .map(async fileName => {
         const accumulatedPath = join(currentPath, fileName)
         const rootPath = lookBack(accumulatedPath, depth + 1)
+        const { birthtime } = await stat(accumulatedPath)
         const baseProperties = {
           name: fileName,
           path: relative(rootPath, accumulatedPath),
-          stats: await stat(accumulatedPath),
+          stats: { birthtime },
           depth,
         }
         if (await isDirectory(accumulatedPath)) {
