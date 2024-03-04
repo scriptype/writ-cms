@@ -6,27 +6,37 @@ const { urls, inlineMedia } = require('../helpers/processContent')
 
 const POST_COUNT = 25
 
-const processPostContent = Renderer => async post => {
+const processPartialBlock = (compiledBlockContent, entry) => {
   const { site } = Settings.getSettings()
-  const compiledContent = await Renderer.compile({
-    data: post,
-    content: post.content
-  })
-
-  const processedContent = await Promise.resolve(compiledContent)
-    .then(content => inlineMedia(content, post))
+  return Promise.resolve(compiledBlockContent)
+    .then(content => inlineMedia(content, entry))
     .then(content => {
-      const baseUrl = new URL(post.permalink, site.url).toString()
+      const baseUrl = new URL(entry.permalink, site.url).toString()
       return urls(content, baseUrl)
     })
-
-  return {
-    ...post,
-    content: processedContent
-  }
 }
 
-const renderRSSFeed = async (Renderer, { posts, categories }) => {
+const processPosts = (Renderer, contentModel) => {
+  return Promise.all(contentModel.posts.map(async post => {
+    const compiledContent = await Renderer.compile({
+      data: contentModel,
+      content: post.content
+    })
+
+    const compiledSummary = await Renderer.compile({
+      data: contentModel,
+      content: post.summary
+    })
+
+    return {
+      ...post,
+      content: processPartialBlock(compiledContent, post),
+      summary: processPartialBlock(compiledSummary, post)
+    }
+  }))
+}
+
+const renderRSSFeed = async (Renderer, contentModel) => {
   const { out, site, rss } = Settings.getSettings()
   if (rss === 'off') {
     return Promise.resolve()
@@ -38,9 +48,7 @@ const renderRSSFeed = async (Renderer, { posts, categories }) => {
 
   Debug.debugLog('creating feeds')
 
-  const processedPosts = await Promise.all(
-    posts.map(processPostContent(Renderer))
-  )
+  const processedPosts = await processPosts(Renderer, contentModel)
 
   const compilation = [
     Renderer.render({
@@ -53,15 +61,15 @@ const renderRSSFeed = async (Renderer, { posts, categories }) => {
           description: site.description,
           permalink: new URL('feed.xml', `${site.url}/`).toString(),
           iconUrl: new URL(site.icon, `${site.url}/`).toString(),
-          lastBuildDate: new Date(),
+          lastBuildDate: new Date().toUTCString(),
         },
         posts: processedPosts.slice(0, POST_COUNT),
-        categories,
+        categories: contentModel.categories,
         settings: Settings.getSettings(),
         debug: Debug.getDebug()
       }
     }),
-    ...categories.map(category => {
+    ...contentModel.categories.map(category => {
       Debug.debugLog('creating category feed:', category.name)
       return Renderer.render({
         template: 'features/rss',
@@ -78,7 +86,7 @@ const renderRSSFeed = async (Renderer, { posts, categories }) => {
           posts: category.posts.slice(0, POST_COUNT).map(({ handle }) => {
             return processedPosts.find(p => p.handle === handle)
           }),
-          categories,
+          categories: contentModel.categories,
           settings: Settings.getSettings(),
           debug: Debug.getDebug()
         }

@@ -12,6 +12,7 @@ const withDates = async (entry) => {
   return {
     ..._.omit(entry, 'publishDatePrototype'),
     publishDate,
+    publishDateUTC: publishDate.toUTCString(),
     publishDateFull: publishDate.toLocaleString(locale, { dateStyle: 'full' }),
     publishDateLong: publishDate.toLocaleString(locale, { dateStyle: 'long' }),
     publishDateMedium: publishDate.toLocaleString(locale, { dateStyle: 'medium' }),
