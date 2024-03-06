@@ -25,7 +25,7 @@ const defaultSettings = (rootDirectory) => ({
     ".gitignore",
     "README.md",
     ".DS_Store",
-    "_.*",
+    "^_.*",
     "settings.json",
     "CNAME"
   ],
