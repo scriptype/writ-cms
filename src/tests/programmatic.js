@@ -561,6 +561,81 @@ test('refreshTheme option when there is no theme/keep', async t => {
   hasNotPaths(t, themeDirectoryContents, [deletedFileName], 'theme directory is refreshed')
 })
 
+test('hooks', async t => {
+  const dir = await createTempDir(t)
+  const assetsDir = await createTempDir(t)
+  const partialsDir = await createTempDir(t)
+
+  const testDictionaryWord = 'yazarlar'
+  const testAssetName = 'test-asset.jpg'
+  const testAuthorNames = ['random', 'human', 'names']
+  await assetsDir.mkFile(testAssetName, '')
+  await partialsDir.mkFile('hello.hbs', 'world')
+
+  writ
+    .useDictionary((value) => {
+      return {
+        ...value,
+        authors: testDictionaryWord
+      }
+    })
+    .useAssets((value) => {
+      return [
+        ...value,
+        {
+          src: assetsDir.name,
+          dest: 'test'
+        }
+      ]
+    })
+    .useContentModel((value) => {
+      return {
+        ...value,
+        authors: testAuthorNames
+      }
+    })
+    .useTemplatePartials((value) => {
+      return [
+        ...value,
+        partialsDir.name
+      ]
+    })
+    .useTemplateHelpers((value) => {
+      return {
+        ...value,
+        andInBetween(arr) {
+          return arr.join(' and ')
+        }
+      }
+    })
+    .useTemplate((value) => {
+      return `${value} <p>{{>hello}} {{lookup 'authors'}}: {{andInBetween authors}}</p>`
+    })
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  const { exportDirectory, assetsDirectory } = writ.getDefaultSettings()
+
+  const indexHTMLPath = join(dir.name, exportDirectory, 'index.html')
+  const indexHTMLContent = await readFile(indexHTMLPath, { encoding: 'utf-8' })
+
+  t.match(
+    indexHTMLContent,
+    new RegExp(`world ${testDictionaryWord}: random and human and names`),
+    'useDictionary, useContentModel, useTemplatePartials, useTemplateHelpers, useTemplate hooks'
+  )
+
+  const testAssetsPath = join(dir.name, exportDirectory, assetsDirectory, 'test')
+  const testAssetsDir = await readdir(testAssetsPath)
+
+  t.true(
+    testAssetsDir.includes(testAssetName),
+    'useAssets hook'
+  )
+})
+
 test('start mode', t => {
 
   t.test('starts a local server for preview', async st => {
