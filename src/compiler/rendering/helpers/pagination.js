@@ -1,7 +1,14 @@
 const { join } = require('path')
 const _ = require('lodash')
 
-const getPageUrl = (basePermalink, pageIndex, pagination, isNextPage) => {
+const getPageUrl = (basePermalink, pageNumber) => {
+  if (basePermalink === '/') {
+    return basePermalink + ['page', String(pageNumber)].join('/')
+  }
+  return [basePermalink, 'page', String(pageNumber)].join('/')
+}
+
+const getAdjacentPageUrl = (basePermalink, pageIndex, pagination, isNextPage) => {
   if (isNextPage && pageIndex === pagination.length - 1) {
     return undefined
   }
@@ -12,10 +19,7 @@ const getPageUrl = (basePermalink, pageIndex, pagination, isNextPage) => {
     return basePermalink
   }
   const pageNumber = isNextPage ? pageIndex + 2 : pageIndex
-  if (basePermalink === '/') {
-    return basePermalink + ['page', String(pageNumber)].join('/')
-  }
-  return [basePermalink, 'page', String(pageNumber)].join('/')
+  return getPageUrl(basePermalink, pageNumber)
 }
 
 const paginate = ({ page, posts, postsPerPage: _postsPerPage, outputDir, render }) => {
@@ -45,13 +49,24 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outputDir, render 
 
   const basePermalink = page.permalink
 
+  const pages = currentPageIndex => {
+    return pagination.map((pageOfPosts, i) => {
+      return {
+        url: i === 0 ? basePermalink : getPageUrl(basePermalink, i + 1),
+        number: i + 1,
+        current: i === currentPageIndex
+      }
+    })
+  }
+
   /* Render pagination[0] as the index itself
    * and pagination[n] as /page/n+1 */
   return pagination.map(async (pageOfPosts, i) => {
     const paginationData = {
-      previousPage: getPageUrl(basePermalink, i),
-      nextPage: getPageUrl(basePermalink, i, pagination, true),
-      numberOfPages: pagination.length
+      previousPage: getAdjacentPageUrl(basePermalink, i),
+      nextPage: getAdjacentPageUrl(basePermalink, i, pagination, true),
+      numberOfPages: pagination.length,
+      pages: pages(i)
     }
 
     if (i === 0) {
@@ -73,5 +88,6 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outputDir, render 
 
 module.exports = {
   getPageUrl,
+  getAdjacentPageUrl,
   paginate
 }

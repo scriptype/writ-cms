@@ -1,57 +1,57 @@
 const { join } = require('path')
 const { join: joinPosix } = require('path').posix
 const test = require('tape')
-const { getPageUrl, paginate } = require('../../compiler/rendering/helpers/pagination')
+const { getPageUrl, getAdjacentPageUrl, paginate } = require('../../compiler/rendering/helpers/pagination')
 const { filterPosts } = require('../../compiler/rendering/helpers/filterPosts')
 
 const casesForGetPageUrl = (t, basePermalink) => {
   t.equal(
-    getPageUrl(basePermalink, 0),
+    getAdjacentPageUrl(basePermalink, 0),
     undefined,
     `${basePermalink} does not have previousPage url`
   )
 
   t.equal(
-    getPageUrl(basePermalink, 0, ['a'], true),
+    getAdjacentPageUrl(basePermalink, 0, ['a'], true),
     undefined,
     `${basePermalink} does not have nextPage url if there is no next page`
   )
 
   t.equal(
-    getPageUrl(basePermalink, 0, ['a', 'b'], true),
+    getAdjacentPageUrl(basePermalink, 0, ['a', 'b'], true),
     joinPosix(basePermalink, '/page/2'),
     `${basePermalink} has correct nextPage url if there is next page`
   )
 
   t.equal(
-    getPageUrl(basePermalink, 1),
+    getAdjacentPageUrl(basePermalink, 1),
     basePermalink,
     `${joinPosix(basePermalink, '/page/2')} has correct previousPage url`
   )
 
   t.equal(
-    getPageUrl(basePermalink, 1, ['a', 'b'], true),
+    getAdjacentPageUrl(basePermalink, 1, ['a', 'b'], true),
     undefined,
     `${joinPosix(basePermalink, '/page/2')} does not have nextPage url if it is the last page`
   )
 
   t.equal(
-    getPageUrl(basePermalink, 1, ['a', 'b', 'c'], true),
+    getAdjacentPageUrl(basePermalink, 1, ['a', 'b', 'c'], true),
     joinPosix(basePermalink, '/page/3'),
     `${joinPosix(basePermalink, '/page/2')} has correct nextPage url if there is next page`
   )
 }
 
 test('compiler/rendering', t => {
-  t.test('pagination.getPageUrl (basePermalink: /)', async () => {
+  t.test('pagination.getAdjacentPageUrl (basePermalink: /)', async () => {
     casesForGetPageUrl(t, '/')
   })
 
-  t.test('pagination.getPageUrl (basePermalink: /blog)', async () => {
+  t.test('pagination.getAdjacentPageUrl (basePermalink: /blog)', async () => {
     casesForGetPageUrl(t, '/blog')
   })
 
-  t.test('pagination.getPageUrl (basePermalink: /blog/writings)', async () => {
+  t.test('pagination.getAdjacentPageUrl (basePermalink: /blog/writings)', async () => {
     casesForGetPageUrl(t, '/blog/writings')
   })
 
@@ -82,7 +82,12 @@ test('compiler/rendering', t => {
             {
               previousPage: undefined,
               nextPage: '/lorem/page/2',
-              numberOfPages: 3
+              numberOfPages: 3,
+              pages: [
+                { url: '/lorem', number: 1, current: true },
+                { url: '/lorem/page/2', number: 2, current: false },
+                { url: '/lorem/page/3', number: 3, current: false }
+              ]
             },
             'First page gets correct paginationData'
           )
@@ -105,7 +110,12 @@ test('compiler/rendering', t => {
             {
               previousPage: '/lorem',
               nextPage: '/lorem/page/3',
-              numberOfPages: 3
+              numberOfPages: 3,
+              pages: [
+                { url: '/lorem', number: 1, current: false },
+                { url: '/lorem/page/2', number: 2, current: true },
+                { url: '/lorem/page/3', number: 3, current: false }
+              ]
             },
             'Second page gets correct paginationData'
           )
@@ -128,7 +138,12 @@ test('compiler/rendering', t => {
             {
               previousPage: '/lorem/page/2',
               nextPage: undefined,
-              numberOfPages: 3
+              numberOfPages: 3,
+              pages: [
+                { url: '/lorem', number: 1, current: false },
+                { url: '/lorem/page/2', number: 2, current: false },
+                { url: '/lorem/page/3', number: 3, current: true }
+              ]
             },
             'Third page gets correct paginationData'
           )
@@ -220,7 +235,11 @@ test('compiler/rendering', t => {
             {
               previousPage: undefined,
               nextPage: '/lorem/page/2',
-              numberOfPages: 2
+              numberOfPages: 2,
+              pages: [
+                { url: '/lorem', number: 1, current: true },
+                { url: '/lorem/page/2', number: 2, current: false }
+              ]
             },
             'First page gets correct paginationData'
           )
@@ -243,7 +262,11 @@ test('compiler/rendering', t => {
             {
               previousPage: '/lorem',
               nextPage: undefined,
-              numberOfPages: 2
+              numberOfPages: 2,
+              pages: [
+                { url: '/lorem', number: 1, current: false },
+                { url: '/lorem/page/2', number: 2, current: true }
+              ]
             },
             'Second page gets correct paginationData'
           )
