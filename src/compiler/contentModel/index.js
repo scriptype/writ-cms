@@ -8,12 +8,13 @@ const withLinkedPosts = require('./enhancers/links')
 
 const create = async (fileSystemTree) => {
   const contentModel = pipe(await createContentModel(fileSystemTree), [
+    decorate.bind(null, 'contentModel'),
     withDates,
     withSortedPosts,
     withTags,
     withLinkedPosts
   ])
-  return decorate('contentModel', contentModel)
+  return contentModel
 }
 
 module.exports = {
