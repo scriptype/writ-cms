@@ -14,13 +14,16 @@ const Preview = require('./preview')
 const Watcher = require('./watcher')
 const createCMS = require('./cms')
 
-const startUp = async ({ debug, watch, startCMSServer, ...rest }) => {
+const startUp = async ({ debug, watch, startCMSServer, onFinish, ...rest }) => {
   Debug.init(debug)
   Debug.timeStart('> total')
   const cms = createCMS()
   const runOptions = {
-    finishCallback: (state) => {
+    finishCallback: async (state) => {
       cms.setState(state)
+      if (typeof onFinish === 'function') {
+        await onFinish(state)
+      }
       Debug.timeEnd('> total')
       Debug.logTimes()
     },
@@ -61,7 +64,7 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await CNAME.create()
   const { fileSystemTree, contentModel } = await Compiler.compile()
   await Assets.copyAssets()
-  finishCallback({
+  await finishCallback({
     settings: Settings.getSettings(),
     fileSystemTree,
     contentModel
