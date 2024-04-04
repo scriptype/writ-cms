@@ -28,10 +28,8 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 
 ## Example websites
 
-Currently, only I'm using this system. Have a look at:
-
-- A simple writ project: https://github.com/scriptype/writ
-- The default frontend: https://writ.enes.in
+- [Writ](https://writ.enes.in) (source: https://github.com/scriptype/writ)
+- [Reads Feed](https://enes.in/feed) (source: https://github.com/scriptype/feed)
 
 ## Usage
 
