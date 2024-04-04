@@ -1,6 +1,6 @@
 {
   "name": "writ-cms",
-  "version": "0.28.1",
+  "version": "0.28.2",
   "description": "Simple static site generator",
   "main": "src/index.js",
   "bin": {
