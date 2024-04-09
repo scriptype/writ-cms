@@ -1,6 +1,6 @@
 # Writ-CMS
 
-A spirited web engine, in early development.
+The timeless SSG + CMS, in the making.
 
 [![tests status badge](https://github.com/scriptype/writ-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/scriptype/writ-cms/actions/workflows/tests.yml)
 [![Coverage Status](https://coveralls.io/repos/github/scriptype/writ-cms/badge.svg?fuckgithubcache=true)](https://coveralls.io/github/scriptype/writ-cms?branch=master)
