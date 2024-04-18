@@ -11,8 +11,8 @@ const create = async (fileSystemTree) => {
     decorate.bind(null, 'contentModel'),
     withDates,
     withSortedPosts,
+    withLinkedPosts,
     withTags,
-    withLinkedPosts
   ])
   return contentModel
 }

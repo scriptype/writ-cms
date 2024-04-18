@@ -1,7 +1,6 @@
 const { join } = require('path')
-const Settings = require('../../../settings')
-const { getSlug, makePermalink } = require('../../../helpers')
 
+/* Extract tags from posts as an array of tags with posts */
 const getTags = (posts) => {
   const tags = posts.map((post) => {
     return post.tags.map((tag) => {
@@ -12,32 +11,22 @@ const getTags = (posts) => {
   const flatTags = [].concat(...tags)
 
   const tagsIndex = flatTags.reduce((acc, tagWithPost) => {
-    const tag = tagWithPost.tag
+    const { tag, post } = tagWithPost
     return {
       ...acc,
-      [tag]: [
-        ...(acc[tag] || []),
-        tagWithPost.post
-      ]
+      [tag.tag]: {
+        ...tag,
+        posts: [
+          ...(acc[tag.tag] ? acc[tag.tag].posts : []),
+          post
+        ]
+      }
     }
   }, {})
 
-  const { permalinkPrefix } = Settings.getSettings()
-
   return Object
     .keys(tagsIndex)
-    .map(key => {
-      const permalink = makePermalink({
-        prefix: permalinkPrefix,
-        parts: ['tags', key]
-      })
-      return {
-        tag: key,
-        slug: getSlug(key),
-        permalink,
-        posts: tagsIndex[key]
-      }
-    })
+    .map(key => tagsIndex[key])
     .sort((a, b) => b.posts.length - a.posts.length)
 }
 

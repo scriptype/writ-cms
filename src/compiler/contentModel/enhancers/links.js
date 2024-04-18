@@ -1,5 +1,6 @@
 const _ = require('lodash')
-const { pipe } = require('../../../helpers')
+const Settings = require('../../../settings')
+const { pipe, getSlug, makePermalink } = require('../../../helpers')
 
 const getScoreByOverlap = (arrayOfStrings1 = [], arrayOfStrings2 = []) => {
   const overlap = _.intersection(
@@ -145,11 +146,19 @@ const linkMentionedEntries = (contentModel) => {
 }
 
 const _linkPostTags = (post, tags) => {
+  const { permalinkPrefix } = Settings.getSettings()
   return {
     ...post,
     tags: post.tags.map(tag => {
-      const { posts, ...rest } = tags.find(t => t.tag === tag)
-      return rest
+      const permalink = makePermalink({
+        prefix: permalinkPrefix,
+        parts: ['tags', tag]
+      })
+      return {
+        tag,
+        slug: getSlug(tag),
+        permalink
+      }
     })
   }
 }
