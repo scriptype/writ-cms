@@ -1,4 +1,4 @@
-import Dictionary from '../dictionary.js'
+import Dictionary from '../../common/dictionary.js'
 
 const times = (n, what) => {
   return [...Array(n).keys()].map(() => what)

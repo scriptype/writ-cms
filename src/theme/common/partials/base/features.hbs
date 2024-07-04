@@ -7,12 +7,12 @@
 {{/if}}
 
 {{#if (isEnabled "syntaxHighlighting")}}
-  <link rel="stylesheet" href="{{assetsPath}}/common/highlight/styles/default.min.css">
-  <script src="{{assetsPath}}/common/highlight/highlight.min.js"></script>
+  <link rel="stylesheet" href="{{assetsPath}}/features/highlight/styles/default.min.css">
+  <script src="{{assetsPath}}/features/highlight/highlight.min.js"></script>
   <script>hljs.highlightAll();</script>
 {{/if}}
 
 {{#if (isEnabled "search")}}
-  <link rel="stylesheet" href="{{assetsPath}}/common/search/search.css">
-  <script defer type="module" src="{{assetsPath}}/common/search/search.js"></script>
+  <link rel="stylesheet" href="{{assetsPath}}/features/search/search.css">
+  <script defer type="module" src="{{assetsPath}}/features/search/search.js"></script>
 {{/if}}
