@@ -1,5 +1,5 @@
 const { tmpdir } = require('os')
-const { stat, rm, mkdir, mkdtemp, cp, readdir } = require('fs/promises')
+const { stat, rm, rmdir, mkdir, mkdtemp, cp, readdir } = require('fs/promises')
 const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
@@ -29,6 +29,7 @@ const Methods = (() => {
         Debug.debugLog('refresh theme')
         await refreshCustomTheme(customThemePath)
       } else {
+        await refreshFeaturesDirectory(customThemePath)
         await collectCustomizerPaths(customThemePath)
       }
     } else {
@@ -91,11 +92,6 @@ const Methods = (() => {
   const copyCommonResources = (targetPath) => {
     return Promise.all([
       cp(
-        join(__dirname, 'common', FEATURES),
-        join(targetPath, FEATURES),
-        { recursive: true }
-      ),
-      cp(
         join(__dirname, 'common', PARTIALS.from),
         join(targetPath, PARTIALS.to),
         { recursive: true }
@@ -105,6 +101,73 @@ const Methods = (() => {
         join(targetPath, PARTIALS.to, TEMPLATE_HELPERS.to)
       )
     ])
+  }
+
+  const refreshFeaturesDirectory = async (targetPath) => {
+    const settings = Settings.getSettings()
+
+    const features = [
+      ['syntaxHighlighting', 'highlight'],
+      ['search', 'search']
+    ]
+
+    const enabledFeatures = features
+      .filter(([ settingsKey, dirName ]) => {
+        return settings[settingsKey] !== 'off'
+      })
+      .map(([, dirName]) => dirName)
+
+    const disabledFeatures = features
+      .filter(([ settingsKey, dirName ]) => {
+        return settings[settingsKey] === 'off'
+      })
+      .map(([, dirName]) => dirName)
+
+    Debug.debugLog('enabledFeatures', enabledFeatures)
+    Debug.debugLog('disabledFeatures', disabledFeatures)
+
+    disabledFeatures.forEach(featureDirName => {
+      Debug.debugLog('rm -rf', join(targetPath, FEATURES, featureDirName))
+    })
+
+    const copyEnabledFeaturesIfMissing = async () => Promise.all(
+      enabledFeatures.map(featureDirName => {
+        const path = join(targetPath, FEATURES, featureDirName)
+        return stat(path)
+          .then(() => Promise.resolve())
+          .catch(() => cp(
+            join(__dirname, 'common', FEATURES, featureDirName),
+            join(targetPath, FEATURES, featureDirName),
+            { recursive: true }
+          ))
+      })
+    )
+
+    const deleteDisabledFeaturesIfExisting = async () => Promise.all(
+      disabledFeatures.map(async featureDirName => {
+        const path = join(targetPath, FEATURES, featureDirName)
+        return stat(path)
+          .then(() => rmdir(path, { recursive: true, force: true }))
+          .catch(() => Promise.resolve())
+      })
+    )
+
+    const deleteEmptyFeaturesDirectory = async () => readdir(join(targetPath, FEATURES))
+      .then(featuresDirectory => {
+        if (!featuresDirectory.length) {
+          Debug.debugLog('Deleting empty features directory')
+          return rmdir(join(targetPath, FEATURES))
+        }
+        return Promise.resolve()
+      })
+      .catch(() => {
+        Debug.debugLog('Features directory not found')
+        return Promise.resolve()
+      })
+
+    await copyEnabledFeaturesIfMissing()
+    await deleteDisabledFeaturesIfExisting()
+    return deleteEmptyFeaturesDirectory()
   }
 
   const copyBaseThemeResources = (customThemePath) => {
@@ -157,6 +220,7 @@ const Methods = (() => {
     ])
 
     await copyCommonResources(customThemePath)
+    await refreshFeaturesDirectory(customThemePath)
     await copyBaseThemeResources(customThemePath)
     await copyCustomizers(customThemePath)
   }
