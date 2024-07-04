@@ -8,7 +8,7 @@ let dictionary = {}
 
 const lookup = (key, variables = {}) => {
   if (!(key in dictionary)) {
-    Debug.debugLog(`unrecognized word: ${key}`)
+    console.log(`unrecognized key: ${key}`)
     return ''
   }
   const translation = dictionary[key]
