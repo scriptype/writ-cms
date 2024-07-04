@@ -99,5 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const posts = await loadPosts('posts.json')
 
-  initSearch(UI, posts)
+  Dictionary.ready(() => {
+    initSearch(UI, posts)
+  })
 })
