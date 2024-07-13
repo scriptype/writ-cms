@@ -28,7 +28,7 @@ const copyAsset = async ({ basePath, destPath, path, name, isFolder }) => {
   }
 }
 
-const copyLocalAssets = async ({ localAssets, posts, subpages, categories }) => {
+const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categories }) => {
   const { rootDirectory, contentDirectory, pagesDirectory } = Settings.getSettings()
   const basePath = await contentRoot(rootDirectory, contentDirectory)
 
@@ -36,6 +36,16 @@ const copyLocalAssets = async ({ localAssets, posts, subpages, categories }) => 
     localAssets
       .map(withBasePath(basePath))
       .map(copyAsset)
+  )
+
+  const copyHomepageAssets = all(
+    (homepage.localAssets || []).map((localAsset) => {
+      const assetWithBasePath = withBasePath(basePath)(localAsset)
+      return copyAsset({
+        ...assetWithBasePath,
+        destPath: '.'
+      })
+    })
   )
 
   const copyCategoryAssets = all(
@@ -74,6 +84,7 @@ const copyLocalAssets = async ({ localAssets, posts, subpages, categories }) => 
 
   return all([
     copyRootAssets,
+    copyHomepageAssets,
     copyCategoryAssets,
     copyPostAssets,
     copySubpageAssets

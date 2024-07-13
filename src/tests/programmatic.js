@@ -129,6 +129,63 @@ test('post files in a category', async t => {
   hasPaths(t, categoryDir, compiledPostNames)
 })
 
+test('homepage', async t => {
+  const { exportDirectory, homepageDirectory } = writ.getDefaultSettings()
+
+  const dir = await createTempDir(t)
+  const rawHTMLHomepageContent = 'raw html homepage'
+  await dir.mkFile('index.html', rawHTMLHomepageContent)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: ['index.html']
+    },
+    exportDirectoryPaths: {
+      exists: ['index.html']
+    }
+  })
+
+  const actualRawHTMLOutputContent = await readFile(join(dir.name, exportDirectory, 'index.html'), { encoding: 'utf-8' })
+  const expectedRawHTMLOutputContent = new RegExp(`^${rawHTMLHomepageContent}$`, 's')
+  t.match(
+    actualRawHTMLOutputContent,
+    expectedRawHTMLOutputContent,
+    "When homepage file has .html extension, it's treated as raw HTML"
+  )
+
+  await rm(join(dir.name, 'index.html'))
+
+  const folderedHomepageContent = 'I am foldered homepage'
+  await dir.mkDir(homepageDirectory)
+  await dir.mkFile(join(homepageDirectory, 'index.html'), folderedHomepageContent)
+
+  await writ.build({
+    rootDirectory: dir.name
+  })
+
+  await common.builds(t, dir.name, {
+    rootDirectoryPaths: {
+      exists: [homepageDirectory]
+    },
+    exportDirectoryPaths: {
+      notExists: [homepageDirectory],
+      exists: ['index.html']
+    }
+  })
+
+  const actualFolderedOutputContent = await readFile(join(dir.name, exportDirectory, 'index.html'), { encoding: 'utf-8' })
+  const expectedFolderedOutputContent = new RegExp(`^${folderedHomepageContent}$`, 's')
+  t.match(
+    actualFolderedOutputContent,
+    expectedFolderedOutputContent,
+    'Using a homepage folder works'
+  )
+})
+
 test('subpages', async t => {
   const dir = await createTempDir(t)
 

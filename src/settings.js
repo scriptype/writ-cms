@@ -13,6 +13,7 @@ const defaultSettings = (rootDirectory) => ({
   permalinkPrefix: "/",
   assetsDirectory: "assets",
   exportDirectory: "docs",
+  homepageDirectory: "homepage",
   pagesDirectory: "pages",
   themeDirectory: "theme",
   contentDirectory: "content",

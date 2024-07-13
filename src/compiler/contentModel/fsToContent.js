@@ -4,7 +4,12 @@ const Dictionary = require('../../dictionary')
 const { last } = require('../../helpers')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
-const { createHomepage } = require('./models/homepage')
+
+const {
+  createHomepage,
+  createFolderedHomepage,
+  createFolderedHomepageIndex
+} = require('./models/homepage')
 
 const {
   createCategory,
@@ -52,6 +57,12 @@ const isCategoryIndexFile = (fsObject) => {
 
 const isHomepageFile = (fsObject) => {
   return isTemplateFile(fsObject) && fsObject.name.match(/^(homepage|home|index)\..+$/)
+}
+
+const isHomepageDirectory = (fsObject) => {
+  const { homepageDirectory } = Settings.getSettings()
+  const pattern = new RegExp(`^(${homepageDirectory}|homepage|home)$`)
+  return fsObject.name.match(pattern)
 }
 
 const newEntry = ({
@@ -123,6 +134,31 @@ const withHomepage = (contentModel, fsObject) => {
     key: 'homepage',
     entryFn: () => createHomepage(fsObject).data,
     replace: true
+  })
+}
+
+const withFolderedHomepage = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'homepage',
+    entryFn: () => {
+      const homepage = createFolderedHomepage({
+        ...fsObject,
+        children: fsObject.children.map(mapFolderedHomepageTree)
+      })
+      return homepage.data
+    },
+    replace: true
+  })
+}
+
+const mapFolderedHomepageTree = (fsObject) => {
+  if (isHomepageFile(fsObject)) {
+    return createFolderedHomepageIndex(fsObject)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
   })
 }
 
@@ -276,6 +312,9 @@ const createContentModel = (fsTree) => {
     if (!fsObject.children) {
       return withLocalAsset(contentModel, fsObject)
     }
+    if (isHomepageDirectory(fsObject)) {
+      return withFolderedHomepage(contentModel, fsObject)
+    }
     if (fsObject.name === pagesDirectory) {
       return withSubpages(contentModel, fsObject)
     }
@@ -293,7 +332,7 @@ const createContentModel = (fsTree) => {
     subpages: [],
     categories: [],
     posts: [],
-    homepage: createHomepage().data,
+    homepage: createHomepage({}).data,
     localAssets: [],
     tags: []
   })
