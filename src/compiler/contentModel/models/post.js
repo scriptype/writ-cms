@@ -7,6 +7,8 @@ const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
 
+const DEFAULT_TYPE = 'text'
+
 const isPost = (fsObject) => {
   return fsObject.type === contentTypes.POST
 }
@@ -91,11 +93,13 @@ const _createPost = (fsObject, { categorized, foldered }) => {
     permalink
   })
 
+  const type = postFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
+
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
     data: {
-      type: metadata.type || 'text',
+      type: metadata.type || type,
       title: metadata.title || removeExtension(fsObject.name),
       cover: metadata.cover ? [permalink, metadata.cover].join('/') : '',
       media: metadata.media ? [permalink, metadata.media].join('/') : '',

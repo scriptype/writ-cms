@@ -4,6 +4,8 @@ const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
 
+const DEFAULT_TYPE = 'basic'
+
 const isFolderedHomepageIndex = (fsObject) => {
   return fsObject.type === contentTypes.FOLDERED_HOMEPAGE_INDEX
 }
@@ -24,7 +26,7 @@ const _createHomepage = (fsObject, { foldered }) => {
     localAssets
   })
 
-  const type = indexFile.extension === '.html' ? 'raw-index-html' : 'basic'
+  const type = indexFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
 
   return {
     ..._.omit(fsObject, 'children'),

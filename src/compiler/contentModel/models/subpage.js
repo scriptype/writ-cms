@@ -6,6 +6,8 @@ const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
 
+const DEFAULT_TYPE = 'basic'
+
 const isSubpage = (fsObject) => {
   return fsObject.type === contentTypes.SUBPAGE
 }
@@ -65,11 +67,13 @@ const _createSubpage = (fsObject, { foldered }) => {
   const permalink = getSubpagePermalink(fsObject, foldered)
   const metadata = parseTemplate(pageFile)
 
+  const type = pageFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
+
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.SUBPAGE,
     data: {
-      type: metadata.type || 'basic',
+      type: metadata.type || type,
       title: metadata.title || removeExtension(fsObject.name),
       cover: metadata.cover ? [permalink, metadata.cover].join('/') : '',
       media: metadata.media ? [permalink, metadata.media].join('/') : '',

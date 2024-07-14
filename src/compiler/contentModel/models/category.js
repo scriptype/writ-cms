@@ -7,6 +7,8 @@ const parseTemplate = require('../parseTemplate')
 const { isPost } = require('./post')
 const { isLocalAsset } = require('./localAsset')
 
+const DEFAULT_TYPE = 'basic'
+
 const isCategoryIndex = (fsObject) => {
   return fsObject.type === contentTypes.CATEGORY_INDEX
 }
@@ -36,11 +38,13 @@ const createCategory = (fsObject) => {
       attributes: {}
     }
 
+  const type = indexFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
+
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.CATEGORY,
     data: {
-      type: metadata.type || 'basic',
+      type: metadata.type || type,
       name: metadata.title || fsObject.name,
       content: metadata.content || '',
       summary: metadata.summary || '',
