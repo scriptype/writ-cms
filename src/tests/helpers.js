@@ -134,5 +134,6 @@ test('helpers', t => {
     t.equal(maybeRawHTMLType('.xhtml'), null, '.xhtml does not count as raw html type')
     t.equal(maybeRawHTMLType('.htm'), null, '.htm does not count as raw html type')
     t.equal(maybeRawHTMLType('.xml'), null, '.xml does not count as raw html type')
+    t.equal(maybeRawHTMLType(), null, 'undefined extension does not mean raw html type')
   })
 })
