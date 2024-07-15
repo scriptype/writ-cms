@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const Settings = require('../../../settings')
+const { maybeRawHTMLType } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -26,13 +27,11 @@ const _createHomepage = (fsObject, { foldered }) => {
     localAssets
   })
 
-  const type = indexFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
-
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.HOMEPAGE,
     data: {
-      type: metadata.type || type,
+      type: metadata.type || maybeRawHTMLType(indexFile?.extension) || DEFAULT_TYPE,
       title: metadata.title || '',
       content: metadata.content || '',
       mentions: metadata.mentions || [],

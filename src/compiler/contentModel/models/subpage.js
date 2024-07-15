@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { join } = require('path')
 const Settings = require('../../../settings')
-const { getSlug, makePermalink, removeExtension } = require('../../../helpers')
+const { getSlug, makePermalink, removeExtension, maybeRawHTMLType } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -67,13 +67,11 @@ const _createSubpage = (fsObject, { foldered }) => {
   const permalink = getSubpagePermalink(fsObject, foldered)
   const metadata = parseTemplate(pageFile)
 
-  const type = pageFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
-
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.SUBPAGE,
     data: {
-      type: metadata.type || type,
+      type: metadata.type || maybeRawHTMLType(pageFile?.extension) || DEFAULT_TYPE,
       title: metadata.title || removeExtension(fsObject.name),
       cover: metadata.cover ? [permalink, metadata.cover].join('/') : '',
       media: metadata.media ? [permalink, metadata.media].join('/') : '',

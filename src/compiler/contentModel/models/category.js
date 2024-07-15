@@ -1,7 +1,7 @@
 const { join } = require('path')
 const _ = require('lodash')
 const Settings = require('../../../settings')
-const { getSlug, makePermalink } = require('../../../helpers')
+const { getSlug, makePermalink, maybeRawHTMLType } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isPost } = require('./post')
@@ -38,13 +38,11 @@ const createCategory = (fsObject) => {
       attributes: {}
     }
 
-  const type = indexFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
-
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.CATEGORY,
     data: {
-      type: metadata.type || type,
+      type: metadata.type || maybeRawHTMLType(indexFile?.extension) || DEFAULT_TYPE,
       name: metadata.title || fsObject.name,
       content: metadata.content || '',
       summary: metadata.summary || '',

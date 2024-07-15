@@ -55,6 +55,13 @@ const makePermalink = ({ prefix, parts, addHTMLExtension }) => {
   return addHTMLExtension ? permalink + '.html' : permalink
 }
 
+const maybeRawHTMLType = (extension) => {
+  if (!extension || !extension.match(/^\.(html|hbs|handlebars)$/i)) {
+    return null
+  }
+  return 'raw-html-type'
+}
+
 const removeExtension = (fileName) => {
   return fileName.replace(extname(fileName), '')
 }
@@ -90,6 +97,7 @@ module.exports = {
   ensureDirectory,
   getSlug,
   makePermalink,
+  maybeRawHTMLType,
   removeExtension,
   replaceExtension,
   pipe,

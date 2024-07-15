@@ -2,7 +2,7 @@ const _ = require('lodash')
 const { dirname, join } = require('path')
 const Settings = require('../../../settings')
 const Dictionary = require('../../../dictionary')
-const { getSlug, makePermalink, removeExtension } = require('../../../helpers')
+const { getSlug, makePermalink, removeExtension, maybeRawHTMLType } = require('../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')
@@ -93,13 +93,11 @@ const _createPost = (fsObject, { categorized, foldered }) => {
     permalink
   })
 
-  const type = postFile?.extension === '.html' ? 'raw-index-html' : DEFAULT_TYPE
-
   return {
     ..._.omit(fsObject, 'children'),
     type: contentTypes.POST,
     data: {
-      type: metadata.type || type,
+      type: metadata.type || maybeRawHTMLType(postFile?.extension) || DEFAULT_TYPE,
       title: metadata.title || removeExtension(fsObject.name),
       cover: metadata.cover ? [permalink, metadata.cover].join('/') : '',
       media: metadata.media ? [permalink, metadata.media].join('/') : '',
