@@ -2,7 +2,7 @@ const { tmpdir } = require('os')
 const { rm, mkdtemp, mkdir } = require('fs/promises')
 const { resolve, join } = require('path')
 const test = require('tape')
-const { contentRoot, makePermalink } = require('../helpers')
+const { contentRoot, makePermalink, maybeRawHTMLType } = require('../helpers')
 
 const tempDir = () => {
   return mkdtemp(join(tmpdir(), 'writ-test-'))
@@ -122,5 +122,17 @@ test('helpers', t => {
     allExamples.forEach(({ actual, expected, message }) => {
       t.equal(actual, expected, message)
     })
+  })
+
+  t.test('maybeRawHTMLType', async () => {
+    t.equal(maybeRawHTMLType('.html'), 'raw-html-type', '.html')
+    t.equal(maybeRawHTMLType('.HTML'), 'raw-html-type', '.HTML')
+    t.equal(maybeRawHTMLType('.hbs'), 'raw-html-type', '.hbs')
+    t.equal(maybeRawHTMLType('.handlebars'), 'raw-html-type', '.handlebars')
+    t.equal(maybeRawHTMLType('.HANDLEBARS'), 'raw-html-type', '.HANDLEBARS')
+    t.equal(maybeRawHTMLType('.HBS'), 'raw-html-type', '.HBS')
+    t.equal(maybeRawHTMLType('.xhtml'), null, '.xhtml does not count as raw html type')
+    t.equal(maybeRawHTMLType('.htm'), null, '.htm does not count as raw html type')
+    t.equal(maybeRawHTMLType('.xml'), null, '.xml does not count as raw html type')
   })
 })
