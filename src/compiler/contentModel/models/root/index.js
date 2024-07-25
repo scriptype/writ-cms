@@ -4,13 +4,13 @@ const { withDates } = require('./enhancers')
 const createModel = require('./createModel')
 
 const createRoot = async (fileSystemTree) => {
-  return await pipe(await createModel(fileSystemTree), [
+  return pipe(await createModel(fileSystemTree), [
     async function rootSubpagesWithDates(contentModel) {
-      console.log('rootSubpagesWithDates contentModel', contentModel)
+      console.log('createRoot CM', contentModel)
       return {
         ...contentModel,
         subpages: await Promise.all(
-          contentModel.subpages.map(withDates)
+          (contentModel.subpages || []).map(withDates)
         )
       }
     }

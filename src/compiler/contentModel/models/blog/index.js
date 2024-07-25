@@ -5,7 +5,7 @@ const { withDates, withLinkedPosts, withTags } = require('./enhancers')
 const createModel = require('./createModel')
 
 const createBlog = async (fileSystemTree, { foldered }) => {
-  return await pipe(await createModel(fileSystemTree, { foldered }), [
+  return pipe(await createModel(fileSystemTree, { foldered }), [
     async function blogWithDates(contentModel) {
       return {
         ...contentModel,
@@ -21,7 +21,7 @@ const createBlog = async (fileSystemTree, { foldered }) => {
       }
     },
 
-    async function blogWithSortedPosts (contentModel) {
+    function blogWithSortedPosts (contentModel) {
       return {
         ...contentModel,
         categories: contentModel.categories.map(category => {
@@ -36,7 +36,7 @@ const createBlog = async (fileSystemTree, { foldered }) => {
 
     withLinkedPosts,
 
-    async function blogWithPostTags (contentModel) {
+    function blogWithPostTags (contentModel) {
       return {
         ...contentModel,
         tags: withTags(contentModel.posts)

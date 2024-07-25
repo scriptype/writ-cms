@@ -1,8 +1,8 @@
 const { join } = require('path')
 const { writeFile, mkdir } = require('fs/promises')
-const Settings = require('../../../settings')
-const Debug = require('../../../debug')
-const { urls, inlineMedia } = require('../helpers/processContent')
+const Settings = require('../../../../settings')
+const Debug = require('../../../../debug')
+const { urls, inlineMedia } = require('../../helpers/processContent')
 
 const POST_COUNT = 25
 
@@ -49,7 +49,7 @@ const renderRSSFeed = async (Renderer, contentModel) => {
   const compilation = [
     Renderer.render({
       template: 'features/rss',
-      outputPath: join(out, 'feed.xml'),
+      outputPath: join(out, contentModel.outputPrefix, 'feed.xml'),
       data: {
         feed: {
           title: site.title,
@@ -69,7 +69,7 @@ const renderRSSFeed = async (Renderer, contentModel) => {
       Debug.debugLog('creating category feed:', category.name)
       return Renderer.render({
         template: 'features/rss',
-        outputPath: join(out, category.slug, 'feed.xml'),
+        outputPath: join(out, contentModel.outputPrefix, category.slug, 'feed.xml'),
         data: {
           feed: {
             title: site.title + ' | ' + category.name,

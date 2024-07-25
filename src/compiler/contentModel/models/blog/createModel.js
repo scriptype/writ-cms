@@ -3,12 +3,6 @@ const Settings = require('../../../../settings')
 const Dictionary = require('../../../../dictionary')
 const { last } = require('../../../../helpers')
 
-const {
-  createHomepage,
-  createFolderedHomepage,
-  createFolderedHomepageIndex
-} = require('../root/models/homepage')
-
 const { createLocalAsset } = require('../root/models/localAsset')
 const { createBlogIndex } = require('./models/blogIndex')
 
@@ -110,41 +104,7 @@ const withLocalAsset = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'localAssets',
-    entryFn: () => createLocalAsset(fsObject)
-  })
-}
-
-const withHomepage = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'homepage',
-    entryFn: () => createHomepage(fsObject).data,
-    replace: true
-  })
-}
-
-const withFolderedHomepage = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'homepage',
-    entryFn: () => {
-      const homepage = createFolderedHomepage({
-        ...fsObject,
-        children: fsObject.children.map(mapFolderedHomepageTree)
-      })
-      return homepage.data
-    },
-    replace: true
-  })
-}
-
-const mapFolderedHomepageTree = (fsObject) => {
-  if (isHomepageFile(fsObject)) {
-    return createFolderedHomepageIndex(fsObject)
-  }
-  return createLocalAsset({
-    ...fsObject,
-    isFolder: !!fsObject.children
+    entryFn: () => createLocalAsset(fsObject, contentModel.outputPrefix)
   })
 }
 
@@ -152,7 +112,7 @@ const withPost = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'posts',
-    entryFn: () => createPost(fsObject).data
+    entryFn: () => createPost(fsObject, contentModel.outputPrefix).data
   })
 }
 
@@ -163,28 +123,28 @@ const withFolderedPost = (contentModel, fsObject) => {
     entryFn: () => {
       const newPost = createFolderedPost({
         ...fsObject,
-        children: fsObject.children.map(mapFolderedPostTree)
-      })
+        children: fsObject.children.map(mapFolderedPostTree(contentModel))
+      }, contentModel.outputPrefix)
       return newPost.data
     }
   })
 }
 
-const mapFolderedPostTree = (fsObject) => {
+const mapFolderedPostTree = (contentModel) => (fsObject) => {
   if (isFolderedPostIndexFile(fsObject)) {
-    return createFolderedPostIndex(fsObject)
+    return createFolderedPostIndex(fsObject, contentModel.outputPrefix)
   }
   return createLocalAsset({
     ...fsObject,
     isFolder: !!fsObject.children
-  })
+  }, contentModel.outputPrefix)
 }
 
 const withDefaultCategoryPost = (contentModel, fsObject) => {
   return newEntry({
     contentModel,
     key: 'posts',
-    entryFn: () => createDefaultCategoryPost(fsObject).data
+    entryFn: () => createDefaultCategoryPost(fsObject, contentModel.outputPrefix).data
   })
 }
 
@@ -199,7 +159,7 @@ const withDefaultCategory = (contentModel) => {
       const defaultCategory = entry || createCategory({
         name: defaultCategoryName,
         children: []
-      }).data
+      }, contentModel.outputPrefix).data
       return {
         ...defaultCategory,
         posts: defaultCategory.posts.concat(post)
@@ -215,8 +175,8 @@ const withCategory = (contentModel, fsObject) => {
     entryFn: () => {
       const newCategory = createCategory({
         ...fsObject,
-        children: fsObject.children.map(mapCategoryTree)
-      })
+        children: fsObject.children.map(mapCategoryTree(contentModel))
+      }, contentModel.outputPrefix)
       return {
         ...newCategory.data,
         posts: newCategory.data.posts.map(({ data }) => data)
@@ -231,23 +191,23 @@ const withCategory = (contentModel, fsObject) => {
   })
 }
 
-const mapCategoryTree = (fsObject) => {
+const mapCategoryTree = (contentModel) => (fsObject) => {
   if (isCategoryIndexFile(fsObject)) {
-    return createCategoryIndex(fsObject)
+    return createCategoryIndex(fsObject, contentModel.outputPrefix)
   }
   if (isTemplateFile(fsObject)) {
-    return createPost(fsObject)
+    return createPost(fsObject, contentModel.outputPrefix)
   }
   if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
     return createFolderedPost({
       ...fsObject,
-      children: fsObject.children.map(mapFolderedPostTree)
-    })
+      children: fsObject.children.map(mapFolderedPostTree(contentModel))
+    }, contentModel.outputPrefix)
   }
   return createLocalAsset({
     ...fsObject,
     isFolder: !!fsObject.children
-  })
+  }, contentModel.outputPrefix)
 }
 
 const withBlogIndex = (contentModel, fsObject) => {
@@ -255,7 +215,14 @@ const withBlogIndex = (contentModel, fsObject) => {
     contentModel,
     key: 'blogIndex',
     entryFn: () => {
-      return createBlogIndex(fsObject, contentModel._meta_).data
+      const blogIndex = createBlogIndex(fsObject, contentModel.outputPrefix).data
+      newEntry({
+        contentModel,
+        key: 'outputPrefix',
+        entry: blogIndex.outputPrefix,
+        replace: true
+      })
+      return blogIndex
     },
     replace: true
   })
@@ -266,12 +233,10 @@ const withBlogIndex = (contentModel, fsObject) => {
  * */
 const createContentModel = (fsTree, options = { foldered: false }) => {
   console.log('blog.createModel fsTree:', fsTree)
+  const defaultOutputPrefix = options.foldered ? fsTree.name : ''
   return fsTree.children.reduce((contentModel, fsObject) => {
     if (contentModel.foldered && isBlogIndexFile(fsObject)) {
       return withBlogIndex(contentModel, fsObject)
-    }
-    if (!contentModel.foldered && isHomepageFile(fsObject)) {
-      return withHomepage(contentModel, fsObject)
     }
     if (isTemplateFile(fsObject)) {
       return withDefaultCategory(
@@ -291,15 +256,12 @@ const createContentModel = (fsTree, options = { foldered: false }) => {
     }
     return withCategory(contentModel, fsObject)
   }, {
-    homepage: createHomepage({}).data,
+    blogIndex: createBlogIndex({}, defaultOutputPrefix).data,
     localAssets: [],
     categories: [],
     posts: [],
     tags: [],
-    _meta_: {
-      foldered: options.foldered,
-      prefix: options.foldered ? fsTree.name : ''
-    }
+    outputPrefix: defaultOutputPrefix
   })
 }
 

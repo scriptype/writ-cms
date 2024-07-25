@@ -1,0 +1,18 @@
+{{#if (isEnabled "rss")}}
+  {{#if (isCategoryPage) }}
+    <link rel="alternate" type="application/rss+xml" title="{{settings.site.title}} {{category.name}} Feed" href="{{settings.site.url}}{{ category.permalink }}/feed.xml">
+  {{else}}
+    <link rel="alternate" type="application/rss+xml" title="{{settings.site.title}} Feed" href="{{settings.site.url}}/feed.xml">
+  {{/if}}
+{{/if}}
+
+{{#if (isEnabled "syntaxHighlighting")}}
+  <link rel="stylesheet" href="{{assetsPath}}/features/highlight/styles/default.min.css">
+  <script src="{{assetsPath}}/features/highlight/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+{{/if}}
+
+{{#if (isEnabled "search")}}
+  <link rel="stylesheet" href="{{assetsPath}}/features/search/search.css">
+  <script defer type="module" src="{{assetsPath}}/features/search/search.js"></script>
+{{/if}}

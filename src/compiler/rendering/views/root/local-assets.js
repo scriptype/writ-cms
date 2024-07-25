@@ -1,8 +1,8 @@
 const { cp, stat } = require('fs/promises')
 const { join, dirname, sep } = require('path')
-const Settings = require('../../../settings')
-const { contentRoot, getSlug } = require('../../../helpers')
-const { debugLog } = require('../../../debug')
+const Settings = require('../../../../settings')
+const { contentRoot, getSlug } = require('../../../../helpers')
+const { debugLog } = require('../../../../debug')
 
 const all = Promise.all.bind(Promise)
 
@@ -28,9 +28,12 @@ const copyAsset = async ({ basePath, destPath, path, name, isFolder }) => {
   }
 }
 
-const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categories }) => {
+const copyLocalAssets = async (contentModel) => {
   const { rootDirectory, contentDirectory, pagesDirectory } = Settings.getSettings()
   const basePath = await contentRoot(rootDirectory, contentDirectory)
+  const { localAssets, homepage, posts, subpages, categories } = contentModel
+
+  console.log('copyLocalAssets CM', contentModel)
 
   const copyRootAssets = all(
     localAssets
@@ -45,26 +48,6 @@ const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categor
         ...assetWithBasePath,
         destPath: '.'
       })
-    })
-  )
-
-  const copyCategoryAssets = all(
-    (categories || []).map(({ localAssets }) => {
-      return all(
-        localAssets
-          .map(withBasePath(basePath))
-          .map(copyAsset)
-      )
-    })
-  )
-
-  const copyPostAssets = all(
-    (posts || []).map(({ localAssets = [] }) => {
-      return all(
-        localAssets
-          .map(withBasePath(basePath))
-          .map(copyAsset)
-      )
     })
   )
 
@@ -85,8 +68,6 @@ const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categor
   return all([
     copyRootAssets,
     copyHomepageAssets,
-    copyCategoryAssets,
-    copyPostAssets,
     copySubpageAssets
   ])
 }

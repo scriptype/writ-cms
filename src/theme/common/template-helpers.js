@@ -59,6 +59,9 @@ module.exports = {
     if (this.page === 'homepage' && this.homepage.title) {
       return `${this.homepage.title} / ${this.settings.site.title}`
     }
+    if (this.page === 'blogIndex' && this.blogIndex.title) {
+      return `${this.blogIndex.title} / ${this.settings.site.title}`
+    }
     return `${this.settings.site.title}`
   },
 

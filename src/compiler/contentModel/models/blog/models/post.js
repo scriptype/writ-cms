@@ -51,9 +51,7 @@ const getPostPermalink = (fsObject, categorized, foldered) => {
 }
 
 const getPostOutputPath = (fsObject, categorized, foldered) => {
-  const { out } = Settings.getSettings()
   const parts = [
-    out,
     categorized ? getSlug(dirname(fsObject.path)) : '',
     getSlug(fsObject.name),
     foldered ? 'index' : ''

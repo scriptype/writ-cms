@@ -47,9 +47,8 @@ const getSubpagePermalink = (fsObject, foldered) => {
 }
 
 const getSubpageOutputPath = (fsObject, foldered) => {
-  const { out } = Settings.getSettings()
   const slug = getSlug(fsObject.name)
-  const parts = [out, slug, foldered ? 'index' : ''].filter(Boolean)
+  const parts = [slug, foldered ? 'index' : ''].filter(Boolean)
   return join(...parts) + '.html'
 }
 

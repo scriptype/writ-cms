@@ -29,17 +29,14 @@ const templateExtensions = [
 ]
 
 const isTemplateFile = (fsObject) => {
-  console.log('isTemplateFile', fsObject)
   return new RegExp(templateExtensions.join('|'), 'i').test(fsObject.extension)
 }
 
 const isFolderedSubpageIndexFile = (fsObject) => {
-  console.log('isFolderedSubpageIndexFile -> isTemplateFile with', fsObject)
   return isTemplateFile(fsObject) && fsObject.name.match(/^page\..+$/)
 }
 
 const isHomepageFile = (fsObject) => {
-  console.log('isHomepageFile -> isTemplateFile with', fsObject)
   return isTemplateFile(fsObject) && fsObject.name.match(/^(homepage|home|index)\..+$/)
 }
 
@@ -62,13 +59,12 @@ const isBlogFolder = (fsObject) => {
   const isFolder = !!fsObject.children
   const isNamedBlog = fsObject.name.match(/blog/i)
   const hasBlogIndex = fsObject.children.find(f => {
-    console.log('hasBlogIndex -> isTemplateFile with', f)
     return isTemplateFile(f) && f.name.match(/^blog\./i)
   })
   return isFolder && (isNamedBlog || hasBlogIndex)
 }
 
-const newEntry = ({
+const newEntry = async ({
   contentModel,
   key,
   entryFn,
@@ -76,11 +72,11 @@ const newEntry = ({
   liftEntries,
   replace
 }) => {
-  const _entry = entry || entryFn()
+  const _entry = entry || await entryFn()
   const newContentModel = {
     ...contentModel,
     [key]: replace ? _entry : [
-      ...contentModel[key],
+      ...(contentModel[key] || []),
       _entry
     ]
   }
@@ -171,16 +167,12 @@ const withFolderedSubpage = (contentModel, fsObject) => {
     key: 'subpages',
     entryFn: () => createFolderedSubpage({
       ...fsObject,
-      children: fsObject.children.map(f => {
-        console.log('withFolderedSubpage -> mapFolderedSubpageTree', f)
-        return mapFolderedSubpageTree(f)
-      })
+      children: fsObject.children.map(mapFolderedSubpageTree)
     }).data
   })
 }
 
 const mapFolderedSubpageTree = (fsObject) => {
-  console.log('mapFolderedSubpageTree -> isFolderedSubpageIndexFile', fsObject)
   if (isFolderedSubpageIndexFile(fsObject)) {
     return createFolderedSubpageIndex(fsObject)
   }
@@ -199,11 +191,10 @@ const withSubpage = (contentModel, fsObject) => {
 }
 
 const withBlog = (contentModel, fsObject) => {
-  console.log('root.withBlog fsTree:', fsObject)
   return newEntry({
     contentModel,
     key: 'blog',
-    entryFn: () => createBlog(fsObject, { foldered: true }),
+    entryFn: async () => await createBlog(fsObject, { foldered: true }),
     replace: true
   })
 }
@@ -212,53 +203,41 @@ const withBlog = (contentModel, fsObject) => {
  * TODO: Implement [any content model] as rootContentModel
  * TODO: Think about subpages as default rootContentModel. pagesFolder would be a portal
  * */
-const createContentModel = (fsTree) => {
+const createContentModel = async (fsTree) => {
   const { assetsDirectory } = Settings.getSettings()
-  return fsTree.reduce((contentModel, fsObject) => {
+  return fsTree.reduce(async (contentModel, fsObject) => {
     if (fsObject.children) {
       if (isHomepageDirectory(fsObject)) {
-        console.log('foldered homepage', fsObject)
-        return withFolderedHomepage(contentModel, fsObject)
+        return withFolderedHomepage(await contentModel, fsObject)
       }
       if (isAssetsDirectory(fsObject)) {
-        console.log('assets directory', fsObject)
-        return withAssets(contentModel, fsObject)
+        return withAssets(await contentModel, fsObject)
       }
       if (isBlogFolder(fsObject)) {
-        console.log('blog folder', fsObject)
-        //return withBlog(contentModel, fsObject)
-        return contentModel
+        return await withBlog(await contentModel, fsObject)
       }
       if (fsObject.children.some(f => {
-        console.log('createModel -> isFolderedSubpageIndexFile', f)
         return isFolderedSubpageIndexFile(f)
       })) {
-        console.log('foldered subpage', fsObject)
-        return withFolderedSubpage(contentModel, {
+        return withFolderedSubpage(await contentModel, {
           ...fsObject,
           children: fsObject.children.map(f => {
-            console.log('createModel -> mapFolderedSubpageTree', f)
             return mapFolderedSubpageTree(f)
           })
         })
       }
-      console.log('localAsset folder', fsObject)
-      return withLocalAsset(contentModel, {
+      return withLocalAsset(await contentModel, {
         ...fsObject,
         isFolder: true
       })
     }
     if (isHomepageFile(fsObject)) {
-      console.log('homepage', fsObject)
-      return withHomepage(contentModel, fsObject)
+      return withHomepage(await contentModel, fsObject)
     }
-    console.log('createModel -> isTemplateFile with', fsObject)
     if (isTemplateFile(fsObject)) {
-      console.log('subpage', fsObject)
-      return withSubpage(contentModel, fsObject)
+      return withSubpage(await contentModel, fsObject)
     }
-    console.log('localAsset', fsObject)
-    return withLocalAsset(contentModel, {
+    return withLocalAsset(await contentModel, {
       ...fsObject,
       isFolder: false
     })

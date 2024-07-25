@@ -21,7 +21,7 @@ const getCategoryPermalink = (fsObject) => {
   })
 }
 
-const createCategory = (fsObject) => {
+const createCategory = (fsObject, prefix) => {
   const { out } = Settings.getSettings()
   const indexFile = fsObject.children.find(isCategoryIndex)
   const posts = fsObject.children.filter(isPost)
@@ -50,7 +50,6 @@ const createCategory = (fsObject) => {
       ...metadata.attributes,
       slug,
       permalink,
-      outputPath: join(out, getSlug(fsObject.name), 'index.html'),
       posts,
       localAssets
     }

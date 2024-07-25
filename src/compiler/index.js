@@ -7,6 +7,7 @@ const compile = async () => {
   Debug.timeStart('compiler')
   const fileSystemTree = await FileSystem.exploreTree()
   const contentModel = await ContentModel.create(fileSystemTree)
+  console.log('compiler contentModel', contentModel)
   await Rendering.render(contentModel)
   Debug.timeEnd('compiler')
   return {

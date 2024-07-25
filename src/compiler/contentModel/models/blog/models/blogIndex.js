@@ -3,7 +3,6 @@ const Settings = require('../../../../../settings')
 const { maybeRawHTMLType } = require('../../../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
-const { isLocalAsset } = require('../../root/models/localAsset')
 
 const DEFAULT_TYPE = 'basic'
 
@@ -20,8 +19,11 @@ const isBlogIndexFile = (fsObject) => {
  * TODO: Implement an 'outputPrefix' metadata that would override the prefix.
  * TODO: Implement a rendering target for blogIndex (think how to re-organize rendering in relation to content models.
  * */
-const createBlogIndex = (fsObject, { prefix }) => {
-  const permalink = Settings.getSettings().permalinkPrefix
+const createBlogIndex = (fsObject, prefix) => {
+  const permalink = [
+    Settings.getSettings().permalinkPrefix,
+    prefix
+  ].filter(Boolean).join('/')
 
   const metadata = parseTemplate(fsObject)
 
