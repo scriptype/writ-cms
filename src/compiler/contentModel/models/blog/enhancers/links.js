@@ -85,7 +85,9 @@ const linkPosts = (contentModel) => {
   return {
     ...contentModel,
     posts: contentModel.posts.map((post) => {
-      const category = contentModel.categories.find(cat => cat.permalink === post.category.permalink)
+      const category = contentModel.categories.find(cat => {
+        return cat.permalink === post.category.permalink
+      })
       const postInCategory = category.posts.find(p => p.permalink === post.permalink)
       const postIndex = category.posts.indexOf(postInCategory)
       return {

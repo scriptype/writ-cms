@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { dirname, join } = require('path')
+const { dirname, join, sep } = require('path')
 const Settings = require('../../../../../settings')
 const Dictionary = require('../../../../../dictionary')
 const { getSlug, makePermalink, removeExtension, maybeRawHTMLType } = require('../../../../../helpers')
@@ -38,35 +38,43 @@ const getTranscript = (metadata, localAssets) => {
   return firstMatch && firstMatch.content
 }
 
-const getPostPermalink = (fsObject, categorized, foldered) => {
+const getPostPermalink = (fsObject, categorized, foldered, outputPrefix) => {
   const { permalinkPrefix } = Settings.getSettings()
-  return makePermalink({
+  const permalink = makePermalink({
     prefix: permalinkPrefix,
     parts: [
-      categorized ? dirname(fsObject.path) : '',
+      outputPrefix,
+      categorized ?
+        dirname(fsObject.path).split(sep).slice(-1)[0] :
+        '',
       fsObject.name
     ],
     addHTMLExtension: !foldered
   })
+  return permalink
 }
 
 const getPostOutputPath = (fsObject, categorized, foldered) => {
   const parts = [
-    categorized ? getSlug(dirname(fsObject.path)) : '',
+    categorized ? getSlug(dirname(fsObject.path).split(sep).slice(-1)[0]) : '',
     getSlug(fsObject.name),
     foldered ? 'index' : ''
   ].filter(Boolean)
   return join(...parts) + '.html'
 }
 
-const getPostCategory = (fsObject, categorized) => {
+const getPostCategory = (fsObject, categorized, outputPrefix) => {
   const name = categorized ?
-    dirname(fsObject.path) :
+    dirname(fsObject.path).split(sep).slice(-1)[0] :
     Dictionary.lookup('defaultCategoryName')
 
+  const { permalinkPrefix } = Settings.getSettings()
   const permalink = makePermalink({
-    prefix: Settings.getSettings().permalinkPrefix,
-    parts: [name]
+    prefix: permalinkPrefix,
+    parts: [
+      outputPrefix,
+      name
+    ]
   })
 
   return {
@@ -75,7 +83,7 @@ const getPostCategory = (fsObject, categorized) => {
   }
 }
 
-const _createPost = (fsObject, { categorized, foldered }) => {
+const _createPost = (fsObject, { categorized, foldered, outputPrefix }) => {
   const postFile = foldered ?
     fsObject.children.find(isFolderedPostIndex) :
     fsObject
@@ -84,7 +92,7 @@ const _createPost = (fsObject, { categorized, foldered }) => {
     fsObject.children.filter(isLocalAsset) :
     []
 
-  const permalink = getPostPermalink(fsObject, categorized, foldered)
+  const permalink = getPostPermalink(fsObject, categorized, foldered, outputPrefix)
 
   const metadata = parseTemplate(postFile, {
     localAssets,
@@ -110,7 +118,7 @@ const _createPost = (fsObject, { categorized, foldered }) => {
       ...metadata.attributes,
       slug: getSlug(fsObject.name),
       permalink,
-      category: getPostCategory(fsObject, categorized),
+      category: getPostCategory(fsObject, categorized, outputPrefix),
       path: postFile.path,
       outputPath: getPostOutputPath(fsObject, categorized, foldered),
       handle: removeExtension(fsObject.path),
@@ -128,24 +136,27 @@ const createFolderedPostIndex = (fsObject) => {
   }
 }
 
-const createFolderedPost = (fsObject) => {
+const createFolderedPost = (fsObject, outputPrefix) => {
   return _createPost(fsObject, {
     categorized: fsObject.depth > 0,
-    foldered: true
+    foldered: true,
+    outputPrefix
   })
 }
 
-const createDefaultCategoryPost = (fsObject) => {
+const createDefaultCategoryPost = (fsObject, outputPrefix) => {
   return _createPost(fsObject, {
     categorized: false,
-    foldered: false
+    foldered: false,
+    outputPrefix
   })
 }
 
-const createPost = (fsObject) => {
+const createPost = (fsObject, outputPrefix) => {
   return _createPost(fsObject, {
     categorized: true,
-    foldered: false
+    foldered: false,
+    outputPrefix
   })
 }
 

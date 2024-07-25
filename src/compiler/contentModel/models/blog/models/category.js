@@ -1,6 +1,7 @@
 const { join } = require('path')
 const _ = require('lodash')
 const Settings = require('../../../../../settings')
+const Dictionary = require('../../../../../dictionary')
 const { getSlug, makePermalink, maybeRawHTMLType } = require('../../../../../helpers')
 const parseTemplate = require('../../root/parseTemplate')
 const { isLocalAsset } = require('../../root/models/localAsset')
@@ -13,21 +14,24 @@ const isCategoryIndex = (fsObject) => {
   return fsObject.type === contentTypes.CATEGORY_INDEX
 }
 
-const getCategoryPermalink = (fsObject) => {
+const getCategoryPermalink = (fsObject, outputPrefix) => {
+  const name = fsObject.name || Dictionary.lookup('defaultCategoryName')
+
   const { permalinkPrefix } = Settings.getSettings()
-  return makePermalink({
+  const permalink = makePermalink({
     prefix: permalinkPrefix,
-    parts: [fsObject.name]
+    parts: [outputPrefix, name]
   })
+  return permalink
 }
 
-const createCategory = (fsObject, prefix) => {
+const createCategory = (fsObject, outputPrefix) => {
   const { out } = Settings.getSettings()
   const indexFile = fsObject.children.find(isCategoryIndex)
   const posts = fsObject.children.filter(isPost)
 
   const localAssets = fsObject.children.filter(isLocalAsset)
-  const permalink = getCategoryPermalink(fsObject)
+  const permalink = getCategoryPermalink(fsObject, outputPrefix)
   const slug = getSlug(fsObject.name)
 
   const metadata = indexFile ?
