@@ -4,7 +4,7 @@ const Debug = require('../../../debug')
 const { paginate } = require('../helpers/pagination')
 
 const renderTagsPage = (Renderer, { homepage, posts, categories, subpages, tags }) => {
-  if (!tags.length) {
+  if (!tags || !tags.length) {
     return Promise.resolve()
   }
   const settings = Settings.getSettings()
@@ -23,6 +23,9 @@ const renderTagsPage = (Renderer, { homepage, posts, categories, subpages, tags 
 }
 
 const renderTagIndices = (Renderer, { tags, categories, posts, subpages }) => {
+  if (!tags || !tags.length) {
+    return Promise.resolve()
+  }
   const settings = Settings.getSettings()
   const compilation = tags.map(tag => {
     return paginate({

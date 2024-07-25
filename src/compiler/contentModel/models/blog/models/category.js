@@ -1,11 +1,11 @@
 const { join } = require('path')
 const _ = require('lodash')
-const Settings = require('../../../settings')
-const { getSlug, makePermalink, maybeRawHTMLType } = require('../../../helpers')
+const Settings = require('../../../../../settings')
+const { getSlug, makePermalink, maybeRawHTMLType } = require('../../../../../helpers')
+const parseTemplate = require('../../root/parseTemplate')
+const { isLocalAsset } = require('../../root/models/localAsset')
 const contentTypes = require('../contentTypes')
-const parseTemplate = require('../parseTemplate')
 const { isPost } = require('./post')
-const { isLocalAsset } = require('./localAsset')
 
 const DEFAULT_TYPE = 'basic'
 

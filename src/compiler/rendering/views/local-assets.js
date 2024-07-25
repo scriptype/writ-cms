@@ -49,7 +49,7 @@ const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categor
   )
 
   const copyCategoryAssets = all(
-    categories.map(({ localAssets }) => {
+    (categories || []).map(({ localAssets }) => {
       return all(
         localAssets
           .map(withBasePath(basePath))
@@ -59,7 +59,7 @@ const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categor
   )
 
   const copyPostAssets = all(
-    posts.map(({ localAssets = [] }) => {
+    (posts || []).map(({ localAssets = [] }) => {
       return all(
         localAssets
           .map(withBasePath(basePath))
@@ -69,7 +69,7 @@ const copyLocalAssets = async ({ localAssets, homepage, posts, subpages, categor
   )
 
   const copySubpageAssets = all(
-    subpages.map(({ localAssets = [] }) => {
+    (subpages || []).map(({ localAssets = [] }) => {
       return all(
         localAssets
           .map(withBasePath(basePath))

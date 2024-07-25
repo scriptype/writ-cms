@@ -4,6 +4,10 @@ const Settings = require('../../../settings')
 const { getDebug, debugLog } = require('../../../debug')
 
 const renderPostsJSON = ({ posts, categories }) => {
+  if (!posts || !posts.length) {
+    debugLog('no posts, skipping posts.json')
+    return Promise.resolve()
+  }
   const { out } = Settings.getSettings()
   const outPath = join(out, 'posts.json')
   debugLog('creating:', outPath)

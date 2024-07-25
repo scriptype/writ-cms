@@ -1,6 +1,6 @@
 const _ = require('lodash')
-const Settings = require('../../../settings')
-const { pipe, getSlug, makePermalink } = require('../../../helpers')
+const Settings = require('../../../../../settings')
+const { pipe, getSlug, makePermalink } = require('../../../../../helpers')
 
 const getScoreByOverlap = (arrayOfStrings1 = [], arrayOfStrings2 = []) => {
   const overlap = _.intersection(
@@ -100,52 +100,7 @@ const linkPosts = (contentModel) => {
   }
 }
 
-const attachMentionedEntries = (allEntries) => (entry) => {
-  const mention = (contentModelEntry) => ({
-    title: contentModelEntry.title || contentModelEntry.name,
-    permalink: contentModelEntry.permalink,
-    category: contentModelEntry.category
-  })
-
-  const otherEntries = allEntries.filter(otherEntry => {
-    return otherEntry.permalink !== entry.permalink
-  })
-
-  const entriesMentioned = otherEntries
-    .filter(otherEntry => entry.mentions.includes(otherEntry.permalink))
-    .map(mention)
-
-  const entriesMentionedBy = otherEntries
-    .filter(otherEntry => otherEntry.mentions.includes(entry.permalink))
-    .map(mention)
-
-  return {
-    ..._.omit(entry, 'mentions'),
-    links: {
-      ...(entry.links || {}),
-      mentionedTo: entriesMentioned,
-      mentionedBy: entriesMentionedBy
-    }
-  }
-}
-
-const linkMentionedEntries = (contentModel) => {
-  const attacher = attachMentionedEntries([
-    contentModel.homepage,
-    ...contentModel.posts,
-    ...contentModel.subpages,
-    ...contentModel.categories
-  ])
-  return {
-    ...contentModel,
-    homepage: attacher(contentModel.homepage),
-    categories: contentModel.categories.map(attacher),
-    posts: contentModel.posts.map(attacher),
-    subpages: contentModel.subpages.map(attacher)
-  }
-}
-
-const _linkPostTags = (post, tags) => {
+const _linkPostTags = (post) => {
   const { permalinkPrefix } = Settings.getSettings()
   return {
     ...post,
@@ -169,17 +124,16 @@ const linkPostTags = (contentModel) => {
     categories: contentModel.categories.map(category => {
       return {
         ...category,
-        posts: category.posts.map(post => _linkPostTags(post, contentModel.tags))
+        posts: category.posts.map(_linkPostTags)
       }
     }),
-    posts: contentModel.posts.map(post => _linkPostTags(post, contentModel.tags))
+    posts: contentModel.posts.map(_linkPostTags)
   }
 }
 
 module.exports = (contentModel) => {
   return pipe(contentModel, [
     linkPostTags,
-    linkPosts,
-    linkMentionedEntries
+    linkPosts
   ])
 }

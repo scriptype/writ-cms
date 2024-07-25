@@ -20,20 +20,4 @@ const withDates = async (entry) => {
   }
 }
 
-module.exports = async (contentModel) => {
-  return {
-    ...contentModel,
-    categories: await Promise.all(
-      contentModel.categories.map(async category => ({
-        ...category,
-        posts: await Promise.all(category.posts.map(withDates))
-      }))
-    ),
-    posts: await Promise.all(
-      contentModel.posts.map(withDates)
-    ),
-    subpages: await Promise.all(
-      contentModel.subpages.map(withDates)
-    )
-  }
-}
+module.exports = withDates

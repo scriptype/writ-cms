@@ -1,11 +1,11 @@
 const _ = require('lodash')
 const { dirname, join } = require('path')
-const Settings = require('../../../settings')
-const Dictionary = require('../../../dictionary')
-const { getSlug, makePermalink, removeExtension, maybeRawHTMLType } = require('../../../helpers')
+const Settings = require('../../../../../settings')
+const Dictionary = require('../../../../../dictionary')
+const { getSlug, makePermalink, removeExtension, maybeRawHTMLType } = require('../../../../../helpers')
+const parseTemplate = require('../../root/parseTemplate')
+const { isLocalAsset } = require('../../root/models/localAsset')
 const contentTypes = require('../contentTypes')
-const parseTemplate = require('../parseTemplate')
-const { isLocalAsset } = require('./localAsset')
 
 const DEFAULT_TYPE = 'text'
 

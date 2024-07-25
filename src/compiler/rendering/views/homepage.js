@@ -5,10 +5,10 @@ const { filterPosts } = require('../helpers/filterPosts')
 
 const renderHomepage = async (Renderer, contentModel) => {
   const settings = Settings.getSettings()
-  const { homepage, posts } = contentModel
+  const { homepage, blog } = contentModel
   return paginate({
     page: homepage,
-    posts: filterPosts(homepage, posts),
+    posts: filterPosts(homepage, blog?.posts || []),
     postsPerPage: settings.postsPerPage,
     outputDir: settings.out,
     render: async ({ outputPath, pageOfPosts, paginationData }) => {
@@ -21,7 +21,7 @@ const renderHomepage = async (Renderer, contentModel) => {
           homepage,
           pagination: paginationData,
           posts: pageOfPosts,
-          allPosts: posts,
+          allPosts: blog.posts,
           settings,
           debug: Debug.getDebug()
         }

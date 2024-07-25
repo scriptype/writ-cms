@@ -1,6 +1,6 @@
 const _ = require('lodash')
-const Settings = require('../../../settings')
-const { maybeRawHTMLType } = require('../../../helpers')
+const Settings = require('../../../../../settings')
+const { maybeRawHTMLType } = require('../../../../../helpers')
 const contentTypes = require('../contentTypes')
 const parseTemplate = require('../parseTemplate')
 const { isLocalAsset } = require('./localAsset')

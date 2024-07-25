@@ -1,7 +1,8 @@
 const _ = require('lodash')
-const Settings = require('../../settings')
-const Dictionary = require('../../dictionary')
-const { last } = require('../../helpers')
+const Settings = require('../../../../settings')
+const Dictionary = require('../../../../dictionary')
+const { last } = require('../../../../helpers')
+const { createBlog } = require('../blog')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
 
@@ -12,22 +13,10 @@ const {
 } = require('./models/homepage')
 
 const {
-  createCategory,
-  createCategoryIndex
-} = require('./models/category')
-
-const {
   createSubpage,
   createFolderedSubpage,
   createFolderedSubpageIndex
 } = require('./models/subpage')
-
-const {
-  createPost,
-  createFolderedPost,
-  createFolderedPostIndex,
-  createDefaultCategoryPost
-} = require('./models/post')
 
 const templateExtensions = [
   '.hbs',
@@ -43,16 +32,8 @@ const isTemplateFile = (fsObject) => {
   return new RegExp(templateExtensions.join('|'), 'i').test(fsObject.extension)
 }
 
-const isFolderedPostIndexFile = (fsObject) => {
-  return isTemplateFile(fsObject) && fsObject.name.match(/^post\..+$/)
-}
-
 const isFolderedSubpageIndexFile = (fsObject) => {
   return isTemplateFile(fsObject) && fsObject.name.match(/^page\..+$/)
-}
-
-const isCategoryIndexFile = (fsObject) => {
-  return isTemplateFile(fsObject) && fsObject.name.match(/^category\..+$/)
 }
 
 const isHomepageFile = (fsObject) => {
@@ -63,6 +44,15 @@ const isHomepageDirectory = (fsObject) => {
   const { homepageDirectory } = Settings.getSettings()
   const pattern = new RegExp(`^(${homepageDirectory}|homepage|home)$`)
   return fsObject.name.match(pattern)
+}
+
+const isBlogFolder = (fsObject) => {
+  const isFolder = !!fsObject.children
+  const isNamedBlog = fsObject.name.match(/blog/i)
+  const hasBlogIndex = fsObject.children.find(f => {
+    return isTemplateFile(f) && f.name.match(/^blog\./i)
+  })
+  return isFolder && (isNamedBlog || hasBlogIndex)
 }
 
 const newEntry = ({
@@ -196,118 +186,25 @@ const mapFolderedSubpageTree = (fsObject) => {
   })
 }
 
-const withPost = (contentModel, fsObject) => {
+const withBlog = (contentModel, fsObject) => {
+  console.log('root.withBlog fsTree:', fsObject)
   return newEntry({
     contentModel,
-    key: 'posts',
-    entryFn: () => createPost(fsObject).data
+    key: 'blog',
+    entryFn: () => createBlog(fsObject, { foldered: true }),
+    replace: true
   })
 }
 
-const withFolderedPost = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'posts',
-    entryFn: () => {
-      const newPost = createFolderedPost({
-        ...fsObject,
-        children: fsObject.children.map(mapFolderedPostTree)
-      })
-      return newPost.data
-    }
-  })
-}
-
-const mapFolderedPostTree = (fsObject) => {
-  if (isFolderedPostIndexFile(fsObject)) {
-    return createFolderedPostIndex(fsObject)
-  }
-  return createLocalAsset({
-    ...fsObject,
-    isFolder: !!fsObject.children
-  })
-}
-
-const withDefaultCategoryPost = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'posts',
-    entryFn: () => createDefaultCategoryPost(fsObject).data
-  })
-}
-
-const withDefaultCategory = (contentModel) => {
-  const defaultCategoryName = Dictionary.lookup('defaultCategoryName')
-  const post = _.cloneDeep(last(contentModel.posts))
-  return upsertEntry({
-    contentModel,
-    key: 'categories',
-    entryFn: (entry) => entry.name === defaultCategoryName,
-    upsert: (entry) => {
-      const defaultCategory = entry || createCategory({
-        name: defaultCategoryName,
-        children: []
-      }).data
-      return {
-        ...defaultCategory,
-        posts: defaultCategory.posts.concat(post)
-      }
-    }
-  })
-}
-
-const withCategory = (contentModel, fsObject) => {
-  return newEntry({
-    contentModel,
-    key: 'categories',
-    entryFn: () => {
-      const newCategory = createCategory({
-        ...fsObject,
-        children: fsObject.children.map(mapCategoryTree)
-      })
-      return {
-        ...newCategory.data,
-        posts: newCategory.data.posts.map(({ data }) => data)
-      }
-    },
-    liftEntries: (category) => {
-      return {
-        key: 'posts',
-        entries: category.posts
-      }
-    }
-  })
-}
-
-const mapCategoryTree = (fsObject) => {
-  if (isCategoryIndexFile(fsObject)) {
-    return createCategoryIndex(fsObject)
-  }
-  if (isTemplateFile(fsObject)) {
-    return createPost(fsObject)
-  }
-  if (fsObject.children && fsObject.children.some(isFolderedPostIndexFile)) {
-    return createFolderedPost({
-      ...fsObject,
-      children: fsObject.children.map(mapFolderedPostTree)
-    })
-  }
-  return createLocalAsset({
-    ...fsObject,
-    isFolder: !!fsObject.children
-  })
-}
-
+/*
+ * TODO: Implement [any content model] as rootContentModel
+ * TODO: Think about subpages as default rootContentModel. pagesFolder would be a portal
+ * */
 const createContentModel = (fsTree) => {
   const { pagesDirectory, assetsDirectory } = Settings.getSettings()
   return fsTree.reduce((contentModel, fsObject) => {
     if (isHomepageFile(fsObject)) {
       return withHomepage(contentModel, fsObject)
-    }
-    if (isTemplateFile(fsObject)) {
-      return withDefaultCategory(
-        withDefaultCategoryPost(contentModel, fsObject)
-      )
     }
     if (!fsObject.children) {
       return withLocalAsset(contentModel, fsObject)
@@ -315,26 +212,20 @@ const createContentModel = (fsTree) => {
     if (isHomepageDirectory(fsObject)) {
       return withFolderedHomepage(contentModel, fsObject)
     }
+    if (isBlogFolder(fsObject)) {
+      return withBlog(contentModel, fsObject)
+    }
     if (fsObject.name === pagesDirectory) {
       return withSubpages(contentModel, fsObject)
     }
     if (fsObject.name === assetsDirectory) {
       return withAssets(contentModel, fsObject)
     }
-    if (fsObject.children.some(isFolderedPostIndexFile)) {
-      return withDefaultCategory(
-        withFolderedPost(contentModel, fsObject)
-      )
-    }
-    return withCategory(contentModel, fsObject)
   }, {
     assets: [],
     subpages: [],
-    categories: [],
-    posts: [],
     homepage: createHomepage({}).data,
-    localAssets: [],
-    tags: []
+    localAssets: []
   })
 }
 

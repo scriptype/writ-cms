@@ -2,6 +2,9 @@ const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
 const renderPosts = (Renderer, contentModel) => {
+  if (!contentModel.posts || !contentModel.posts.length) {
+    return Promise.resolve()
+  }
   const compilation = contentModel.posts.map(post => {
     return Renderer.render({
       template: `pages/post/${post.type}`,
