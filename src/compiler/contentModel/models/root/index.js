@@ -6,6 +6,7 @@ const createModel = require('./createModel')
 const createRoot = async (fileSystemTree) => {
   return await pipe(await createModel(fileSystemTree), [
     async function rootSubpagesWithDates(contentModel) {
+      console.log('rootSubpagesWithDates contentModel', contentModel)
       return {
         ...contentModel,
         subpages: await Promise.all(

@@ -21,7 +21,7 @@ const renderHomepage = async (Renderer, contentModel) => {
           homepage,
           pagination: paginationData,
           posts: pageOfPosts,
-          allPosts: blog.posts,
+          allPosts: blog?.posts,
           settings,
           debug: Debug.getDebug()
         }
