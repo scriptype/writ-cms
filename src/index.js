@@ -5,6 +5,7 @@ const helpers = require('./helpers')
 
 const start = async ({
   rootDirectory,
+  rootContentModel,
   debug,
   refreshTheme,
   cli,
@@ -15,6 +16,7 @@ const start = async ({
     mode: 'start',
     watch: true,
     rootDirectory,
+    rootContentModel,
     debug,
     refreshTheme,
     cli,
@@ -25,6 +27,7 @@ const start = async ({
 
 const build = async ({
   rootDirectory,
+  rootContentModel,
   debug,
   refreshTheme,
   cli,
@@ -34,6 +37,7 @@ const build = async ({
   return startUp({
     mode: 'build',
     rootDirectory,
+    rootContentModel,
     debug,
     refreshTheme,
     cli,

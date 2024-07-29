@@ -57,6 +57,7 @@ test('properly builds to be served at /blog in build mode', async t => {
   const { exportDirectory } = writ.getDefaultSettings()
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name
   })
 
@@ -103,6 +104,7 @@ test('properly builds to be served at /blog in start mode', async t => {
 
   const watcher = await writ.start({
     rootDirectory: dir.name,
+    rootContentModel: 'blog',
     startCMSServer: false
   })
 

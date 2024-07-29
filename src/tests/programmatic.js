@@ -15,7 +15,8 @@ test('builds in empty directory', async t => {
   const dir = await createTempDir(t)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name)
@@ -29,7 +30,8 @@ test('builds with a single txt file', async t => {
   await dir.mkFile(fileNameIn, 'Hello!')
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -50,13 +52,15 @@ test('builds after a file is deleted', async t => {
   await dir.mkFile(fileNameIn, 'Hello!')
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await rm(join(dir.name, fileNameIn))
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -76,7 +80,8 @@ test('empty folder in root is an empty category', async t => {
   await dir.mkDir(folderName)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -108,7 +113,8 @@ test('post files in a category', async t => {
   }))
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   const { exportDirectory } = writ.getDefaultSettings()
@@ -137,7 +143,8 @@ test('homepage', async t => {
   await dir.mkFile('index.html', rawHTMLHomepageContent)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -164,7 +171,8 @@ test('homepage', async t => {
   await dir.mkFile(join(homepageDirectory, 'index.html'), folderedHomepageContent)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -223,7 +231,8 @@ test('subpages', async t => {
   }))
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -251,14 +260,16 @@ test('builds after theme folder is deleted', async t => {
   const dir = await createTempDir(t)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   const { themeDirectory } = writ.getDefaultSettings()
   await rm(join(dir.name, themeDirectory), { recursive: true })
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name)
@@ -268,14 +279,16 @@ test('builds after theme/assets folder is deleted', async t => {
   const dir = await createTempDir(t)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   const { themeDirectory, assetsDirectory } = writ.getDefaultSettings()
   await rm(join(dir.name, themeDirectory, assetsDirectory), { recursive: true })
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -294,14 +307,16 @@ test('builds after theme/templates folder is deleted', async t => {
   const dir = await createTempDir(t)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   const { themeDirectory } = writ.getDefaultSettings()
   await rm(join(dir.name, themeDirectory, 'templates'), { recursive: true })
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -320,7 +335,8 @@ test('creates tag indices', async t => {
   await dir.mkFile(fileNameIn, 'Hello!')
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -337,7 +353,8 @@ test('creates tag indices', async t => {
   await dir.mkFile(fileNameIn, `${frontMatter}Hello!`)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -410,7 +427,8 @@ Hello`
   await dir.mkFile(mentioner.nameIn, mentioner.content)
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   const { exportDirectory } = writ.getDefaultSettings()
@@ -464,7 +482,8 @@ test('allows uncategorized foldered post', async t => {
   await dir.mkFile(join(postName, subFolderName, subFolderAsset), 'an asset inside subfolder')
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   await common.builds(t, dir.name, {
@@ -514,7 +533,8 @@ test('builds when contentDirectory exists', async t => {
   ])
 
   await writ.build({
-    rootDirectory: dir.name
+    rootDirectory: dir.name,
+    rootContentModel: 'blog'
   })
 
   const { exportDirectory } = writ.getDefaultSettings()
@@ -547,6 +567,7 @@ test('passes through assets folder', async t => {
   await dir.mkAsset(assetsDirectory, fileName, '')
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name
   })
 
@@ -561,6 +582,7 @@ test('refreshTheme option when there is theme/keep', async t => {
   const dir = await createTempDir(t)
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name
   })
 
@@ -573,6 +595,7 @@ test('refreshTheme option when there is theme/keep', async t => {
   await dir.mkFile(join(themeDirectory, 'keep', keptFileName), '')
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name,
     refreshTheme: true
   })
@@ -595,6 +618,7 @@ test('refreshTheme option when there is no theme/keep', async t => {
   const dir = await createTempDir(t)
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name
   })
 
@@ -604,6 +628,7 @@ test('refreshTheme option when there is no theme/keep', async t => {
   await dir.mkFile(join(themeDirectory, deletedFileName), '')
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name,
     refreshTheme: true
   })
@@ -670,6 +695,7 @@ test('hooks', async t => {
     })
 
   await writ.build({
+    rootContentModel: 'blog',
     rootDirectory: dir.name
   })
 
@@ -708,6 +734,7 @@ test('start mode', t => {
 
     const watcher = await writ.start({
       rootDirectory: dir.name,
+      rootContentModel: 'blog',
       startCMSServer: false
     })
 
@@ -740,6 +767,7 @@ test('start mode', t => {
 
     const watcher = await writ.start({
       rootDirectory: dir.name,
+      rootContentModel: 'blog',
       startCMSServer: false
     })
 

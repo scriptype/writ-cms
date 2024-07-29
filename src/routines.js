@@ -41,11 +41,13 @@ const startUp = async ({ debug, watch, startCMSServer, onFinish, ...rest }) => {
   }
 }
 
-const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
+const run = async ({ mode, rootDirectory, rootContentModel, refreshTheme, finishCallback }) => {
   await Settings.init({
     mode,
-    rootDirectory
+    rootDirectory,
+    rootContentModel
   })
+
   await Expansions.init()
   Decorations.register(
     Dictionary.decorator(),
@@ -55,15 +57,23 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
     Expansions.decorator(),
     Hooks.decorator()
   )
+
   await Theme.init({
     refresh: refreshTheme
   })
+
   await VersionControl.init()
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
-  const { fileSystemTree, contentModel } = await Compiler.compile()
+
+  const {
+    fileSystemTree,
+    contentModel
+  } = await Compiler.compile()
+
   await Assets.copyAssets()
+
   await finishCallback({
     settings: Settings.getSettings(),
     fileSystemTree,
