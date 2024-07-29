@@ -1,0 +1,184 @@
+const { stat, readdir } = require('fs/promises')
+const { join, resolve, relative, extname, sep } = require('path')
+const { readFileContent, contentRoot, isDirectory } = require('../../../helpers')
+const { debugLog } = require('../../../debug')
+
+const {
+  shouldIncludePath,
+  isTextFile,
+  lookBack
+} = require('./utils')
+
+const exploreDirectory = async (currentPath, depth = 0) => {
+  debugLog('exploring', currentPath)
+  return Promise.all(
+    (await readdir(currentPath))
+      .filter(shouldIncludePath)
+      .map(async fileName => {
+        const accumulatedPath = join(currentPath, fileName)
+        const rootPath = lookBack(accumulatedPath, depth + 1)
+        const { birthtime } = await stat(accumulatedPath)
+        const baseProperties = {
+          name: fileName,
+          path: relative(rootPath, accumulatedPath),
+          stats: { birthtime },
+          depth,
+        }
+        if (await isDirectory(accumulatedPath)) {
+          return {
+            ...baseProperties,
+            children: await exploreDirectory(accumulatedPath, depth + 1)
+          }
+        }
+        const extension = extname(fileName)
+        const fileProperties = {
+          ...baseProperties,
+          extension,
+        }
+        if (isTextFile(extension)) {
+          const content = await readFileContent(accumulatedPath)
+          return {
+            ...fileProperties,
+            content
+          }
+        } else {
+          return fileProperties
+        }
+      })
+  )
+}
+
+/* * *
+ * * *
+ * * */
+
+const frontMatter = require('front-matter')
+const _ = require('lodash')
+const Driver = require('../../lib/Driver')
+const { ContentTree, ContentTreeEntry } = require('../../lib/ContentTree')
+const ContentParsers = require('../../lib/Parsers')
+
+class FileSystemEntry extends ContentTreeEntry {
+  constructor({ name, path, children, stats, content }) {
+    super({
+      name,
+      pathway: path.split(sep),
+      timestamp: stats.birthtime,
+      children,
+      content
+    })
+  }
+}
+
+class FileEntry extends FileSystemEntry {
+  constructor(entry) {
+    super(entry)
+    const extension = entry.extension?.replace(/^\./, '')?.toLowerCase()
+    const { attributes, parsedContent } = this.parseContent(entry.content, extension)
+    for (const key in attributes) {
+      if (!attributes.hasOwnProperty(key)) {
+        continue
+      }
+      this[key] = attributes[key]
+    }
+    this.HTMLContent = parsedContent
+  }
+
+  parseContent(content, extension) {
+    const parsers = {
+      'txt': ContentParsers.markdown,
+      'md': ContentParsers.markdown,
+      'markdown': ContentParsers.markdown,
+      'hbs': ContentParsers.html,
+      'html': ContentParsers.html,
+      'unrecognized': _=>_
+    }
+
+    const parse = parsers[extension] || parsers.unrecognized
+    return parse(content)
+  }
+}
+
+class FolderEntry extends FileSystemEntry {
+  constructor(entry) {
+    super(entry)
+    this.setChildren(entry.children)
+  }
+}
+
+class FileSystemDriver extends Driver {
+  constructor() {
+    super()
+  }
+
+  async parse(fullPath) {
+    const fileSystemTree = await exploreDirectory(fullPath)
+    const abstractContentTree = this.tokenize(fileSystemTree)
+    return {
+      fileSystemTree,
+      contentTree: new ContentTree(abstractContentTree)
+    }
+  }
+
+  // this works, now find what to do next with this super abstract content tree
+  deepTokenize(obj) {
+    if (Number.isInteger(obj)) {
+      return {
+        type: 'number',
+        data: obj
+      }
+    }
+    if (typeof obj === 'string') {
+      return {
+        type: 'string',
+        data: obj
+      }
+    }
+    if (typeof obj === 'boolean') {
+      return {
+        type: 'boolean',
+        data: obj
+      }
+    }
+    if (Array.isArray(obj)) {
+      return {
+        type: 'array',
+        data: obj.map(this.deepTokenize),
+      }
+    }
+
+    return {
+      type: 'object',
+      data: Object.keys(obj).reduce((result, key) => {
+        if (key === 'children') {
+          return result
+        }
+        return {
+          ...result,
+          [key]: this.deepTokenize(obj[key])
+        }
+      }, {}),
+      subTree: (obj.children || []).map(this.deepTokenize)
+    }
+  }
+
+  tokenize(fileSystemTree) {
+    return fileSystemTree.reduce((entries, entry) => {
+      const maybeFrontMatter = (
+        entry.content ?
+          (frontMatter(entry.content).attributes || {}) :
+          {}
+      )
+
+      const contentNode = this.deepTokenize({
+        ...entry,
+        ...maybeFrontMatter,
+      })
+
+      return [
+        ...entries,
+        contentNode
+      ]
+    }, [])
+  }
+}
