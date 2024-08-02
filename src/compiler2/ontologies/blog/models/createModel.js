@@ -3,7 +3,7 @@ const Settings = require('../../../../settings')
 const Dictionary = require('../../../../dictionary')
 const { last } = require('../../../../helpers')
 
-const { createLocalAsset } = require('../root/models/localAsset')
+const { createLocalAsset } = require('../../root/models/localAsset')
 const { createBlogIndex } = require('./models/blogIndex')
 
 const {

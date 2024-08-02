@@ -2,7 +2,7 @@ const _ = require('lodash')
 const Settings = require('../../../../settings')
 const Dictionary = require('../../../../dictionary')
 const { last } = require('../../../../helpers')
-const { createBlog } = require('../blog')
+const { createBlog } = require('../../blog/models')
 const { createLocalAsset } = require('./models/localAsset')
 const { createAssets } = require('./models/asset')
 
@@ -53,15 +53,6 @@ const isAssetsDirectory = (fsObject) => {
   const { assetsDirectory } = Settings.getSettings()
   const pattern = new RegExp(`^${assetsDirectory}$`, 'i')
   return fsObject.name.match(pattern)
-}
-
-const isBlogFolder = (fsObject) => {
-  const isFolder = !!fsObject.children
-  const isNamedBlog = fsObject.name.match(/blog/i)
-  const hasBlogIndex = fsObject.children.find(f => {
-    return isTemplateFile(f) && f.name.match(/^blog\./i)
-  })
-  return isFolder && (isNamedBlog || hasBlogIndex)
 }
 
 const newEntry = async ({

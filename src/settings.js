@@ -17,6 +17,7 @@ const defaultSettings = (rootDirectory) => ({
   pagesDirectory: "pages",
   themeDirectory: "theme",
   contentDirectory: "content",
+  rootContentModel: "portal",
   cname: "",
   syntaxHighlighting: "off",
   search: "off",

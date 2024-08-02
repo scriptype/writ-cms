@@ -1,3 +1,31 @@
+/*
+module.exports = {
+  createHomepage,
+  createFolderedHomepage,
+  isFolderedHomepageIndex,
+  createFolderedHomepageIndex
+}
+
+const {
+  MarkdownContent,
+  HTMLContent,
+  PlainTextContent
+} = require('./models/content')
+
+const Homepage = {
+  query: [{
+    name: /(home|homepage|index)/,
+    content: Q.or(MarkdownContent, HTMLContent, PlainTextContent)
+  }, {
+    subTree: {
+      name: /(home|homepage|index)/,
+      content: [MarkdownContent, HTMLContent, PlainTextContent]
+    }
+  }]
+}
+
+module.exports = Homepage
+
 const _ = require('lodash')
 const Settings = require('../../../../../settings')
 const { maybeRawHTMLType } = require('../../../../../helpers')
@@ -57,10 +85,36 @@ const createHomepage = (fsObject) => {
 const createFolderedHomepage = (fsObject) => {
   return _createHomepage(fsObject, { foldered: true })
 }
+*/
+const Settings = require('../../../../settings')
+const contentTypes = require('../contentTypes')
 
-module.exports = {
-  createHomepage,
-  createFolderedHomepage,
-  isFolderedHomepageIndex,
-  createFolderedHomepageIndex
+const maybeRawHTMLType = (entry) => {
+  return entry.data.format.data === 'hypertext'
+}
+
+const DEFAULT_TYPE = 'basic'
+
+module.exports = class Homepage {
+  constructor(contentTree) {
+    this.contentModel = this.mapContentTree(contentTree)
+  }
+
+  mapContentTree(entry) {
+    const indexFile = entry
+    const localAssets = []
+    const permalink = Settings.getSettings().permalinkPrefix
+    return {
+      type: contentTypes.HOMEPAGE,
+      data: {
+        type: entry.data.type?.data || maybeRawHTMLType(indexFile) || DEFAULT_TYPE,
+        format: entry.data.format?.data,
+        title: entry.data.title?.data || '',
+        content: entry.data.content?.data || '',
+        mentions: entry.data.mentions?.data || [],
+        localAssets,
+        permalink,
+      }
+    }
+  }
 }

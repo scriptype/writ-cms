@@ -1,4 +1,4 @@
-const { withDates } = require('../../../enhancers')
+const { withDates } = require('../../../../enhancers')
 const withTags = require('./tags')
 const withLinkedPosts = require('./links')
 

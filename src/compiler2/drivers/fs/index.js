@@ -21,7 +21,11 @@ const exploreDirectory = async (currentPath, depth = 0) => {
         const baseProperties = {
           name: fileName,
           path: relative(rootPath, accumulatedPath),
-          stats: { birthtime },
+          stats: {
+            /* Because JSON driver can't easily parse date from string
+             * let contentTree not know about dates for now */
+            birthtime: birthtime.toString()
+          },
           depth,
         }
         if (await isDirectory(accumulatedPath)) {
@@ -33,6 +37,7 @@ const exploreDirectory = async (currentPath, depth = 0) => {
         const extension = extname(fileName)
         const fileProperties = {
           ...baseProperties,
+          name: fileName.replace(new RegExp(extension + '$'), ''),
           extension,
         }
         if (isTextFile(extension)) {
@@ -56,6 +61,8 @@ const frontMatter = require('front-matter')
 const _ = require('lodash')
 const Driver = require('../../lib/Driver')
 const { ContentTree, ContentTreeEntry } = require('../../lib/ContentTree')
+
+/*
 const ContentParsers = require('../../lib/Parsers')
 
 class FileSystemEntry extends ContentTreeEntry {
@@ -105,6 +112,7 @@ class FolderEntry extends FileSystemEntry {
     this.setChildren(entry.children)
   }
 }
+*/
 
 class FileSystemDriver extends Driver {
   constructor() {
@@ -128,38 +136,71 @@ class FileSystemDriver extends Driver {
         data: obj
       }
     }
+
     if (typeof obj === 'string') {
       return {
         type: 'string',
         data: obj
       }
     }
+
     if (typeof obj === 'boolean') {
       return {
         type: 'boolean',
         data: obj
       }
     }
+
+    /* Because JSON driver can't easily parse date from string
+     * let contentTree not know about dates for now
+    if (obj instanceof Date) {
+      return {
+        type: 'date',
+        data: obj
+      }
+    }
+    */
+
     if (Array.isArray(obj)) {
       return {
         type: 'array',
-        data: obj.map(this.deepTokenize),
+        data: obj.map(o => this.deepTokenize(o)),
       }
     }
 
     return {
       type: 'object',
       data: Object.keys(obj).reduce((result, key) => {
+        // omit children from data
         if (key === 'children') {
           return result
         }
+        // tokenize all other keys
         return {
           ...result,
           [key]: this.deepTokenize(obj[key])
         }
       }, {}),
-      subTree: (obj.children || []).map(this.deepTokenize)
+      subTree: (obj.children || []).map(c => this.deepTokenize(c))
     }
+  }
+
+  mapExtensionToFormat(extension) {
+    if (!extension) {
+      return 'unformatted'
+    }
+    return {
+      '.txt': 'plaintext',
+      '.text': 'plaintext',
+      '.md': 'markdown',
+      '.markdown': 'markdown',
+      '.html': 'hypertext',
+      '.htm': 'hypertext',
+      '.hbs': 'handlebars',
+      '.handlebars': 'handlebars',
+      '.json': 'json',
+      '.yml': 'yml',
+    }[extension] || 'unknown'
   }
 
   tokenize(fileSystemTree) {
@@ -173,6 +214,7 @@ class FileSystemDriver extends Driver {
       const contentNode = this.deepTokenize({
         ...entry,
         ...maybeFrontMatter,
+        format: this.mapExtensionToFormat(entry.extension)
       })
 
       return [
@@ -182,3 +224,5 @@ class FileSystemDriver extends Driver {
     }, [])
   }
 }
+
+module.exports = FileSystemDriver

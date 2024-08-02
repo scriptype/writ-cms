@@ -1,6 +1,6 @@
 const ContentModel = require('../contentModel')
-const Rendering = require('../rendering')
 
+/*
 const createContentModel = async (fsTree, initialModel) => {
   const { assetsDirectory } = Settings.getSettings()
   return fsTree.reduce(async (contentModel, fsObject) => {
@@ -46,20 +46,17 @@ const createContentModel = async (fsTree, initialModel) => {
     localAssets: []
   })
 }
+*/
 
 class Ontology {
-  constructor(contentTree, schema) {
+  constructor(name, contentTree) {
+    this.name = name
     this.contentTree = contentTree
-    this.schema = schema
     this.contentModel = null
   }
 
   async map() {
     console.log(ContentModel.create, this.contentTree, this.schema)
-  }
-
-  async render() {
-    return await Rendering.render(await this.model())
   }
 
   async model() {
@@ -68,4 +65,4 @@ class Ontology {
   }
 }
 
-export default Ontology
+module.exports = Ontology

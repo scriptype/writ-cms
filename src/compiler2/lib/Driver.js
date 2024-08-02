@@ -1,4 +1,6 @@
-export default class Driver {
+class Driver {
   constructor() {}
   parse() {}
 }
+
+module.exports = Driver
