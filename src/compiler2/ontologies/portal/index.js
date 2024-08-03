@@ -24,15 +24,15 @@ module.exports = ({ ontologies }) => {
       const schema = _schema || SubOntologies.schema(entry)
       return Object.keys(schema).every((key) => {
         const expected = schema[key]
-        const actual = entry[key]
+        const actual = entry[key]?.data || entry[key]
         if (typeof expected === 'string') {
-          return actual.data === expected
+          return actual === expected
         }
         if (expected instanceof RegExp) {
-          return !!actual.data.match(expected)
+          return !!actual.match(expected)
         }
         if (expected instanceof Function) {
-          return expected(actual.data)
+          return expected(actual)
         }
         if (typeof expected === 'object') {
           return SubOntologies.match(actual, expected)
@@ -41,14 +41,14 @@ module.exports = ({ ontologies }) => {
     },
 
     reduce: (model, entry) => {
-      return undefined
       if (!SubOntologies.match(entry)) {
         return undefined
       }
-      const subOntology = ontologies.get(entry.data.name.data)
+      const subOntologyClass = ontologies.get(entry.data.name.data)
+      const subOntology = new subOntologyClass(model, entry)
       return {
         ...model,
-        [entry.data.name.data]: entry.contentModel
+        [entry.data.name.data]: subOntology.contentModel
       }
     },
 
@@ -166,8 +166,8 @@ module.exports = ({ ontologies }) => {
 
   class Portal extends Ontology {
     constructor(contentTree) {
-      super(contentTree)
-      this.contentModel = contentTree.tree.reduce((model, entry) => {
+      super('portal', contentTree)
+      this.contentModel = contentTree.reduce((model, entry) => {
 
         const withSubOntologies = SubOntologies.reduce(model, entry)
         if (withSubOntologies) {

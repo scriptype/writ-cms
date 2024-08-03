@@ -181,7 +181,22 @@ class FileSystemDriver extends Driver {
           [key]: this.deepTokenize(obj[key])
         }
       }, {}),
-      subTree: (obj.children || []).map(c => this.deepTokenize(c))
+      subTree: (obj.children || []).map(child => {
+        if (child.content) {
+          const frontMatterResult = frontMatter(child.content || '')
+          return this.deepTokenize({
+            ...child,
+            ...(frontMatterResult.attributes || {}),
+            content: frontMatterResult.body,
+            format: this.mapExtensionToFormat(child.extension),
+          })
+        }
+
+        return this.deepTokenize({
+          ...child,
+          format: this.mapExtensionToFormat(child.extension),
+        })
+      })
     }
   }
 

@@ -23,7 +23,7 @@ const compile = async () => {
   } = await fileSystem.parse(contentRootPath)
   console.log('settings.rootContentModel', rootContentModel)
   const RootOntology = Ontologies.get(rootContentModel)
-  const root = new RootOntology(contentTree)
+  const root = new RootOntology(contentTree.tree)
   await root.render(Renderer)
   Debug.timeEnd('compiler')
   return {
