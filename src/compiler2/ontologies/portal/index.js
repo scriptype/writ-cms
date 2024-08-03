@@ -41,7 +41,6 @@ module.exports = ({ ontologies }) => {
     },
 
     reduce: (model, entry) => {
-      console.log('SubOntologies.reduce', model, entry)
       return undefined
       if (!SubOntologies.match(entry)) {
         return undefined
@@ -93,18 +92,14 @@ module.exports = ({ ontologies }) => {
     },
 
     reduce: (model, entry) => {
-      console.log('HomepageCenter.reduce', model, entry)
       if (!HomepageCenter.match(entry)) {
-        console.log('HomepageCenter other')
         return undefined
       }
       const homepage = new Models.Homepage(entry)
-      console.log('HomepageCenter homepage', homepage)
       const newModel = {
         ...model,
         homepage: homepage.contentModel.data
       }
-      console.log('HomepageCenter newModel', newModel)
       return newModel
     },
 
@@ -150,13 +145,10 @@ module.exports = ({ ontologies }) => {
     },
 
     reduce: (model, entry) => {
-      console.log('Subpages.reduce', model, entry)
       if (!Subpages.match(entry)) {
-        console.log('Subpages other')
         return undefined
       }
       const subpage = new Models.Subpage(entry)
-      console.log('Subpages subpage', subpage)
       const newModel = {
         ...model,
         subpages: [
@@ -164,12 +156,10 @@ module.exports = ({ ontologies }) => {
           subpage.contentModel.data
         ]
       }
-      console.log('Subpages newModel', newModel)
       return newModel
     },
 
     render: async (renderer, model) => {
-      console.log('renderSubpages contentModel', model)
       await Subpages.view(renderer, model)
     }
   }
@@ -178,11 +168,9 @@ module.exports = ({ ontologies }) => {
     constructor(contentTree) {
       super(contentTree)
       this.contentModel = contentTree.tree.reduce((model, entry) => {
-        console.log('portal.contentTree.reduce', model, entry)
 
         const withSubOntologies = SubOntologies.reduce(model, entry)
         if (withSubOntologies) {
-          console.log('portal.contentTree.reduce withSubOntologies', withSubOntologies)
           return withSubOntologies
         }
 
@@ -191,7 +179,6 @@ module.exports = ({ ontologies }) => {
           entry
         )
         if (withHomepage) {
-          console.log('portal.contentTree.reduce withHomepage', withHomepage)
           return withHomepage
         }
 
@@ -200,7 +187,6 @@ module.exports = ({ ontologies }) => {
           entry
         )
         if (withSubpages) {
-          console.log('portal.contentTree.reduce withSubpages', withSubpages)
           return withSubpages
         }
 

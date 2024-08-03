@@ -180,7 +180,6 @@ module.exports = class Subpage {
 
   getPermalink(entry) {
     const { permalinkPrefix } = Settings.getSettings()
-    console.log('gerPermalink', entry)
     return makePermalink({
       prefix: permalinkPrefix,
       parts: [entry.data.name.data],

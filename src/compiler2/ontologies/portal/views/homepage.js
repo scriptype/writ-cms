@@ -44,7 +44,6 @@ const parseContent = (rawContent, format) => {
 
 const renderHomepage = async (Renderer, contentModel) => {
   const settings = Settings.getSettings()
-  console.log('renderHomepage contentModel', contentModel)
   const { homepage } = contentModel
   return Renderer.render({
     template: `root/pages/homepage/${homepage.type}`,
