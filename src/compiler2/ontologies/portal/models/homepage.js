@@ -86,6 +86,7 @@ const createFolderedHomepage = (fsObject) => {
   return _createHomepage(fsObject, { foldered: true })
 }
 */
+
 const Settings = require('../../../../settings')
 const contentTypes = require('../contentTypes')
 

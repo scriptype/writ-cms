@@ -57,11 +57,6 @@ const exploreDirectory = async (currentPath, depth = 0) => {
  * * *
  * * */
 
-const frontMatter = require('front-matter')
-const _ = require('lodash')
-const Driver = require('../../lib/Driver')
-const { ContentTree, ContentTreeEntry } = require('../../lib/ContentTree')
-
 /*
 const ContentParsers = require('../../lib/Parsers')
 
@@ -113,6 +108,11 @@ class FolderEntry extends FileSystemEntry {
   }
 }
 */
+
+const frontMatter = require('front-matter')
+const _ = require('lodash')
+const Driver = require('../../lib/Driver')
+const { ContentTree, ContentTreeEntry } = require('../../lib/ContentTree')
 
 class FileSystemDriver extends Driver {
   constructor() {
@@ -205,22 +205,24 @@ class FileSystemDriver extends Driver {
 
   tokenize(fileSystemTree) {
     return fileSystemTree.reduce((entries, entry) => {
-      const maybeFrontMatter = (
-        entry.content ?
-          (frontMatter(entry.content).attributes || {}) :
-          {}
+      if (entry.content) {
+        const frontMatterResult = frontMatter(entry.content || '')
+        return entries.concat(
+          this.deepTokenize({
+            ...entry,
+            ...(frontMatterResult.attributes || {}),
+            content: frontMatterResult.body,
+            format: this.mapExtensionToFormat(entry.extension),
+          })
+        )
+      }
+
+      return entries.concat(
+        this.deepTokenize({
+          ...entry,
+          format: this.mapExtensionToFormat(entry.extension)
+        })
       )
-
-      const contentNode = this.deepTokenize({
-        ...entry,
-        ...maybeFrontMatter,
-        format: this.mapExtensionToFormat(entry.extension)
-      })
-
-      return [
-        ...entries,
-        contentNode
-      ]
     }, [])
   }
 }
