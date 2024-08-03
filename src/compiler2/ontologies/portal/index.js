@@ -29,23 +29,22 @@ module.exports = ({ ontologies }) => {
           return actual.data === expected
         }
         if (expected instanceof RegExp) {
-          console.log('expected is regex', entry, key)
           return !!actual.data.match(expected)
         }
         if (expected instanceof Function) {
           return expected(actual.data)
         }
         if (typeof expected === 'object') {
-          console.log('expected is object', entry, key)
           return SubOntologies.match(actual, expected)
         }
       })
     },
 
     reduce: (model, entry) => {
-      return model
+      console.log('SubOntologies.reduce', model, entry)
+      return undefined
       if (!SubOntologies.match(entry)) {
-        return model
+        return undefined
       }
       const subOntology = ontologies.get(entry.data.name.data)
       return {
@@ -75,23 +74,19 @@ module.exports = ({ ontologies }) => {
 
     match: (entry, _schema) => {
       const schema = _schema || HomepageCenter.schema(entry)
-      console.log('HomepageCenter.match schema', schema)
       return Object.keys(schema).every((key) => {
         const expected = schema[key]
         const actual = entry[key]
         if (typeof expected === 'string') {
-          console.log('expected is string', entry, key)
           return (actual.data || actual) === expected
         }
         if (expected instanceof RegExp) {
-          console.log('expected is regex', entry, key)
           return !!(actual.data || actual).match(expected)
         }
         if (expected instanceof Function) {
           return expected(actual.data || actual)
         }
         if (key === 'data') {
-          console.log('expected is object', entry, key)
           return HomepageCenter.match(actual, expected)
         }
       })
@@ -101,7 +96,7 @@ module.exports = ({ ontologies }) => {
       console.log('HomepageCenter.reduce', model, entry)
       if (!HomepageCenter.match(entry)) {
         console.log('HomepageCenter other')
-        return model
+        return undefined
       }
       const homepage = new Models.Homepage(entry)
       console.log('HomepageCenter homepage', homepage)
@@ -136,23 +131,19 @@ module.exports = ({ ontologies }) => {
 
     match: (entry, _schema) => {
       const schema = _schema || Subpages.schema(entry)
-      console.log('Subpages.match schema', schema)
       return Object.keys(schema).every((key) => {
         const expected = schema[key]
         const actual = entry[key]
         if (typeof expected === 'string') {
-          console.log('expected is string', entry, key)
           return (actual.data || actual) === expected
         }
         if (expected instanceof RegExp) {
-          console.log('expected is regex', entry, key)
           return !!(actual.data || actual).match(expected)
         }
         if (expected instanceof Function) {
           return expected(actual.data || actual)
         }
         if (key === 'data') {
-          console.log('expected is object', entry, key)
           return Subpages.match(actual, expected)
         }
       })
@@ -162,7 +153,7 @@ module.exports = ({ ontologies }) => {
       console.log('Subpages.reduce', model, entry)
       if (!Subpages.match(entry)) {
         console.log('Subpages other')
-        return model
+        return undefined
       }
       const subpage = new Models.Subpage(entry)
       console.log('Subpages subpage', subpage)
@@ -178,7 +169,7 @@ module.exports = ({ ontologies }) => {
     },
 
     render: async (renderer, model) => {
-      console.log('subpages.render contentModel', model)
+      console.log('renderSubpages contentModel', model)
       await Subpages.view(renderer, model)
     }
   }
@@ -189,16 +180,33 @@ module.exports = ({ ontologies }) => {
       this.contentModel = contentTree.tree.reduce((model, entry) => {
         console.log('portal.contentTree.reduce', model, entry)
 
-        const maybeWithSubOntologies = SubOntologies.reduce(model, entry)
-        console.log('portal.contentTree.reduce withSubOntologies', maybeWithSubOntologies, entry)
+        const withSubOntologies = SubOntologies.reduce(model, entry)
+        if (withSubOntologies) {
+          console.log('portal.contentTree.reduce withSubOntologies', withSubOntologies)
+          return withSubOntologies
+        }
 
-        const maybeWithHomepage = HomepageCenter.reduce(maybeWithSubOntologies, entry)
-        console.log('portal.contentTree.reduce withHomepage', maybeWithHomepage, entry)
+        const withHomepage = HomepageCenter.reduce(
+          (withSubOntologies || model),
+          entry
+        )
+        if (withHomepage) {
+          console.log('portal.contentTree.reduce withHomepage', withHomepage)
+          return withHomepage
+        }
 
-        const maybeWithSubpages = Subpages.reduce(maybeWithHomepage, entry, entry)
-        console.log('portal.contentTree.reduce withSubpages', maybeWithSubpages)
+        const withSubpages = Subpages.reduce(
+          (withHomepage || withSubOntologies || model),
+          entry
+        )
+        if (withSubpages) {
+          console.log('portal.contentTree.reduce withSubpages', withSubpages)
+          return withSubpages
+        }
 
-        return maybeWithSubpages
+        // localAssets
+
+        return model
       }, {})
       console.log('portal.contentModel', JSON.stringify(this.contentModel, null, 2))
     }
