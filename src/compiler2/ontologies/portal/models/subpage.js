@@ -198,7 +198,7 @@ module.exports = class Subpage {
       data: {
         type: entry.data.type?.data || maybeRawHTMLType(entry) || DEFAULT_TYPE,
         format: entry.data.format?.data,
-        title: entry.data.title?.data || entry.data.name.data || '',
+        title: entry.data.title?.data || entry.data.name?.data || '',
         content: entry.data.content?.data || '',
         mentions: entry.data.mentions?.data || [],
         cover: entry.data.cover ? [permalink, entry.data.cover.data].join('/') : '',

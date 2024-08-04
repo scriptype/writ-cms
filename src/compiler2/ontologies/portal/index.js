@@ -40,20 +40,26 @@ module.exports = ({ ontologies }) => {
       })
     },
 
-    reduce: (model, entry) => {
+    reduce: (contentModel, entry) => {
       if (!SubOntologies.match(entry)) {
         return undefined
       }
       const subOntologyClass = ontologies.get(entry.data.name.data)
-      const subOntology = new subOntologyClass(model, entry)
       return {
-        ...model,
-        [entry.data.name.data]: subOntology.contentModel
+        ...contentModel,
+        [entry.data.name.data]: new subOntologyClass(entry)
       }
     },
 
-    render: (renderer, model) => {
-      return Promise.resolve()
+    async render(renderer, contentModel) {
+      return Promise.all(
+        Object.keys(contentModel).map(key => {
+          const entry = contentModel[key]
+          if (entry instanceof Ontology) {
+            return entry.render(renderer, entry, contentModel)
+          }
+        })
+      )
     }
   }
 
@@ -91,20 +97,20 @@ module.exports = ({ ontologies }) => {
       })
     },
 
-    reduce: (model, entry) => {
+    reduce: (contentModel, entry) => {
       if (!HomepageCenter.match(entry)) {
         return undefined
       }
       const homepage = new Models.Homepage(entry)
       const newModel = {
-        ...model,
+        ...contentModel,
         homepage: homepage.contentModel.data
       }
       return newModel
     },
 
-    render: async (renderer, model) => {
-      await HomepageCenter.view(renderer, model)
+    render: async (renderer, contentModel) => {
+      await HomepageCenter.view(renderer, contentModel)
     }
   }
 
@@ -144,38 +150,38 @@ module.exports = ({ ontologies }) => {
       })
     },
 
-    reduce: (model, entry) => {
+    reduce: (contentModel, entry) => {
       if (!Subpages.match(entry)) {
         return undefined
       }
       const subpage = new Models.Subpage(entry)
       const newModel = {
-        ...model,
+        ...contentModel,
         subpages: [
-          ...(model.subpages || []),
+          ...(contentModel.subpages || []),
           subpage.contentModel.data
         ]
       }
       return newModel
     },
 
-    render: async (renderer, model) => {
-      await Subpages.view(renderer, model)
+    render: async (renderer, contentModel) => {
+      await Subpages.view(renderer, contentModel)
     }
   }
 
   class Portal extends Ontology {
     constructor(contentTree) {
       super('portal', contentTree)
-      this.contentModel = contentTree.reduce((model, entry) => {
+      this.contentModel = contentTree.reduce((contentModel, entry) => {
 
-        const withSubOntologies = SubOntologies.reduce(model, entry)
+        const withSubOntologies = SubOntologies.reduce(contentModel, entry)
         if (withSubOntologies) {
           return withSubOntologies
         }
 
         const withHomepage = HomepageCenter.reduce(
-          (withSubOntologies || model),
+          (withSubOntologies || contentModel),
           entry
         )
         if (withHomepage) {
@@ -183,7 +189,7 @@ module.exports = ({ ontologies }) => {
         }
 
         const withSubpages = Subpages.reduce(
-          (withHomepage || withSubOntologies || model),
+          (withHomepage || withSubOntologies || contentModel),
           entry
         )
         if (withSubpages) {
@@ -192,7 +198,7 @@ module.exports = ({ ontologies }) => {
 
         // localAssets
 
-        return model
+        return contentModel
       }, {})
       console.log('portal.contentModel', JSON.stringify(this.contentModel, null, 2))
     }
