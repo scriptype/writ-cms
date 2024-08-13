@@ -30,6 +30,7 @@ When I'm writing a blog post, I want to deal with the least amount of software c
 
 - [Writ](https://writ.enes.in) (source: https://github.com/scriptype/writ)
 - [Reads Feed](https://enes.in/feed) (source: https://github.com/scriptype/feed)
+- [Upstairs is boiling](https://upstairsisboiling.com) (source: https://github.com/upstairsisboiling/upstairsisboiling.github.io)
 
 ## Usage
 
