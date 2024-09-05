@@ -1,4 +1,5 @@
 module.exports = {
+  SUB_ONTOLOGY: 'subOntology',
   HOMEPAGE: 'homepage',
   SUBPAGES: 'subpages',
   SUBPAGE: 'subpage',

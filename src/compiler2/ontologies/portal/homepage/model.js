@@ -89,19 +89,24 @@ const createFolderedHomepage = (fsObject) => {
 
 const Settings = require('../../../../settings')
 const contentTypes = require('../contentTypes')
+const Model = require('../../../lib/Model')
+
+const DEFAULT_TYPE = 'basic'
 
 const maybeRawHTMLType = (entry) => {
   return entry.data.format.data === 'hypertext'
 }
 
-const DEFAULT_TYPE = 'basic'
+const Homepage = new Model({
+  schema: (entry) => ({
+    type: 'object',
+    data: {
+      name: /(homepage|home|index)/,
+      format: /(markdown|plaintext|hypertext|handlebars)/,
+    },
+  }),
 
-module.exports = class Homepage {
-  constructor(contentTree) {
-    this.contentModel = this.mapContentTree(contentTree)
-  }
-
-  mapContentTree(entry) {
+  create(entry) {
     const indexFile = entry
     const localAssets = []
     const permalink = Settings.getSettings().permalinkPrefix
@@ -118,4 +123,6 @@ module.exports = class Homepage {
       }
     }
   }
-}
+})
+
+module.exports = Homepage

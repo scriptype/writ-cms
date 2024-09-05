@@ -166,31 +166,35 @@ const _createSubpage = (fsObject, { foldered }) => {
 const Settings = require('../../../../settings')
 const { makePermalink, getSlug } = require('../../../../helpers')
 const contentTypes = require('../contentTypes')
+const Model = require('../../../lib/Model')
+
+const DEFAULT_TYPE = 'basic'
+
+const getPermalink = (entry) => {
+  const { permalinkPrefix } = Settings.getSettings()
+  return makePermalink({
+    prefix: permalinkPrefix,
+    parts: [entry.data.name.data],
+    addHTMLExtension: true
+  })
+}
 
 const maybeRawHTMLType = (entry) => {
   return entry.data.format.data === 'hypertext'
 }
 
-const DEFAULT_TYPE = 'basic'
+const Subpage = new Model({
+  schema: (entry) => ({
+    type: 'object',
+    data: {
+      format: /(markdown|plaintext|hypertext|handlebars)/
+    }
+  }),
 
-module.exports = class Subpage {
-  constructor(contentTree) {
-    this.contentModel = this.mapContentTree(contentTree)
-  }
-
-  getPermalink(entry) {
-    const { permalinkPrefix } = Settings.getSettings()
-    return makePermalink({
-      prefix: permalinkPrefix,
-      parts: [entry.data.name.data],
-      addHTMLExtension: true
-    })
-  }
-
-  mapContentTree(entry) {
+  create(entry) {
     const indexFile = entry
     const localAssets = []
-    const permalink = this.getPermalink(entry)
+    const permalink = getPermalink(entry)
     const { pagesDirectory } = Settings.getSettings()
 
     return {
@@ -218,4 +222,6 @@ module.exports = class Subpage {
       }
     }
   }
-}
+})
+
+module.exports = Subpage
