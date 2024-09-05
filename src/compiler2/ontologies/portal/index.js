@@ -53,6 +53,7 @@ module.exports = ({ ontologies }) => {
       await this.subOntologies.render(renderer, this.contentModel)
       await Homepage.render(renderer, this.contentModel)
       await Subpages.render(renderer, this.contentModel)
+      await LocalAssets.render(renderer, this.contentModel)
     }
   }
 
