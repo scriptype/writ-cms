@@ -24,6 +24,7 @@ const compile = async () => {
   console.log('settings.rootContentModel', rootContentModel)
   const RootOntology = Ontologies.get(rootContentModel)
   const root = new RootOntology(contentTree.tree)
+  await Renderer.init()
   await root.render(Renderer)
   Debug.timeEnd('compiler')
   return {

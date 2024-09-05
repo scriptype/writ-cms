@@ -46,7 +46,7 @@ const renderHomepage = async (Renderer, contentModel) => {
   const settings = Settings.getSettings()
   const { homepage } = contentModel
   return Renderer.render({
-    template: `root/pages/homepage/${homepage.type}`,
+    template: `pages/homepage/${homepage.type}`,
     outputPath: join(settings.out, 'index.html'),
     content: parseContent(homepage.content, homepage.format),
     data: {

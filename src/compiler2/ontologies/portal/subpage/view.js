@@ -48,7 +48,7 @@ const renderSubpages = (Renderer, contentModel) => {
   const compilation = contentModel.subpages.map(subpage => {
     // console.log('rendering subpage', subpage, 'to', join(out, subpage.outputPath))
     return Renderer.render({
-      template: `root/pages/subpage/${subpage.type}`,
+      template: `pages/subpage/${subpage.type}`,
       outputPath: join(out, subpage.outputPath),
       content: parseContent(subpage.content.data, subpage.format.data),
       data: {
