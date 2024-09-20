@@ -2,9 +2,10 @@ const model = require('./model')
 const view = require('./view')
 
 const render = (renderer, blog, contentModel) => {
+  console.log('blog render categories', blog.data.categories)
   return Promise.all(
-    blog.data.posts.map(post => {
-      return view(renderer, post, contentModel)
+    blog.data.categories.map(category => {
+      return view(renderer, category, contentModel)
     })
   )
 }
@@ -15,8 +16,8 @@ const reduce = (contentModel, entry) => {
   }
   return {
     ...contentModel,
-    posts: [
-      ...(contentModel.posts || []),
+    categories: [
+      ...(contentModel.categories || []),
       model.create(entry).data
     ]
   }

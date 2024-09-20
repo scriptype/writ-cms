@@ -2,6 +2,7 @@ const Settings = require('../../../settings')
 const { makePermalink, getSlug } = require('../../../helpers')
 const Ontology = require('../../lib/Ontology')
 const Posts = require('./post')
+const Categories = require('./category')
 
 const BLOG_DEFAULT_TYPE = 'text'
 
@@ -16,21 +17,23 @@ class Blog extends Ontology {
         format: blogEntry.data.format.data,
         name: blogEntry.data.name.data,
         path: blogEntry.data.path.data,
-        posts: [
-          ...blogEntry.subTree.reduce((contentModel, childEntry) => {
-            const withPosts = Posts.reduce(contentModel, childEntry)
-            if (withPosts) {
-              return withPosts
-            }
-            return contentModel
-          }, [])
-        ]
+        ...(blogEntry.subTree.reduce((contentModel, childEntry) => {
+          return (
+            Posts.reduce(contentModel, childEntry) ||
+            Categories.reduce(contentModel, childEntry) ||
+            contentModel
+          )
+        }, {
+          posts: [],
+          categories: []
+        }))
       }
     }
   }
 
   async render(renderer, blogEntry, rootModel) {
     await Posts.render(renderer, blogEntry.contentModel, rootModel)
+    await Categories.render(renderer, blogEntry.contentModel, rootModel)
   }
 }
 

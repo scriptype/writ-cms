@@ -14,39 +14,15 @@ module.exports = ({ ontologies }) => {
       })
 
       this.contentModel = contentTree.reduce((contentModel, entry) => {
-
-        const withSubOntologies = this.subOntologies.reduce(contentModel, entry)
-        if (withSubOntologies) {
-          return withSubOntologies
-        }
-
-        const withHomepage = Homepage.reduce(
-          (withSubOntologies || contentModel),
-          entry
+        return (
+          this.subOntologies.reduce(contentModel, entry) ||
+          Homepage.reduce(contentModel, entry) ||
+          Subpages.reduce(contentModel, entry) ||
+          LocalAssets.reduce(contentModel, entry) ||
+          contentModel
         )
-        if (withHomepage) {
-          return withHomepage
-        }
-
-        const withSubpages = Subpages.reduce(
-          (withHomepage || withSubOntologies || contentModel),
-          entry
-        )
-        if (withSubpages) {
-          return withSubpages
-        }
-
-        const withLocalAssets = LocalAssets.reduce(
-          (withSubpages || withHomepage || withSubOntologies || contentModel),
-          entry
-        )
-        if (withLocalAssets) {
-          return withLocalAssets
-        }
-
-        return contentModel
       }, {})
-      // console.log('portal.contentModel', JSON.stringify(this.contentModel, null, 2))
+      console.log('portal.contentModel', JSON.stringify(this.contentModel, null, 2))
     }
 
     async render(renderer) {
