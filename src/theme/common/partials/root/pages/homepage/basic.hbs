@@ -1,12 +1,12 @@
 {{#>base page="homepage"}}
   {{#>layouts/single-column}}
     <header {{region "header"}}>
-      {{>components/header}}
+      {{>root/components/header}}
     </header>
 
     <main {{region "main"}}>
       {{> @partial-block }}
-      {{>components/posts}}
+      {{>root/components/posts}}
     </main>
   {{/layouts/single-column}}
 {{/base}}

@@ -8,12 +8,13 @@ const all = Promise.all.bind(Promise)
 
 const withBasePath = (basePath) => (asset) => ({ ...asset, basePath })
 
-const copyAsset = ({ outputPrefix }) => async ({ basePath, destPath, path, name, isFolder, outputPrefix }) => {
+const copyAsset = ({ outputPrefix }) => async ({ basePath, destPath, path, name, isFolder }) => {
   const { out } = Settings.getSettings()
   const outputDir = dirname(destPath || path)
   const dirnameSlug = outputDir === '.' ?
     outputDir :
     outputDir.split(sep).map(getSlug).join(sep)
+  console.log('blog local assets', out, outputPrefix, 'join(', dirnameSlug, name, ')')
   const outPath = join(out, outputPrefix, join(dirnameSlug, name))
   debugLog('copying:', path)
   try {

@@ -1,12 +1,12 @@
 {{#>base page="tag"}}
   {{#>layouts/single-column}}
     <header {{region "header"}}>
-      {{>components/header}}
+      {{>blog/components/header}}
     </header>
 
     <main {{region "main"}}>
       <h2>{{lookup "tagIndexHeader" (map 'tag' tag.tag)}}</h2>
-      {{>components/posts}}
+      {{>blog/components/posts}}
     </main>
   {{/layouts/single-column}}
 {{/base}}

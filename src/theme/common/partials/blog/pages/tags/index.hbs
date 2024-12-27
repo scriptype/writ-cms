@@ -1,7 +1,7 @@
 {{#>base page="tags"}}
   {{#>layouts/single-column}}
     <header {{region "header"}}>
-      {{>components/header}}
+      {{>blog/components/header}}
     </header>
 
     <main {{region "main"}}>
@@ -15,7 +15,7 @@
       {{else}}
         <h2>{{lookup 'tagsNotFoundHeader'}}</h2>
       {{/if}}
-      {{>components/posts posts=tag.posts}}
+      {{>blog/components/posts posts=tag.posts}}
     </main>
   {{/layouts/single-column}}
 {{/base}}

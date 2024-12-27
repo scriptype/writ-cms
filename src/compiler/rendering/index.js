@@ -9,6 +9,8 @@ module.exports = {
   async render(contentModel) {
     await Renderer.init()
     await Views.Root.render(Renderer, contentModel)
-    return await Views.Blog.render(Renderer, contentModel.blog)
+    if (contentModel.blog) {
+      await Views.Blog.render(Renderer, contentModel.blog)
+    }
   }
 }

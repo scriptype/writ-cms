@@ -34,7 +34,7 @@ const createBlog = async (fileSystemTree, { foldered }) => {
       }
     },
 
-    withLinkedPosts,
+    // withLinkedPosts,
 
     function blogWithPostTags (contentModel) {
       return {
