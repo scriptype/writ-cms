@@ -83,10 +83,12 @@ const attachRelevantPosts = (post, posts) => {
 }
 
 const linkPosts = (contentModel) => {
+  console.log('linkPosts')
   return {
     ...contentModel,
     posts: contentModel.posts.map((post) => {
       const category = contentModel.categories.find(cat => {
+        console.log('links find', cat.path, post.category.path)
         return cat.path === post.category.path
       })
       const postInCategory = category.posts.find(p => p.path === post.path)
