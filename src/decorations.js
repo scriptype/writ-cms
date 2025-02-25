@@ -1,5 +1,5 @@
 const Debug = require('./debug')
-const { curry, pipe } = require('./helpers')
+const { curry, pipe, pipeSync } = require('./helpers')
 
 const createDecorations = () => {
   const decorations = {
@@ -53,6 +53,12 @@ const decorate = (key, initialValue) => {
   return decorated
 }
 
+const decorateSync = (key, initialValue) => {
+  const decoration = decorations.get(key)
+  const decorated = pipeSync(initialValue, decoration)
+  return decorated
+}
+
 class DecoratorFactory {
   constructor(fn) {
     return curry(fn)
@@ -62,5 +68,6 @@ class DecoratorFactory {
 module.exports = {
   register,
   decorate,
+  decorateSync,
   DecoratorFactory
 }
