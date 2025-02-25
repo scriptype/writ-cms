@@ -39,16 +39,13 @@ const getTranscript = (metadata, localAssets) => {
 }
 
 const getPostCategory = (fsObject, categorized) => {
-  console.log('getPostCategory fsObject.path', fsObject.path)
   const pathParts = fsObject.path.split(sep)
-  console.log('getPostCategory pathParts', pathParts)
 
   const categoryName = categorized ?
     pathParts.slice(-2, -1)[0] :
     (Dictionary.lookup('defaultCategoryName') || 'Unclassified')
 
   const categoryPath = pathParts.slice(0, -1).join(sep)
-  console.log('getPostCategory categoryPath', categoryPath)
 
   const categoryPermalink = makePermalink({
     prefix: Settings.getSettings().permalinkPrefix,
