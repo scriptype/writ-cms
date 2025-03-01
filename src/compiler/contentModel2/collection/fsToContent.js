@@ -2,8 +2,13 @@ const { dirname } = require('path')
 const _ = require('lodash')
 const Dictionary = require('../../../dictionary')
 const { last } = require('../../../helpers')
-const contentTypes = require('./contentTypes')
 const { createLocalAsset } = require('../models/localAsset')
+
+const {
+  createCollectionHome,
+  createFolderedCollectionHome,
+  createFolderedCollectionHomeIndex
+} = require('./models/collectionHome')
 
 const {
   createCategory,
@@ -29,6 +34,14 @@ const templateExtensions = [
 
 const isTemplateFile = (fsObject) => {
   return new RegExp(templateExtensions.join('|'), 'i').test(fsObject.extension)
+}
+
+const isCollectionHomeFile = (fsObject) => {
+  return isTemplateFile(fsObject) && fsObject.name.match(/^(index|home|collection)\..+$/)
+}
+
+const isCollectionHomeDirectory = (fsObject) => {
+  return fsObject.name.match(`^(index|home|collection)$`)
 }
 
 const isFolderedPostIndexFile = (fsObject) => {
@@ -83,6 +96,39 @@ const upsertEntry = ({
     ...contentModel,
     [key]: newCollection
   }
+}
+
+const withCollectionHome = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'index',
+    entryFn: () => createCollectionHome(fsObject).data,
+    replace: true
+  })
+}
+
+const withFolderedCollectionHome = (contentModel, fsObject) => {
+  return newEntry({
+    contentModel,
+    key: 'index',
+    entryFn: () => {
+      return createFolderedCollectionHome({
+        ...fsObject,
+        children: fsObject.children.map(mapFolderedCollectionHomeTree)
+      }).data
+    },
+    replace: true
+  })
+}
+
+const mapFolderedCollectionHomeTree = (fsObject) => {
+  if (isCollectionHomeFile(fsObject)) {
+    return createFolderedCollectionHomeIndex(fsObject)
+  }
+  return createLocalAsset({
+    ...fsObject,
+    isFolder: !!fsObject.children
+  })
 }
 
 const withLocalAsset = (contentModel, fsObject) => {
@@ -190,6 +236,9 @@ const mapCategoryTree = (fsObject) => {
 
 const mapCollectionTree = (fsTree) => {
   return fsTree.reduce((contentModel, fsObject) => {
+    if (isCollectionHomeFile(fsObject)) {
+      return withCollectionHome(contentModel, fsObject)
+    }
     if (isTemplateFile(fsObject)) {
       return withDefaultCategory(
         withDefaultCategoryPost(contentModel, fsObject),
@@ -199,6 +248,9 @@ const mapCollectionTree = (fsTree) => {
     if (!fsObject.children) {
       return withLocalAsset(contentModel, fsObject)
     }
+    if (isCollectionHomeDirectory(fsObject)) {
+      return withFolderedCollectionHome(contentModel, fsObject)
+    }
     if (fsObject.children.some(isFolderedPostIndexFile)) {
       return withDefaultCategory(
         withFolderedPost(contentModel, fsObject),
@@ -207,6 +259,7 @@ const mapCollectionTree = (fsTree) => {
     }
     return withCategory(contentModel, fsObject)
   }, {
+    index: createCollectionHome({}).data,
     categories: [],
     posts: [],
     localAssets: [],
