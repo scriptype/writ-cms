@@ -1,22 +1,5 @@
-const contentTypes = require('../contentTypes')
-
-const createAsset = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.ASSET
-  }
+function asset(node) {
+  return node
 }
 
-const createAssets = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.ASSETS,
-    data: fsObject.children.map(createAsset)
-  }
-}
-
-module.exports = {
-  ...contentTypes,
-  createAsset,
-  createAssets
-}
+module.exports = asset
