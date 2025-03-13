@@ -33,7 +33,7 @@
             },
             "depth": 2,
             "extension": ".markdown",
-            "content": "---\ntype: text\ndate: 2021-05-18, 02:41\ntags: kendim, düşünceler\nmusiclist:\n - Boards of Canada - Music Has the Right to Children (album)\n - Boards of Canada Random 35 Tracks Full Tape\n - Underworld - The Hump\n---\nİşte tam bu andaydım. Düşündüm. Evimde kendime düşünmek için bir alan ayırmıştım ve orada uzanmış düşünüyordum."
+            "content": "---\ndate: 2021-05-18, 02:41\ntags: kendim, düşünceler\n---\nİşte tam bu andaydım. Düşündüm. Evimde kendime düşünmek için bir alan ayırmıştım ve orada uzanmış düşünüyordum."
           },
           {
             "name": "Hepsi Buymuş",
@@ -60,7 +60,7 @@
                 },
                 "depth": 3,
                 "extension": ".hbs",
-                "content": "---\ntype: text\ndate: 2021-04-11, 01:38\ntags: kendim, düşünceler, sarhoş\nmusiclist:\n - Teoman - Hepsi Buymuş\n - Sneaker Pimps - Tesco Suicide\n - Sneaker Pimps - Spin Spin Sugar\n---\n<p>Vim'de blog yazıyorum:</p>\n<div><img src=\"vim.png\" alt=\"Vim'de blog yazdığımın ekran görüntüsü.\"></div>\n<p>Ne zamandır ikinci yazımı yazmak istiyordum. Şimdi ikna ettim kendimi ama aklıma bir şey gelmiyor.</p>\n<p>Şunlardan bahsetmek istemiştim: Daft Punk'ın ayrılması, Teoman'ın yeni albüm çıkarması."
+                "content": "---\ndate: 2021-04-11, 01:38\ntags: kendim, düşünceler, sarhoş\n---\n<p>Vim'de blog yazıyorum:</p>\n<div><img src=\"vim.png\" alt=\"Vim'de blog yazdığımın ekran görüntüsü.\"></div>\n<p>Ne zamandır ikinci yazımı yazmak istiyordum. Şimdi ikna ettim kendimi ama aklıma bir şey gelmiyor.</p>\n<p>Şunlardan bahsetmek istemiştim: Daft Punk'ın ayrılması, Teoman'ın yeni albüm çıkarması."
               },
               {
                 "name": "vim.png",
@@ -81,7 +81,7 @@
             },
             "depth": 2,
             "extension": ".hbs",
-            "content": "---\ntype: text\ndate: 2022-10-19, 21:44\ntags: random, bir, post, test\nmusiclist:\n  - Shakira - She Wolf\n---\n<p>Herhangi bir random post</p>\n{{seeMore}}\n<p>Henna bebek</p>\n"
+            "content": "---\ndate: 2022-10-19, 21:44\ntags: random, bir, post, test\n---\n<p>Herhangi bir random post</p>\n{{seeMore}}\n<p>Henna bebek</p>\n"
           },
           {
             "name": "Kabanla Yürünen Deniz Kenarları.txt",
@@ -91,7 +91,7 @@
             },
             "depth": 2,
             "extension": ".txt",
-            "content": "---\ntype: text\ndate: 2021-04-17, 22:24\ntags: kendim, düşünceler, sarhoş\nmusiclist:\n  - Björk - Hyperballad, Human Behavior, Jóga, Army of Me, Hidden Place\n  - Aphex Twin - Surfing on Sine Waves 2\n  - AFX - 1 P String\n---\nAklımda tuttuğum onca yazı fikri hep bu anlarda yok oluyor.\nYeni eve taşınmama 12 gün kalmış."
+            "content": "---\ndate: 2021-04-17, 22:24\ntags: kendim, düşünceler, sarhoş\n---\nAklımda tuttuğum onca yazı fikri hep bu anlarda yok oluyor.\nYeni eve taşınmama 12 gün kalmış."
           },
           {
             "name": "İlk Şey.hbs",
@@ -101,7 +101,7 @@
             },
             "depth": 2,
             "extension": ".hbs",
-            "content": "---\ntype: text\ndate: 2021-03-07, 01:44\ntags: kendim, düşünceler, ilk, sarhoş\nmusiclist:\n  - UnderWorld - Born slippery,\n  - Underworld - Pinetum,\n  - Underworld & Iggy Pop - Bells & Circles\n  - Daft Punk - Alive 2027\n  - Depeche Mode - It's No Good\n  - 22 Pistepirkko - Birdy\n---\n<p>İlk paragraf.</p>\n<p>HTML yazmak neden istememeliyiz ki? Soyutlamamaya karar verirsem pekala HTML ile blog oluşturabilirim. Neyse artık.</p>\n<p>16 yaşımdaydım galiba, buna benzer bir özel günlük yazmaya başlamıştım düz HTML ile.</p>\n<p>Gafamın dönmeye başlamak üzere olduğunu hissediyorum. Dışarıda kar fırtınasına yakın bir şey var. Tek sorun: kar yağmıyor. Epey rüzgarlı sadece. Sigaradan sigaraya çıkıyorum dışarı.</p>\n{{seeMore}}\n<p>Bu gönderiyi yazdığım sırada henüz burası için CSS bile yazmış değilim. Micro pause, git kenara!</p>\n<p>Yine de aklımdaki belli bir kurguya göre class'lar kullandım. Günün birinde buraya CSS yazmalıyım düşüncesi ile.</p>\n<p>Gelecekteki ben. Burayı okuduğun zaman ne zaman olacak acaba. Nasıl biri olacaksın acaba. Biliyorum, burayı yazan bana benzeyen biri olacaksın, en azından belli açılardan (artık x yıl önceki halinden eser kalmayacak yaşı geçtiğime göre). Sen (gelecekteki ben), şu an bunu yazan benim alacağım kararların mahkumusun. Bana saygı duy veya benden nefret et ama senin var olma nedenin benim. Daha doğrusu, akla ilk gelen neden benim. Benim (şu anki benim) akla ilk gelen var olma nedenim, mesela, 16 saat önceki benim. Hatta 1 saat önceki benim.</p>\n<p>Şu anki benim var olmamda akla gelen ilk neden, şu andan sonsuz miktarda kısa zaman önceki benim. Mikrosaniyeler veya nanosaniyeler yeterli olmayabilir bu zaman dilimini tarif etmek için. Zaman ölçeği uzamsal değişikliklerin çerçevesini belirliyor. Şöyle ki, bundan 1 saniye önce benim parmaklarım tamamen farklı konumlarda olabiliyorken, dünya kendi ekseni etrafında yalnızda 1 yay saniyesi kadar daha az dönmüş durumdaydı. Herhangi bir gökadanın 1 saniye önceki fotoğrafı ile şu anki fotoğrafı arasında (fotoğrafın çekildiği ortam şartları sayılmazsa) kabaca hiçbir fark yok. Kabaca dememin sebebi ise fotoğrafın çözünürluğü ile ilgili. Eğer bu gökadanın herhangi bir sarmal kolunda yer alan bir yıldızın yörüngesindeki yaşama elverişli bir gezegenin yüzeyinin her bir nanometresini çözebilen bir fotoğraftan bahsediyorsak, tabii ki 1 saniye bu iki fotoğraf arasında büyük farklara neden olabilir.</p>\n<p>1 saniyelik zaman dilimi, nanometrelik ölçekte, var olmak veya yok olmak arasındaki farkı belirleyecek kadar büyük bir zaman. Milimetreler ve santimetreler için bile 1 saniye oldukça geniş bir zaman dilimi. Aslında söz konusu varlığın uzaydaki yer değiştirme hızına göre değişiyor zaman ölçeğinin etkisi. Uzayda asla yer değiştirmeyen bir varlık sonsuza dek aynı kalacakken ışık hızında hareket eden bir varlık için nanosaniyeler bile büyük zaman dilimleri olabilir.</p>\n<p>İşte bu yüzden senin (gelecekteki ben) akla gelen <em>ilk</em> var olma nedenin benim. Ben süregelen bir varlığım. Benim bu anki varlığım ile senin aranda ben var olmaya devam edeceğim. O zaman dilimindeki tüm benlerin var olmalarının akla ilk gelen nedeni benim. Senin var olmanla sonuçlanacak olan süreçte rol oynayan tüm benlerin mimarı benim. Henüz nasıl benler yaratacağımı bilmiyorum. Sen halihazırda biliyorsun şu anki benden sana gelen süreçte ne gibi benlerin var olduğunu. Kabul ediyorum, o yaptığın hatanın sorumlusu benim. Evet, o güzel anı benim sayemde yaşadın. Bana saygı duy veya benden nefret et, önemsiz.</p>\n"
+            "content": "---\ndate: 2021-03-07, 01:44\ntags: kendim, düşünceler, ilk, sarhoş\n---\n<p>İlk paragraf.</p>\n<p>HTML yazmak neden istememeliyiz ki? Soyutlamamaya karar verirsem pekala HTML ile blog oluşturabilirim. Neyse artık.</p>\n<p>16 yaşımdaydım galiba, buna benzer bir özel günlük yazmaya başlamıştım düz HTML ile.</p>\n<p>Gafamın dönmeye başlamak üzere olduğunu hissediyorum. Dışarıda kar fırtınasına yakın bir şey var. Tek sorun: kar yağmıyor. Epey rüzgarlı sadece. Sigaradan sigaraya çıkıyorum dışarı.</p>\n{{seeMore}}\n<p>Bu gönderiyi yazdığım sırada henüz burası için CSS bile yazmış değilim. Micro pause, git kenara!</p>"
           }
         ]
       },
@@ -121,7 +121,7 @@
             },
             "depth": 2,
             "extension": ".hbs",
-            "content": "---\ntype: text\ndate: 2021-06-10, 22:17\ntags: memories\nmusiclist:\n - The Weeknd - In Your Eyes\n---\n<p>This song from The Weeknd, \"In Your Eyes\", has had an interesting effect on me, maybe a bit of a nostalgic, but somehow a tickling, problematic feeling, if that makes sense at all. It's hard to explain at first, so bear with me until I figure out how to put it.</p>\n{{seeMore}}\n<p>When I heard it the first time, it didn't mean much. The second time, I started remembering."
+            "content": "---\ndate: 2021-06-10, 22:17\ntags: memories\n---\n<p>This song from The Weeknd, \"In Your Eyes\", has had an interesting effect on me, maybe a bit of a nostalgic, but somehow a tickling, problematic feeling, if that makes sense at all. It's hard to explain at first, so bear with me until I figure out how to put it.</p>\n{{seeMore}}\n<p>When I heard it the first time, it didn't mean much. The second time, I started remembering."
           }
         ]
       },
@@ -150,7 +150,7 @@
             },
             "depth": 2,
             "extension": ".md",
-            "content": "---\ntype: text\ndate: 2022-12-31, 00:43\ntags: deneme\ncover: sorgular.jpg\ncoverAlt: Ağaçlar olasılıklarını dallarıyla olaya döker\ncoverShape: roundTop\ncoverPosition: center bottom\nmusiclist:\n - Boards of Canada - Sunshine Recorder\n - Massive Attack - Pray for Rain\n - Massive Attack - I Against I\n - Duman - Dibine Kadar\n---\n\n### Ağaç sorguları\n\nAğaçlarda kendimizi görebiliriz. Sınırsız şekillerde dallar her göz için farklı kesişir.\nAkla basit gelen bir dizi genetik kuralın sonucu olarak bu ağaçlar bizi farklı düşlere koyar.\n{{seeMore}}\n\nİnsan kendi kader ağacını gerçek bir ağaçta gözlemleyebilir. Hayat içinde bir ağaç gibi\nilerlemenin neye benzediğini düşünür."
+            "content": "---\ndate: 2022-12-31, 00:43\ntags: deneme\ncover: sorgular.jpg\ncoverAlt: Ağaçlar olasılıklarını dallarıyla olaya döker\ncoverShape: roundTop\ncoverPosition: center bottom\n---\n\n### Ağaç sorguları\n\nAğaçlarda kendimizi görebiliriz. Sınırsız şekillerde dallar her göz için farklı kesişir.\nAkla basit gelen bir dizi genetik kuralın sonucu olarak bu ağaçlar bizi farklı düşlere koyar.\n{{seeMore}}\n\nİnsan kendi kader ağacını gerçek bir ağaçta gözlemleyebilir. Hayat içinde bir ağaç gibi\nilerlemenin neye benzediğini düşünür."
           },
           {
             "name": "sorgular.jpg",
