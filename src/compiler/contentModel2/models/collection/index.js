@@ -2,13 +2,11 @@ const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
 const settings = require('../../../../settings').getSettings()
-const { isTemplateFile, parseTags } = require('../../helpers')
+const { isTemplateFile } = require('../../helpers')
 const models = {
-  _baseEntry: require('../_baseEntry'),
   attachment: require('../attachment'),
   category: require('./category'),
-  post: require('./post'),
-  tag: require('./tag')
+  post: require('./post')
 }
 
 function collection(node) {
