@@ -5,13 +5,25 @@ const models = {
 
 function subpage(node) {
   const baseEntryProps = models._baseEntry(node, ['index', 'page'])
+
+  const permalink = (
+    settings.permalinkPrefix +
+    baseEntryProps.slug +
+    (node.children ? '' : '.html')
+  )
+
+  const pageContext = {
+    title: baseEntryProps.title,
+    slug: baseEntryProps.slug,
+    permalink
+  }
+
   return {
     ...baseEntryProps,
-    permalink: (
-      settings.permalinkPrefix +
-      baseEntryProps.slug +
-      (node.children ? '' : '.html')
-    )
+    ...pageContext,
+    attachments: baseEntryProps.attachments.map(a => a({
+      page: pageContext
+    }))
   }
 }
 

@@ -5,9 +5,21 @@ const models = {
 
 function homepage(node) {
   const baseEntryProps = models._baseEntry(node, ['index'])
+
+  const permalink = settings.permalinkPrefix
+
+  const pageContext = {
+    title: baseEntryProps.title,
+    slug: baseEntryProps.slug,
+    permalink
+  }
+
   return {
     ...baseEntryProps,
-    permalink: settings.permalinkPrefix
+    attachments: baseEntryProps.attachments.map(a => a({
+      page: pageContext
+    })),
+    permalink
   }
 }
 

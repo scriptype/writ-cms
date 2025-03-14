@@ -8,8 +8,9 @@ const FSTree = os.platform() === 'win32' ?
 
 test('compiler/contentModel2', t => {
   t.test('exits 0', async () => {
-    console.log(
-      contentModel2.create(FSTree).collections[0]
+    console.dir(
+      contentModel2.create(FSTree).collections[0],
+      { depth: null, colors: true }
     )
   })
 })

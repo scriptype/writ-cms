@@ -10,28 +10,6 @@ const models = {
 }
 
 function collection(node) {
-  const tree = {
-    categories: [],
-    posts: [],
-    tags: [],
-    attachments: []
-  }
-
-  const indexFile = node.children.find(child => {
-    return isTemplateFile(child) && child.name.match(/^collection\..+$/)
-  })
-
-  const indexProps = indexFile ? frontMatter(indexFile.content) : {}
-
-  const slug = indexProps.attributes?.slug || makeSlug(node.name)
-  const context = {
-    ...indexProps.attributes,
-    childContentType: indexProps.attributes?.childContentType || 'text',
-    title: indexProps.attributes?.title || node.name,
-    slug,
-    permalink: settings.permalinkPrefix + slug
-  }
-
   function collectPostTags(post) {
     post.tags.forEach(postTag => {
       let collectionTag = tree.tags.find(t => t.name === postTag.name)
@@ -75,6 +53,28 @@ function collection(node) {
     })
     defaultCategory.posts.push(uncategorizedPost)
     tree.posts.push(uncategorizedPost)
+  }
+
+  const tree = {
+    categories: [],
+    posts: [],
+    tags: [],
+    attachments: []
+  }
+
+  const indexFile = node.children.find(child => {
+    return isTemplateFile(child) && child.name.match(/^collection\..+$/)
+  })
+
+  const indexProps = indexFile ? frontMatter(indexFile.content) : {}
+
+  const slug = indexProps.attributes?.slug || makeSlug(node.name)
+  const context = {
+    ...indexProps.attributes,
+    childContentType: indexProps.attributes?.childContentType || 'text',
+    title: indexProps.attributes?.title || node.name,
+    slug,
+    permalink: settings.permalinkPrefix + slug
   }
 
   node.children.forEach(childNode => {

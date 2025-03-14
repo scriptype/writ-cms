@@ -62,7 +62,10 @@ function category(node, context) {
         )
       }
       return tree.attachments.push(
-        models.attachment(childNode)
+        models.attachment(childNode, {
+          ...context,
+          category: categoryContext
+        })
       )
     }
     if (childNode.children.some(c => isTemplateFile(c) && c.name.match(/^(index|post)\..+$/))) {
@@ -74,7 +77,10 @@ function category(node, context) {
       )
     }
     return tree.push(
-      models.attachment(childNode)
+      models.attachment(childNode, {
+        ...context,
+        category: categoryContext
+      })
     )
   })
 

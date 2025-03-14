@@ -7,23 +7,36 @@ const models = {
 
 function post(node, context) {
   const baseEntryProps = models._baseEntry(node, ['index', 'post'])
+
+  const permalink = (
+    settings.permalinkPrefix +
+    [
+      context.collection.slug,
+      context.category.isDefaultCategory ? '' : context.category.slug,
+      baseEntryProps.slug
+    ].filter(Boolean).join('/') +
+    (node.children ? '' : '.html')
+  )
+
+  const postContext = {
+    title: baseEntryProps.title,
+    slug: baseEntryProps.slug,
+    permalink
+  }
+
   return {
     ...baseEntryProps,
+    ...postContext,
     context,
     contentType: baseEntryProps.contentType || context.category.childContentType,
     tags: parseTags(baseEntryProps.tags).map(tagName => {
       return models.tag(tagName, context)
     }),
     date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
-    permalink: (
-      settings.permalinkPrefix +
-      [
-        context.collection.slug,
-        context.category.isDefaultCategory ? '' : context.category.slug,
-        baseEntryProps.slug
-      ].filter(Boolean).join('/') +
-      (node.children ? '' : '.html')
-    )
+    attachments: baseEntryProps.attachments.map(a => a({
+      ...context,
+      post: postContext
+    }))
   }
 }
 
