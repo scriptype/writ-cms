@@ -1,3 +1,4 @@
+const { join } = require('path')
 const settings = require('../../../../settings').getSettings()
 const { parseTags } = require('../../helpers')
 const models = {
@@ -18,6 +19,14 @@ function post(node, context) {
     (node.children ? '' : '.html')
   )
 
+  const outputPath = join(...[
+    settings.out,
+    context.collection.slug,
+    (context.category.isDefaultCategory ? '' : context.category.slug),
+    baseEntryProps.slug,
+    (node.children ? 'index' : '')
+  ].filter(Boolean)) + '.html'
+
   const postContext = {
     title: baseEntryProps.title,
     slug: baseEntryProps.slug,
@@ -33,6 +42,7 @@ function post(node, context) {
       return models.tag(tagName, context)
     }),
     date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
+    outputPath,
     attachments: baseEntryProps.attachments.map(a => a({
       ...context,
       post: postContext

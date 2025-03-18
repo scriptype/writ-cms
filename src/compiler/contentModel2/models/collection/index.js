@@ -1,3 +1,4 @@
+const { join } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
@@ -69,12 +70,14 @@ function collection(node) {
   const indexProps = indexFile ? frontMatter(indexFile.content) : {}
 
   const slug = indexProps.attributes?.slug || makeSlug(node.name)
+  const permalink = settings.permalinkPrefix + slug
+  const outputPath = join(settings.out, slug, 'index.html')
   const context = {
     ...indexProps.attributes,
     childContentType: indexProps.attributes?.childContentType || 'text',
     title: indexProps.attributes?.title || node.name,
     slug,
-    permalink: settings.permalinkPrefix + slug
+    permalink
   }
 
   node.children.forEach(childNode => {
@@ -106,7 +109,8 @@ function collection(node) {
   return {
     ...context,
     ...tree,
-    content: indexProps.content || ''
+    content: indexProps.content || '',
+    outputPath
   }
 }
 

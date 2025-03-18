@@ -1,3 +1,4 @@
+const { join } = require('path')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
 const settings = require('../../../../settings').getSettings()
@@ -10,16 +11,23 @@ const models = {
 function category(node, context) {
   if (node.isDefaultCategory) {
     const slug = makeSlug(settings.defaultCategoryName)
+    const permalink = (
+      settings.permalinkPrefix +
+      context.collection.slug
+    )
+    const outputPath = join(
+      settings.out,
+      context.collection.slug,
+      'index.html'
+    )
     return {
       context,
       childContentType: context.collection.childContentType,
       content: '',
       title: settings.defaultCategoryName,
       slug,
-      permalink: (
-        settings.permalinkPrefix +
-        [ context.collection.slug, slug ].join('/')
-      ),
+      permalink,
+      outputPath,
       isDefaultCategory: true,
       posts: [],
       attachments: []
@@ -32,15 +40,21 @@ function category(node, context) {
   const indexProps = indexFile ? frontMatter(indexFile) : {}
 
   const slug = indexProps.attributes?.slug || makeSlug(node.name)
+  const permalink = (
+    settings.permalinkPrefix +
+    [ context.collection.slug, slug ].join('/')
+  )
+  const outputPath = join(
+    settings.out,
+    context.collection.slug, slug, 'index.html'
+  )
+
   const categoryContext = {
     ...indexProps.attributes,
     childContentType: indexProps.attributes?.childContentType || context.collection.childContentType,
     title: indexProps.attributes?.title || node.name,
     slug,
-    permalink: (
-      settings.permalinkPrefix +
-      [ context.collection.slug, slug ].join('/')
-    )
+    permalink
   }
 
   const tree = {
@@ -90,7 +104,8 @@ function category(node, context) {
     ...categoryContext,
     ...tree,
     context: context,
-    content: indexProps.content || ''
+    content: indexProps.content || '',
+    outputPath
   }
 }
 

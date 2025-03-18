@@ -1,3 +1,4 @@
+const { join } = require('path')
 const settings = require('../../../settings').getSettings()
 const models = {
   _baseEntry: require('./_baseEntry')
@@ -12,6 +13,12 @@ function subpage(node) {
     (node.children ? '' : '.html')
   )
 
+  const outputPath = join(...[
+    settings.out,
+    baseEntryProps.slug,
+    (node.children ? 'index' : '')
+  ].filter(Boolean)) + '.html'
+
   const pageContext = {
     title: baseEntryProps.title,
     slug: baseEntryProps.slug,
@@ -21,6 +28,7 @@ function subpage(node) {
   return {
     ...baseEntryProps,
     ...pageContext,
+    outputPath,
     attachments: baseEntryProps.attachments.map(a => a({
       page: pageContext
     }))
