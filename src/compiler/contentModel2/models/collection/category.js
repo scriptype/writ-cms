@@ -1,7 +1,7 @@
 const { join } = require('path')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const settings = require('../../../../settings').getSettings()
+const Settings = require('../../../../settings')
 const { isTemplateFile } = require('../../helpers')
 const models = {
   post: require('./post'),
@@ -9,6 +9,8 @@ const models = {
 }
 
 function category(node, context) {
+  const settings = Settings.getSettings()
+
   if (node.isDefaultCategory) {
     const slug = makeSlug(settings.defaultCategoryName)
     const permalink = (

@@ -1,10 +1,12 @@
 const { join } = require('path')
-const settings = require('../../../settings').getSettings()
+const Settings = require('../../../settings')
 const models = {
   _baseEntry: require('./_baseEntry')
 }
 
 function homepage(node) {
+  const settings = Settings.getSettings()
+
   const baseEntryProps = models._baseEntry(node, ['index'])
 
   const permalink = settings.permalinkPrefix
@@ -20,7 +22,7 @@ function homepage(node) {
   return {
     ...baseEntryProps,
     attachments: baseEntryProps.attachments.map(a => a({
-      page: pageContext
+      homepage: pageContext
     })),
     permalink,
     outputPath

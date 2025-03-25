@@ -10,6 +10,9 @@ const compile2 = async () => {
 
   const fileSystemTree = await FileSystem.exploreTree()
   const contentModel = ContentModel2.create(fileSystemTree)
+
+  return {}
+
   await Rendering2.render(contentModel)
   Debug.timeEnd('compiler')
   return {

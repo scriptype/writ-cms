@@ -11,7 +11,7 @@ module.exports = {
   async render(contentModel) {
     await Renderer.init()
     return Promise.all([
-      Views.copyAssets(contentModel),
+      Views.copyAssets(Renderer, contentModel),
       Views.renderHomepage(Renderer, contentModel),
       Views.renderSubpages(Renderer, contentModel),
       Views.renderCollections(Renderer, contentModel)

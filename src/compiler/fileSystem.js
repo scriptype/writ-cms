@@ -47,6 +47,7 @@ const _explore = async (currentPath, depth = 0) => {
         const baseProperties = {
           name: fileName,
           path: relative(rootPath, accumulatedPath),
+          absolutePath: accumulatedPath,
           stats: { birthtime },
           depth,
         }

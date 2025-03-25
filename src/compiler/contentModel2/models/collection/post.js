@@ -1,5 +1,5 @@
 const { join } = require('path')
-const settings = require('../../../../settings').getSettings()
+const Settings = require('../../../../settings')
 const { parseTags } = require('../../helpers')
 const models = {
   _baseEntry: require('../_baseEntry'),
@@ -7,6 +7,8 @@ const models = {
 }
 
 function post(node, context) {
+  const settings = Settings.getSettings()
+
   const baseEntryProps = models._baseEntry(node, ['index', 'post'])
 
   const permalink = (

@@ -1,7 +1,9 @@
 const { join } = require('path')
-const settings = require('../../../settings').getSettings()
+const Settings = require('../../../settings')
 
 function attachment(node, context) {
+  const settings = Settings.getSettings()
+
   const permalink = (
     settings.permalinkPrefix +
     [
@@ -16,7 +18,7 @@ function attachment(node, context) {
   const outputPath = join(...[
     settings.out,
     context.collection?.slug,
-    context.category?.isDefaultCategory ? '' : context.category.slug,
+    context.category?.isDefaultCategory ? '' : context.category?.slug,
     context.post?.slug,
     context.page?.slug,
     node.name

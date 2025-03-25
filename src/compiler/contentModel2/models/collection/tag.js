@@ -1,8 +1,9 @@
 const { join } = require('path')
 const makeSlug = require('slug')
-const settings = require('../../../../settings').getSettings()
+const Settings = require('../../../../settings')
 
 function tag(name, context) {
+  const settings = Settings.getSettings()
   const slug = makeSlug(name)
   const permalink = (
     settings.permalinkPrefix +

@@ -1,5 +1,5 @@
 const Handlebars = require('handlebars')
-const { stat, readdir, writeFile } = require('fs/promises')
+const { stat, readdir, writeFile, cp } = require('fs/promises')
 const { dirname, extname, join } = require('path')
 const { debugLog } = require('../../debug')
 const { decorate } = require('../../decorations')
@@ -89,8 +89,22 @@ const compile = ({ data, content, options = {} }) => {
   return template(data)
 }
 
+const copy = async ({ src, dest, recursive }) => {
+  try {
+    return await cp(src, dest, { recursive })
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      debugLog('failed copying file that no longer exists', e)
+    } else {
+      debugLog('failed copying file', e)
+    }
+    return Promise.resolve()
+  }
+}
+
 module.exports = {
   init,
   render,
-  compile
+  compile,
+  copy
 }

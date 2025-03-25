@@ -3,7 +3,7 @@ const Debug = require('../../../debug')
 
 const renderSubpages = (Renderer, contentModel) => {
   const compilation = contentModel.subpages.map(subpage => {
-    return Renderer.render({
+    const renderPage = Renderer.render({
       templates: [
         `pages/${subpage.template}`,
         `pages/${subpage.contentType}`,
@@ -18,7 +18,21 @@ const renderSubpages = (Renderer, contentModel) => {
         debug: Debug.getDebug()
       }
     })
+
+    const copyAttachments = subpage.attachments.map(node => {
+      return Renderer.copy({
+        src: node.absolutePath,
+        dest: node.outputPath,
+        recursive: !!node.children
+      })
+    })
+
+    return Promise.all([
+      renderPage,
+      ...copyAttachments
+    ])
   })
+
   return Promise.all(compilation)
 }
 

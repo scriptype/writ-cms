@@ -2,6 +2,7 @@
   {
     "name": "Blog",
     "path": "Blog",
+    "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog",
     "stats": {
       "birthtime": "1025-02-25T07:50:48.872Z"
     },
@@ -10,6 +11,7 @@
       {
         "name": "collection.md",
         "path": "Blog\\collection.md",
+        "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\collection.md",
         "stats": {
           "birthtime": "2025-03-01T03:38:49.442Z"
         },
@@ -20,6 +22,7 @@
       {
         "name": "Türkçe",
         "path": "Blog\\Türkçe",
+        "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe",
         "stats": {
           "birthtime": "2023-01-12T18:44:08.872Z"
         },
@@ -28,6 +31,7 @@
           {
             "name": "Bu andaydım.markdown",
             "path": "Blog\\Türkçe\\Bu andaydım.markdown",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Bu andaydım.markdown",
             "stats": {
               "birthtime": "2023-10-17T15:57:41.481Z"
             },
@@ -38,6 +42,7 @@
           {
             "name": "Hepsi Buymuş",
             "path": "Blog\\Türkçe\\Hepsi Buymuş",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Hepsi Buymuş",
             "stats": {
               "birthtime": "2023-01-12T18:44:08.873Z"
             },
@@ -46,6 +51,7 @@
               {
                 "name": "fifa2005.png",
                 "path": "Blog\\Türkçe\\Hepsi Buymuş\\fifa2005.png",
+                "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Hepsi Buymuş\\fifa2005.png",
                 "stats": {
                   "birthtime": "2023-01-12T18:44:08.873Z"
                 },
@@ -55,6 +61,7 @@
               {
                 "name": "post.hbs",
                 "path": "Blog\\Türkçe\\Hepsi Buymuş\\post.hbs",
+                "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Hepsi Buymuş\\post.hbs",
                 "stats": {
                   "birthtime": "2023-06-10T03:22:38.416Z"
                 },
@@ -65,6 +72,7 @@
               {
                 "name": "vim.png",
                 "path": "Blog\\Türkçe\\Hepsi Buymuş\\vim.png",
+                "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Hepsi Buymuş\\vim.png",
                 "stats": {
                   "birthtime": "2023-01-12T18:44:08.875Z"
                 },
@@ -76,6 +84,7 @@
           {
             "name": "Herhangi bir text post.hbs",
             "path": "Blog\\Türkçe\\Herhangi bir text post.hbs",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Herhangi bir text post.hbs",
             "stats": {
               "birthtime": "2023-10-17T15:57:58.789Z"
             },
@@ -86,6 +95,7 @@
           {
             "name": "Kabanla Yürünen Deniz Kenarları.txt",
             "path": "Blog\\Türkçe\\Kabanla Yürünen Deniz Kenarları.txt",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\Kabanla Yürünen Deniz Kenarları.txt",
             "stats": {
               "birthtime": "2023-10-11T12:05:11.158Z"
             },
@@ -96,6 +106,7 @@
           {
             "name": "İlk Şey.hbs",
             "path": "Blog\\Türkçe\\İlk Şey.hbs",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Türkçe\\İlk Şey.hbs",
             "stats": {
               "birthtime": "2023-10-17T16:17:33.225Z"
             },
@@ -108,6 +119,7 @@
       {
         "name": "Writings",
         "path": "Blog\\Writings",
+        "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Writings",
         "stats": {
           "birthtime": "2023-01-12T18:44:08.895Z"
         },
@@ -116,6 +128,7 @@
           {
             "name": "In your eyes.hbs",
             "path": "Blog\\Writings\\In your eyes.hbs",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Writings\\In your eyes.hbs",
             "stats": {
               "birthtime": "2023-06-02T15:21:41.659Z"
             },
@@ -128,6 +141,7 @@
       {
         "name": "Olay ve Olasılık",
         "path": "Blog\\Olay ve Olasılık",
+        "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Olay ve Olasılık",
         "stats": {
           "birthtime": "2023-10-08T15:57:36.074Z"
         },
@@ -136,6 +150,7 @@
           {
             "name": "ben.jpg",
             "path": "Blog\\Olay ve Olasılık\\ben.jpg",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Olay ve Olasılık\\ben.jpg",
             "stats": {
               "birthtime": "2023-10-08T15:57:36.075Z"
             },
@@ -145,6 +160,7 @@
           {
             "name": "post.md",
             "path": "Blog\\Olay ve Olasılık\\post.md",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Olay ve Olasılık\\post.md",
             "stats": {
               "birthtime": "2023-11-15T20:59:12.301Z"
             },
@@ -155,6 +171,7 @@
           {
             "name": "sorgular.jpg",
             "path": "Blog\\Olay ve Olasılık\\sorgular.jpg",
+            "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\Blog\\Olay ve Olasılık\\sorgular.jpg",
             "stats": {
               "birthtime": "2023-10-08T15:57:36.106Z"
             },
@@ -168,6 +185,7 @@
   {
     "name": "homepage.md",
     "path": "homepage.md",
+    "absolutePath": "C:\\Users\\enes\\code\\writ\\content\\homepage.md",
     "stats": {
       "birthtime": "2025-02-25T04:35:49.442Z"
     },

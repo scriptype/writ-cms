@@ -1,20 +1,20 @@
 const { join } = require('path')
-const Settings = require('../../../settings')
-const Debug = require('../../../debug')
-const { paginate } = require('../helpers/pagination')
+const Settings = require('../../../../settings')
+const Debug = require('../../../../debug')
+const { paginate } = require('../../helpers/pagination')
 
-const renderTagsPage = (Renderer, { homepage, posts, categories, subpages, tags }) => {
+const renderTagsPage = (Renderer, contentModel, collection) => {
+  const { tags } = collection
   if (!tags.length) {
     return Promise.resolve()
   }
   const settings = Settings.getSettings()
   return Renderer.render({
     templates: ['pages/tags'],
-    outputPath: join(settings.out, 'tags', 'index.html'),
+    outputPath: join(settings.out, collection.slug, 'tags', 'index.html'),
     data: {
-      posts,
-      categories,
-      subpages,
+      ...contentModel,
+      collection,
       tags,
       settings,
       debug: Debug.getDebug()
@@ -22,26 +22,25 @@ const renderTagsPage = (Renderer, { homepage, posts, categories, subpages, tags 
   })
 }
 
-const renderTagIndices = (Renderer, { tags, categories, posts, subpages }) => {
+const renderTagIndices = (Renderer, contentModel, collection) => {
+  const { tags } = collection.tags
   const settings = Settings.getSettings()
   const compilation = tags.map(tag => {
     return paginate({
       page: tag,
       posts: tag.posts,
-      postsPerPage: settings.postsPerPage,
-      outputDir: join(settings.out, 'tags', tag.slug),
+      postsPerPage: collection.postsPerPage || settings.postsPerPage,
+      outputDir: join(settings.out, collection.slug, 'tags', tag.slug),
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
         return Renderer.render({
-          templates: [`pages/tags/tag`],
+          templates: [`pages/tag`],
           outputPath,
           data: {
+            ...contentModel,
+            collection,
             tag,
-            tags,
-            categories,
             pagination: paginationData,
             posts: pageOfPosts,
-            allPosts: posts,
-            subpages,
             settings,
             debug: Debug.getDebug()
           }

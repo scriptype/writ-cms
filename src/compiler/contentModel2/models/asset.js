@@ -1,7 +1,9 @@
 const { join } = require('path')
-const settings = require('../../../settings').getSettings()
+const Settings = require('../../../settings')
 
 function asset(node) {
+  const settings = Settings.getSettings()
+
   const permalink = (
     settings.permalinkPrefix +
     [settings.assetsDirectory, node.name].join('/')
@@ -16,7 +18,8 @@ function asset(node) {
   return {
     ...node,
     permalink,
-    outputPath
+    outputPath,
+    date: new Date(node.stats.birthtime || Date.now())
   }
 }
 

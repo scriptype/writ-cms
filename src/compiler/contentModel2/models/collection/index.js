@@ -2,7 +2,7 @@ const { join } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const settings = require('../../../../settings').getSettings()
+const Settings = require('../../../../settings')
 const { isTemplateFile } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
@@ -11,6 +11,8 @@ const models = {
 }
 
 function collection(node) {
+  const settings = Settings.getSettings()
+
   function collectPostTags(post) {
     post.tags.forEach(postTag => {
       let collectionTag = tree.tags.find(t => t.name === postTag.name)
