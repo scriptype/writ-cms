@@ -8,7 +8,7 @@ function attachment(node, context) {
     settings.permalinkPrefix +
     [
       context.collection?.slug,
-      context.category?.isDefaultCategory ? '' : context.category.slug,
+      context.category?.isDefaultCategory ? '' : context.category?.slug,
       context.post?.slug,
       context.page?.slug,
       node.name

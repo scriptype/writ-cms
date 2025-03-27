@@ -6,7 +6,7 @@ const renderPosts = (Renderer, contentModel, collection) => {
     const renderPage = Renderer.render({
       templates: [
         `pages/${post.template}`,
-        `pages/${post.contentType}`,
+        `pages/post/${post.contentType}`,
         `pages/post`
       ],
       outputPath: post.outputPath,

@@ -1,8 +1,8 @@
 const { resolve, join } = require('path')
 const test = require('tape')
-const { lookBack } = require('../../compiler/fileSystem')
+const { lookBack } = require('../lib/FileSystemParser')
 
-test('compiler/fileSystem', t => {
+test('fileSystemParser', t => {
   t.test('lookBack', async () => {
     const path = join('lorem', 'ipsum', 'dolor', 'sit')
     t.equal(

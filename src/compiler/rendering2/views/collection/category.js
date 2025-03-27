@@ -20,7 +20,7 @@ const renderCategories = (Renderer, contentModel, collection) => {
         return Renderer.render({
           templates: [
             `pages/${category.template}`,
-            `pages/${category.contentType}`,
+            `pages/category/${category.contentType}`,
             `pages/category`
           ],
           outputPath,

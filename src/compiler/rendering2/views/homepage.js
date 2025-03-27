@@ -7,7 +7,7 @@ const renderHomepage = async (Renderer, contentModel) => {
   const renderPage = Renderer.render({
     templates: [
       `pages/${homepage.template}`,
-      `pages/${homepage.contentType}`,
+      `pages/homepage/${homepage.contentType}`,
       `pages/homepage`
     ],
     outputPath: homepage.outputPath,

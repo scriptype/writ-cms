@@ -8,6 +8,11 @@ const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
 const CNAME = require('./cname')
 const Dictionary = require('./dictionary')
+const FileSystemParser = require('./lib/FileSystemParser')
+const ContentModel1 = require('./compiler/contentModel')
+const ContentModel2 = require('./compiler/contentModel2')
+const Rendering1 = require('./compiler/rendering')
+const Rendering2 = require('./compiler/rendering2')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
@@ -46,6 +51,7 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
     mode,
     rootDirectory
   })
+  const settings = Settings.getSettings()
   await Expansions.init()
   Decorations.register(
     Dictionary.decorator(),
@@ -62,10 +68,23 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
-  const { fileSystemTree, contentModel } = await Compiler.compile()
-  await Assets.copyAssets()
+  const logger = {
+    debug: Debug.debugLog
+  }
+  const { fileSystemTree, contentModel } = await new Compiler({
+    fileSystemParser: new FileSystemParser({
+      rootDirectory: settings.rootDirectory,
+      contentDirectory: settings.contentDirectory,
+      IGNORE_PATHS_REG_EXP: settings.IGNORE_PATHS_REG_EXP
+    }, logger),
+    contentModel: settings.compilerVersion === 2 ? ContentModel2 : ContentModel1,
+    renderer: settings.compilerVersion === 2 ? Rendering2 : Rendering1
+  }).compile()
+  if (settings.compilerVersion === 1) {
+    await Assets.copyAssets()
+  }
   await finishCallback({
-    settings: Settings.getSettings(),
+    settings,
     fileSystemTree,
     contentModel
   })

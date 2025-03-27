@@ -6,7 +6,7 @@ const renderSubpages = (Renderer, contentModel) => {
     const renderPage = Renderer.render({
       templates: [
         `pages/${subpage.template}`,
-        `pages/${subpage.contentType}`,
+        `pages/subpage/${subpage.contentType}`,
         `pages/subpage`
       ],
       outputPath: subpage.outputPath,

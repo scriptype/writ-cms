@@ -50,7 +50,7 @@ const root = (fsTree) => {
 
     if (isPagesDirectory(node)) {
       node.children.forEach(childNode => {
-        if (isTemplateFile(childNode) || childNode.children) {
+        if (isTemplateFile(childNode) || childNode.children?.find(isTemplateFile)) {
           contentModel.subpages.push(
             models.subpage(childNode)
           )

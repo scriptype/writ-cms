@@ -17,12 +17,12 @@ const renderCollections = async (Renderer, contentModel) => {
       page: collection,
       posts: collection.posts,
       postsPerPage: collection.postsPerPage || settings.postsPerPage,
-      outputDir: join(settings.out, collection.lug),
+      outputDir: join(settings.out, collection.slug),
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
         return Renderer.render({
           templates: [
             `pages/${collection.template}`,
-            `pages/${collection.contentType}`,
+            `pages/collection/${collection.contentType}`,
             `pages/collection`
           ],
           outputPath,

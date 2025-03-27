@@ -23,9 +23,8 @@ const renderTagsPage = (Renderer, contentModel, collection) => {
 }
 
 const renderTagIndices = (Renderer, contentModel, collection) => {
-  const { tags } = collection.tags
   const settings = Settings.getSettings()
-  const compilation = tags.map(tag => {
+  const compilation = collection.tags.map(tag => {
     return paginate({
       page: tag,
       posts: tag.posts,
