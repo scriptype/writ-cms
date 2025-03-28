@@ -1,17 +1,20 @@
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const slug = require('slug')
-const { templateExtensions, removeExtension } = require('../helpers')
+const { templateExtensions, removeExtension, Markdown } = require('../helpers')
 
 const models = {
   attachment: require('./attachment')
 }
 
 const isIndexFile = (node, nameOptions) => {
+  if (node.children) {
+    return false
+  }
   const names = nameOptions.join('|')
   const extensions = templateExtensions.join('|')
   const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
-  return !node.children && node.name.match(namePattern)
+  return node.name.match(namePattern)
 }
 
 function parseFolderedEntry(node, indexFileNameOptions) {
@@ -33,6 +36,13 @@ function parseFolderedEntry(node, indexFileNameOptions) {
   }
 }
 
+function parseContent(node, content) {
+  if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
+    return content
+  }
+  return Markdown.parse(content)
+}
+
 function _baseEntry(node, indexFileNameOptions) {
   const folderedEntry = node.children ?
     parseFolderedEntry(node, indexFileNameOptions) :
@@ -43,13 +53,16 @@ function _baseEntry(node, indexFileNameOptions) {
     folderedEntry?.name || entryFile.name
   )
   const attachments = folderedEntry?.attachments || []
+  const contentRaw = body || ''
+  const content = parseContent(entryFile, contentRaw)
 
   return {
     ..._.omit(node, 'children'),
     ...attributes,
     title: attributes.title || entryName,
     slug: attributes.slug || slug(entryName),
-    content: body || '',
+    contentRaw,
+    content,
     attachments
   }
 }

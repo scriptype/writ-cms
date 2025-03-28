@@ -2,10 +2,17 @@ const { join } = require('path')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
 const Settings = require('../../../../settings')
-const { isTemplateFile } = require('../../helpers')
+const { isTemplateFile, Markdown } = require('../../helpers')
 const models = {
   post: require('./post'),
   attachment: require('../attachment')
+}
+
+function parseContent(node, content) {
+  if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
+    return content
+  }
+  return Markdown.parse(content)
 }
 
 function category(node, context) {
@@ -26,6 +33,7 @@ function category(node, context) {
       context,
       childContentType: context.collection.childContentType,
       content: '',
+      contentRaw: '',
       title: settings.defaultCategoryName,
       slug,
       permalink,
@@ -102,11 +110,17 @@ function category(node, context) {
 
   tree.posts.sort((a, b) => b.date - a.date)
 
+  const contentRaw = indexProps.content || ''
+  const content = indexFile ?
+    parseContent(indexFile, contentRaw) :
+    ''
+
   return {
     ...categoryContext,
     ...tree,
     context: context,
-    content: indexProps.content || '',
+    contentRaw,
+    content,
     outputPath
   }
 }

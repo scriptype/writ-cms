@@ -3,11 +3,18 @@ const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
 const Settings = require('../../../../settings')
-const { isTemplateFile } = require('../../helpers')
+const { isTemplateFile, Markdown } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
   category: require('./category'),
   post: require('./post')
+}
+
+function parseContent(node, content) {
+  if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
+    return content
+  }
+  return Markdown.parse(content)
 }
 
 function collection(node) {
@@ -108,10 +115,16 @@ function collection(node) {
     attachLinks(post, i, posts)
   })
 
+  const contentRaw = indexProps.content || ''
+  const content = indexFile ?
+    parseContent(indexFile, contentRaw) :
+    ''
+
   return {
     ...context,
     ...tree,
-    content: indexProps.content || '',
+    contentRaw,
+    content,
     outputPath
   }
 }
