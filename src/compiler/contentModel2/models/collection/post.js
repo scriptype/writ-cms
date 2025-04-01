@@ -1,6 +1,6 @@
 const { join } = require('path')
 const Settings = require('../../../../settings')
-const { parseTags } = require('../../helpers')
+const { parseArray } = require('../../helpers')
 const models = {
   _baseEntry: require('../_baseEntry'),
   tag: require('./tag')
@@ -30,7 +30,7 @@ function post(node, context) {
     ...postContext,
     context,
     contentType: baseEntryProps.contentType || context.category.childContentType,
-    tags: parseTags(baseEntryProps.tags).map(tagName => {
+    tags: parseArray(baseEntryProps.tags).map(tagName => {
       return models.tag(tagName, context)
     }),
     date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),

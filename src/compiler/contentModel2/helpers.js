@@ -21,10 +21,10 @@ const removeExtension = (fileName) => {
   return fileName
 }
 
-const parseTags = (tags = []) => {
-  return typeof tags === 'string' ?
-    tags.split(',').map(t => t.trim()) :
-    tags
+const parseArray = (array = []) => {
+  return typeof array === 'string' ?
+    array.split(',').map(t => t.trim()) :
+    array
 }
 
 const Markdown = {
@@ -51,6 +51,6 @@ module.exports = {
   templateExtensions,
   isTemplateFile,
   removeExtension,
-  parseTags,
+  parseArray,
   Markdown
 }
