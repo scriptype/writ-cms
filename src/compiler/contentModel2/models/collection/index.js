@@ -35,7 +35,7 @@ function collection(node) {
     })
   }
 
-  function attachLinks(post, postIndex, posts) {
+  function linkPosts(post, postIndex, posts) {
     post.links = {}
     if (postIndex > 0) {
       post.links.nextPost = {
@@ -62,6 +62,7 @@ function collection(node) {
       category: _.omit(defaultCategory, ['posts', 'context', 'content', 'attachments'])
     })
     defaultCategory.posts.push(uncategorizedPost)
+    defaultCategory.posts.forEach(linkPosts)
     tree.posts.push(uncategorizedPost)
   }
 
@@ -113,7 +114,6 @@ function collection(node) {
   tree.posts.sort((a, b) => b.date - a.date)
   tree.posts.forEach((post, i, posts) => {
     collectPostTags(post)
-    attachLinks(post, i, posts)
   })
 
   const contentRaw = indexProps.content || ''

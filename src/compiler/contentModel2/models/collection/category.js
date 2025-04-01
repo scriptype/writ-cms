@@ -18,6 +18,22 @@ function parseContent(node, content) {
 function category(node, context) {
   const settings = Settings.getSettings()
 
+  function linkPosts(post, postIndex, posts) {
+    post.links = {}
+    if (postIndex > 0) {
+      post.links.nextPost = {
+        title: posts[postIndex - 1].title,
+        permalink: posts[postIndex - 1].permalink
+      }
+    }
+    if (postIndex < posts.length - 1) {
+      post.links.previousPost = {
+        title: posts[postIndex + 1].title,
+        permalink: posts[postIndex + 1].permalink
+      }
+    }
+  }
+
   if (node.isDefaultCategory) {
     return {
       context,
@@ -94,6 +110,7 @@ function category(node, context) {
   })
 
   tree.posts.sort((a, b) => b.date - a.date)
+  tree.posts.forEach(linkPosts)
 
   const contentRaw = indexProps.content || ''
   const content = indexFile ?
