@@ -5,20 +5,13 @@ const Settings = require('../../../../settings')
 function tag(name, context) {
   const settings = Settings.getSettings()
   const slug = makeSlug(name)
-  const permalink = (
-    settings.permalinkPrefix +
-    context.collection.slug + '/tags/' + slug
-  )
-  const outputPath = join(
-    settings.out,
-    context.collection.slug,
-    slug,
-    'index.html'
-  )
+  const permalink = [context.collection.permalink, 'tags', slug].join('/')
+  const outputPath = join(context.collection.outputPath, slug)
   return {
     name,
     slug,
-    permalink
+    permalink,
+    outputPath
   }
 }
 

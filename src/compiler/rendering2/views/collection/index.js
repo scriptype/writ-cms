@@ -17,7 +17,7 @@ const renderCollections = async (Renderer, contentModel) => {
       page: collection,
       posts: collection.posts,
       postsPerPage: collection.postsPerPage || settings.postsPerPage,
-      outputDir: join(settings.out, collection.slug),
+      outputDir: collection.outputPath,
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
         return Renderer.render({
           templates: [

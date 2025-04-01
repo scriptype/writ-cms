@@ -15,7 +15,7 @@ const renderCategories = (Renderer, contentModel, collection) => {
         collection.postsPerPage ||
         settings.postsPerPage
       ),
-      outputDir: join(settings.out, collection.slug, category.slug),
+      outputDir: category.outputPath,
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
         return Renderer.render({
           templates: [

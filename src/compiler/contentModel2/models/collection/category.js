@@ -19,25 +19,15 @@ function category(node, context) {
   const settings = Settings.getSettings()
 
   if (node.isDefaultCategory) {
-    const slug = makeSlug(settings.defaultCategoryName)
-    const permalink = (
-      settings.permalinkPrefix +
-      context.collection.slug
-    )
-    const outputPath = join(
-      settings.out,
-      context.collection.slug,
-      'index.html'
-    )
     return {
       context,
       childContentType: context.collection.childContentType,
       content: '',
       contentRaw: '',
+      slug: '',
       title: settings.defaultCategoryName,
-      slug,
-      permalink,
-      outputPath,
+      permalink: context.collection.permalink,
+      outputPath: context.collection.outputPath,
       isDefaultCategory: true,
       posts: [],
       attachments: []
@@ -50,21 +40,16 @@ function category(node, context) {
   const indexProps = indexFile ? frontMatter(indexFile) : {}
 
   const slug = indexProps.attributes?.slug || makeSlug(node.name)
-  const permalink = (
-    settings.permalinkPrefix +
-    [ context.collection.slug, slug ].join('/')
-  )
-  const outputPath = join(
-    settings.out,
-    context.collection.slug, slug, 'index.html'
-  )
+  const permalink = [context.collection.permalink, slug].join('/')
+  const outputPath = join(context.collection.outputPath, slug)
 
   const categoryContext = {
     ...indexProps.attributes,
     childContentType: indexProps.attributes?.childContentType || context.collection.childContentType,
     title: indexProps.attributes?.title || node.name,
     slug,
-    permalink
+    permalink,
+    outputPath,
   }
 
   const tree = {
@@ -120,8 +105,7 @@ function category(node, context) {
     ...tree,
     context: context,
     contentRaw,
-    content,
-    outputPath
+    content
   }
 }
 

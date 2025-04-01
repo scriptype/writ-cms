@@ -15,22 +15,18 @@ function subpage(node) {
     (node.children ? '' : '.html')
   )
 
-  const outputPath = join(...[
-    settings.out,
-    baseEntryProps.slug,
-    (node.children ? 'index' : '')
-  ].filter(Boolean)) + '.html'
+  const outputPath = join(settings.out, baseEntryProps.slug)
 
   const pageContext = {
     title: baseEntryProps.title,
     slug: baseEntryProps.slug,
-    permalink
+    permalink,
+    outputPath
   }
 
   return {
     ...baseEntryProps,
     ...pageContext,
-    outputPath,
     attachments: baseEntryProps.attachments.map(a => a({
       page: pageContext
     }))

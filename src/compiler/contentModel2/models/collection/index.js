@@ -80,13 +80,14 @@ function collection(node) {
 
   const slug = indexProps.attributes?.slug || makeSlug(node.name)
   const permalink = settings.permalinkPrefix + slug
-  const outputPath = join(settings.out, slug, 'index.html')
+  const outputPath = join(settings.out, slug)
   const context = {
     ...indexProps.attributes,
     childContentType: indexProps.attributes?.childContentType || 'text',
     title: indexProps.attributes?.title || node.name,
     slug,
-    permalink
+    permalink,
+    outputPath
   }
 
   node.children.forEach(childNode => {
@@ -124,8 +125,7 @@ function collection(node) {
     ...context,
     ...tree,
     contentRaw,
-    content,
-    outputPath
+    content
   }
 }
 

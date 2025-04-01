@@ -4,23 +4,19 @@ const Settings = require('../../../settings')
 function attachment(node, context) {
   const settings = Settings.getSettings()
 
-  const permalink = (
-    settings.permalinkPrefix +
-    [
-      context.collection?.slug,
-      context.category?.isDefaultCategory ? '' : context.category?.slug,
-      context.post?.slug,
-      context.page?.slug,
-      node.name
-    ].filter(Boolean).join('/')
-  )
+  const permalink = [
+    context.page?.permalink ||
+    context.post?.permalink ||
+    context.category?.permalink ||
+    context.collection?.permalink,
+    node.name
+  ].filter(Boolean).join('/')
 
   const outputPath = join(...[
-    settings.out,
-    context.collection?.slug,
-    context.category?.isDefaultCategory ? '' : context.category?.slug,
-    context.post?.slug,
-    context.page?.slug,
+    context.page?.outputPath ||
+    context.post?.outputPath ||
+    context.category?.outputPath ||
+    context.collection?.outputPath,
     node.name
   ].filter(Boolean))
 

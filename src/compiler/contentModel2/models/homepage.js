@@ -16,16 +16,17 @@ function homepage(node) {
   const pageContext = {
     title: baseEntryProps.title,
     slug: baseEntryProps.slug,
-    permalink
+    permalink,
+    outputPath
   }
 
   return {
     ...baseEntryProps,
+    ...pageContext,
     attachments: baseEntryProps.attachments.map(a => a({
       homepage: pageContext
     })),
-    permalink,
-    outputPath
+    permalink
   }
 }
 

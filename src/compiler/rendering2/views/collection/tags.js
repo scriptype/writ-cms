@@ -11,7 +11,7 @@ const renderTagsPage = (Renderer, contentModel, collection) => {
   const settings = Settings.getSettings()
   return Renderer.render({
     templates: ['pages/tags'],
-    outputPath: join(settings.out, collection.slug, 'tags', 'index.html'),
+    outputPath: join(collection.outputPath, 'tags', 'index.html'),
     data: {
       ...contentModel,
       collection,
@@ -29,7 +29,7 @@ const renderTagIndices = (Renderer, contentModel, collection) => {
       page: tag,
       posts: tag.posts,
       postsPerPage: collection.postsPerPage || settings.postsPerPage,
-      outputDir: join(settings.out, collection.slug, 'tags', tag.slug),
+      outputDir: tag.outputPath,
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
         return Renderer.render({
           templates: [`pages/tag`],

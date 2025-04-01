@@ -59,6 +59,7 @@ function _baseEntry(node, indexFileNameOptions) {
   return {
     ..._.omit(node, 'children'),
     ...attributes,
+    hasIndex: !!folderedEntry,
     title: attributes.title || entryName,
     slug: attributes.slug || slug(entryName),
     contentRaw,

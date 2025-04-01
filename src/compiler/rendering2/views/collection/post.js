@@ -1,3 +1,4 @@
+const { join } = require('path')
 const Settings = require('../../../../settings')
 const Debug = require('../../../../debug')
 
@@ -9,7 +10,10 @@ const renderPosts = (Renderer, contentModel, collection) => {
         `pages/post/${post.contentType}`,
         `pages/post`
       ],
-      outputPath: post.outputPath,
+      outputPath: join(...[
+        post.outputPath,
+        post.hasIndex ? 'index' : ''
+      ].filter(Boolean)) + '.html',
       content: post.content,
       data: {
         ...contentModel,

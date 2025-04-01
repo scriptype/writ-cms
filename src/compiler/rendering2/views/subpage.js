@@ -1,3 +1,4 @@
+const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
@@ -9,7 +10,10 @@ const renderSubpages = (Renderer, contentModel) => {
         `pages/subpage/${subpage.contentType}`,
         `pages/subpage`
       ],
-      outputPath: subpage.outputPath,
+      outputPath: join(...[
+        subpage.outputPath,
+        subpage.hasIndex ? 'index' : ''
+      ]) + '.html',
       content: subpage.content,
       data: {
         ...contentModel,
