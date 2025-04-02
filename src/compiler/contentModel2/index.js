@@ -22,9 +22,15 @@ const isAssetsDirectory = (node) => {
   return node.name.match(/^assets$/)
 }
 
+const defaultHomepage = () => models.homepage({
+  name: 'index',
+  extension: 'md',
+  content: ''
+})
+
 const root = (fsTree) => {
   const contentModel = {
-    homepage: null,
+    homepage: defaultHomepage(),
     subpages: [],
     collections: [],
     assets: []
