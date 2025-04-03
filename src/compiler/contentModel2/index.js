@@ -36,6 +36,48 @@ const defaultHomepage = () => models.homepage({
   content: ''
 })
 
+const linkEntries = (contentModel) => {
+  contentModel.collections.forEach(collection => {
+    collection.posts.forEach(post => {
+      const fields = Object.keys(post)
+      const linkFields = fields
+        .map(key => {
+          const match = key.match(/(.+){(.+)}/)
+          if (!match) {
+            return
+          }
+          const [, entrySlug, categorySlug] = post[key].match(/([^(\s]+)(?:\s*\(([^)]+)\))?/)
+          return {
+            key: match[1],
+            collectionSlug: match[2],
+            categorySlug,
+            entrySlug
+          }
+        })
+        .filter(Boolean)
+      linkFields.forEach(link => {
+        const collection = contentModel.collections.find(c => c.slug.match(new RegExp(link.collectionSlug, 'i')))
+        const container = link.categorySlug ?
+          collection.categories.find(c => c.slug.match(new RegExp(link.categorySlug, 'i'))) || collection :
+          collection
+        const entry = container.posts.find(p => p.slug.match(new RegExp(link.entrySlug, 'i')))
+        post[link.key] = entry
+        entry.links = entry.links || {}
+        entry.links.relations = entry.links.relations || []
+        const relation = entry.links.relations.find(r => r.key === link.key)
+        if (relation) {
+          relation.entries.push(post)
+        } else {
+          entry.links.relations.push({
+            key: link.key,
+            entries: [post]
+          })
+        }
+      })
+    })
+  })
+}
+
 const root = (fsTree) => {
   const contentModel = {
     homepage: defaultHomepage(),
@@ -112,6 +154,7 @@ const root = (fsTree) => {
     )
   })
 
+  linkEntries(contentModel)
   return contentModel
 }
 
