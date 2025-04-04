@@ -29,11 +29,7 @@ function parseFolderedEntry(node, indexFileNameOptions) {
     }
     tree.attachments.push(models.attachment.bind(null, childNode))
   })
-
-  return {
-    ...tree,
-    name: node.name
-  }
+  return tree
 }
 
 function parseContent(node, content) {
@@ -49,9 +45,7 @@ function _baseEntry(node, indexFileNameOptions) {
     undefined
   const entryFile = folderedEntry?.indexFile || node
   const { attributes, body } = frontMatter(entryFile.content)
-  const entryName = removeExtension(
-    folderedEntry?.name || entryFile.name
-  )
+  const entryName = folderedEntry ? node.name : removeExtension(entryFile.name)
   const attachments = folderedEntry?.attachments || []
   const contentRaw = body || ''
   const content = parseContent(entryFile, contentRaw)
