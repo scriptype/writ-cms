@@ -8,6 +8,14 @@ const models = {
   attachment: require('../attachment')
 }
 
+const isCategoryIndexFile = (node) => {
+  return isTemplateFile(node) && node.name.match(/^category\..+$/)
+}
+
+const isPostIndexFile = (node) => {
+  return isTemplateFile(node) && node.name.match(/^(post|index)\..+$/)
+}
+
 function parseContent(node, content) {
   if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
     return content
@@ -50,9 +58,7 @@ function category(node, context) {
     }
   }
 
-  const indexFile = node.children.find(child => {
-    return isTemplateFile(child) && child.name.match(/^category\..+$/)
-  })
+  const indexFile = node.children.find(isCategoryIndexFile)
   const indexProps = indexFile ? frontMatter(indexFile) : {}
 
   const slug = indexProps.attributes?.slug || makeSlug(node.name)
@@ -74,26 +80,10 @@ function category(node, context) {
   }
 
   node.children.forEach(childNode => {
-    if (!childNode.children) {
-      if (isTemplateFile(childNode)) {
-        if (childNode.name.match(/^category\..+$/)) {
-          return
-        }
-        return tree.posts.push(
-          models.post(childNode, {
-            ...context,
-            category: categoryContext
-          })
-        )
-      }
-      return tree.attachments.push(
-        models.attachment(childNode, {
-          ...context,
-          category: categoryContext
-        })
-      )
+    if (isCategoryIndexFile(childNode)) {
+      return
     }
-    if (childNode.children.some(c => isTemplateFile(c) && c.name.match(/^(index|post)\..+$/))) {
+    if (isTemplateFile(childNode) || childNode.children?.some(isPostIndexFile)) {
       return tree.posts.push(
         models.post(childNode, {
           ...context,
@@ -101,7 +91,7 @@ function category(node, context) {
         })
       )
     }
-    return tree.push(
+    return tree.attachments.push(
       models.attachment(childNode, {
         ...context,
         category: categoryContext

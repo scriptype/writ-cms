@@ -10,24 +10,36 @@ const isHomepageFile = (node) => {
   return isTemplateFile(node) && node.name.match(/^(homepage|home|index)\..+$/)
 }
 
+const isHomepageDirectory = (node) => {
+  return node.children && node.name.match(/^(homepage|home)$/) && node.children.find(isHomepageFile)
+}
+
+const isHomepage = (node) => {
+  return isHomepageFile(node) || isHomepageDirectory(node)
+}
+
+const isPagesDirectory = (node) => {
+  return node.children && node.name.match(/^(subpages|pages)$/)
+}
+
 const isSubpageIndexFile = (node) => {
   return isTemplateFile(node) && node.name.match(/^(page|index)\..+$/)
+}
+
+const isSubpage = (node) => {
+  return isTemplateFile(node) || node.children?.find(isSubpageIndexFile)
 }
 
 const isCollectionIndexFile = (node) => {
   return isTemplateFile(node) && node.name.match(/^collection\..+$/)
 }
 
-const isHomepageDirectory = (node) => {
-  return node.name.match(/^(homepage|home)$/)
-}
-
-const isPagesDirectory = (node) => {
-  return node.name.match(/^(subpages|pages)$/)
+const isACollectionDirectory = (node) => {
+  return node.children?.find(isCollectionIndexFile)
 }
 
 const isAssetsDirectory = (node) => {
-  return node.name.match(/^assets$/)
+  return node.children && node.name.match(/^assets$/)
 }
 
 const defaultHomepage = () => models.homepage({
@@ -87,33 +99,20 @@ const root = (fsTree) => {
   }
 
   fsTree.forEach(node => {
-    if (isHomepageFile(node)) {
+    if (isHomepage(node)) {
       contentModel.homepage = models.homepage(node)
       return
     }
 
-    if (isTemplateFile(node)) {
-      contentModel.subpages.push(
+    if (isSubpage(node)) {
+      return contentModel.subpages.push(
         models.subpage(node)
       )
-      return
-    }
-
-    if (!node.children) {
-      contentModel.assets.push(
-        models.asset(node)
-      )
-      return
-    }
-
-    if (isHomepageDirectory(node)) {
-      contentModel.homepage = models.homepage(node)
-      return
     }
 
     if (isPagesDirectory(node)) {
-      node.children.forEach(childNode => {
-        if (isTemplateFile(childNode) || childNode.children?.find(isSubpageIndexFile)) {
+      return node.children.forEach(childNode => {
+        if (isSubpage(childNode)) {
           contentModel.subpages.push(
             models.subpage(childNode)
           )
@@ -123,30 +122,18 @@ const root = (fsTree) => {
           )
         }
       })
-      return
+    }
+
+    if (isACollectionDirectory) {
+      return contentModel.collections.push(
+        models.collection(node)
+      )
     }
 
     if (isAssetsDirectory(node)) {
-      node.children.forEach(childNode => {
-        contentModel.assets.push(
-          models.asset(childNode)
-        )
-      })
-      return
-    }
-
-    if (node.children.find(isSubpageIndexFile)) {
-      contentModel.subpages.push(
-        models.subpage(node)
+      return contentModel.assets.push(
+        ...node.children.map(models.asset)
       )
-      return
-    }
-
-    if (node.children.find(isCollectionIndexFile)) {
-      contentModel.collections.push(
-        models.collection(node)
-      )
-      return
     }
 
     contentModel.assets.push(

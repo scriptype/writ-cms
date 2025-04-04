@@ -10,6 +10,22 @@ const models = {
   post: require('./post')
 }
 
+const isCollectionIndexFile = (node) => {
+  return isTemplateFile(node) && node.name.match(/^collection\..+$/)
+}
+
+const isPostIndexFile = (node) => {
+  return isTemplateFile(node) && node.name.match(/^(post|index)\..+$/)
+}
+
+const isPost = (node) => {
+  return isTemplateFile(node) || node.children?.find(isPostIndexFile)
+}
+
+const isCategory = (node) => {
+  return node.children?.find(isPost)
+}
+
 function parseContent(node, content) {
   if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
     return content
@@ -73,10 +89,7 @@ function collection(node) {
     attachments: []
   }
 
-  const indexFile = node.children.find(child => {
-    return isTemplateFile(child) && child.name.match(/^collection\..+$/)
-  })
-
+  const indexFile = node.children.find(isCollectionIndexFile)
   const indexProps = indexFile ? frontMatter(indexFile.content) : {}
 
   const slug = indexProps.attributes?.slug || makeSlug(node.name)
@@ -92,23 +105,21 @@ function collection(node) {
   }
 
   node.children.forEach(childNode => {
-    if (!childNode.children) {
-      if (isTemplateFile(childNode)) {
-        if (childNode.name.match(/^collection\..+$/)) {
-          return
-        }
-        return addUncategorizedPost(childNode)
-      }
-      return tree.attachments.push(
-        models.attachment(childNode, { collection: context })
-      )
+    if (isCollectionIndexFile(childNode)) {
+      return
     }
-    if (childNode.children.find(c => isTemplateFile(c) && c.name.match(/^post\..+$/))) {
+    if (isPost(childNode)) {
       return addUncategorizedPost(childNode)
     }
-    const newCategory = models.category(childNode, { collection: context })
-    tree.categories.push(newCategory)
-    tree.posts.push(...newCategory.posts)
+    if (isCategory(childNode)) {
+      const newCategory = models.category(childNode, { collection: context })
+      tree.categories.push(newCategory)
+      tree.posts.push(...newCategory.posts)
+      return
+    }
+    tree.attachments.push(
+      models.attachment(childNode, { collection: context })
+    )
   })
 
   tree.posts.sort((a, b) => b.date - a.date)
