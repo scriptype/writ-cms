@@ -1,3 +1,4 @@
+const { join } = require('path')
 const Settings = require('../../../settings')
 const Debug = require('../../../debug')
 
@@ -10,7 +11,7 @@ const renderHomepage = async (Renderer, contentModel) => {
       `pages/homepage/${homepage.contentType}`,
       `pages/homepage`
     ],
-    outputPath: homepage.outputPath,
+    outputPath: join(homepage.outputPath, 'index.html'),
     content: homepage.content,
     data: {
       ...contentModel,

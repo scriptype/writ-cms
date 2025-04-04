@@ -7,17 +7,13 @@ const models = {
 function homepage(node) {
   const settings = Settings.getSettings()
 
-  const baseEntryProps = models._baseEntry(node, ['index'])
-
-  const permalink = settings.permalinkPrefix
-
-  const outputPath = join(settings.out, 'index.html')
+  const baseEntryProps = models._baseEntry(node, ['index', 'homepage', 'home'])
 
   const pageContext = {
     title: baseEntryProps.title,
     slug: baseEntryProps.slug,
-    permalink,
-    outputPath
+    permalink: settings.permalinkPrefix,
+    outputPath: settings.out
   }
 
   return {
@@ -25,8 +21,7 @@ function homepage(node) {
     ...pageContext,
     attachments: baseEntryProps.attachments.map(a => a({
       homepage: pageContext
-    })),
-    permalink
+    }))
   }
 }
 
