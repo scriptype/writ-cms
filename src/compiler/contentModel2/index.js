@@ -1,3 +1,5 @@
+const _ = require('lodash')
+const { resolve } = require('path')
 const { isTemplateFile } = require('./helpers')
 const models = {
   homepage: require('./models/homepage'),
@@ -90,61 +92,93 @@ const linkEntries = (contentModel) => {
   })
 }
 
-const root = (fsTree) => {
-  const contentModel = {
-    homepage: defaultHomepage(),
-    subpages: [],
-    collections: [],
-    assets: []
+const defaultContentModelSettings = {
+  permalinkPrefix: '/',
+  out: resolve('.'),
+  defaultCategoryName: 'Unclassified',
+  assetsDirectory: 'assets',
+  pagesDirectory: 'pages',
+  homepageDirectory: 'homepage'
+}
+class ContentModel {
+  constructor(contentModelSettings = defaultContentModelSettings) {
+    this.settings = {
+      ...defaultContentModelSettings,
+      ...contentModelSettings
+    }
+
+    this.collectionSettings = _.pick(
+      this.settings,
+      ['permalinkPrefix', 'out', 'defaultCategoryName']
+    )
+    this.subpageSettings = _.pick(
+      this.settings,
+      ['permalinkPrefix', 'out', 'pagesDirectory']
+    )
+    this.homepageSettings = _.pick(
+      this.settings,
+      ['permalinkPrefix', 'out', 'homepageDirectory']
+    )
+    this.assetSettings = _.pick(
+      this.settings,
+      ['permalinkPrefix', 'out', 'assetsDirectory']
+    )
   }
 
-  fsTree.forEach(node => {
-    if (isHomepage(node)) {
-      contentModel.homepage = models.homepage(node)
-      return
+  create(fileSystemTree) {
+    const contentModel = {
+      homepage: defaultHomepage(),
+      subpages: [],
+      collections: [],
+      assets: []
     }
 
-    if (isSubpage(node)) {
-      return contentModel.subpages.push(
-        models.subpage(node)
+    fileSystemTree.forEach(node => {
+      if (isHomepage(node)) {
+        contentModel.homepage = models.homepage(node, this.homepageSettings)
+        return
+      }
+
+      if (isSubpage(node)) {
+        return contentModel.subpages.push(
+          models.subpage(node, this.subpageSettings)
+        )
+      }
+
+      if (isPagesDirectory(node)) {
+        return node.children.forEach(childNode => {
+          if (isSubpage(childNode)) {
+            contentModel.subpages.push(
+              models.subpage(childNode, this.subpageSettings)
+            )
+          } else {
+            contentModel.assets.push(
+              models.asset(childNode, this.assetSettings)
+            )
+          }
+        })
+      }
+
+      if (isACollectionDirectory(node)) {
+        return contentModel.collections.push(
+          models.collection(node, this.collectionSettings)
+        )
+      }
+
+      if (isAssetsDirectory(node)) {
+        return contentModel.assets.push(
+          ...node.children.map(n => models.asset(n, this.assetSettings))
+        )
+      }
+
+      contentModel.assets.push(
+        models.asset(node, this.assetSettings)
       )
-    }
+    })
 
-    if (isPagesDirectory(node)) {
-      return node.children.forEach(childNode => {
-        if (isSubpage(childNode)) {
-          contentModel.subpages.push(
-            models.subpage(childNode)
-          )
-        } else {
-          contentModel.assets.push(
-            models.asset(node)
-          )
-        }
-      })
-    }
-
-    if (isACollectionDirectory(node)) {
-      return contentModel.collections.push(
-        models.collection(node)
-      )
-    }
-
-    if (isAssetsDirectory(node)) {
-      return contentModel.assets.push(
-        ...node.children.map(models.asset)
-      )
-    }
-
-    contentModel.assets.push(
-      models.asset(node)
-    )
-  })
-
-  linkEntries(contentModel)
-  return contentModel
+    linkEntries(contentModel)
+    return contentModel
+  }
 }
 
-module.exports = {
-  create: root
-}
+module.exports = ContentModel

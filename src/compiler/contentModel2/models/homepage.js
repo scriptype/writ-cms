@@ -1,12 +1,14 @@
-const { join } = require('path')
-const Settings = require('../../../settings')
+const { join, resolve } = require('path')
 const models = {
   _baseEntry: require('./_baseEntry')
 }
 
-function homepage(node) {
-  const settings = Settings.getSettings()
-
+const defaultSettings = {
+  permalinkPrefix: '/',
+  out: resolve('.'),
+  homepageDirectory: 'homepage'
+}
+function homepage(node, settings = defaultSettings) {
   const baseEntryProps = models._baseEntry(node, ['index', 'homepage', 'home'])
 
   const pageContext = {

@@ -1,9 +1,11 @@
-const { join } = require('path')
-const Settings = require('../../../settings')
+const { join, resolve } = require('path')
 
-function asset(node) {
-  const settings = Settings.getSettings()
-
+const defaultSettings = {
+  permalinkPrefix: '/',
+  out: resolve('.'),
+  assetsDirectory: 'assets'
+}
+function asset(node, settings = defaultSettings) {
   const permalink = (
     settings.permalinkPrefix +
     [settings.assetsDirectory, node.name].join('/')

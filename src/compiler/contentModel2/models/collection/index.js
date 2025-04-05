@@ -1,8 +1,7 @@
-const { join } = require('path')
+const { join, resolve } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const Settings = require('../../../../settings')
 const { isTemplateFile, Markdown } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
@@ -33,9 +32,12 @@ function parseContent(node, content) {
   return Markdown.parse(content)
 }
 
-function collection(node) {
-  const settings = Settings.getSettings()
-
+const defaultSettings = {
+  permalinkPrefix: '/',
+  out: resolve('.'),
+  defaultCategoryName: 'Unclassified'
+}
+function collection(node, settings = defaultSettings) {
   function collectPostTags(post) {
     post.tags.forEach(postTag => {
       let collectionTag = tree.tags.find(t => t.name === postTag.name)

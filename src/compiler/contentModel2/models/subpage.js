@@ -1,12 +1,14 @@
-const { join } = require('path')
-const Settings = require('../../../settings')
+const { join, resolve } = require('path')
 const models = {
   _baseEntry: require('./_baseEntry')
 }
 
-function subpage(node) {
-  const settings = Settings.getSettings()
-
+const defaultSettings = {
+  permalinkPrefix: '/',
+  out: resolve('.'),
+  pagesDirectory: 'pages'
+}
+function subpage(node, settings = defaultSettings) {
   const baseEntryProps = models._baseEntry(node, ['index', 'page'])
 
   const permalink = (

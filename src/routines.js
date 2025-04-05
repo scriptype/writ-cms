@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Debug = require('./debug')
 const Settings = require('./settings')
 const Decorations = require('./decorations')
@@ -68,21 +69,41 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
+
   const logger = {
     debug: Debug.debugLog
   }
   const { fileSystemTree, contentModel } = await new Compiler({
-    fileSystemParser: new FileSystemParser({
-      rootDirectory: settings.rootDirectory,
-      contentDirectory: settings.contentDirectory,
-      IGNORE_PATHS_REG_EXP: settings.IGNORE_PATHS_REG_EXP
-    }, logger),
-    contentModel: settings.compilerVersion === 2 ? ContentModel2 : ContentModel1,
-    renderer: settings.compilerVersion === 2 ? Rendering2 : Rendering1
+    fileSystemParser: new FileSystemParser(
+      _.pick(settings, [
+        'rootDirectory',
+        'contentDirectory',
+        'IGNORE_PATHS_REG_EXP'
+      ]),
+      logger
+    ),
+
+    contentModel: settings.compilerVersion === 2 ?
+      new ContentModel2(
+        _.pick(settings, [
+          'permalinkPrefix',
+          'out',
+          'defaultCategoryName',
+          'assetsDirectory',
+          'pagesDirectory',
+          'homepageDirectory'
+        ])
+      ) :
+      ContentModel1,
+
+    renderer: settings.compilerVersion === 2 ?
+      Rendering2 :
+      Rendering1
   }).compile()
   if (settings.compilerVersion === 1) {
     await Assets.copyAssets()
   }
+
   await finishCallback({
     settings,
     fileSystemTree,
