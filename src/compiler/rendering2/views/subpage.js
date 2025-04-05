@@ -8,7 +8,7 @@ const renderSubpages = (Renderer, contentModel) => {
       templates: [
         `pages/${subpage.template}`,
         `pages/subpage/${subpage.contentType}`,
-        `pages/subpage`
+        `pages/subpage/default`
       ],
       outputPath: join(...[
         subpage.outputPath,

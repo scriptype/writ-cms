@@ -97,11 +97,28 @@ function collection(node) {
   const outputPath = join(settings.out, slug)
   const context = {
     ...indexProps.attributes,
-    childContentType: indexProps.attributes?.childContentType || 'text',
+    contentType: indexProps.attributes?.contentType || 'default',
+    categoryContentType: indexProps.attributes?.categoryContentType || 'default',
+    entryContentType: indexProps.attributes?.entryContentType || 'default',
+    categoryAlias: indexProps.attributes?.categoryAlias,
+    categoriesAlias: indexProps.attributes?.categoriesAlias,
+    entryAlias: indexProps.attributes?.entryAlias,
+    entriesAlias: indexProps.attributes?.entriesAlias,
+    defaultCategoryName: indexProps.attributes?.defaultCategoryName || settings.defaultCategoryName,
     title: indexProps.attributes?.title || node.name,
     slug,
     permalink,
     outputPath
+  }
+
+  const categoriesAlias = indexProps.attributes?.categoriesAlias
+  if (categoriesAlias) {
+    tree[categoriesAlias] = tree.categories
+  }
+
+  const entriesAlias = indexProps.attributes?.entriesAlias
+  if (entriesAlias) {
+    tree[entriesAlias] = tree.posts
   }
 
   node.children.forEach(childNode => {
@@ -127,7 +144,7 @@ function collection(node) {
     collectPostTags(post)
   })
 
-  const contentRaw = indexProps.content || ''
+  const contentRaw = indexProps.body || ''
   const content = indexFile ?
     parseContent(indexFile, contentRaw) :
     ''

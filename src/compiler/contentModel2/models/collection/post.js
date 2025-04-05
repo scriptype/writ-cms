@@ -1,5 +1,4 @@
 const { join } = require('path')
-const Settings = require('../../../../settings')
 const { parseArray } = require('../../helpers')
 const models = {
   _baseEntry: require('../_baseEntry'),
@@ -7,8 +6,6 @@ const models = {
 }
 
 function post(node, context) {
-  const settings = Settings.getSettings()
-
   const baseEntryProps = models._baseEntry(node, ['index', 'post'])
 
   const permalink = [
@@ -29,7 +26,7 @@ function post(node, context) {
     ...baseEntryProps,
     ...postContext,
     context,
-    contentType: baseEntryProps.contentType || context.category.childContentType,
+    contentType: context.collection.entryContentType,
     tags: parseArray(baseEntryProps.tags).map(tagName => {
       return models.tag(tagName, context)
     }),

@@ -17,23 +17,28 @@ const renderCategories = (Renderer, contentModel, collection) => {
       ),
       outputDir: category.outputPath,
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
+        const data = {
+          ...contentModel,
+          collection,
+          category,
+          pagination: paginationData,
+          posts: pageOfPosts,
+          settings,
+          debug: Debug.getDebug()
+        }
+        const categoryAlias = category.context.collection.categoryAlias
+        if (categoryAlias) {
+          data[categoryAlias] = data.category
+        }
         return Renderer.render({
           templates: [
             `pages/${category.template}`,
-            `pages/category/${category.childContentType}`,
-            `pages/category`
+            `pages/category/${category.contentType}`,
+            `pages/category/default`
           ],
           outputPath,
           content: category.content,
-          data: {
-            ...contentModel,
-            collection,
-            category,
-            pagination: paginationData,
-            posts: pageOfPosts,
-            settings,
-            debug: Debug.getDebug()
-          }
+          data
         })
       }
     })

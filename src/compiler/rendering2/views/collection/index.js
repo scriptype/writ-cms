@@ -22,8 +22,8 @@ const renderCollections = async (Renderer, contentModel) => {
         return Renderer.render({
           templates: [
             `pages/${collection.template}`,
-            `pages/collection/${collection.childContentType}`,
-            `pages/collection`
+            `pages/collection/${collection.contentType}`,
+            `pages/collection/default`
           ],
           outputPath,
           content: collection.content,

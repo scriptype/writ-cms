@@ -1,9 +1,6 @@
 const { join } = require('path')
-const Settings = require('../../../settings')
 
 function attachment(node, context) {
-  const settings = Settings.getSettings()
-
   const permalink = [
     context.page?.permalink ||
     context.post?.permalink ||

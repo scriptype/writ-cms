@@ -9,7 +9,7 @@ const renderHomepage = async (Renderer, contentModel) => {
     templates: [
       `pages/${homepage.template}`,
       `pages/homepage/${homepage.contentType}`,
-      `pages/homepage`
+      `pages/homepage/default`
     ],
     outputPath: join(homepage.outputPath, 'index.html'),
     content: homepage.content,

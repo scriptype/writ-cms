@@ -4,24 +4,29 @@ const Debug = require('../../../../debug')
 
 const renderPosts = (Renderer, contentModel, collection) => {
   const compilation = collection.posts.map(post => {
+    const data = {
+      ...contentModel,
+      collection,
+      post,
+      settings: Settings.getSettings(),
+      debug: Debug.getDebug()
+    }
+    const entryAlias = post.context.collection.entryAlias
+    if (entryAlias) {
+      data[entryAlias] = data.post
+    }
     const renderPage = Renderer.render({
       templates: [
         `pages/${post.template}`,
         `pages/post/${post.contentType}`,
-        `pages/post`
+        `pages/post/default`
       ],
       outputPath: join(...[
         post.outputPath,
         post.hasIndex ? 'index' : ''
       ].filter(Boolean)) + '.html',
       content: post.content,
-      data: {
-        ...contentModel,
-        collection,
-        post,
-        settings: Settings.getSettings(),
-        debug: Debug.getDebug()
-      }
+      data
     })
 
     const copyAttachments = post.attachments.map(node => {

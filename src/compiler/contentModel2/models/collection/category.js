@@ -1,7 +1,6 @@
 const { join } = require('path')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const Settings = require('../../../../settings')
 const { isTemplateFile, Markdown } = require('../../helpers')
 const models = {
   post: require('./post'),
@@ -24,8 +23,6 @@ function parseContent(node, content) {
 }
 
 function category(node, context) {
-  const settings = Settings.getSettings()
-
   function linkPosts(post, postIndex, posts) {
     post.links = {}
     if (postIndex > 0) {
@@ -42,20 +39,31 @@ function category(node, context) {
     }
   }
 
+  const entriesAlias = context.collection.entriesAlias
+
   if (node.isDefaultCategory) {
-    return {
+    const title = context.collection.defaultCategoryName
+    const slug = makeSlug(title)
+
+    const defaultCategory = {
       context,
-      childContentType: context.collection.childContentType,
+      contentType: context.collection.categoryContentType,
       content: '',
       contentRaw: '',
-      slug: '',
-      title: settings.defaultCategoryName,
-      permalink: context.collection.permalink,
-      outputPath: context.collection.outputPath,
+      slug,
+      title,
+      permalink: [context.collection.permalink, slug].join('/'),
+      outputPath: join(context.collection.outputPath, slug),
       isDefaultCategory: true,
       posts: [],
       attachments: []
     }
+
+    if (entriesAlias) {
+      defaultCategory[entriesAlias] = defaultCategory.posts
+    }
+
+    return defaultCategory
   }
 
   const indexFile = node.children.find(isCategoryIndexFile)
@@ -67,7 +75,7 @@ function category(node, context) {
 
   const categoryContext = {
     ...indexProps.attributes,
-    childContentType: indexProps.attributes?.childContentType || context.collection.childContentType,
+    contentType: context.collection.categoryContentType,
     title: indexProps.attributes?.title || node.name,
     slug,
     permalink,
@@ -77,6 +85,10 @@ function category(node, context) {
   const tree = {
     posts: [],
     attachments: []
+  }
+
+  if (entriesAlias) {
+    tree[entriesAlias] = tree.posts
   }
 
   node.children.forEach(childNode => {
@@ -110,7 +122,7 @@ function category(node, context) {
   return {
     ...categoryContext,
     ...tree,
-    context: context,
+    context,
     contentRaw,
     content
   }
