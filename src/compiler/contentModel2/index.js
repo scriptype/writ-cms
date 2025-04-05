@@ -124,7 +124,7 @@ const root = (fsTree) => {
       })
     }
 
-    if (isACollectionDirectory) {
+    if (isACollectionDirectory(node)) {
       return contentModel.collections.push(
         models.collection(node)
       )
