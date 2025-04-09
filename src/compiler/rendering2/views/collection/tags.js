@@ -32,7 +32,7 @@ const renderTagIndices = (Renderer, contentModel, collection) => {
       outputDir: tag.outputPath,
       render: async ({ outputPath, pageOfPosts, paginationData }) => {
         return Renderer.render({
-          templates: [`pages/tag`],
+          templates: [`pages/tags/tag`],
           outputPath,
           data: {
             ...contentModel,

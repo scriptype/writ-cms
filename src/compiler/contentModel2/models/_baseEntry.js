@@ -22,12 +22,17 @@ function parseFolderedEntry(node, indexFileNameOptions) {
     indexFile: null,
     attachments: []
   }
+  const subModels = {
+    attachment: models.attachment()
+  }
   node.children.forEach(childNode => {
     if (isIndexFile(childNode, indexFileNameOptions)) {
       tree.indexFile = childNode
       return
     }
-    tree.attachments.push(models.attachment.bind(null, childNode))
+    if (subModels.attachment.match(childNode)) {
+      tree.attachments.push(subModels.attachment.create.bind(null, childNode))
+    }
   })
   return tree
 }

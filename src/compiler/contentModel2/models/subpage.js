@@ -1,38 +1,67 @@
 const { join, resolve } = require('path')
+const { isTemplateFile } = require('../helpers')
 const models = {
   _baseEntry: require('./_baseEntry')
 }
 
 const defaultSettings = {
-  permalinkPrefix: '/',
-  out: resolve('.'),
   pagesDirectory: 'pages'
 }
-function subpage(node, settings = defaultSettings) {
-  const baseEntryProps = models._baseEntry(node, ['index', 'page'])
+module.exports = function subpage(settings = defaultSettings) {
+  const indexFileNameOptions = ['page', 'index']
+  const pagesDirectoryNameOptions = [settings.pagesDirectory, 'subpages', 'pages']
 
-  const permalink = (
-    settings.permalinkPrefix +
-    baseEntryProps.slug +
-    (node.children ? '' : '.html')
-  )
+  const isSubpageIndexFile = (node) => {
+    return (
+      isTemplateFile(node) &&
+      node.name.match(
+        new RegExp(`^(${indexFileNameOptions.join('|')})\..+$`)
+      )
+    )
+  }
 
-  const outputPath = join(settings.out, baseEntryProps.slug)
+  const isFolderedSubpage = (node) => {
+    return node.children?.find(isSubpageIndexFile)
+  }
 
-  const pageContext = {
-    title: baseEntryProps.title,
-    slug: baseEntryProps.slug,
-    permalink,
-    outputPath
+  const isPagesDirectory = (node) => {
+    return (
+      node.children &&
+      node.name.match(
+        new RegExp(`^(${pagesDirectoryNameOptions.join('|')})$`)
+      )
+    )
   }
 
   return {
-    ...baseEntryProps,
-    ...pageContext,
-    attachments: baseEntryProps.attachments.map(a => a({
-      page: pageContext
-    }))
+    match: node => isTemplateFile(node) || isFolderedSubpage(node),
+    matchPagesDirectory: node => isPagesDirectory(node),
+    create: (node, context) => {
+      const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
+
+      const permalink = (
+        context.root.permalink +
+        baseEntryProps.slug +
+        (baseEntryProps.hasIndex ? '' : '.html')
+      )
+
+      const outputPath = join(context.root.outputPath, baseEntryProps.slug)
+
+      const pageContext = {
+        title: baseEntryProps.title,
+        slug: baseEntryProps.slug,
+        permalink,
+        outputPath
+      }
+
+      return {
+        ...baseEntryProps,
+        ...pageContext,
+        context,
+        attachments: baseEntryProps.attachments.map(a => a({
+          page: pageContext
+        }))
+      }
+    }
   }
 }
-
-module.exports = subpage

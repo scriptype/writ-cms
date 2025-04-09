@@ -8,48 +8,6 @@ const models = {
   asset: require('./models/asset')
 }
 
-const isHomepageFile = (node) => {
-  return isTemplateFile(node) && node.name.match(/^(homepage|home|index)\..+$/)
-}
-
-const isHomepageDirectory = (node) => {
-  return node.children && node.name.match(/^(homepage|home)$/) && node.children.find(isHomepageFile)
-}
-
-const isHomepage = (node) => {
-  return isHomepageFile(node) || isHomepageDirectory(node)
-}
-
-const isPagesDirectory = (node) => {
-  return node.children && node.name.match(/^(subpages|pages)$/)
-}
-
-const isSubpageIndexFile = (node) => {
-  return isTemplateFile(node) && node.name.match(/^(page|index)\..+$/)
-}
-
-const isSubpage = (node) => {
-  return isTemplateFile(node) || node.children?.find(isSubpageIndexFile)
-}
-
-const isCollectionIndexFile = (node) => {
-  return isTemplateFile(node) && node.name.match(/^collection\..+$/)
-}
-
-const isACollectionDirectory = (node) => {
-  return node.children?.find(isCollectionIndexFile)
-}
-
-const isAssetsDirectory = (node) => {
-  return node.children && node.name.match(/^assets$/)
-}
-
-const defaultHomepage = () => models.homepage({
-  name: 'index',
-  extension: 'md',
-  content: ''
-})
-
 const linkEntries = (contentModel) => {
   contentModel.collections.forEach(collection => {
     collection.posts.forEach(post => {
@@ -107,73 +65,84 @@ class ContentModel {
       ...contentModelSettings
     }
 
-    this.collectionSettings = _.pick(
-      this.settings,
-      ['permalinkPrefix', 'out', 'defaultCategoryName']
-    )
-    this.subpageSettings = _.pick(
-      this.settings,
-      ['permalinkPrefix', 'out', 'pagesDirectory']
-    )
-    this.homepageSettings = _.pick(
-      this.settings,
-      ['permalinkPrefix', 'out', 'homepageDirectory']
-    )
-    this.assetSettings = _.pick(
-      this.settings,
-      ['permalinkPrefix', 'out', 'assetsDirectory']
-    )
+    this.models = {
+      collection: models.collection({
+        defaultCategoryName: this.settings.defaultCategoryName
+      }),
+      subpage: models.subpage({
+        pagesDirectory: this.settings.pagesDirectory
+      }),
+      homepage: models.homepage({
+        homepageDirectory: this.settings.homepageDirectory
+      }),
+      asset: models.asset({
+        assetsDirectory: this.settings.assetsDirectory
+      })
+    }
   }
 
   create(fileSystemTree) {
+    const context = {
+      outputPath: this.settings.out,
+      permalink: this.settings.permalinkPrefix
+    }
+
     const contentModel = {
-      homepage: defaultHomepage(),
+      homepage: this.models.homepage.create({
+        name: 'index',
+        extension: 'md',
+        content: ''
+      }, { root: context }),
       subpages: [],
       collections: [],
       assets: []
     }
 
     fileSystemTree.forEach(node => {
-      if (isHomepage(node)) {
-        contentModel.homepage = models.homepage(node, this.homepageSettings)
+      if (this.models.homepage.match(node)) {
+        contentModel.homepage = this.models.homepage.create(node, { root: context })
         return
       }
 
-      if (isSubpage(node)) {
+      if (this.models.subpage.match(node)) {
         return contentModel.subpages.push(
-          models.subpage(node, this.subpageSettings)
+          this.models.subpage.create(node, { root: context })
         )
       }
 
-      if (isPagesDirectory(node)) {
+      if (this.models.subpage.matchPagesDirectory(node)) {
         return node.children.forEach(childNode => {
-          if (isSubpage(childNode)) {
+          if (this.models.subpage.match(childNode)) {
             contentModel.subpages.push(
-              models.subpage(childNode, this.subpageSettings)
+              this.models.subpage.create(childNode, { root: context })
             )
-          } else {
+          } else if (this.models.asset.match(childNode)) {
             contentModel.assets.push(
-              models.asset(childNode, this.assetSettings)
+              this.models.asset.create(childNode, { root: context })
             )
           }
         })
       }
 
-      if (isACollectionDirectory(node)) {
+      if (this.models.collection.match(node)) {
         return contentModel.collections.push(
-          models.collection(node, this.collectionSettings)
+          this.models.collection.create(node, { root: context })
         )
       }
 
-      if (isAssetsDirectory(node)) {
+      if (this.models.asset.matchAssetsDirectory(node)) {
         return contentModel.assets.push(
-          ...node.children.map(n => models.asset(n, this.assetSettings))
+          ...node.children.map(childNode => {
+            return this.models.asset.create(childNode, { root: context })
+          })
         )
       }
 
-      contentModel.assets.push(
-        models.asset(node, this.assetSettings)
-      )
+      if (this.models.asset.match(node)) {
+        return contentModel.assets.push(
+          this.models.asset.create(node, { root: context })
+        )
+      }
     })
 
     linkEntries(contentModel)
