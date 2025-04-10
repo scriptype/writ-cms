@@ -9,6 +9,7 @@ const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
 const CNAME = require('./cname')
 const Dictionary = require('./dictionary')
+const ContentTypes = require('./content-types')
 const FileSystemParser = require('./lib/FileSystemParser')
 const ContentModel1 = require('./compiler/contentModel')
 const ContentModel2 = require('./compiler/contentModel2')
@@ -70,6 +71,16 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await SiteDirectory.create()
   await CNAME.create()
 
+  let contentTypes = []
+  if (settings.compilerVersion === 2) {
+    contentTypes = await ContentTypes.init(
+      _.pick(settings, [
+        'rootDirectory',
+        'contentTypesDirectory'
+      ])
+    )
+  }
+
   const logger = {
     debug: Debug.debugLog
   }
@@ -92,7 +103,8 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
           'assetsDirectory',
           'pagesDirectory',
           'homepageDirectory'
-        ])
+        ]),
+        contentTypes
       ) :
       ContentModel1,
 
@@ -107,7 +119,8 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await finishCallback({
     settings,
     fileSystemTree,
-    contentModel
+    contentModel,
+    contentTypes
   })
 }
 

@@ -12,6 +12,7 @@ const defaultSettings = (rootDirectory) => ({
   theme: "default",
   permalinkPrefix: "/",
   defaultCategoryName: "Unclassified",
+  contentTypesDirectory: "schema",
   assetsDirectory: "assets",
   exportDirectory: "docs",
   homepageDirectory: "homepage",

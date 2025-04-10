@@ -15,7 +15,7 @@ module.exports = function post(settings = defaultSettings) {
     return (
       isTemplateFile(node) &&
       node.name.match(
-        new RegExp(`^${indexFileNameOptions.join('|')}\..+$`)
+        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
       )
     )
   }

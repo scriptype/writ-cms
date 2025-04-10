@@ -23,7 +23,7 @@ module.exports = function category(settings = defaultSettings) {
 
   const isCategoryIndexFile = (node) => {
     return isTemplateFile(node) && node.name.match(
-      new RegExp(`^${indexFileNameOptions.join('|')}\..+$`)
+      new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
     )
   }
 

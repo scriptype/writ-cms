@@ -2,7 +2,7 @@ const { join, resolve } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const { isTemplateFile, Markdown } = require('../../helpers')
+const { isTemplateFile, removeExtension, Markdown } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
   category: require('./category'),
@@ -17,11 +17,19 @@ function parseContent(node, content) {
 }
 
 const defaultSettings = {
-  defaultCategoryName: 'Unclassified'
+  defaultCategoryName: 'Unclassified',
+  collectionAliases: []
 }
-module.exports = function collection(settings = defaultSettings) {
+module.exports = function collection(settings = defaultSettings, contentTypes = []) {
+  const indexFileNameOptions = [
+    ...settings.collectionAliases,
+    'collection'
+  ].filter(Boolean)
+
   const isCollectionIndexFile = (node) => {
-    return isTemplateFile(node) && node.name.match(/^collection\..+$/)
+    return isTemplateFile(node) && node.name.match(
+      new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+    )
   }
 
   return {
@@ -85,33 +93,38 @@ module.exports = function collection(settings = defaultSettings) {
       }
 
       const indexFile = node.children.find(isCollectionIndexFile)
-      const indexProps = indexFile ? frontMatter(indexFile.content) : {}
+      const indexProps = frontMatter(indexFile.content)
+      const indexFileName = removeExtension(indexFile.name)
+
+      const contentType = contentTypes
+        .filter(ct => ct.model === 'collection')
+        .find(ct => ct.collectionAlias === indexFileName)
 
       const slug = indexProps.attributes?.slug || makeSlug(node.name)
       const permalink = context.root.permalink + slug
       const outputPath = join(context.root.outputPath, slug)
       const collectionContext = {
         ...indexProps.attributes,
-        contentType: indexProps.attributes?.contentType || 'default',
-        categoryContentType: indexProps.attributes?.categoryContentType || 'default',
-        entryContentType: indexProps.attributes?.entryContentType || 'default',
-        categoryAlias: indexProps.attributes?.categoryAlias,
-        categoriesAlias: indexProps.attributes?.categoriesAlias,
-        entryAlias: indexProps.attributes?.entryAlias,
-        entriesAlias: indexProps.attributes?.entriesAlias,
-        defaultCategoryName: indexProps.attributes?.defaultCategoryName || settings.defaultCategoryName,
+        contentType: indexProps.attributes?.contentType || contentType?.name || 'default',
+        categoryContentType: indexProps.attributes?.categoryContentType || contentType?.categoryContentType || 'default',
+        entryContentType: indexProps.attributes?.entryContentType || contentType?.entryContentType || 'default',
+        categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
+        categoriesAlias: indexProps.attributes?.categoriesAlias || contentType?.categoriesAlias,
+        entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
+        entriesAlias: indexProps.attributes?.entriesAlias || contentType?.entriesAlias,
+        defaultCategoryName: indexProps.attributes?.defaultCategoryName || contentType?.defaultCategoryName || settings.defaultCategoryName,
         title: indexProps.attributes?.title || node.name,
         slug,
         permalink,
         outputPath
       }
 
-      const categoriesAlias = indexProps.attributes?.categoriesAlias
+      const categoriesAlias = indexProps.attributes?.categoriesAlias || contentType?.categoriesAlias
       if (categoriesAlias) {
         tree[categoriesAlias] = tree.categories
       }
 
-      const entriesAlias = indexProps.attributes?.entriesAlias
+      const entriesAlias = indexProps.attributes?.entriesAlias || contentType?.entriesAlias
       if (entriesAlias) {
         tree[entriesAlias] = tree.posts
       }
@@ -119,11 +132,11 @@ module.exports = function collection(settings = defaultSettings) {
       const childModels = {
         attachment: models.attachment(),
         category: models.category({
-          categoryAlias: indexProps.attributes?.categoryAlias,
-          entryAlias: indexProps.attributes?.entryAlias
+          categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
+          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias
         }),
         post: models.post({
-          entryAlias: indexProps.attributes?.entryAlias
+          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias
         })
       }
 

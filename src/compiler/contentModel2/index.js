@@ -1,5 +1,6 @@
-const _ = require('lodash')
 const { resolve } = require('path')
+const _ = require('lodash')
+const frontMatter = require('front-matter')
 const { isTemplateFile } = require('./helpers')
 const models = {
   homepage: require('./models/homepage'),
@@ -59,32 +60,53 @@ const defaultContentModelSettings = {
   homepageDirectory: 'homepage'
 }
 class ContentModel {
-  constructor(contentModelSettings = defaultContentModelSettings) {
+  constructor(contentModelSettings = defaultContentModelSettings, contentTypes = []) {
     this.settings = {
       ...defaultContentModelSettings,
       ...contentModelSettings
     }
-
-    this.models = {
-      collection: models.collection({
-        defaultCategoryName: this.settings.defaultCategoryName
-      }),
-      subpage: models.subpage({
-        pagesDirectory: this.settings.pagesDirectory
-      }),
-      homepage: models.homepage({
-        homepageDirectory: this.settings.homepageDirectory
-      }),
-      asset: models.asset({
-        assetsDirectory: this.settings.assetsDirectory
-      })
-    }
+    this.contentTypes = contentTypes
   }
 
   create(fileSystemTree) {
+    const indexFileNameOptions = ['root']
+
+    const isRootIndexFile = (node) => {
+      return isTemplateFile(node) && node.name.match(
+        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+      )
+    }
+
+    const indexFile = fileSystemTree.find(isRootIndexFile)
+    const indexProps = indexFile ? frontMatter(indexFile.content) : {}
+
     const context = {
       outputPath: this.settings.out,
       permalink: this.settings.permalinkPrefix
+    }
+
+    this.models = {
+      collection: models.collection({
+        defaultCategoryName: this.settings.defaultCategoryName,
+        collectionAliases: [
+          ...this.contentTypes
+            .filter(ct => ct.model === 'collection')
+            .map(ct => ct.collectionAlias),
+          ...(indexProps.attributes?.collectionAliases || [])
+        ]
+      }, this.contentTypes),
+
+      subpage: models.subpage({
+        pagesDirectory: this.settings.pagesDirectory
+      }),
+
+      homepage: models.homepage({
+        homepageDirectory: this.settings.homepageDirectory
+      }),
+
+      asset: models.asset({
+        assetsDirectory: this.settings.assetsDirectory
+      })
     }
 
     const contentModel = {
