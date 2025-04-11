@@ -4,6 +4,7 @@ const { dirname, extname, join } = require('path')
 const { debugLog } = require('../../debug')
 const { decorate } = require('../../decorations')
 const { isDirectory, readFileContent, ensureDirectory } = require('../../helpers')
+const { paginate } = require('./helpers/pagination')
 
 const isTemplateFile = (fileName) => {
   const extension = extname(fileName)
@@ -105,6 +106,7 @@ const copy = async ({ src, dest, recursive }) => {
 module.exports = {
   init,
   render,
+  paginate,
   compile,
   copy
 }

@@ -11,7 +11,12 @@ module.exports = class Compiler {
     Debug.timeStart('compiler')
     const fileSystemTree = await this.fileSystemParser.parse()
     const contentModel = this.contentModel.create(fileSystemTree)
-    await this.renderer.render(contentModel)
+    if (this.contentModel.render) {
+      await this.renderer.init()
+      await this.contentModel.render(this.renderer)
+    } else {
+      await this.renderer.render(contentModel)
+    }
     Debug.timeEnd('compiler')
     return {
       fileSystemTree,

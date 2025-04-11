@@ -1,6 +1,7 @@
 const { resolve } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
+const ImmutableStack = require('../../lib/ImmutableStack')
 const { isTemplateFile } = require('./helpers')
 const models = {
   homepage: require('./models/homepage'),
@@ -57,7 +58,12 @@ const defaultContentModelSettings = {
   defaultCategoryName: 'Unclassified',
   assetsDirectory: 'assets',
   pagesDirectory: 'pages',
-  homepageDirectory: 'homepage'
+  homepageDirectory: 'homepage',
+  debug: false,
+  site: {
+    title: '',
+    description: ''
+  }
 }
 class ContentModel {
   constructor(contentModelSettings = defaultContentModelSettings, contentTypes = []) {
@@ -80,10 +86,11 @@ class ContentModel {
     const indexFile = fileSystemTree.find(isRootIndexFile)
     const indexProps = indexFile ? frontMatter(indexFile.content) : {}
 
-    const context = {
+    const context = new ImmutableStack([{
+      key: 'root',
       outputPath: this.settings.out,
       permalink: this.settings.permalinkPrefix
-    }
+    }])
 
     this.models = {
       collection: models.collection({
@@ -109,12 +116,12 @@ class ContentModel {
       })
     }
 
-    const contentModel = {
+    this.contentModel = {
       homepage: this.models.homepage.create({
         name: 'index',
         extension: 'md',
         content: ''
-      }, { root: context }),
+      }, context),
       subpages: [],
       collections: [],
       assets: []
@@ -122,53 +129,106 @@ class ContentModel {
 
     fileSystemTree.forEach(node => {
       if (this.models.homepage.match(node)) {
-        contentModel.homepage = this.models.homepage.create(node, { root: context })
+        this.contentModel.homepage = this.models.homepage.create(node, context)
         return
       }
 
       if (this.models.subpage.match(node)) {
-        return contentModel.subpages.push(
-          this.models.subpage.create(node, { root: context })
+        return this.contentModel.subpages.push(
+          this.models.subpage.create(node, context)
         )
       }
 
       if (this.models.subpage.matchPagesDirectory(node)) {
         return node.children.forEach(childNode => {
           if (this.models.subpage.match(childNode)) {
-            contentModel.subpages.push(
-              this.models.subpage.create(childNode, { root: context })
+            this.contentModel.subpages.push(
+              this.models.subpage.create(childNode, context)
             )
           } else if (this.models.asset.match(childNode)) {
-            contentModel.assets.push(
-              this.models.asset.create(childNode, { root: context })
+            this.contentModel.assets.push(
+              this.models.asset.create(childNode, context)
             )
           }
         })
       }
 
       if (this.models.collection.match(node)) {
-        return contentModel.collections.push(
-          this.models.collection.create(node, { root: context })
+        return this.contentModel.collections.push(
+          this.models.collection.create(node, context)
         )
       }
 
       if (this.models.asset.matchAssetsDirectory(node)) {
-        return contentModel.assets.push(
+        return this.contentModel.assets.push(
           ...node.children.map(childNode => {
-            return this.models.asset.create(childNode, { root: context })
+            return this.models.asset.create(childNode, context)
           })
         )
       }
 
       if (this.models.asset.match(node)) {
-        return contentModel.assets.push(
-          this.models.asset.create(node, { root: context })
+        return this.contentModel.assets.push(
+          this.models.asset.create(node, context)
         )
       }
     })
 
-    linkEntries(contentModel)
-    return contentModel
+    linkEntries(this.contentModel)
+    return this.contentModel
+  }
+
+  render(renderer) {
+    const renderHomepage = () => {
+      return this.models.homepage.render(renderer, this.contentModel.homepage, {
+        contentModel: this.contentModel,
+        settings: this.settings,
+        debug: this.settings.debug
+      })
+    }
+
+    const renderCollections = () => {
+      return Promise.all(
+        this.contentModel.collections.map(collection => {
+          return this.models.collection.render( renderer, collection, {
+            contentModel: this.contentModel,
+            settings: this.settings,
+            debug: this.settings.debug
+          })
+        })
+      )
+    }
+
+    const renderSubpages = () => {
+      return Promise.all(
+        this.contentModel.subpages.map(subpage => {
+          return this.models.subpage.render(renderer, subpage, {
+            contentModel: this.contentModel,
+            settings: this.settings,
+            debug: this.settings.debug
+          })
+        })
+      )
+    }
+
+    const renderAssets = () => {
+      return Promise.all(
+        this.contentModel.assets.map(asset => {
+          return this.models.asset.render(renderer, asset, {
+            contentModel: this.contentModel,
+            settings: this.settings,
+            debug: this.settings.debug
+          })
+        })
+      )
+    }
+
+    return Promise.all([
+      renderHomepage(),
+      renderCollections(),
+      renderSubpages(),
+      renderAssets()
+    ])
   }
 }
 

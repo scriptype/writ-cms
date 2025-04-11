@@ -3,7 +3,7 @@ const { join, resolve } = require('path')
 const defaultSettings = {
   assetsDirectory: 'assets'
 }
-module.exports = function asset(settings = defaultSettings) {
+module.exports = function Asset(settings = defaultSettings) {
   const assetsDirectoryNameOptions = [settings.assetsDirectory, 'assets']
 
   const isAssetsDirectory = (node) => {
@@ -18,14 +18,15 @@ module.exports = function asset(settings = defaultSettings) {
   return {
     match: node => true,
     matchAssetsDirectory: isAssetsDirectory,
+
     create: (node, context) => {
       const permalink = (
-        context.root.permalink +
+        context.peek().permalink +
         [settings.assetsDirectory, node.name].join('/')
       )
 
       const outputPath = join(
-        context.root.outputPath,
+        context.peek().outputPath,
         settings.assetsDirectory,
         node.name
       )
@@ -37,6 +38,14 @@ module.exports = function asset(settings = defaultSettings) {
         outputPath,
         date: new Date(node.stats.birthtime || Date.now())
       }
+    },
+
+    render: (renderer, asset) => {
+      return renderer.copy({
+        src: asset.absolutePath,
+        dest: asset.outputPath,
+        recursive: !!asset.children
+      })
     }
   }
 }

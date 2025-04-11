@@ -6,7 +6,8 @@ const { isTemplateFile, removeExtension, Markdown } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
   category: require('./category'),
-  post: require('./post')
+  post: require('./post'),
+  tag: require('./tag')
 }
 
 function parseContent(node, content) {
@@ -20,7 +21,7 @@ const defaultSettings = {
   defaultCategoryName: 'Unclassified',
   collectionAliases: []
 }
-module.exports = function collection(settings = defaultSettings, contentTypes = []) {
+module.exports = function Collection(settings = defaultSettings, contentTypes = []) {
   const indexFileNameOptions = [
     ...settings.collectionAliases,
     'collection'
@@ -34,6 +35,7 @@ module.exports = function collection(settings = defaultSettings, contentTypes = 
 
   return {
     match: node => node.children?.find(isCollectionIndexFile),
+
     create: (node, context) => {
       function collectPostTags(post) {
         post.tags.forEach(postTag => {
@@ -71,15 +73,25 @@ module.exports = function collection(settings = defaultSettings, contentTypes = 
         if (!defaultCategory) {
           defaultCategory = childModels.category.create(
             { isDefaultCategory: true },
-            { ...context, collection: collectionContext }
+            context.push(collectionContext)
           )
           tree.categories.push(defaultCategory)
         }
-        const uncategorizedPost = childModels.post.create(childNode, {
-          ...context,
-          collection: collectionContext,
-          category: _.omit(defaultCategory, ['posts', 'context', 'content', 'attachments'])
-        })
+        const defaultCategoryContext = _.omit(
+          defaultCategory,
+          ['posts', 'context', 'content', 'attachments']
+        )
+        const uncategorizedPost = childModels.post.create(
+          childNode,
+          context.push({
+            ...collectionContext,
+            key: 'collection'
+          }).push({
+            ...defaultCategoryContext,
+            key: 'category'
+          })
+        )
+        defaultCategory.levelPosts.push(uncategorizedPost)
         defaultCategory.posts.push(uncategorizedPost)
         defaultCategory.posts.forEach(linkPosts)
         tree.posts.push(uncategorizedPost)
@@ -101,8 +113,8 @@ module.exports = function collection(settings = defaultSettings, contentTypes = 
         .find(ct => ct.collectionAlias === indexFileName)
 
       const slug = indexProps.attributes?.slug || makeSlug(node.name)
-      const permalink = context.root.permalink + slug
-      const outputPath = join(context.root.outputPath, slug)
+      const permalink = context.peek().permalink + slug
+      const outputPath = join(context.peek().outputPath, slug)
       const collectionContext = {
         ...indexProps.attributes,
         contentType: indexProps.attributes?.contentType || contentType?.name || 'default',
@@ -148,20 +160,26 @@ module.exports = function collection(settings = defaultSettings, contentTypes = 
           return addUncategorizedPost(childNode)
         }
         if (childModels.category.match(childNode)) {
-          const newCategory = childModels.category.create(childNode, {
-            ...context,
-            collection: collectionContext
-          })
+          const newCategory = childModels.category.create(
+            childNode,
+            context.push({
+              ...collectionContext,
+              key: 'collection'
+            })
+          )
           tree.categories.push(newCategory)
           tree.posts.push(...newCategory.posts)
           return
         }
         if (childModels.attachment.match(childNode)) {
           tree.attachments.push(
-            childModels.attachment.create(childNode, {
-              ...context,
-              collection: collectionContext
-            })
+            childModels.attachment.create(
+              childNode,
+              context.push({
+                ...collectionContext,
+                key: 'collection'
+              })
+            )
           )
         }
       })
@@ -183,6 +201,67 @@ module.exports = function collection(settings = defaultSettings, contentTypes = 
         contentRaw,
         content
       }
+    },
+
+    render: (renderer, collection, { contentModel, settings, debug }) => {
+      const renderCollection = () => {
+        return renderer.paginate({
+          page: collection,
+          posts: collection.posts,
+          postsPerPage: 15, //collection.context.peek().postsPerPage,
+          outputDir: collection.outputPath,
+          render: async ({ outputPath, pageOfPosts, paginationData }) => {
+            return renderer.render({
+              templates: [
+                `pages/${collection.template}`,
+                `pages/collection/${collection.contentType}`,
+                `pages/collection/default`
+              ],
+              outputPath,
+              content: collection.content,
+              data: {
+                ...contentModel,
+                collection,
+                pagination: paginationData,
+                posts: pageOfPosts,
+                settings,
+                debug
+              }
+            })
+          }
+        })
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          collection.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      const renderCategories = () => {
+        return Promise.all(
+          collection.categories.map(category => {
+            return models.category().render(
+              renderer, category, { contentModel, settings, debug}
+            )
+          })
+        )
+      }
+
+      const renderTags = () => {
+        return models.tag().render(
+          renderer, collection.tags, { contentModel, settings, debug }
+        )
+      }
+
+      return Promise.all([
+        renderCollection(),
+        renderAttachments(),
+        renderCategories(),
+        renderTags()
+      ])
     }
   }
 }

@@ -18,7 +18,7 @@ const defaultSettings = {
   categoryAlias: undefined,
   entryAlias: undefined
 }
-module.exports = function category(settings = defaultSettings) {
+module.exports = function Category(settings = defaultSettings, level = 1) {
   const indexFileNameOptions = [settings.categoryAlias, 'category'].filter(Boolean)
 
   const isCategoryIndexFile = (node) => {
@@ -35,8 +35,16 @@ module.exports = function category(settings = defaultSettings) {
   }
 
   return {
-    match: (node) => node.children?.find(childModels.post.match),
-    create(node, context) {
+    match: (node) => node.children?.find(childNode => {
+      const containsPosts = childModels.post.match(childNode)
+      if (level > 3) {
+        return containsPosts
+      }
+      const containsSubCategories = Category().match(childNode)
+      return containsSubCategories || containsPosts
+    }),
+
+    create: (node, context) => {
       function linkPosts(post, postIndex, posts) {
         post.links = {}
         if (postIndex > 0) {
@@ -53,28 +61,37 @@ module.exports = function category(settings = defaultSettings) {
         }
       }
 
-      const entriesAlias = context.collection.entriesAlias
-
       if (node.isDefaultCategory) {
-        const title = context.collection.defaultCategoryName
+        const title = context.peek().defaultCategoryName
         const slug = makeSlug(title)
+        const { entriesAlias, categoriesAlias } = context.peek()
 
         const defaultCategory = {
           context,
-          contentType: context.collection.categoryContentType,
+          contentType: context.peek().categoryContentType,
+          categoryContentType: context.peek().categoryContentType,
+          entryContentType: context.peek().entryContentType,
+          entryAlias: context.peek().entryAlias,
           content: '',
           contentRaw: '',
           slug,
           title,
-          permalink: [context.collection.permalink, slug].join('/'),
-          outputPath: join(context.collection.outputPath, slug),
+          permalink: [context.peek().permalink, slug].join('/'),
+          outputPath: join(context.peek().outputPath, slug),
           isDefaultCategory: true,
           posts: [],
-          attachments: []
+          levelPosts: [],
+          categories: [],
+          attachments: [],
+          level
         }
 
         if (entriesAlias) {
           defaultCategory[entriesAlias] = defaultCategory.posts
+        }
+
+        if (categoriesAlias) {
+          defaultCategory[categoriesAlias] = defaultCategory.categories
         }
 
         return defaultCategory
@@ -84,45 +101,75 @@ module.exports = function category(settings = defaultSettings) {
       const indexProps = indexFile ? frontMatter(indexFile.content) : {}
 
       const slug = indexProps.attributes?.slug || makeSlug(node.name)
-      const permalink = [context.collection.permalink, slug].join('/')
-      const outputPath = join(context.collection.outputPath, slug)
+      const permalink = [context.peek().permalink, slug].join('/')
+      const outputPath = join(context.peek().outputPath, slug)
 
       const categoryContext = {
         ...indexProps.attributes,
-        contentType: context.collection.categoryContentType,
+        contentType: context.peek().categoryContentType,
+        categoryContentType: indexProps.attributes?.categoryContentType || context.peek().categoryContentType,
+        entryContentType: indexProps.attributes?.entryContentType || context.peek().entryContentType,
+        categoryAlias: indexProps.attributes?.categoryAlias || context.peek().categoryAlias,
+        entryAlias: indexProps.attributes?.entryAlias || context.peek().entryAlias,
+        categoriesAlias: indexProps.attributes?.categoriesAlias || context.peek().categoriesAlias,
+        entriesAlias: indexProps.attributes?.entriesAlias || context.peek().entriesAlias,
         title: indexProps.attributes?.title || node.name,
         slug,
         permalink,
         outputPath,
+        level
       }
 
       const tree = {
+        categories: [],
         posts: [],
+        levelPosts: [],
         attachments: []
       }
+
+      const { entriesAlias, categoriesAlias } = categoryContext
 
       if (entriesAlias) {
         tree[entriesAlias] = tree.posts
       }
 
+      if (categoriesAlias) {
+        tree[categoriesAlias] = tree.categories
+      }
+
+      const contextKey = level === 1 ? 'category' : `subCategory${level - 1}`
       node.children.forEach(childNode => {
+        const childContext = context.push({
+          ...categoryContext,
+          key: contextKey
+        })
+
         if (isCategoryIndexFile(childNode)) {
           return
         }
         if (childModels.post.match(childNode)) {
+          tree.levelPosts.push(
+            childModels.post.create(childNode, childContext)
+          )
           return tree.posts.push(
-            childModels.post.create(childNode, {
-              ...context,
-              category: categoryContext
-            })
+            childModels.post.create(childNode, childContext)
           )
         }
-        return tree.attachments.push(
-          childModels.attachment.create(childNode, {
-            ...context,
-            category: categoryContext
-          })
-        )
+        if (Category().match(childNode)) {
+          const SubCategoryModel = Category({
+            entryAlias: categoryContext.entryAlias || settings.entryAlias,
+            categoryAlias: categoryContext.categoryAlias || settings.categoryAlias
+          }, level + 1)
+          const subCategory = SubCategoryModel.create(childNode, childContext)
+          tree.categories.push(subCategory)
+          tree.posts.push(...subCategory.posts)
+          return
+        }
+        if (childModels.attachment.match(childNode)) {
+          return tree.attachments.push(
+            childModels.attachment.create(childNode, childContext)
+          )
+        }
       })
 
       tree.posts.sort((a, b) => b.date - a.date)
@@ -140,6 +187,72 @@ module.exports = function category(settings = defaultSettings) {
         contentRaw,
         content
       }
+    },
+
+    render: (renderer, category, { contentModel, settings, debug }) => {
+      const renderCategory = () => {
+        return renderer.paginate({
+          page: category,
+          posts: category.posts,
+          postsPerPage: 15, //category.context.peek().postsPerPage,
+          outputDir: category.outputPath,
+          render: async ({ outputPath, pageOfPosts, paginationData }) => {
+            const data = {
+              ...contentModel,
+              category,
+              pagination: paginationData,
+              posts: pageOfPosts,
+              settings,
+              debug
+            }
+            const categoryAlias = category.context.peek().categoryAlias
+            if (categoryAlias) {
+              data[categoryAlias] = data.category
+            }
+            return renderer.render({
+              templates: [
+                `pages/${category.template}`,
+                `pages/category/${category.contentType}`,
+                `pages/category/default`
+              ],
+              outputPath,
+              content: category.content,
+              data
+            })
+          }
+        })
+      }
+
+      const renderSubCategories = () => {
+        return Promise.all(
+          category.categories.map(subCategory => {
+            return Category().render(renderer, subCategory, { contentModel, settings, debug })
+          })
+        )
+      }
+
+      const renderPosts = () => {
+        return Promise.all(
+          category.levelPosts.map(post => {
+            return models.post().render(renderer, post, { contentModel, settings, debug })
+          })
+        )
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          category.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      return Promise.all([
+        renderCategory(),
+        renderSubCategories(),
+        renderPosts(),
+        renderAttachments()
+      ])
     }
   }
 }

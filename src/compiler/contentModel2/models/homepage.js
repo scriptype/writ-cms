@@ -7,7 +7,7 @@ const models = {
 const defaultSettings = {
   homepageDirectory: 'homepage'
 }
-module.exports = function homepage(settings = defaultSettings) {
+module.exports = function Homepage(settings = defaultSettings) {
   const indexFileNameOptions = ['homepage', 'home', 'index']
   const folderNameOptions = [settings.homepageDirectory, 'homepage', 'home']
 
@@ -31,14 +31,15 @@ module.exports = function homepage(settings = defaultSettings) {
 
   return {
     match: node => isHomepageFile(node) || isHomepageDirectory(node),
+
     create: (node, context) => {
       const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
 
       const pageContext = {
         title: baseEntryProps.title,
         slug: baseEntryProps.slug,
-        permalink: context.root.permalink,
-        outputPath: context.root.outputPath
+        permalink: context.peek().permalink,
+        outputPath: context.peek().outputPath
       }
 
       return {
@@ -49,6 +50,39 @@ module.exports = function homepage(settings = defaultSettings) {
           homepage: pageContext
         }))
       }
+    },
+
+    render: (renderer, homepage, { contentModel, settings, debug }) => {
+      const renderHomepage = () => {
+        return renderer.render({
+          templates: [
+            `pages/${homepage.template}`,
+            `pages/homepage/${homepage.contentType}`,
+            `pages/homepage/default`
+          ],
+          outputPath: join(homepage.outputPath, 'index.html'),
+          content: homepage.content,
+          data: {
+            ...contentModel,
+            homepage,
+            settings,
+            debug
+          }
+        })
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          homepage.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      return Promise.all([
+        renderHomepage(),
+        renderAttachments()
+      ])
     }
   }
 }

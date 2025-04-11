@@ -1,13 +1,14 @@
 const { join, resolve } = require('path')
 const { isTemplateFile } = require('../helpers')
 const models = {
-  _baseEntry: require('./_baseEntry')
+  _baseEntry: require('./_baseEntry'),
+  attachment: require('./attachment'),
 }
 
 const defaultSettings = {
   pagesDirectory: 'pages'
 }
-module.exports = function subpage(settings = defaultSettings) {
+module.exports = function Subpage(settings = defaultSettings) {
   const indexFileNameOptions = ['page', 'index']
   const pagesDirectoryNameOptions = [settings.pagesDirectory, 'subpages', 'pages']
 
@@ -36,16 +37,20 @@ module.exports = function subpage(settings = defaultSettings) {
   return {
     match: node => isTemplateFile(node) || isFolderedSubpage(node),
     matchPagesDirectory: node => isPagesDirectory(node),
+
     create: (node, context) => {
       const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
 
       const permalink = (
-        context.root.permalink +
+        context.peek().permalink +
         baseEntryProps.slug +
         (baseEntryProps.hasIndex ? '' : '.html')
       )
 
-      const outputPath = join(context.root.outputPath, baseEntryProps.slug)
+      const outputPath = join(
+        context.peek().outputPath,
+        baseEntryProps.slug
+      )
 
       const pageContext = {
         title: baseEntryProps.title,
@@ -58,10 +63,49 @@ module.exports = function subpage(settings = defaultSettings) {
         ...baseEntryProps,
         ...pageContext,
         context,
-        attachments: baseEntryProps.attachments.map(a => a({
-          page: pageContext
-        }))
+        attachments: baseEntryProps.attachments.map(
+          attachment => attachment(context.push({
+            ...pageContext,
+            key: 'page'
+          }))
+        )
       }
+    },
+
+    render: (renderer, subpage, { contentModel, settings, debug }) => {
+      const renderSubpage = () => {
+        return renderer.render({
+          templates: [
+            `pages/${subpage.template}`,
+            `pages/subpage/${subpage.contentType}`,
+            `pages/subpage/default`
+          ],
+          outputPath: join(...[
+            subpage.outputPath,
+            subpage.hasIndex ? 'index' : ''
+          ]) + '.html',
+          content: subpage.content,
+          data: {
+            ...contentModel,
+            subpage,
+            settings,
+            debug
+          }
+        })
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          subpage.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      return Promise.all([
+        renderSubpage(),
+        renderAttachments()
+      ])
     }
   }
 }

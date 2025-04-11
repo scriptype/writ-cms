@@ -14,7 +14,7 @@ const FileSystemParser = require('./lib/FileSystemParser')
 const ContentModel1 = require('./compiler/contentModel')
 const ContentModel2 = require('./compiler/contentModel2')
 const Rendering1 = require('./compiler/rendering')
-const Rendering2 = require('./compiler/rendering2')
+const Rendering2 = require('./compiler/rendering2/renderer')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
@@ -95,15 +95,22 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
     ),
 
     contentModel: settings.compilerVersion === 2 ?
-      new ContentModel2(
-        _.pick(settings, [
-          'permalinkPrefix',
-          'out',
-          'defaultCategoryName',
-          'assetsDirectory',
-          'pagesDirectory',
-          'homepageDirectory'
-        ]),
+      new ContentModel2({
+          ..._.pick(settings, [
+            'permalinkPrefix',
+            'out',
+            'defaultCategoryName',
+            'assetsDirectory',
+            'pagesDirectory',
+            'homepageDirectory',
+            'site',
+            'mode',
+            'search',
+            'rss',
+            'syntaxHighlighting'
+          ]),
+          debug: Debug.getDebug()
+        },
         contentTypes
       ) :
       ContentModel1,

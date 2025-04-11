@@ -2,13 +2,14 @@ const { join } = require('path')
 const { isTemplateFile, parseArray } = require('../../helpers')
 const models = {
   _baseEntry: require('../_baseEntry'),
+  attachment: require('../attachment'),
   tag: require('./tag')
 }
 
 const defaultSettings = {
   entryAlias: undefined
 }
-module.exports = function post(settings = defaultSettings) {
+module.exports = function Post(settings = defaultSettings) {
   const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
 
   const isPostIndexFile = (node) => {
@@ -21,16 +22,19 @@ module.exports = function post(settings = defaultSettings) {
   }
 
   return {
-    match: (node) => isTemplateFile(node) || node.children?.find(isPostIndexFile),
+    match: (node) => (
+      isTemplateFile(node) || node.children?.find(isPostIndexFile)
+    ),
+
     create: (node, context) => {
       const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
 
       const permalink = [
-        context.category.permalink,
+        context.peek().permalink,
         baseEntryProps.slug
       ].join('/') + (node.children ? '' : '.html')
 
-      const outputPath = join(context.category.outputPath, baseEntryProps.slug)
+      const outputPath = join(context.peek().outputPath, baseEntryProps.slug)
 
       const postContext = {
         title: baseEntryProps.title,
@@ -43,16 +47,61 @@ module.exports = function post(settings = defaultSettings) {
         ...baseEntryProps,
         ...postContext,
         context,
-        contentType: context.collection.entryContentType,
+        contentType: context.peek().entryContentType,
         tags: parseArray(baseEntryProps.tags).map(tagName => {
-          return models.tag(tagName, context)
+          const topContext = context.throwUntil(layer => layer.key === 'collection')
+          return models.tag().create(tagName, topContext)
         }),
         date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
-        attachments: baseEntryProps.attachments.map(a => a({
-          ...context,
-          post: postContext
-        }))
+        attachments: baseEntryProps.attachments.map(
+          attachment => attachment(context.push({
+            ...postContext,
+            key: 'post'
+          }))
+        )
       }
+    },
+
+    render: (renderer, post, { contentModel, settings, debug }) => {
+      const renderPost = () => {
+        const data = {
+          ...contentModel,
+          post,
+          settings,
+          debug
+        }
+        const entryAlias = post.context.peek().entryAlias
+        if (entryAlias) {
+          data[entryAlias] = data.post
+        }
+
+        return renderer.render({
+          templates: [
+            `pages/${post.template}`,
+            `pages/post/${post.contentType}`,
+            `pages/post/default`
+          ],
+          outputPath: join(...[
+            post.outputPath,
+            post.hasIndex ? 'index' : ''
+          ].filter(Boolean)) + '.html',
+          content: post.content,
+          data
+        })
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          post.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      return Promise.all([
+        renderPost(),
+        renderAttachments()
+      ])
     }
   }
 }

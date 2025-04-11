@@ -1,24 +1,22 @@
 const { join } = require('path')
+const _ = require('lodash')
 
-module.exports = function attachment() {
+module.exports = function Attachment() {
   return {
     match: node => true,
-    create(node, context) {
-      const permalink = [
-        context.page?.permalink ||
-        context.post?.permalink ||
-        context.category?.permalink ||
-        context.collection?.permalink,
-        node.name
-      ].filter(Boolean).join('/')
 
-      const outputPath = join(...[
-        context.page?.outputPath ||
-        context.post?.outputPath ||
-        context.category?.outputPath ||
-        context.collection?.outputPath,
+    create(node, context) {
+      const permalink = _.compact([
+        context.peek()?.permalink,
         node.name
-      ].filter(Boolean))
+      ]).join('/')
+
+      const outputPath = join(
+        ..._.compact([
+          context.peek()?.outputPath,
+          node.name
+        ])
+      )
 
       return {
         ...node,
@@ -27,6 +25,14 @@ module.exports = function attachment() {
         outputPath,
         date: new Date(node.stats.birthtime || Date.now())
       }
+    },
+
+    render: (renderer, attachment) => {
+      return renderer.copy({
+        src: attachment.absolutePath,
+        dest: attachment.outputPath,
+        recursive: !!attachment.children
+      })
     }
   }
 }
