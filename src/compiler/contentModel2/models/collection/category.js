@@ -27,6 +27,22 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
     )
   }
 
+  const linkPosts = (post, postIndex, posts) => {
+    post.links = {}
+    if (postIndex > 0) {
+      post.links.nextPost = {
+        title: posts[postIndex - 1].title,
+        permalink: posts[postIndex - 1].permalink
+      }
+    }
+    if (postIndex < posts.length - 1) {
+      post.links.previousPost = {
+        title: posts[postIndex + 1].title,
+        permalink: posts[postIndex + 1].permalink
+      }
+    }
+  }
+
   const childModels = {
     attachment: models.attachment(),
     post: models.post({
@@ -35,6 +51,8 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
   }
 
   return {
+    linkPosts,
+
     match: (node) => node.children?.find(childNode => {
       const containsPosts = childModels.post.match(childNode)
       if (level > 3) {
@@ -45,22 +63,6 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
     }),
 
     create: (node, context) => {
-      function linkPosts(post, postIndex, posts) {
-        post.links = {}
-        if (postIndex > 0) {
-          post.links.nextPost = {
-            title: posts[postIndex - 1].title,
-            permalink: posts[postIndex - 1].permalink
-          }
-        }
-        if (postIndex < posts.length - 1) {
-          post.links.previousPost = {
-            title: posts[postIndex + 1].title,
-            permalink: posts[postIndex + 1].permalink
-          }
-        }
-      }
-
       if (node.isDefaultCategory) {
         const title = context.peek().defaultCategoryName
         const slug = makeSlug(title)

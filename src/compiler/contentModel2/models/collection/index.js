@@ -52,22 +52,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         })
       }
 
-      function linkPosts(post, postIndex, posts) {
-        post.links = {}
-        if (postIndex > 0) {
-          post.links.nextPost = {
-            title: posts[postIndex - 1].title,
-            permalink: posts[postIndex - 1].permalink
-          }
-        }
-        if (postIndex < posts.length - 1) {
-          post.links.previousPost = {
-            title: posts[postIndex + 1].title,
-            permalink: posts[postIndex + 1].permalink
-          }
-        }
-      }
-
       function addUncategorizedPost(childNode) {
         let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
         if (!defaultCategory) {
@@ -93,7 +77,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         )
         defaultCategory.levelPosts.push(uncategorizedPost)
         defaultCategory.posts.push(uncategorizedPost)
-        defaultCategory.posts.forEach(linkPosts)
+        defaultCategory.posts.forEach(childModels.category.linkPosts)
         tree.posts.push(uncategorizedPost)
       }
 
@@ -185,9 +169,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       })
 
       tree.posts.sort((a, b) => b.date - a.date)
-      tree.posts.forEach((post, i, posts) => {
-        collectPostTags(post)
-      })
+      tree.posts.forEach(collectPostTags)
 
       const contentRaw = indexProps.body || ''
       const content = indexFile ?
