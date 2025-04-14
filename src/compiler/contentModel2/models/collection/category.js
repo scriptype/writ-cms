@@ -148,12 +148,10 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
           return
         }
         if (childModels.post.match(childNode)) {
-          tree.levelPosts.push(
-            childModels.post.create(childNode, childContext)
-          )
-          return tree.posts.push(
-            childModels.post.create(childNode, childContext)
-          )
+          const post = childModels.post.create(childNode, childContext)
+          tree.levelPosts.push(post)
+          tree.posts.push(post)
+          return
         }
         if (Category().match(childNode)) {
           const SubCategoryModel = Category({
