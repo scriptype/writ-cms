@@ -1,5 +1,5 @@
 const { join, resolve } = require('path')
-const { isTemplateFile } = require('../helpers')
+const { isTemplateFile, makePermalink } = require('../helpers')
 const models = {
   _baseEntry: require('./_baseEntry'),
   attachment: require('./attachment'),
@@ -41,11 +41,10 @@ module.exports = function Subpage(settings = defaultSettings) {
     create: (node, context) => {
       const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
 
-      const permalink = (
-        context.peek().permalink +
-        baseEntryProps.slug +
-        (baseEntryProps.hasIndex ? '' : '.html')
-      )
+      const permalink = makePermalink(
+        context.peek().permalink,
+        baseEntryProps.slug
+      ) + (baseEntryProps.hasIndex ? '' : '.html')
 
       const outputPath = join(
         context.peek().outputPath,

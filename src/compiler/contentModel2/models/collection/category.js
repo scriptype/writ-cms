@@ -1,7 +1,7 @@
 const { join } = require('path')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const { isTemplateFile, Markdown } = require('../../helpers')
+const { isTemplateFile, Markdown, makePermalink } = require('../../helpers')
 const models = {
   post: require('./post'),
   attachment: require('../attachment')
@@ -78,7 +78,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
           contentRaw: '',
           slug,
           title,
-          permalink: [context.peek().permalink, slug].join('/'),
+          permalink: makePermalink(context.peek().permalink, slug),
           outputPath: join(context.peek().outputPath, slug),
           isDefaultCategory: true,
           posts: [],
@@ -103,7 +103,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
       const indexProps = indexFile ? frontMatter(indexFile.content) : {}
 
       const slug = indexProps.attributes?.slug || makeSlug(node.name)
-      const permalink = [context.peek().permalink, slug].join('/')
+      const permalink = makePermalink(context.peek().permalink, slug)
       const outputPath = join(context.peek().outputPath, slug)
 
       const categoryContext = {

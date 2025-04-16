@@ -1,15 +1,18 @@
 const { join } = require('path')
 const _ = require('lodash')
+const { makePermalink } = require('../helpers')
 
 module.exports = function Attachment() {
   return {
     match: node => true,
 
     create(node, context) {
-      const permalink = _.compact([
-        context.peek()?.permalink,
-        node.name
-      ]).join('/')
+      const permalink = makePermalink(
+        ..._.compact([
+          context.peek()?.permalink,
+          node.name
+        ])
+      )
 
       const outputPath = join(
         ..._.compact([

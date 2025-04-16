@@ -1,4 +1,5 @@
 const { join, resolve } = require('path')
+const { makePermalink } = require('../helpers')
 
 const defaultSettings = {
   assetsDirectory: 'assets'
@@ -20,9 +21,10 @@ module.exports = function Asset(settings = defaultSettings) {
     matchAssetsDirectory: isAssetsDirectory,
 
     create: (node, context) => {
-      const permalink = (
-        context.peek().permalink +
-        [settings.assetsDirectory, node.name].join('/')
+      const permalink = makePermalink(
+        context.peek().permalink,
+        settings.assetsDirectory,
+        node.name
       )
 
       const outputPath = join(

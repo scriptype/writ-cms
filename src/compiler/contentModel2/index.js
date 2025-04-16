@@ -223,12 +223,14 @@ class ContentModel {
       )
     }
 
-    return Promise.all([
-      renderHomepage(),
-      renderCollections(),
-      renderSubpages(),
-      renderAssets()
-    ])
+    return renderHomepage()
+      .then(() =>
+        Promise.all([
+          renderCollections(),
+          renderSubpages(),
+          renderAssets()
+        ])
+      )
   }
 }
 

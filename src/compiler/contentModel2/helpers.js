@@ -27,6 +27,13 @@ const parseArray = (array = []) => {
     array
 }
 
+const makePermalink = (...parts) => {
+  if (parts[0] === '/') {
+    return parts[0] + parts.slice(1).join('/')
+  }
+  return parts.join('/')
+}
+
 const Markdown = {
   parse(text) {
     return Markdown.unescapeHandlebarsExpressions(
@@ -52,5 +59,6 @@ module.exports = {
   isTemplateFile,
   removeExtension,
   parseArray,
+  makePermalink,
   Markdown
 }

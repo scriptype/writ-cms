@@ -1,11 +1,12 @@
 const { join } = require('path')
 const makeSlug = require('slug')
+const { makePermalink } = require('../../helpers')
 
 module.exports = function Tag() {
   return {
     create: (name, context) => {
       const slug = makeSlug(name)
-      const permalink = [context.peek().permalink, 'tags', slug].join('/')
+      const permalink = makePermalink(context.peek().permalink, 'tags', slug)
       const outputPath = join(context.peek().outputPath, 'tags', slug)
       return {
         name,

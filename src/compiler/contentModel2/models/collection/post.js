@@ -1,5 +1,5 @@
 const { join } = require('path')
-const { isTemplateFile, parseArray } = require('../../helpers')
+const { isTemplateFile, parseArray, makePermalink } = require('../../helpers')
 const models = {
   _baseEntry: require('../_baseEntry'),
   attachment: require('../attachment'),
@@ -29,10 +29,10 @@ module.exports = function Post(settings = defaultSettings) {
     create: (node, context) => {
       const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
 
-      const permalink = [
+      const permalink = makePermalink(
         context.peek().permalink,
         baseEntryProps.slug
-      ].join('/') + (node.children ? '' : '.html')
+      ) + (node.children ? '' : '.html')
 
       const outputPath = join(context.peek().outputPath, baseEntryProps.slug)
 

@@ -2,7 +2,12 @@ const { join, resolve } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const { isTemplateFile, removeExtension, Markdown } = require('../../helpers')
+const {
+  isTemplateFile,
+  removeExtension,
+  makePermalink,
+  Markdown
+} = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
   category: require('./category'),
@@ -96,8 +101,10 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         .filter(ct => ct.model === 'collection')
         .find(ct => ct.collectionAlias === indexFileName)
 
-      const slug = indexProps.attributes?.slug || makeSlug(node.name)
-      const permalink = context.peek().permalink + slug
+      const slug = indexProps.attributes?.slug === null ?
+        '' :
+        indexProps.attributes?.slug || makeSlug(node.name)
+      const permalink = makePermalink(context.peek().permalink, slug)
       const outputPath = join(context.peek().outputPath, slug)
       const collectionContext = {
         ...indexProps.attributes,
