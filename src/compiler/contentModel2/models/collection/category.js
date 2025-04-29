@@ -1,9 +1,16 @@
-const { join } = require('path')
+const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const { isTemplateFile, Markdown, makePermalink } = require('../../helpers')
+const { join } = require('path')
+const {
+  isTemplateFile,
+  Markdown,
+  makePermalink,
+  makeDateSlug
+} = require('../../helpers')
 const models = {
   post: require('./post'),
+  facet: require('./facet'),
   attachment: require('../attachment')
 }
 
@@ -12,6 +19,22 @@ function parseContent(node, content) {
     return content
   }
   return Markdown.parse(content)
+}
+
+function linkPosts(post, postIndex, posts) {
+  post.links = post.links || {}
+  if (postIndex > 0) {
+    post.links.nextPost = {
+      title: posts[postIndex - 1].title,
+      permalink: posts[postIndex - 1].permalink
+    }
+  }
+  if (postIndex < posts.length - 1) {
+    post.links.previousPost = {
+      title: posts[postIndex + 1].title,
+      permalink: posts[postIndex + 1].permalink
+    }
+  }
 }
 
 const defaultSettings = {
@@ -25,22 +48,6 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
     return isTemplateFile(node) && node.name.match(
       new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
     )
-  }
-
-  const linkPosts = (post, postIndex, posts) => {
-    post.links = {}
-    if (postIndex > 0) {
-      post.links.nextPost = {
-        title: posts[postIndex - 1].title,
-        permalink: posts[postIndex - 1].permalink
-      }
-    }
-    if (postIndex < posts.length - 1) {
-      post.links.previousPost = {
-        title: posts[postIndex + 1].title,
-        permalink: posts[postIndex + 1].permalink
-      }
-    }
   }
 
   const childModels = {
@@ -74,6 +81,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
           categoryContentType: context.peek().categoryContentType,
           entryContentType: context.peek().entryContentType,
           entryAlias: context.peek().entryAlias,
+          facetKeys: context.peek().facetKeys || [],
           content: '',
           contentRaw: '',
           slug,
@@ -115,6 +123,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
         entryAlias: indexProps.attributes?.entryAlias || context.peek().entryAlias,
         categoriesAlias: indexProps.attributes?.categoriesAlias || context.peek().categoriesAlias,
         entriesAlias: indexProps.attributes?.entriesAlias || context.peek().entriesAlias,
+        facetKeys: context.peek().facetKeys || [],
         title: indexProps.attributes?.title || node.name,
         slug,
         permalink,
@@ -172,9 +181,6 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
         }
       })
 
-      tree.posts.sort((a, b) => b.date - a.date)
-      tree.posts.forEach(linkPosts)
-
       const contentRaw = indexProps.body || ''
       const content = indexFile ?
         parseContent(indexFile, contentRaw) :
@@ -187,6 +193,40 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
         contentRaw,
         content
       }
+    },
+
+    afterEffects: (contentModel, category) => {
+      if (category.facetKeys.length) {
+        const categoryContext = _.omit(category, [
+          'context',
+          'contentRaw',
+          'content',
+          'categories',
+          'posts',
+          'attachments',
+          'facets'
+        ])
+
+        category.facets = models.facet().collectFacets(
+          category.posts,
+          category.facetKeys,
+          category.context.push({
+            ...categoryContext,
+            key: 'category'
+          })
+        )
+      }
+
+      category.categories.forEach(subCategory => {
+        Category().afterEffects(contentModel, subCategory)
+      })
+
+      category.posts.sort((a, b) => b.date - a.date)
+      category.posts.forEach(linkPosts)
+
+      category.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
     },
 
     render: (renderer, category, { contentModel, settings, debug }) => {
@@ -247,11 +287,21 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
         )
       }
 
+      const renderFacets = () => {
+        if (!category.facets?.length) {
+          return
+        }
+        return models.facet().render(
+          renderer, category.facets, { contentModel, settings, debug }
+        )
+      }
+
       return Promise.all([
         renderCategory(),
         renderSubCategories(),
         renderPosts(),
-        renderAttachments()
+        renderAttachments(),
+        renderFacets()
       ])
     }
   }

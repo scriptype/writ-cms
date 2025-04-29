@@ -31,11 +31,11 @@ const linkEntries = (contentModel) => {
         .filter(Boolean)
       linkFields.forEach(link => {
         const collection = contentModel.collections.find(c => c.slug.match(new RegExp(link.collectionSlug, 'i')))
-        const container = link.categorySlug ?
+        const container = link.categorySlug ? // TODO: Handle subcategories
           collection.categories.find(c => c.slug.match(new RegExp(link.categorySlug, 'i'))) || collection :
           collection
         const entry = container.posts.find(p => p.slug.match(new RegExp(link.entrySlug, 'i')))
-        post[link.key] = entry
+        post[link.key] = Object.assign({}, entry)
         entry.links = entry.links || {}
         entry.links.relations = entry.links.relations || []
         const relation = entry.links.relations.find(r => r.key === link.key)
@@ -174,8 +174,26 @@ class ContentModel {
       }
     })
 
-    linkEntries(this.contentModel)
+    this.afterEffects()
     return this.contentModel
+  }
+
+  afterEffects() {
+    linkEntries(this.contentModel)
+
+    this.contentModel.collections.forEach(collection => {
+      this.models.collection.afterEffects(this.contentModel, collection)
+    })
+
+    this.contentModel.subpages.forEach(subpage => {
+      this.models.subpage.afterEffects(this.contentModel, subpage)
+    })
+
+    this.models.homepage.afterEffects(this.contentModel, this.contentModel.homepage)
+
+    this.contentModel.assets.forEach(asset => {
+      this.models.asset.afterEffects(this.contentModel, asset)
+    })
   }
 
   render(renderer) {

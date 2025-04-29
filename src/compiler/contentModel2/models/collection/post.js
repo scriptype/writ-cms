@@ -1,9 +1,10 @@
 const { join } = require('path')
+const makeSlug = require('slug')
 const { isTemplateFile, parseArray, makePermalink } = require('../../helpers')
 const models = {
+  facet: require('./facet'),
   _baseEntry: require('../_baseEntry'),
-  attachment: require('../attachment'),
-  tag: require('./tag')
+  attachment: require('../attachment')
 }
 
 const defaultSettings = {
@@ -48,10 +49,7 @@ module.exports = function Post(settings = defaultSettings) {
         ...postContext,
         context,
         contentType: context.peek().entryContentType,
-        tags: parseArray(baseEntryProps.tags).map(tagName => {
-          const topContext = context.throwUntil(layer => layer.key === 'collection')
-          return models.tag().create(tagName, topContext)
-        }),
+        tags: parseArray(baseEntryProps.tags),
         date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
         attachments: baseEntryProps.attachments.map(
           attachment => attachment(context.push({
@@ -60,6 +58,14 @@ module.exports = function Post(settings = defaultSettings) {
           }))
         )
       }
+    },
+
+    afterEffects: (contentModel, post, facets) => {
+      models.facet().linkEntryFieldsToFacets(post, facets)
+
+      post.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
     },
 
     render: (renderer, post, { contentModel, settings, debug }) => {

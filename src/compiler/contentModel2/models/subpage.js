@@ -71,6 +71,12 @@ module.exports = function Subpage(settings = defaultSettings) {
       }
     },
 
+    afterEffects: (contentModel, subpage) => {
+      subpage.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
+    },
+
     render: (renderer, subpage, { contentModel, settings, debug }) => {
       const renderSubpage = () => {
         return renderer.render({

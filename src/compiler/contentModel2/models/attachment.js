@@ -30,6 +30,8 @@ module.exports = function Attachment() {
       }
     },
 
+    afterEffects: (contentModel, attachment) => {},
+
     render: (renderer, attachment) => {
       return renderer.copy({
         src: attachment.absolutePath,

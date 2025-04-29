@@ -34,6 +34,10 @@ const makePermalink = (...parts) => {
   return parts.join('/')
 }
 
+const makeDateSlug = (date) => {
+  return date.toISOString().split('T')[0]
+}
+
 const Markdown = {
   parse(text) {
     return Markdown.unescapeHandlebarsExpressions(
@@ -60,5 +64,6 @@ module.exports = {
   removeExtension,
   parseArray,
   makePermalink,
+  makeDateSlug,
   Markdown
 }

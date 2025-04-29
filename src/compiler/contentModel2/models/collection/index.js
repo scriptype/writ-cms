@@ -1,18 +1,21 @@
-const { join, resolve } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const makeSlug = require('slug')
+const { join, resolve } = require('path')
 const {
   isTemplateFile,
   removeExtension,
+  parseArray,
   makePermalink,
+  makeDateSlug,
   Markdown
 } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
   category: require('./category'),
   post: require('./post'),
-  tag: require('./tag')
+  tag: require('./tag'),
+  facet: require('./facet')
 }
 
 function parseContent(node, content) {
@@ -42,21 +45,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
     match: node => node.children?.find(isCollectionIndexFile),
 
     create: (node, context) => {
-      function collectPostTags(post) {
-        post.tags.forEach(postTag => {
-          let collectionTag = tree.tags.find(t => t.name === postTag.name)
-          if (collectionTag) {
-            collectionTag.posts.push(post)
-          } else {
-            collectionTag = {
-              ...postTag,
-              posts: [post]
-            }
-            tree.tags.push(collectionTag)
-          }
-        })
-      }
-
       function addUncategorizedPost(childNode) {
         let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
         if (!defaultCategory) {
@@ -89,8 +77,8 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       const tree = {
         categories: [],
         posts: [],
-        tags: [],
-        attachments: []
+        attachments: [],
+        facets: []
       }
 
       const indexFile = node.children.find(isCollectionIndexFile)
@@ -117,6 +105,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         entriesAlias: indexProps.attributes?.entriesAlias || contentType?.entriesAlias,
         defaultCategoryName: indexProps.attributes?.defaultCategoryName || contentType?.defaultCategoryName || settings.defaultCategoryName,
         title: indexProps.attributes?.title || node.name,
+        facetKeys: parseArray(indexProps.attributes?.facets || contentType?.facets || []),
         slug,
         permalink,
         outputPath
@@ -175,9 +164,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         }
       })
 
-      tree.posts.sort((a, b) => b.date - a.date)
-      tree.posts.forEach(collectPostTags)
-
       const contentRaw = indexProps.body || ''
       const content = indexFile ?
         parseContent(indexFile, contentRaw) :
@@ -190,6 +176,47 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         contentRaw,
         content
       }
+    },
+
+    afterEffects: (contentModel, collection) => {
+      collection.posts.sort((a, b) => b.date - a.date)
+
+      if (collection.facetKeys.length) {
+        const collectionContext = _.omit(collection, [
+          'context',
+          'contentRaw',
+          'content',
+          'categories',
+          'posts',
+          'attachments',
+          'facets'
+        ])
+
+        collection.facets = models.facet().collectFacets(
+          collection.posts,
+          collection.facetKeys,
+          collection.context.push({
+            ...collectionContext,
+            key: 'collection'
+          })
+        )
+      }
+
+      collection.categories.forEach(category => {
+        models.category().afterEffects(contentModel, category, collection.facets)
+      })
+
+      collection.posts.forEach(post => {
+        models.post().afterEffects(contentModel, post, collection.facets)
+      })
+
+      collection.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
+
+      collection.facets.forEach(facet => {
+        models.facet().afterEffects(contentModel, facet)
+      })
     },
 
     render: (renderer, collection, { contentModel, settings, debug }) => {
@@ -233,15 +260,29 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         return Promise.all(
           collection.categories.map(category => {
             return models.category().render(
-              renderer, category, { contentModel, settings, debug}
+              renderer, category, { contentModel, settings, debug, facets: collection.facets }
             )
           })
         )
       }
 
       const renderTags = () => {
+        console.log('skip rendering tags')
+        return Promise.resolve()
         return models.tag().render(
           renderer, collection.tags, { contentModel, settings, debug }
+        )
+      }
+
+      const renderFacets = () => {
+        if (collection.facets.length) {
+          /*
+          console.log(collection.title, 'facets')
+          console.dir(collection.facets, { depth: 3, color: true })
+          */
+        }
+        return models.facet().render(
+          renderer, collection.facets, { contentModel, settings, debug }
         )
       }
 
@@ -249,7 +290,8 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         renderCollection(),
         renderAttachments(),
         renderCategories(),
-        renderTags()
+        renderTags(),
+        renderFacets()
       ])
     }
   }

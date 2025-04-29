@@ -1,7 +1,8 @@
 const { join, resolve } = require('path')
 const { isTemplateFile } = require('../helpers')
 const models = {
-  _baseEntry: require('./_baseEntry')
+  _baseEntry: require('./_baseEntry'),
+  attachment: require('./attachment')
 }
 
 const defaultSettings = {
@@ -50,6 +51,12 @@ module.exports = function Homepage(settings = defaultSettings) {
           homepage: pageContext
         }))
       }
+    },
+
+    afterEffects: (contentModel, homepage) => {
+      homepage.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
     },
 
     render: (renderer, homepage, { contentModel, settings, debug }) => {

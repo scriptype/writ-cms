@@ -42,6 +42,8 @@ module.exports = function Asset(settings = defaultSettings) {
       }
     },
 
+    afterEffects: (contentModel, asset) => {},
+
     render: (renderer, asset) => {
       return renderer.copy({
         src: asset.absolutePath,
