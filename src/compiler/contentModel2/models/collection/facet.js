@@ -2,12 +2,22 @@ const { join } = require('path')
 const makeSlug = require('slug')
 const { makePermalink, makeDateSlug } = require('../../helpers')
 
+function serializeLinkedFacet(facetValue) {
+  return facetValue.slug ?
+    JSON.stringify({
+      title: facetValue.title,
+      slug: facetValue.slug
+    }) :
+    facetValue
+}
+
 function upsertFacetValueWithPost(facet, facetValue, post) {
-  const collectedPosts = facet.map.get(facetValue)
+  const key = serializeLinkedFacet(facetValue)
+  const collectedPosts = facet.map.get(key)
   if (collectedPosts) {
     collectedPosts.push(post)
   } else {
-    facet.map.set(facetValue, [post])
+    facet.map.set(key, [post])
   }
 }
 
@@ -31,9 +41,6 @@ function collectFacets(posts, facetKeys, context) {
           const dateSlug = makeDateSlug(facetValue)
           upsertFacetValueWithPost(facet, dateSlug, post)
 
-        } else if (facetValue.slug) {
-          upsertFacetValueWithPost(facet, facetValue.slug, post)
-
         } else {
           upsertFacetValueWithPost(facet, facetValue, post)
         }
@@ -43,18 +50,17 @@ function collectFacets(posts, facetKeys, context) {
 
         if (Array.isArray(facetValue)) {
           facetValue.forEach(facetValueItem => {
-            map.set(facetValueItem, [post])
+            const key = serializeLinkedFacet(facetValueItem)
+            map.set(key, [post])
           })
 
         } else if (facetValue instanceof Date) {
           const dateSlug = facetValue.toISOString().split('T')[0]
           map.set(dateSlug, [post])
 
-        } else if (facetValue.slug) {
-          map.set(facetValue.slug, [post])
-
         } else {
-          map.set(facetValue, [post])
+          const key = serializeLinkedFacet(facetValue)
+          map.set(key, [post])
         }
 
         if (map.size > 0) {
@@ -142,11 +148,18 @@ function Facet() {
           return Array.from(f.map.keys())
         },
         get entries() {
-          return Array.from(f.map, ([key, value]) => ({
-            key,
-            value,
-            slug: key.slug || makeSlug(key)
-          }))
+          return Array.from(f.map, ([key, value]) => {
+            let linkedFacet
+            try {
+              linkedFacet = JSON.parse(key)
+            } catch { }
+            const slug = linkedFacet ? linkedFacet.slug : makeSlug(key)
+            return {
+              key: linkedFacet ? linkedFacet.title : key,
+              value,
+              slug
+            }
+          })
         }
       }))
 
@@ -200,7 +213,7 @@ function Facet() {
                 page: facetValue,
                 posts: facetValue.value,
                 postsPerPage: 15,
-                outputDir: join(facet.outputPath, facetValue.key.slug || makeSlug(facetValue.key)),
+                outputDir: join(facet.outputPath, facetValue.slug),
                 render: async ({ outputPath, pageOfPosts, paginationData }) => {
                   return renderer.render({
                     templates: [`pages/facets/facetKeyPosts`],
