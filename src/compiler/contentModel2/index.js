@@ -10,42 +10,65 @@ const models = {
   asset: require('./models/asset')
 }
 
+const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
+
+const parseLink = (value) => {
+  const [collectionSlug, ...restPath] = value.replace(/^\+/g, '').split('/')
+  const entrySlug = restPath.pop()
+  const categorySlugs = restPath
+  return {
+    collectionSlug,
+    categorySlugs,
+    entrySlug
+  }
+}
+
+const findLinkedEntry = (contentModel, link) => {
+  const collection = contentModel.collections.find(c => c.slug.match(new RegExp(link.collectionSlug, 'i')))
+  const container = link.categorySlugs[0] ? // TODO: Handle subcategories
+    collection.categories.find(c => c.slug.match(new RegExp(link.categorySlug, 'i'))) || collection :
+    collection
+  return container.posts.find(p => p.slug.match(new RegExp(link.entrySlug, 'i')))
+}
+
+const linkBack = (post, entry, key) => {
+  entry.links = entry.links || {}
+  entry.links.relations = entry.links.relations || []
+  const relation = entry.links.relations.find(r => r.key === key)
+  if (relation) {
+    relation.entries.push(post)
+  } else {
+    entry.links.relations.push({
+      key,
+      entries: [post]
+    })
+  }
+}
+
 const linkEntries = (contentModel) => {
   contentModel.collections.forEach(collection => {
     collection.posts.forEach(post => {
       const fields = Object.keys(post)
-      const linkFields = fields
-        .map(key => {
-          const match = key.match(/(.+){(.+)}/)
-          if (!match) {
+      Object.keys(post).forEach(key => {
+        const value = post[key]
+        if (Array.isArray(value)) {
+          value.forEach((valueItem, valueIndex) => {
+            if (!LINKED_FIELD_SYNTAX.test(valueItem)) {
+              return
+            }
+            const link = parseLink(valueItem)
+            const entry = findLinkedEntry(contentModel, link)
+            post[key][valueIndex] = Object.assign({}, entry)
+            linkBack(post, entry, key)
+          })
+        } else {
+          if (!LINKED_FIELD_SYNTAX.test(value)) {
             return
           }
-          const [, entrySlug, categorySlug] = post[key].match(/([^(\s]+)(?:\s*\(([^)]+)\))?/)
-          return {
-            key: match[1],
-            collectionSlug: match[2],
-            categorySlug,
-            entrySlug
-          }
-        })
-        .filter(Boolean)
-      linkFields.forEach(link => {
-        const collection = contentModel.collections.find(c => c.slug.match(new RegExp(link.collectionSlug, 'i')))
-        const container = link.categorySlug ? // TODO: Handle subcategories
-          collection.categories.find(c => c.slug.match(new RegExp(link.categorySlug, 'i'))) || collection :
-          collection
-        const entry = container.posts.find(p => p.slug.match(new RegExp(link.entrySlug, 'i')))
-        post[link.key] = Object.assign({}, entry)
-        entry.links = entry.links || {}
-        entry.links.relations = entry.links.relations || []
-        const relation = entry.links.relations.find(r => r.key === link.key)
-        if (relation) {
-          relation.entries.push(post)
-        } else {
-          entry.links.relations.push({
-            key: link.key,
-            entries: [post]
-          })
+          const link = parseLink(value)
+          const entry = findLinkedEntry(contentModel, link)
+          post[key] = Object.assign({}, entry)
+          linkBack(post, entry, key)
         }
       })
     })

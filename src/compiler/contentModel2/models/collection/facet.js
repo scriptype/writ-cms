@@ -95,10 +95,17 @@ function linkEntryFieldsToFacets(entry, facets) {
     if (facetValue?.slug) {
       facetValue.facetPermalink = makeFacetPermalink(facet, facetValue.slug)
     } else if (Array.isArray(facetValue)) {
-      entry[facetKey] = facetValue.map(item => createFacetField(facet, item))
+      entry[facetKey] = facetValue.map(item => {
+        if (!item.slug) {
+          return createFacetField(facet, item)
+        }
+        return {
+          ...item,
+          facetPermalink: makeFacetPermalink(facet, item.slug)
+        }
+      })
     } else {
-      const field = createFacetField(facet, facetValue)
-      entry[facetKey] = field
+      entry[facetKey] = createFacetField(facet, facetValue)
     }
   })
 }
@@ -138,7 +145,7 @@ function Facet() {
           return Array.from(f.map, ([key, value]) => ({
             key,
             value,
-            slug: makeSlug(key)
+            slug: key.slug || makeSlug(key)
           }))
         }
       }))
@@ -193,7 +200,7 @@ function Facet() {
                 page: facetValue,
                 posts: facetValue.value,
                 postsPerPage: 15,
-                outputDir: join(facet.outputPath, makeSlug(facetValue.key)),
+                outputDir: join(facet.outputPath, facetValue.key.slug || makeSlug(facetValue.key)),
                 render: async ({ outputPath, pageOfPosts, paginationData }) => {
                   return renderer.render({
                     templates: [`pages/facets/facetKeyPosts`],
