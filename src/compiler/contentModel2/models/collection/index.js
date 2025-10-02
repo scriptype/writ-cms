@@ -5,7 +5,6 @@ const { join, resolve } = require('path')
 const {
   isTemplateFile,
   removeExtension,
-  parseArray,
   makePermalink,
   makeDateSlug,
   Markdown
@@ -14,7 +13,6 @@ const models = {
   attachment: require('../attachment'),
   category: require('./category'),
   post: require('./post'),
-  tag: require('./tag'),
   facet: require('./facet')
 }
 
@@ -105,7 +103,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         entriesAlias: indexProps.attributes?.entriesAlias || contentType?.entriesAlias,
         defaultCategoryName: indexProps.attributes?.defaultCategoryName || contentType?.defaultCategoryName || settings.defaultCategoryName,
         title: indexProps.attributes?.title || node.name,
-        facetKeys: parseArray(indexProps.attributes?.facets || contentType?.facets || []),
+        facetKeys: indexProps.attributes?.facets || contentType?.facets || [],
         slug,
         permalink,
         outputPath
@@ -266,14 +264,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         )
       }
 
-      const renderTags = () => {
-        console.log('skip rendering tags')
-        return Promise.resolve()
-        return models.tag().render(
-          renderer, collection.tags, { contentModel, settings, debug }
-        )
-      }
-
       const renderFacets = () => {
         if (collection.facets.length) {
           /*
@@ -290,7 +280,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         renderCollection(),
         renderAttachments(),
         renderCategories(),
-        renderTags(),
         renderFacets()
       ])
     }

@@ -1,6 +1,6 @@
 const { join } = require('path')
 const makeSlug = require('slug')
-const { isTemplateFile, parseArray, makePermalink } = require('../../helpers')
+const { isTemplateFile, makePermalink } = require('../../helpers')
 const models = {
   facet: require('./facet'),
   _baseEntry: require('../_baseEntry'),
@@ -49,7 +49,6 @@ module.exports = function Post(settings = defaultSettings) {
         ...postContext,
         context,
         contentType: context.peek().entryContentType,
-        tags: parseArray(baseEntryProps.tags),
         date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
         attachments: baseEntryProps.attachments.map(
           attachment => attachment(context.push({

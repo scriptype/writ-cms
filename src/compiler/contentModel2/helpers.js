@@ -21,12 +21,6 @@ const removeExtension = (fileName) => {
   return fileName
 }
 
-const parseArray = (array = []) => {
-  return typeof array === 'string' ?
-    array.split(',').map(t => t.trim()) :
-    array
-}
-
 const makePermalink = (...parts) => {
   if (parts[0] === '/') {
     return parts[0] + parts.slice(1).join('/')
@@ -62,7 +56,6 @@ module.exports = {
   templateExtensions,
   isTemplateFile,
   removeExtension,
-  parseArray,
   makePermalink,
   makeDateSlug,
   Markdown
