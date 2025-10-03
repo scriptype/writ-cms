@@ -231,6 +231,9 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
 
     render: (renderer, category, { contentModel, settings, debug }) => {
       const renderCategory = () => {
+        if (category.isDefaultCategory && !category.slug) {
+          return
+        }
         return renderer.paginate({
           page: category,
           posts: category.posts,

@@ -25,7 +25,7 @@ const makePermalink = (...parts) => {
   if (parts[0] === '/') {
     return parts[0] + parts.slice(1).join('/')
   }
-  return parts.join('/')
+  return parts.filter(Boolean).join('/')
 }
 
 const makeDateSlug = (date) => {

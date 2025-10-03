@@ -24,7 +24,7 @@ function parseContent(node, content) {
 }
 
 const defaultSettings = {
-  defaultCategoryName: 'Unclassified',
+  defaultCategoryName: '',
   collectionAliases: []
 }
 module.exports = function Collection(settings = defaultSettings, contentTypes = []) {

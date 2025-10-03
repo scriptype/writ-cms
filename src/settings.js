@@ -11,7 +11,7 @@ const defaultSettings = (rootDirectory) => ({
   icon: "assets/common/writ-icon-512.png",
   theme: "default",
   permalinkPrefix: "/",
-  defaultCategoryName: "Unclassified",
+  defaultCategoryName: "",
   contentTypesDirectory: "schema",
   assetsDirectory: "assets",
   exportDirectory: "docs",
