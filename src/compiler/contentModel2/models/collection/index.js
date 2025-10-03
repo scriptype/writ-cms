@@ -7,6 +7,7 @@ const {
   removeExtension,
   makePermalink,
   makeDateSlug,
+  sort,
   Markdown
 } = require('../../helpers')
 const models = {
@@ -102,6 +103,8 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
         entriesAlias: indexProps.attributes?.entriesAlias || contentType?.entriesAlias,
         defaultCategoryName: indexProps.attributes?.defaultCategoryName || contentType?.defaultCategoryName || settings.defaultCategoryName,
+        sortBy: indexProps.attributes?.sortBy || contentType?.sortBy || 'date',
+        sortOrder: indexProps.attributes?.sortOrder || contentType?.sortOrder || 1,
         title: indexProps.attributes?.title || node.name,
         facetKeys: indexProps.attributes?.facets || contentType?.facets || [],
         slug,
@@ -177,7 +180,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
     },
 
     afterEffects: (contentModel, collection) => {
-      collection.posts.sort((a, b) => b.date - a.date)
+      sort(collection.posts, collection.sortBy, collection.sortOrder)
 
       if (collection.facetKeys.length) {
         const collectionContext = _.omit(collection, [

@@ -6,7 +6,8 @@ const {
   isTemplateFile,
   Markdown,
   makePermalink,
-  makeDateSlug
+  makeDateSlug,
+  sort
 } = require('../../helpers')
 const models = {
   post: require('./post'),
@@ -82,6 +83,8 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
           entryContentType: context.peek().entryContentType,
           entryAlias: context.peek().entryAlias,
           facetKeys: context.peek().facetKeys || [],
+          sortBy: context.peek().sortBy,
+          sortOrder: context.peek().sortOrder,
           content: '',
           contentRaw: '',
           slug,
@@ -124,6 +127,8 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
         categoriesAlias: indexProps.attributes?.categoriesAlias || context.peek().categoriesAlias,
         entriesAlias: indexProps.attributes?.entriesAlias || context.peek().entriesAlias,
         facetKeys: context.peek().facetKeys || [],
+        sortBy: indexProps.attributes?.sortBy || context.peek().sortBy,
+        sortOrder: indexProps.attributes?.sortOrder || context.peek().sortOrder,
         title: indexProps.attributes?.title || node.name,
         slug,
         permalink,
@@ -221,7 +226,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
         Category().afterEffects(contentModel, subCategory)
       })
 
-      category.posts.sort((a, b) => b.date - a.date)
+      sort(category.posts, category.sortBy, category.sortOrder)
       category.posts.forEach(linkPosts)
 
       category.attachments.forEach(attachment => {

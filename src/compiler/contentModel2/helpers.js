@@ -32,6 +32,21 @@ const makeDateSlug = (date) => {
   return date.toISOString().split('T')[0]
 }
 
+const _sortableValue = (value) => {
+  return typeof value === 'string' ? value.charCodeAt(0) * -1 : value
+}
+
+const sort = (items, sortBy, sortOrder) => {
+  items.sort((a, b) => {
+    const sortableA = _sortableValue(a[sortBy])
+    const sortableB = _sortableValue(b[sortBy])
+    if (sortOrder === -1) {
+      return sortableA - sortableB
+    }
+    return sortableB - sortableA
+  })
+}
+
 const Markdown = {
   parse(text) {
     return Markdown.unescapeHandlebarsExpressions(
@@ -58,5 +73,6 @@ module.exports = {
   removeExtension,
   makePermalink,
   makeDateSlug,
+  sort,
   Markdown
 }
