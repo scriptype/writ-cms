@@ -24,6 +24,28 @@ function parseContent(node, content) {
   return Markdown.parse(content)
 }
 
+function locatePinnedEntries(entries) {
+  const pinnedEntries = []
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i]
+    if (entry.order !== undefined) {
+      entries.splice(i, 1)
+      pinnedEntries.push(entry)
+      i--
+    }
+  }
+
+  pinnedEntries.sort((a, b) => a.order - b.order)
+
+  for (const pinnedEntry of pinnedEntries) {
+    const insertIndex = pinnedEntry.order === -1 ?
+      entries.length :
+      pinnedEntry.order
+    entries.splice(insertIndex, 0, pinnedEntry)
+  }
+}
+
 const defaultSettings = {
   defaultCategoryName: '',
   collectionAliases: []
@@ -181,6 +203,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
 
     afterEffects: (contentModel, collection) => {
       sort(collection.posts, collection.sortBy, collection.sortOrder)
+      locatePinnedEntries(collection.posts)
 
       if (collection.facetKeys.length) {
         const collectionContext = _.omit(collection, [
