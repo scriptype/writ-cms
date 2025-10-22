@@ -10,7 +10,7 @@ const models = {
 const defaultSettings = {
   entryAlias: undefined
 }
-module.exports = function Post(settings = defaultSettings) {
+module.exports = function Post(settings = defaultSettings, contentTypes = []) {
   const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
 
   const isPostIndexFile = (node) => {
@@ -44,11 +44,14 @@ module.exports = function Post(settings = defaultSettings) {
         outputPath,
       }
 
+      const contentType = context.peek().entryContentType
+
       return {
         ...baseEntryProps,
         ...postContext,
         context,
-        contentType: context.peek().entryContentType,
+        contentType,
+        schema: contentTypes.find(ct => ct.name === contentType),
         date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
         attachments: baseEntryProps.attachments.map(
           attachment => attachment(context.push({
@@ -83,6 +86,7 @@ module.exports = function Post(settings = defaultSettings) {
         return renderer.render({
           templates: [
             `pages/${post.template}`,
+            `pages/post/${entryAlias}`,
             `pages/post/${post.contentType}`,
             `pages/post/default`
           ],

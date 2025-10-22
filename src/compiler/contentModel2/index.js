@@ -32,6 +32,21 @@ const findLinkedEntry = (contentModel, link) => {
 }
 
 const linkBack = (post, entry, key) => {
+  if (entry.schema) {
+    Object.keys(entry.schema).forEach(schemaKey => {
+      const schemaValue = entry.schema[schemaKey]
+      const re = new RegExp(`^\\+(${post.contentType}|):${key}$`)
+      const match = Array.isArray(schemaValue) ?
+        schemaValue.find(v => re.test(v)) :
+        re.test(schemaValue)
+      if (match) {
+        // console.log('linking', post.title, 'to', schemaKey, 'field of', entry.title)
+        entry[schemaKey] = entry[schemaKey] || []
+        entry[schemaKey].push(post)
+      }
+    })
+    return
+  }
   entry.links = entry.links || {}
   entry.links.relations = entry.links.relations || []
   const relation = entry.links.relations.find(r => r.key === key)

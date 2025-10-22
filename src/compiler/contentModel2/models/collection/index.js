@@ -149,10 +149,10 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         category: models.category({
           categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
           entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias
-        }),
+        }, contentTypes),
         post: models.post({
           entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias
-        })
+        }, contentTypes)
       }
 
       node.children.forEach(childNode => {

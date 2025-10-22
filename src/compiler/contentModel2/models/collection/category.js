@@ -42,7 +42,7 @@ const defaultSettings = {
   categoryAlias: undefined,
   entryAlias: undefined
 }
-module.exports = function Category(settings = defaultSettings, level = 1) {
+module.exports = function Category(settings = defaultSettings, contentTypes, level = 1) {
   const indexFileNameOptions = [settings.categoryAlias, 'category'].filter(Boolean)
 
   const isCategoryIndexFile = (node) => {
@@ -55,7 +55,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
     attachment: models.attachment(),
     post: models.post({
       entryAlias: settings.entryAlias
-    })
+    }, contentTypes)
   }
 
   return {
@@ -173,7 +173,7 @@ module.exports = function Category(settings = defaultSettings, level = 1) {
           const SubCategoryModel = Category({
             entryAlias: categoryContext.entryAlias || settings.entryAlias,
             categoryAlias: categoryContext.categoryAlias || settings.categoryAlias
-          }, level + 1)
+          }, contentTypes, level + 1)
           const subCategory = SubCategoryModel.create(childNode, childContext)
           tree.categories.push(subCategory)
           tree.posts.push(...subCategory.posts)
