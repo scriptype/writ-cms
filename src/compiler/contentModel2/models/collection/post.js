@@ -1,6 +1,6 @@
 const { join } = require('path')
 const makeSlug = require('slug')
-const { isTemplateFile, makePermalink } = require('../../helpers')
+const { isTemplateFile, makePermalink, Markdown } = require('../../helpers')
 const models = {
   facet: require('./facet'),
   _baseEntry: require('../_baseEntry'),
@@ -59,6 +59,32 @@ module.exports = function Post(settings = defaultSettings, contentTypes = []) {
             key: 'post'
           }))
         )
+      }
+    },
+
+    createFromData: (data, context) => {
+      const slug = data.slug || makeSlug(data.title)
+
+      const postContext = {
+        title: data.title,
+        slug,
+        permalink: makePermalink(context.peek().permalink, slug) + '.html',
+        outputPath: join(context.peek().outputPath, slug),
+      }
+
+      const contentType = context.peek().entryContentType
+      const contentRaw = data.content || ''
+
+      return {
+        ...data,
+        ...postContext,
+        context,
+        contentType,
+        schema: contentTypes.find(ct => ct.name === contentType),
+        date: new Date(data.date || Date.now()),
+        contentRaw,
+        content: Markdown.parse(contentRaw),
+        attachments: []
       }
     },
 

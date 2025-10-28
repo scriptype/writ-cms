@@ -62,11 +62,19 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
     )
   }
 
+  const isDataFile = (node, parentNode) => {
+    return node.name.match(new RegExp(`^${parentNode.name}\\.json$`, 'i'))
+  }
+
   return {
-    match: node => node.children?.find(isCollectionIndexFile),
+    match: node => {
+      const hasCollectionIndex = node.children?.find(isCollectionIndexFile)
+      const hasCollectionData = node.children?.find(childNode => isDataFile(childNode, node))
+      return hasCollectionIndex || hasCollectionData
+    },
 
     create: (node, context) => {
-      function addUncategorizedPost(childNode) {
+      function addUncategorizedPost(childNode, postData) {
         let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
         if (!defaultCategory) {
           defaultCategory = childModels.category.create(
@@ -79,16 +87,16 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
           defaultCategory,
           ['posts', 'context', 'content', 'attachments']
         )
-        const uncategorizedPost = childModels.post.create(
-          childNode,
-          context.push({
-            ...collectionContext,
-            key: 'collection'
-          }).push({
-            ...defaultCategoryContext,
-            key: 'category'
-          })
-        )
+        const postContext = context.push({
+          ...collectionContext,
+          key: 'collection'
+        }).push({
+          ...defaultCategoryContext,
+          key: 'category'
+        })
+        const uncategorizedPost = childNode ?
+          childModels.post.create(childNode, postContext) :
+          childModels.post.createFromData(postData, postContext)
         defaultCategory.levelPosts.push(uncategorizedPost)
         defaultCategory.posts.push(uncategorizedPost)
         defaultCategory.posts.forEach(childModels.category.linkPosts)
@@ -103,12 +111,11 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       }
 
       const indexFile = node.children.find(isCollectionIndexFile)
-      const indexProps = frontMatter(indexFile.content)
-      const indexFileName = removeExtension(indexFile.name)
+      const indexProps = indexFile ? frontMatter(indexFile.content) : {}
 
       const contentType = contentTypes
         .filter(ct => ct.model === 'collection')
-        .find(ct => ct.collectionAlias === indexFileName)
+        .find(ct => ct.collectionAlias === (indexFile ? removeExtension(indexFile.name) : node.name))
 
       const slug = indexProps.attributes?.slug === null ?
         '' :
@@ -158,6 +165,15 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       node.children.forEach(childNode => {
         if (isCollectionIndexFile(childNode)) {
           return
+        }
+        if (isDataFile(childNode, node)) {
+          const data = JSON.parse(childNode.content)
+          if (!Array.isArray(data)) {
+            return console.log('Collection data should be an array of posts', childNode.name)
+          }
+          return data.forEach(entry => {
+            addUncategorizedPost(null, entry)
+          })
         }
         if (childModels.post.match(childNode)) {
           return addUncategorizedPost(childNode)
