@@ -8,14 +8,18 @@ const defaultSettings = {
   rootDirectory: '.',
   contentTypesDirectory: 'schema'
 }
-const init = async (contentTypesSettings = defaultSettings) => {
+const init = async (contentTypesSettings = defaultSettings, logger) => {
   const { rootDirectory, contentTypesDirectory } = contentTypesSettings
   const contentTypesPath = join(
     rootDirectory,
     contentTypesSettings.contentTypesDirectory
   )
-  const contentTypes = await readContentTypesDirectory(contentTypesPath)
-  return contentTypes
+  try {
+    return await readContentTypesDirectory(contentTypesPath)
+  } catch {
+    logger.debug('schema directory not found')
+    return []
+  }
 }
 
 const readContentTypesDirectory = async (dir) => {

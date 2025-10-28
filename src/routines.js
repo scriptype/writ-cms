@@ -71,19 +71,21 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await SiteDirectory.create()
   await CNAME.create()
 
+  const logger = {
+    debug: Debug.debugLog
+  }
+
   let contentTypes = []
   if (settings.compilerVersion === 2) {
     contentTypes = await ContentTypes.init(
       _.pick(settings, [
         'rootDirectory',
         'contentTypesDirectory'
-      ])
+      ]),
+      logger
     )
   }
 
-  const logger = {
-    debug: Debug.debugLog
-  }
   const { fileSystemTree, contentModel } = await new Compiler({
     fileSystemParser: new FileSystemParser(
       _.pick(settings, [
@@ -119,9 +121,8 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
       Rendering2 :
       Rendering1
   }).compile()
-  if (settings.compilerVersion === 1) {
-    await Assets.copyAssets()
-  }
+
+  await Assets.copyAssets()
 
   await finishCallback({
     settings,
