@@ -24,16 +24,19 @@ function parseContent(node, content) {
 
 function linkPosts(post, postIndex, posts) {
   post.links = post.links || {}
-  if (postIndex > 0) {
+
+  const nextPost = posts[postIndex - 1]
+  if (nextPost) {
     post.links.nextPost = {
-      title: posts[postIndex - 1].title,
-      permalink: posts[postIndex - 1].permalink
+      title: nextPost.title,
+      permalink: nextPost.permalink
     }
   }
-  if (postIndex < posts.length - 1) {
+  const previousPost = posts[postIndex + 1]
+  if (previousPost) {
     post.links.previousPost = {
-      title: posts[postIndex + 1].title,
-      permalink: posts[postIndex + 1].permalink
+      title: previousPost.title,
+      permalink: previousPost.permalink
     }
   }
 }
@@ -59,8 +62,6 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
   }
 
   return {
-    linkPosts,
-
     match: (node) => node.children?.find(childNode => {
       const containsPosts = childModels.post.match(childNode)
       if (level > 3) {

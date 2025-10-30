@@ -99,7 +99,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
           childModels.post.createFromData(postData, postContext)
         defaultCategory.levelPosts.push(uncategorizedPost)
         defaultCategory.posts.push(uncategorizedPost)
-        defaultCategory.posts.forEach(childModels.category.linkPosts)
         tree.posts.push(uncategorizedPost)
       }
 
