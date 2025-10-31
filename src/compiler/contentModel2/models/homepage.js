@@ -6,7 +6,8 @@ const models = {
 }
 
 const defaultSettings = {
-  homepageDirectory: 'homepage'
+  homepageDirectory: 'homepage',
+  mode: 'start'
 }
 module.exports = function Homepage(settings = defaultSettings) {
   const indexFileNameOptions = ['homepage', 'home', 'index']

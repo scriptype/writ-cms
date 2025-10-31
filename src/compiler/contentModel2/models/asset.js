@@ -2,7 +2,8 @@ const { join, resolve } = require('path')
 const { makePermalink } = require('../helpers')
 
 const defaultSettings = {
-  assetsDirectory: 'assets'
+  assetsDirectory: 'assets',
+  mode: 'start'
 }
 module.exports = function Asset(settings = defaultSettings) {
   const assetsDirectoryNameOptions = [settings.assetsDirectory, 'assets']

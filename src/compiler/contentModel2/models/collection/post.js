@@ -8,7 +8,8 @@ const models = {
 }
 
 const defaultSettings = {
-  entryAlias: undefined
+  entryAlias: undefined,
+  mode: 'start'
 }
 module.exports = function Post(settings = defaultSettings, contentTypes = []) {
   const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)

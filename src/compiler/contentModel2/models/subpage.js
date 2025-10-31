@@ -6,7 +6,8 @@ const models = {
 }
 
 const defaultSettings = {
-  pagesDirectory: 'pages'
+  pagesDirectory: 'pages',
+  mode: 'start'
 }
 module.exports = function Subpage(settings = defaultSettings) {
   const indexFileNameOptions = ['page', 'index']

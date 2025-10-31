@@ -48,7 +48,8 @@ function locatePinnedEntries(entries) {
 
 const defaultSettings = {
   defaultCategoryName: '',
-  collectionAliases: []
+  collectionAliases: [],
+  mode: 'start'
 }
 module.exports = function Collection(settings = defaultSettings, contentTypes = []) {
   const indexFileNameOptions = [
@@ -64,6 +65,10 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
 
   const isDataFile = (node, parentNode) => {
     return node.name.match(new RegExp(`^${parentNode.name}\\.json$`, 'i'))
+  }
+
+  const draftCheck = (node) => {
+    return settings.mode === 'start' || !node.draft
   }
 
   return {
@@ -97,9 +102,11 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         const uncategorizedPost = childNode ?
           childModels.post.create(childNode, postContext) :
           childModels.post.createFromData(postData, postContext)
-        defaultCategory.levelPosts.push(uncategorizedPost)
-        defaultCategory.posts.push(uncategorizedPost)
-        tree.posts.push(uncategorizedPost)
+        if (childModels.category.draftCheck(uncategorizedPost)) {
+          defaultCategory.levelPosts.push(uncategorizedPost)
+          defaultCategory.posts.push(uncategorizedPost)
+          tree.posts.push(uncategorizedPost)
+        }
       }
 
       const tree = {
@@ -154,10 +161,12 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         attachment: models.attachment(),
         category: models.category({
           categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
-          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias
+          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
+          mode: settings.mode
         }, contentTypes),
         post: models.post({
-          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias
+          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
+          mode: settings.mode
         }, contentTypes)
       }
 
@@ -185,8 +194,10 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
               key: 'collection'
             })
           )
-          tree.categories.push(newCategory)
-          tree.posts.push(...newCategory.posts)
+          if (draftCheck(newCategory)) {
+            tree.categories.push(newCategory)
+            tree.posts.push(...newCategory.posts)
+          }
           return
         }
         if (childModels.attachment.match(childNode)) {

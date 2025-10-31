@@ -43,7 +43,8 @@ function linkPosts(post, postIndex, posts) {
 
 const defaultSettings = {
   categoryAlias: undefined,
-  entryAlias: undefined
+  entryAlias: undefined,
+  mode: 'start'
 }
 module.exports = function Category(settings = defaultSettings, contentTypes, level = 1) {
   const indexFileNameOptions = [settings.categoryAlias, 'category'].filter(Boolean)
@@ -54,6 +55,10 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
     )
   }
 
+  const draftCheck = (node) => {
+    return settings.mode === 'start' || !node.draft
+  }
+
   const childModels = {
     attachment: models.attachment(),
     post: models.post({
@@ -62,6 +67,8 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
   }
 
   return {
+    draftCheck,
+
     match: (node) => node.children?.find(childNode => {
       const containsPosts = childModels.post.match(childNode)
       if (level > 3) {
@@ -166,8 +173,10 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
         }
         if (childModels.post.match(childNode)) {
           const post = childModels.post.create(childNode, childContext)
-          tree.levelPosts.push(post)
-          tree.posts.push(post)
+          if (draftCheck(post)) {
+            tree.levelPosts.push(post)
+            tree.posts.push(post)
+          }
           return
         }
         if (Category().match(childNode)) {
@@ -176,8 +185,10 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
             categoryAlias: categoryContext.categoryAlias || settings.categoryAlias
           }, contentTypes, level + 1)
           const subCategory = SubCategoryModel.create(childNode, childContext)
-          tree.categories.push(subCategory)
-          tree.posts.push(...subCategory.posts)
+          if (draftCheck(subCategory)) {
+            tree.categories.push(subCategory)
+            tree.posts.push(...subCategory.posts)
+          }
           return
         }
         if (childModels.attachment.match(childNode)) {

@@ -67,23 +67,33 @@ const linkEntries = (contentModel) => {
       Object.keys(post).forEach(key => {
         const value = post[key]
         if (Array.isArray(value)) {
-          value.forEach((valueItem, valueIndex) => {
+          for (let i = 0; i < value.length; i++) {
+            let valueItem = value[i]
             if (!LINKED_FIELD_SYNTAX.test(valueItem)) {
-              return
+              break
             }
             const link = parseLink(valueItem)
             const entry = findLinkedEntry(contentModel, link)
-            post[key][valueIndex] = Object.assign({}, entry)
-            linkBack(post, entry, key)
-          })
+            if (entry) {
+              post[key][i] = Object.assign({}, entry)
+              linkBack(post, entry, key)
+            } else {
+              post[key].splice(i, 1)
+              i--
+            }
+          }
         } else {
           if (!LINKED_FIELD_SYNTAX.test(value)) {
             return
           }
           const link = parseLink(value)
           const entry = findLinkedEntry(contentModel, link)
-          post[key] = Object.assign({}, entry)
-          linkBack(post, entry, key)
+          if (entry) {
+            post[key] = Object.assign({}, entry)
+            linkBack(post, entry, key)
+          } else {
+            post[key] = undefined
+          }
         }
       })
     })
@@ -101,7 +111,11 @@ const defaultContentModelSettings = {
   site: {
     title: '',
     description: ''
-  }
+  },
+  mode: 'start',
+  search: 'off',
+  rss: 'off',
+  syntaxHighlighting: 'off'
 }
 class ContentModel {
   constructor(contentModelSettings = defaultContentModelSettings, contentTypes = []) {
@@ -110,6 +124,10 @@ class ContentModel {
       ...contentModelSettings
     }
     this.contentTypes = contentTypes
+  }
+
+  draftCheck(node) {
+    return this.settings.mode === 'start' || !node.draft
   }
 
   create(fileSystemTree) {
@@ -138,19 +156,23 @@ class ContentModel {
             .filter(ct => ct.model === 'collection')
             .map(ct => ct.collectionAlias),
           ...(indexProps.attributes?.collectionAliases || [])
-        ]
+        ],
+        mode: this.settings.mode
       }, this.contentTypes),
 
       subpage: models.subpage({
-        pagesDirectory: this.settings.pagesDirectory
+        pagesDirectory: this.settings.pagesDirectory,
+        mode: this.settings.mode
       }),
 
       homepage: models.homepage({
-        homepageDirectory: this.settings.homepageDirectory
+        homepageDirectory: this.settings.homepageDirectory,
+        mode: this.settings.mode
       }),
 
       asset: models.asset({
-        assetsDirectory: this.settings.assetsDirectory
+        assetsDirectory: this.settings.assetsDirectory,
+        mode: this.settings.mode
       })
     }
 
@@ -192,9 +214,11 @@ class ContentModel {
       }
 
       if (this.models.collection.match(node)) {
-        return this.contentModel.collections.push(
-          this.models.collection.create(node, context)
-        )
+        const collection = this.models.collection.create(node, context)
+        if (this.draftCheck(collection)) {
+          this.contentModel.collections.push(collection)
+        }
+        return
       }
 
       if (this.models.asset.matchAssetsDirectory(node)) {
