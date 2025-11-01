@@ -105,6 +105,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         if (childModels.category.draftCheck(uncategorizedPost)) {
           defaultCategory.levelPosts.push(uncategorizedPost)
           defaultCategory.posts.push(uncategorizedPost)
+          tree.levelPosts.push(uncategorizedPost)
           tree.posts.push(uncategorizedPost)
         }
       }
@@ -112,6 +113,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       const tree = {
         categories: [],
         posts: [],
+        levelPosts: [],
         attachments: [],
         facets: []
       }

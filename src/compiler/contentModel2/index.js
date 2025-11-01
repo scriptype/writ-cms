@@ -24,11 +24,36 @@ const parseLink = (value) => {
 }
 
 const findLinkedEntry = (contentModel, link) => {
-  const collection = contentModel.collections.find(c => c.slug.match(new RegExp(link.collectionSlug, 'i')))
-  const container = link.categorySlugs[0] ? // TODO: Handle subcategories
-    collection.categories.find(c => c.slug.match(new RegExp(link.categorySlug, 'i'))) || collection :
-    collection
-  return container.posts.find(p => p.slug.match(new RegExp(link.entrySlug, 'i')))
+  const collectionSlugRe = new RegExp(link.collectionSlug, 'i')
+  const collection = contentModel.collections.find(c => c.slug.match(collectionSlugRe))
+  let container = collection
+
+  for (const categorySlug of link.categorySlugs) {
+    const categorySlugRe = new RegExp(categorySlug, 'i')
+    const category = container.categories?.find(c => c.slug.match(categorySlugRe))
+    if (!category) {
+      break
+    }
+    container = category
+  }
+
+  const entrySlugRe = new RegExp(link.entrySlug, 'i')
+  const queue = [container]
+  while (queue.length > 0) {
+    const node = queue.shift()
+    if (node.slug?.match(entrySlugRe)) {
+      return node
+    }
+    const match = node.levelPosts?.find(p => p.slug.match(entrySlugRe))
+    if (match) {
+      return match
+    }
+    if (node.categories) {
+      queue.push(...node.categories)
+    }
+  }
+
+  return undefined
 }
 
 const linkBack = (post, entry, key) => {
