@@ -116,11 +116,37 @@ function linkEntryFieldsToFacets(entry, facets) {
   })
 }
 
+function serialize(facet) {
+  return {
+    ...facet,
+    title: facet.key,
+    get keys() {
+      return Array.from(facet.map.keys())
+    },
+    get entries() {
+      return Array.from(facet.map, ([key, value]) => {
+        let linkedFacet
+        try {
+          linkedFacet = JSON.parse(key)
+        } catch { }
+        const slug = linkedFacet ? linkedFacet.slug : makeSlug(key)
+        return {
+          key: linkedFacet ? linkedFacet.title : key,
+          value,
+          slug
+        }
+      })
+    }
+  }
+}
+
 function Facet() {
   const addressSegment = 'by' // alt: browse, filter, view
 
   return {
     collectFacets,
+
+    serialize,
 
     linkEntryFieldsToFacets,
 
@@ -141,27 +167,7 @@ function Facet() {
     afterEffects: (contentModel, facet) => {},
 
     render: (renderer, facets, { contentModel, settings, debug }) => {
-      const presentationFacets = facets.map(f => ({
-        ...f,
-        title: f.key,
-        get keys() {
-          return Array.from(f.map.keys())
-        },
-        get entries() {
-          return Array.from(f.map, ([key, value]) => {
-            let linkedFacet
-            try {
-              linkedFacet = JSON.parse(key)
-            } catch { }
-            const slug = linkedFacet ? linkedFacet.slug : makeSlug(key)
-            return {
-              key: linkedFacet ? linkedFacet.title : key,
-              value,
-              slug
-            }
-          })
-        }
-      }))
+      const presentationFacets = facets.map(serialize)
 
       // /by
       const renderAllFacetsPage = () => {

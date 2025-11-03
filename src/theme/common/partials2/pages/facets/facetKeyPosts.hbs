@@ -1,0 +1,16 @@
+{{#>base page="facet-value"}}
+  {{#>layouts/single-column}}
+    <header {{region "header"}}>
+      {{>components/header}}
+    </header>
+
+    <main {{region "main"}}>
+      <h2>{{facetValue.title}}</h2>
+      <ul>
+        {{#each facetValue.posts as |post|}}
+        <li><a href="{{post.permalink}}">{{post.title}}</a></li>
+        {{/each}}
+      </ul>
+    </main>
+  {{/layouts/single-column}}
+{{/base}}

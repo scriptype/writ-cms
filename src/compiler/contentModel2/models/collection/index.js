@@ -46,6 +46,13 @@ function locatePinnedEntries(entries) {
   }
 }
 
+function serialize(collection) {
+  return {
+    ...collection,
+    facets: collection.facets.map(models.facet().serialize)
+  }
+}
+
 const defaultSettings = {
   defaultCategoryName: '',
   collectionAliases: [],
@@ -72,6 +79,8 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
   }
 
   return {
+    serialize,
+
     match: node => {
       const hasCollectionIndex = node.children?.find(isCollectionIndexFile)
       const hasCollectionData = node.children?.find(childNode => isDataFile(childNode, node))
@@ -289,7 +298,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
               content: collection.content,
               data: {
                 ...contentModel,
-                collection,
+                collection: serialize(collection),
                 pagination: paginationData,
                 posts: pageOfPosts,
                 settings,

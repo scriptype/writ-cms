@@ -2,7 +2,8 @@ const { join, resolve } = require('path')
 const { isTemplateFile } = require('../helpers')
 const models = {
   _baseEntry: require('./_baseEntry'),
-  attachment: require('./attachment')
+  attachment: require('./attachment'),
+  collection: require('./collection')
 }
 
 const defaultSettings = {
@@ -72,6 +73,7 @@ module.exports = function Homepage(settings = defaultSettings) {
           content: homepage.content,
           data: {
             ...contentModel,
+            collections: contentModel.collections.map(models.collection().serialize),
             homepage,
             settings,
             debug

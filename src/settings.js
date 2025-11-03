@@ -70,6 +70,7 @@ module.exports = {
     }
     _settings = _.omit({
       ...userSettings,
+      theme: userSettings.compilerVersion === 1 ? _settings.theme : 'zen',
       site: {
         title: userSettings.title,
         description: userSettings.description,

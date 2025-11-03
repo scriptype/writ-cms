@@ -1,0 +1,47 @@
+{{#>base page="collection"}}
+
+  <style>
+    .collection-header {
+      display: flex;
+      gap: .8em;
+      align-items: center;
+    }
+
+    .collection-facets {
+      font-size: .8em;
+      font-variant: small-caps;
+    }
+
+    .collection-entries-list {
+      margin-top: 0;
+    }
+  </style>
+
+  <h1>{{settings.site.title}}</h1>
+
+  <header class="collection-header">
+    <h2><a href="{{collection.permalink}}">{{collection.title}}</a></h2>
+
+    {{#if collection.facets.length}}
+    <div class="collection-facets">
+      <a href="{{collection.permalink}}/by">by</a>:
+      {{#each collection.facets as |facet|}}
+      <a href="{{facet.permalink}}">{{facet.title}}</a>
+      {{/each}}
+    </div>
+    {{/if}}
+  </header>
+
+  {{> @partial-block }}
+
+  <h2>Categories and entries</h2>
+  {{#each collection.categories as |category| }}
+    <h2><a href="{{category.permalink}}">{{category.title}}</a></h2>
+    <ul>
+      {{#each category.posts as |post|}}
+      <li><a href="{{post.permalink}}">{{post.title}}</a></li>
+      {{/each}}
+    </ul>
+  {{/each}}
+
+{{/base}}

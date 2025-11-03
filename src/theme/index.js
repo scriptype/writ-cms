@@ -8,6 +8,7 @@ const {
   ASSETS,
   FEATURES,
   PARTIALS,
+  PARTIALS2,
   TEMPLATE_HELPERS,
   THEME_SETTINGS,
   KEEP_PATH
@@ -90,9 +91,10 @@ const Methods = (() => {
   }
 
   const copyCommonResources = (targetPath) => {
+    const { compilerVersion } = Settings.getSettings()
     return Promise.all([
       cp(
-        join(__dirname, 'common', PARTIALS.from),
+        join(__dirname, 'common', compilerVersion === 2 ? PARTIALS2.from : PARTIALS.from),
         join(targetPath, PARTIALS.to),
         { recursive: true }
       ),
