@@ -41,6 +41,13 @@ function linkPosts(post, postIndex, posts) {
   }
 }
 
+function serialize(category) {
+  return {
+    ...category,
+    facets: category.facets.map(models.facet().serialize)
+  }
+}
+
 const defaultSettings = {
   categoryAlias: undefined,
   entryAlias: undefined,
@@ -67,6 +74,8 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
   }
 
   return {
+    serialize,
+
     draftCheck,
 
     match: (node) => node.children?.find(childNode => {
@@ -259,7 +268,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
           render: async ({ outputPath, pageOfPosts, paginationData }) => {
             const data = {
               ...contentModel,
-              category,
+              category: serialize(category),
               pagination: paginationData,
               posts: pageOfPosts,
               settings,
