@@ -22,7 +22,7 @@
   {{> @partial-block }}
 
   <h2>Pages</h2>
-  <ul class="collection-entries-list">
+  <ul>
     {{#each subpages as |subpage|}}
     <li><a href="{{subpage.permalink}}">{{subpage.title}}</a></li>
     {{/each}}
@@ -31,7 +31,6 @@
   <h2>Collections</h2>
 
   {{#each collections as |collection|}}
-
     <header class="collection-header">
       <h3><a href="{{collection.permalink}}">{{collection.title}}</a></h3>
 
@@ -46,11 +45,10 @@
     </header>
 
     <ul class="collection-entries-list">
-        {{#each collection.posts as |post|}}
-        <li><a href="{{post.permalink}}">{{post.title}}</a></li>
-        {{/each}}
+      {{#each collection.posts as |post|}}
+      <li><a href="{{post.permalink}}">{{post.title}}</a></li>
+      {{/each}}
     </ul>
-
   {{/each}}
 
 {{/base}}

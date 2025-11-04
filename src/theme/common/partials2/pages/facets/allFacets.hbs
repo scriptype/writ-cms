@@ -1,23 +1,17 @@
 {{#>base page="facets"}}
-  {{#>layouts/single-column}}
-    <header {{region "header"}}>
-      {{>components/header}}
-    </header>
+  <h1>{{settings.site.title}}</h1>
 
-    <main {{region "main"}}>
-      <h2>Browse entries by property</h2>
-      <ul>
-        {{#each facets as |facet|}}
-          <li>
-            <a href="{{facet.permalink}}">{{facet.key}}</a>
-            <ul>
-              {{#each facet.entries as |facetEntry|}}
-              <li><a href="{{facet.permalink}}/{{facetEntry.slug}}">{{facetEntry.key}}</a></li>
-              {{/each}}
-            </ul>
-          </li>
-        {{/each}}
-      </ul>
-    </main>
-  {{/layouts/single-column}}
+  <h2>Browse entries by property</h2>
+  <ul>
+    {{#each facets as |facet|}}
+      <li>
+        <a href="{{facet.permalink}}">{{facet.key}}</a>
+        <ul>
+          {{#each facet.entries as |facetEntry|}}
+          <li><a href="{{facet.permalink}}/{{facetEntry.slug}}">{{facetEntry.key}}</a></li>
+          {{/each}}
+        </ul>
+      </li>
+    {{/each}}
+  </ul>
 {{/base}}

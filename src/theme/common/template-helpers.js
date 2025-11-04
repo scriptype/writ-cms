@@ -1,4 +1,33 @@
 module.exports = {
+
+  /*
+   * CM2 helpers
+   * */
+
+  dateUTC(date) {
+    return date.toUTCString()
+  },
+
+  dateFull(date) {
+    return date.toLocaleString('en', { dateStyle: 'full' })
+  },
+
+  publishDateLong(date) {
+    return date.toLocaleString('en', { dateStyle: 'long' })
+  },
+
+  dateMedium(date) {
+    return date.toLocaleString('en', { dateStyle: 'medium' })
+  },
+
+  dateShort(date) {
+    return date.toLocaleString('en', { dateStyle: 'short' })
+  },
+
+  /*
+   * Legacy helpers
+   * */
+
   region(name) {
     return ` data-region-id="${name}" `
   },

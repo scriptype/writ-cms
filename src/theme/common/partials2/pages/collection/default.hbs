@@ -11,10 +11,6 @@
       font-size: .8em;
       font-variant: small-caps;
     }
-
-    .collection-entries-list {
-      margin-top: 0;
-    }
   </style>
 
   <h1>{{settings.site.title}}</h1>
@@ -24,7 +20,11 @@
 
     {{#if collection.facets.length}}
     <div class="collection-facets">
+      {{#if (is collection.permalink '/')}}
+      <a href="by">by</a>:
+      {{else}}
       <a href="{{collection.permalink}}/by">by</a>:
+      {{/if}}
       {{#each collection.facets as |facet|}}
       <a href="{{facet.permalink}}">{{facet.title}}</a>
       {{/each}}
@@ -34,14 +34,21 @@
 
   {{> @partial-block }}
 
-  <h2>Categories and entries</h2>
+  <h3>Posts by categories</h3>
   {{#each collection.categories as |category| }}
-    <h2><a href="{{category.permalink}}">{{category.title}}</a></h2>
+    <h4><a href="{{category.permalink}}">{{category.title}}</a></h4>
     <ul>
       {{#each category.posts as |post|}}
       <li><a href="{{post.permalink}}">{{post.title}}</a></li>
       {{/each}}
     </ul>
   {{/each}}
+
+  <h3>All posts</h3>
+  <ul>
+    {{#each collection.posts as |post|}}
+    <li><a href="{{post.permalink}}">{{post.title}}</a></li>
+    {{/each}}
+  </ul>
 
 {{/base}}

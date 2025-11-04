@@ -1,23 +1,17 @@
 {{#>base page="facet"}}
-  {{#>layouts/single-column}}
-    <header {{region "header"}}>
-      {{>components/header}}
-    </header>
+  <h1>{{settings.site.title}}</h1>
 
-    <main {{region "main"}}>
-      <h2>{{facet.title}}</h2>
+  <h2>{{facet.title}}</h2>
+  <ul>
+    {{#each facet.entries as |facetEntry|}}
+    <li>
+      <a href="{{facetEntry.slug}}">{{facetEntry.key}}</a>
       <ul>
-        {{#each facet.entries as |facetEntry|}}
-        <li>
-          <a href="{{facetEntry.slug}}">{{facetEntry.key}}</a>
-          <ul>
-            {{#each facetEntry.value as |post|}}
-            <li><a href="{{post.permalink}}">{{post.title}}</a></li>
-            {{/each}}
-          </ul>
-        </li>
+        {{#each facetEntry.value as |post|}}
+        <li><a href="{{post.permalink}}">{{post.title}}</a></li>
         {{/each}}
       </ul>
-    </main>
-  {{/layouts/single-column}}
+    </li>
+    {{/each}}
+  </ul>
 {{/base}}
