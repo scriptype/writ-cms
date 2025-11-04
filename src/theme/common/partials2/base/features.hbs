@@ -1,6 +1,6 @@
 {{#if (isEnabled "rss")}}
   {{#if (isCategoryPage) }}
-    <link rel="alternate" type="application/rss+xml" title="{{settings.site.title}} {{category.name}} Feed" href="{{settings.site.url}}{{ category.permalink }}/feed.xml">
+    <link rel="alternate" type="application/rss+xml" title="{{settings.site.title}} {{category.title}} Feed" href="{{settings.site.url}}{{ category.permalink }}/feed.xml">
   {{else}}
     <link rel="alternate" type="application/rss+xml" title="{{settings.site.title}} Feed" href="{{settings.site.url}}/feed.xml">
   {{/if}}
