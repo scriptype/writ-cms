@@ -67,6 +67,28 @@ const Markdown = {
   },
 }
 
+const safeStringify = ({ data, omit = [], stub = [] }) => {
+  const seen = new WeakSet()
+  return JSON.stringify(data, (key, value) => {
+    if (omit.includes(key)) {
+      return undefined
+    }
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        const result = {}
+        stub.forEach(k => {
+          if (value.hasOwnProperty(k) && typeof value[k] !== 'object') {
+            result[k] = value[k]
+          }
+        })
+        return result
+      }
+      seen.add(value)
+    }
+    return value
+  })
+}
+
 module.exports = {
   templateExtensions,
   isTemplateFile,
@@ -74,5 +96,6 @@ module.exports = {
   makePermalink,
   makeDateSlug,
   sort,
-  Markdown
+  Markdown,
+  safeStringify
 }

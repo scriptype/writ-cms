@@ -103,10 +103,15 @@ const copy = async ({ src, dest, recursive }) => {
   }
 }
 
+const createFile = ({ path, content }) => {
+  return writeFile(path, content)
+}
+
 module.exports = {
   init,
   render,
   paginate,
   compile,
+  createFile,
   copy
 }

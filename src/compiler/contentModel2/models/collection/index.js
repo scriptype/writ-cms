@@ -8,7 +8,8 @@ const {
   makePermalink,
   makeDateSlug,
   sort,
-  Markdown
+  Markdown,
+  safeStringify
 } = require('../../helpers')
 const models = {
   attachment: require('../attachment'),
@@ -282,7 +283,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
 
     render: (renderer, collection, { contentModel, settings, debug }) => {
       const renderCollection = () => {
-        return renderer.paginate({
+        const renderHTML = renderer.paginate({
           page: collection,
           posts: collection.posts,
           postsPerPage: 15, //collection.context.peek().postsPerPage,
@@ -307,6 +308,31 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
             })
           }
         })
+
+        // TODO: Inspires a serialize method inside models/post
+        const renderJSON = renderer.createFile({
+          path: resolve(collection.outputPath, '..', `${collection.slug}.json`),
+          content: safeStringify({
+            data: collection.posts,
+            omit: [
+              'absolutePath',
+              'outputPath',
+              'path',
+              'depth',
+              'extension',
+              'stats',
+              'hasIndex',
+              'contentRaw',
+              'contentType',
+              'context'
+            ]
+          })
+        })
+
+        return Promise.all([
+          renderHTML,
+          renderJSON
+        ])
       }
 
       const renderAttachments = () => {
