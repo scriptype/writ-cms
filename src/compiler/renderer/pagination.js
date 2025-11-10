@@ -22,14 +22,7 @@ const getAdjacentPageUrl = (basePermalink, pageIndex, pagination, isNextPage) =>
   return getPageUrl(basePermalink, pageNumber)
 }
 
-const paginate = ({ page, posts, postsPerPage: _postsPerPage, outputDir, render }) => {
-  const paginationSettingOverride = page['posts per page']
-
-  // Override should take effect and either work or turn off pagination completely
-  const postsPerPage = (paginationSettingOverride || typeof paginationSettingOverride === 'number') ?
-    paginationSettingOverride :
-    _postsPerPage
-
+const paginate = ({ basePermalink, posts, postsPerPage, outputDir, render }) => {
   if (postsPerPage <= 0 || typeof postsPerPage !== 'number') {
     return render({
       outputPath: join(outputDir, 'index.html'),
@@ -45,8 +38,6 @@ const paginate = ({ page, posts, postsPerPage: _postsPerPage, outputDir, render 
       pageOfPosts: []
     })
   }
-
-  const basePermalink = page.permalink
 
   const pages = currentPageIndex => {
     return pagination.map((pageOfPosts, i) => {

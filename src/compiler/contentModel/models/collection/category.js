@@ -261,9 +261,9 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
           return
         }
         return renderer.paginate({
-          page: category,
+          basePermalink: category.permalink,
           posts: category.posts,
-          postsPerPage: 15, //category.context.peek().postsPerPage,
+          postsPerPage: category.postsPerPage || 15, //category.context.peek().postsPerPage
           outputDir: category.outputPath,
           render: async ({ outputPath, pageOfPosts, paginationData }) => {
             const data = {

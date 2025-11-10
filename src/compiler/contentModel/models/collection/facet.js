@@ -216,7 +216,7 @@ function Facet() {
             const container = facet.context.peek()
             return facet.entries.map(facetValue => {
               return renderer.paginate({
-                page: facetValue,
+                basePermalink: facetValue.permalink,
                 posts: facetValue.value,
                 postsPerPage: 15,
                 outputDir: join(facet.outputPath, facetValue.slug),

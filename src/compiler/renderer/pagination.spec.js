@@ -3,6 +3,35 @@ const { join: joinPosix } = require('path').posix
 const test = require('tape')
 const { getPageUrl, getAdjacentPageUrl, paginate } = require('../../compiler/renderer/pagination')
 
+const verifyAllPostsReturned = (t, options) => {
+  const { basePermalink, posts, outputDir, postsPerPage, description } = options
+  paginate({
+    basePermalink,
+    posts,
+    postsPerPage,
+    outputDir,
+    render({ outputPath, pageOfPosts, paginationData }) {
+      t.equal(
+        outputPath,
+        join(outputDir, 'index.html'),
+        `Index page is rendered at the base outputDir when ${description}`
+      )
+
+      t.deepEqual(
+        pageOfPosts,
+        posts,
+        `Index page gets all posts when ${description}`
+      )
+
+      t.deepEqual(
+        paginationData,
+        undefined,
+        `paginationData is not available when ${description}`
+      )
+    }
+  })
+}
+
 const casesForGetPageUrl = (t, basePermalink) => {
   t.equal(
     getAdjacentPageUrl(basePermalink, 0),
@@ -58,7 +87,7 @@ test('pagination', t => {
     let pageNumber = 0
     const out = join('/', 'some', 'absolute', 'path', 'to', 'lorem')
     paginate({
-      page: { permalink: '/lorem' },
+      basePermalink: '/lorem',
       posts: ['a', 'b', 'c', 'd', 'e'],
       postsPerPage: 2,
       outputDir: out,
@@ -154,66 +183,47 @@ test('pagination', t => {
       }
     })
 
-    paginate({
-      page: { permalink: '/lorem' },
+    verifyAllPostsReturned(t, {
+      basePermalink: '/lorem',
       posts: ['a', 'b', 'c', 'd', 'e'],
-      postsPerPage: 0,
       outputDir: out,
-      render({ outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputPath,
-          join(out, 'index.html'),
-          'Index page is rendered at the base outputDir when postsPerPage is 0'
-        )
-
-        t.deepEqual(
-          pageOfPosts,
-          ['a', 'b', 'c', 'd', 'e'],
-          'Index page gets all posts when postsPerPage is 0'
-        )
-
-        t.deepEqual(
-          paginationData,
-          undefined,
-          'paginationData is not available when postsPerPage is 0'
-        )
-      }
+      postsPerPage: 0,
+      description: 'postsPerPage is 0'
     })
 
-    paginate({
-      page: { permalink: '/lorem' },
+    verifyAllPostsReturned(t, {
+      basePermalink: '/lorem',
       posts: ['a', 'b', 'c', 'd', 'e'],
-      postsPerPage: 'something',
       outputDir: out,
-      render({ outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputPath,
-          join(out, 'index.html'),
-          'Index page is rendered at the base outputDir when postsPerPage is not a number'
-        )
+      postsPerPage: 'something',
+      description: 'postsPerPage is not a number'
+    })
 
-        t.deepEqual(
-          pageOfPosts,
-          ['a', 'b', 'c', 'd', 'e'],
-          'Index page gets all posts when postsPerPage is not a number'
-        )
+    verifyAllPostsReturned(t, {
+      basePermalink: '/lorem',
+      posts: ['a', 'b', 'c', 'd', 'e'],
+      outputDir: out,
+      postsPerPage: -5,
+      description: 'postsPerPage is negative'
+    })
 
-        t.deepEqual(
-          paginationData,
-          undefined,
-          'paginationData is not available when postsPerPage is not a number'
-        )
-      }
+    verifyAllPostsReturned(t, {
+      basePermalink: '/lorem',
+      posts: ['a', 'b', 'c', 'd', 'e'],
+      outputDir: out,
+      postsPerPage: undefined,
+      description: 'postsPerPage is omitted'
     })
   })
 
-  t.test('pagination.paginate (postsPerPage override from frontMatter)', async () => {
+  t.test('pagination.paginate (explicit postsPerPage)', async () => {
     let pageNumber = 0
     const out = join('/', 'some', 'absolute', 'path', 'to', 'lorem')
+
     paginate({
-      page: { permalink: '/lorem', 'posts per page': 3 },
-      posts: ['a', 'b', 'c', 'd', 'e'],
-      postsPerPage: 2,
+      basePermalink: '/lorem',
+      posts: Array.from({ length: 30 }, (_, i) => String(i + 1)),
+      postsPerPage: 15,
       outputDir: out,
       render({ outputPath, pageOfPosts, paginationData }) {
         if (pageNumber === 0) {
@@ -223,24 +233,16 @@ test('pagination', t => {
             'First page is rendered at the base outputDir'
           )
 
-          t.deepEqual(
-            pageOfPosts,
-            ['a', 'b', 'c'],
-            'First page gets the first [postsPerPage] items'
+          t.equal(
+            pageOfPosts.length,
+            15,
+            'First page gets 15 posts (explicit postsPerPage)'
           )
 
           t.deepEqual(
-            paginationData,
-            {
-              previousPage: undefined,
-              nextPage: '/lorem/page/2',
-              numberOfPages: 2,
-              pages: [
-                { url: '/lorem', number: 1, current: true },
-                { url: '/lorem/page/2', number: 2, current: false }
-              ]
-            },
-            'First page gets correct paginationData'
+            paginationData.numberOfPages,
+            2,
+            'Has correct number of pages with postsPerPage of 15'
           )
         }
         if (pageNumber === 1) {
@@ -250,82 +252,16 @@ test('pagination', t => {
             'Second page is rendered at the correct path'
           )
 
-          t.deepEqual(
-            pageOfPosts,
-            ['d', 'e'],
-            'Second page gets the second [postsPerPage] items'
-          )
-
-          t.deepEqual(
-            paginationData,
-            {
-              previousPage: '/lorem',
-              nextPage: undefined,
-              numberOfPages: 2,
-              pages: [
-                { url: '/lorem', number: 1, current: false },
-                { url: '/lorem/page/2', number: 2, current: true }
-              ]
-            },
-            'Second page gets correct paginationData'
+          t.equal(
+            pageOfPosts.length,
+            15,
+            'Second page gets remaining 15 posts'
           )
         }
         if (pageNumber === 2) {
           t.fail('There should not be a third page')
         }
         pageNumber++
-      }
-    })
-
-    paginate({
-      page: { permalink: '/lorem', 'posts per page': 0 },
-      posts: ['a', 'b', 'c', 'd', 'e'],
-      postsPerPage: 2,
-      outputDir: out,
-      render({ outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputPath,
-          join(out, 'index.html'),
-          'Index page is rendered at the base outputDir when postsPerPage is 0 (override)'
-        )
-
-        t.deepEqual(
-          pageOfPosts,
-          ['a', 'b', 'c', 'd', 'e'],
-          'Index page gets all posts when postsPerPage is 0 (override)'
-        )
-
-        t.deepEqual(
-          paginationData,
-          undefined,
-          'paginationData is not available when postsPerPage is 0 (override)'
-        )
-      }
-    })
-
-    paginate({
-      page: { permalink: '/lorem', 'posts per page': 'anything' },
-      posts: ['a', 'b', 'c', 'd', 'e'],
-      postsPerPage: 2,
-      outputDir: out,
-      render({ outputPath, pageOfPosts, paginationData }) {
-        t.equal(
-          outputPath,
-          join(out, 'index.html'),
-          'Index page is rendered at the base outputDir when postsPerPage is not a number (override)'
-        )
-
-        t.deepEqual(
-          pageOfPosts,
-          ['a', 'b', 'c', 'd', 'e'],
-          'Index page gets all posts when postsPerPage is not a number (override)'
-        )
-
-        t.deepEqual(
-          paginationData,
-          undefined,
-          'paginationData is not available when postsPerPage is not a number (override)'
-        )
       }
     })
   })

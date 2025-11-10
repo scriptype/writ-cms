@@ -284,9 +284,9 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
     render: (renderer, collection, { contentModel, settings, debug }) => {
       const renderCollection = () => {
         const renderHTML = renderer.paginate({
-          page: collection,
+          basePermalink: collection.permalink,
           posts: collection.posts,
-          postsPerPage: 15, //collection.context.peek().postsPerPage,
+          postsPerPage: collection.postsPerPage || 15,
           outputDir: collection.outputPath,
           render: async ({ outputPath, pageOfPosts, paginationData }) => {
             return renderer.render({
