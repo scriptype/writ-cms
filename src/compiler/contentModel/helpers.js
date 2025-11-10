@@ -33,7 +33,7 @@ const makeDateSlug = (date) => {
 }
 
 const _sortableValue = (value) => {
-  return typeof value === 'string' ? value.charCodeAt(0) * -1 : value
+  return typeof value === 'string' ? value.toLowerCase().charCodeAt(0) : value
 }
 
 const sort = (items, sortBy, sortOrder) => {
@@ -41,9 +41,9 @@ const sort = (items, sortBy, sortOrder) => {
     const sortableA = _sortableValue(a[sortBy])
     const sortableB = _sortableValue(b[sortBy])
     if (sortOrder === -1) {
-      return sortableA - sortableB
+      return sortableB - sortableA
     }
-    return sortableB - sortableA
+    return sortableA - sortableB
   })
 }
 
