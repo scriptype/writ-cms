@@ -9,8 +9,8 @@
   "scripts": {
     "start": "node src",
     "hookup": "husky install",
-    "tape": "tape \"src/tests/**/*.js\" | tap-spec",
-    "test": "echo 'skip: nyc --reporter=text-summary npm run tape for now'",
+    "tape": "tape \"src/**/*.spec.js\" | tap-spec",
+    "test": "nyc --reporter=text-summary npm run tape",
     "test:ci": "nyc --reporter=lcov npm run tape"
   },
   "repository": {

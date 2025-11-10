@@ -41,7 +41,7 @@ const casesForGetPageUrl = (t, basePermalink) => {
   )
 }
 
-test('compiler/rendering', t => {
+test('pagination', t => {
   t.test('pagination.getAdjacentPageUrl (basePermalink: /)', async () => {
     casesForGetPageUrl(t, '/')
   })
