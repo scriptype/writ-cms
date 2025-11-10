@@ -6,9 +6,7 @@ const Settings = require('../settings')
 const createDecorator = require('./decorator')
 const {
   ASSETS,
-  FEATURES,
   PARTIALS,
-  PARTIALS2,
   TEMPLATE_HELPERS,
   THEME_SETTINGS,
   KEEP_PATH
@@ -30,7 +28,6 @@ const Methods = (() => {
         Debug.debugLog('refresh theme')
         await refreshCustomTheme(customThemePath)
       } else {
-        await refreshFeatureResources(customThemePath)
         await collectCustomizerPaths(customThemePath)
       }
     } else {
@@ -91,10 +88,9 @@ const Methods = (() => {
   }
 
   const copyCommonResources = (targetPath) => {
-    const { compilerVersion } = Settings.getSettings()
     return Promise.all([
       cp(
-        join(__dirname, 'common', compilerVersion === 2 ? PARTIALS2.from : PARTIALS.from),
+        join(__dirname, 'common', PARTIALS.from),
         join(targetPath, PARTIALS.to),
         { recursive: true }
       ),
@@ -103,113 +99,6 @@ const Methods = (() => {
         join(targetPath, PARTIALS.to, TEMPLATE_HELPERS.to)
       )
     ])
-  }
-
-  const refreshFeatureResources = async (targetPath) => {
-    const settings = Settings.getSettings()
-
-      const srcAssetsPath = featureDirName => join(__dirname, 'common', FEATURES, featureDirName, ASSETS)
-      const targetAssetsPath = featureDirName => join(targetPath, ASSETS, FEATURES, featureDirName)
-      const srcPartialsPath = featureDirName => join(__dirname, 'common', FEATURES, featureDirName, PARTIALS.from)
-      const targetPartialsPath = featureDirName => join(targetPath, PARTIALS.to, FEATURES, featureDirName)
-
-    const features = [
-      ['syntaxHighlighting', 'highlight'],
-      ['search', 'search'],
-      ['rss', 'rss']
-    ]
-
-    const enabledFeatures = features
-      .filter(([ settingsKey, dirName ]) => {
-        return settings[settingsKey] !== 'off'
-      })
-      .map(([, dirName]) => dirName)
-
-    const disabledFeatures = features
-      .filter(([ settingsKey, dirName ]) => {
-        return settings[settingsKey] === 'off'
-      })
-      .map(([, dirName]) => dirName)
-
-    Debug.debugLog('enabledFeatures', enabledFeatures)
-    Debug.debugLog('disabledFeatures', disabledFeatures)
-
-    disabledFeatures.forEach(featureDirName => {
-      Debug.debugLog('rm -rf', join(targetPath, FEATURES, featureDirName))
-    })
-
-    const copyEnabledFeaturesIfMissing = async () => Promise.all(
-      enabledFeatures.map(featureDirName => {
-        return Promise.all([
-          stat(targetAssetsPath(featureDirName))
-            .then(() => Promise.resolve())
-            .catch(() => {
-              return stat(srcAssetsPath(featureDirName))
-                .then(() => cp(
-                  srcAssetsPath(featureDirName),
-                  targetAssetsPath(featureDirName),
-                  { recursive: true })
-                )
-                .catch(() => Promise.resolve())
-            }),
-          stat(targetPartialsPath(featureDirName))
-            .then(() => Promise.resolve())
-            .catch(() => {
-              return stat(srcPartialsPath(featureDirName))
-                .then(() => cp(
-                  srcPartialsPath(featureDirName),
-                  targetPartialsPath(featureDirName),
-                  { recursive: true })
-                )
-                .catch(() => Promise.resolve())
-            })
-        ])
-      })
-    )
-
-    const deleteDisabledFeaturesIfExisting = async () => Promise.all(
-      disabledFeatures.map(async featureDirName => {
-        return Promise.all([
-          stat(targetAssetsPath(featureDirName))
-            .then(() => rm(targetAssetsPath(featureDirName), { recursive: true, force: true }))
-            .catch(() => Promise.resolve()),
-          stat(targetPartialsPath(featureDirName))
-            .then(() => rm(targetPartialsPath(featureDirName), { recursive: true, force: true }))
-            .catch(() => Promise.resolve())
-        ])
-      })
-    )
-
-    const deleteEmptyFeaturesDirectories = async () => Promise.all([
-      readdir(targetAssetsPath(''))
-        .then(directory => {
-          if (!directory.length) {
-            Debug.debugLog('Deleting empty assets/features directory')
-            return rm(targetAssetsPath(''), { recursive: true, force: true })
-          }
-          return Promise.resolve()
-        })
-        .catch(() => {
-          Debug.debugLog('assets/features directory not found')
-          return Promise.resolve()
-        }),
-      readdir(targetPartialsPath(''))
-        .then(directory => {
-          if (!directory.length) {
-            Debug.debugLog('Deleting empty assets/features directory')
-            return rm(targetPartialsPath(''), { recursive: true, force: true })
-          }
-          return Promise.resolve()
-        })
-        .catch(() => {
-          Debug.debugLog('templates/features directory not found')
-          return Promise.resolve()
-        })
-    ])
-
-    await copyEnabledFeaturesIfMissing()
-    await deleteDisabledFeaturesIfExisting()
-    return deleteEmptyFeaturesDirectories()
   }
 
   const copyBaseThemeResources = (customThemePath) => {
@@ -262,7 +151,6 @@ const Methods = (() => {
     ])
 
     await copyCommonResources(customThemePath)
-    await refreshFeatureResources(customThemePath)
     await copyBaseThemeResources(customThemePath)
     await copyCustomizers(customThemePath)
   }

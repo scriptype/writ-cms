@@ -3,7 +3,6 @@ const { curry, pipe, pipeSync } = require('./helpers')
 
 const createDecorations = () => {
   const decorations = {
-    dictionary: [],
     assets: [],
     contentModel: [],
     previewApi: [],

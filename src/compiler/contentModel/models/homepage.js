@@ -1,66 +1,98 @@
-const _ = require('lodash')
-const Settings = require('../../../settings')
-const { maybeRawHTMLType } = require('../../../helpers')
-const contentTypes = require('../contentTypes')
-const parseTemplate = require('../parseTemplate')
-const { isLocalAsset } = require('./localAsset')
-
-const DEFAULT_TYPE = 'basic'
-
-const isFolderedHomepageIndex = (fsObject) => {
-  return fsObject.type === contentTypes.FOLDERED_HOMEPAGE_INDEX
+const { join, resolve } = require('path')
+const { isTemplateFile } = require('../helpers')
+const models = {
+  _baseEntry: require('./_baseEntry'),
+  attachment: require('./attachment'),
+  collection: require('./collection')
 }
 
-const _createHomepage = (fsObject, { foldered }) => {
-  const indexFile = foldered ?
-    fsObject.children.find(isFolderedHomepageIndex) :
-    fsObject
+const defaultSettings = {
+  homepageDirectory: 'homepage',
+  mode: 'start'
+}
+module.exports = function Homepage(settings = defaultSettings) {
+  const indexFileNameOptions = ['homepage', 'home', 'index']
+  const folderNameOptions = [settings.homepageDirectory, 'homepage', 'home']
 
-  const localAssets = foldered ?
-    fsObject.children.filter(isLocalAsset) :
-    []
+  const isHomepageFile = (node) => {
+    return (
+      isTemplateFile(node) &&
+      node.name.match(
+        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+      )
+    )
+  }
 
-  const permalink = Settings.getSettings().permalinkPrefix
-
-  const metadata = parseTemplate(indexFile, {
-    permalink,
-    localAssets
-  })
+  const isHomepageDirectory = (node) => {
+    return (
+      node.children?.find(isHomepageFile) &&
+      node.name.match(
+        new RegExp(`^(${folderNameOptions.join('|')})$`)
+      )
+    )
+  }
 
   return {
-    ..._.omit(fsObject, 'children'),
-    type: contentTypes.HOMEPAGE,
-    data: {
-      type: metadata.type || maybeRawHTMLType(indexFile?.extension) || DEFAULT_TYPE,
-      title: metadata.title || '',
-      content: metadata.content || '',
-      mentions: metadata.mentions || [],
-      ...metadata.attributes,
-      foldered,
-      localAssets,
-      permalink
+    match: node => isHomepageFile(node) || isHomepageDirectory(node),
+
+    create: (node, context) => {
+      const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
+
+      const pageContext = {
+        title: baseEntryProps.title,
+        slug: baseEntryProps.slug,
+        permalink: context.peek().permalink,
+        outputPath: context.peek().outputPath
+      }
+
+      return {
+        ...baseEntryProps,
+        ...pageContext,
+        context,
+        attachments: baseEntryProps.attachments.map(a => a({
+          homepage: pageContext
+        }))
+      }
+    },
+
+    afterEffects: (contentModel, homepage) => {
+      homepage.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
+    },
+
+    render: (renderer, homepage, { contentModel, settings, debug }) => {
+      const renderHomepage = () => {
+        return renderer.render({
+          templates: [
+            `pages/${homepage.template}`,
+            `pages/homepage/${homepage.contentType}`,
+            `pages/homepage/default`
+          ],
+          outputPath: join(homepage.outputPath, 'index.html'),
+          content: homepage.content,
+          data: {
+            ...contentModel,
+            collections: contentModel.collections.map(models.collection().serialize),
+            homepage,
+            settings,
+            debug
+          }
+        })
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          homepage.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      return Promise.all([
+        renderHomepage(),
+        renderAttachments()
+      ])
     }
   }
-}
-
-const createFolderedHomepageIndex = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.FOLDERED_HOMEPAGE_INDEX
-  }
-}
-
-const createHomepage = (fsObject) => {
-  return _createHomepage(fsObject, { foldered: false })
-}
-
-const createFolderedHomepage = (fsObject) => {
-  return _createHomepage(fsObject, { foldered: true })
-}
-
-module.exports = {
-  createHomepage,
-  createFolderedHomepage,
-  isFolderedHomepageIndex,
-  createFolderedHomepageIndex
 }

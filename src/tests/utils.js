@@ -37,10 +37,6 @@ const hasCommonDirectory = (t, paths, message) => {
   t.true(paths.includes('common'), message)
 }
 
-const hasDefaultThemeDirectory = (t, paths, message) => {
-  t.true(paths.includes('default'), message)
-}
-
 const hasCustomDirectory = (t, paths, message) => {
   t.true(paths.includes('custom'), message)
 }
@@ -95,7 +91,6 @@ const common = {
 
   exportAssetsDirectoryContents(t, actualPaths, expectedPaths) {
     if (!expectedPaths) {
-      hasDefaultThemeDirectory(t, actualPaths, 'Export/assets directory has theme-default assets')
       hasCustomDirectory(t, actualPaths, 'Export/assets directory has custom assets')
     }
     expectPaths(t, actualPaths, expectedPaths, 'Export/assets directory')
@@ -139,7 +134,6 @@ module.exports = {
   hasThemeDirectory,
   hasAssetsDirectory,
   hasCommonDirectory,
-  hasDefaultThemeDirectory,
   hasCustomDirectory,
   hasTemplatesDirectory
 }

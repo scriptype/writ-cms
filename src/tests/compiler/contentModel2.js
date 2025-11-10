@@ -1,6 +1,6 @@
 const os = require('os')
 const test = require('tape')
-const ContentModel2 = require('../../compiler/contentModel2')
+const ContentModel2 = require('../../compiler/contentModel')
 
 const FSTree = os.platform() === 'win32' ?
   require('../fixtures/contentModel2FSTreeWin32.json') :

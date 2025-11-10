@@ -1,9 +1,4 @@
 module.exports = {
-
-  /*
-   * CM2 helpers
-   * */
-
   dateUTC(date) {
     return date.toUTCString()
   },
@@ -24,46 +19,40 @@ module.exports = {
     return date.toLocaleString('en', { dateStyle: 'short' })
   },
 
-  /*
-   * Legacy helpers
-   * */
-
-  region(name) {
-    return ` data-region-id="${name}" `
+  is(value1, value2) {
+    return value1 === value2
   },
 
-  seeMore() {
-    return ''
+  isNot(value1, value2) {
+    return value1 !== value2
   },
 
-  map(...keyValues) {
-    return keyValues.reduce((result, keyOrValue, index) => {
-      if (index % 2 > 0) {
-        return result
-      }
-      return {
-        ...result,
-        [keyOrValue]: keyValues[index + 1]
-      }
-    }, {})
+  isStartMode() {
+    return this.settings.mode === 'start'
   },
 
-  mention(permalink, options) {
-    const pattern = new RegExp('^(|\/)' + permalink)
-    const entry = [
-      this.homepage,
-      ...this.posts,
-      ...this.categories,
-      ...this.subpages
-    ].find(e => pattern.test(e.permalink))
-    if (options.fn) {
-      return options.fn(entry)
-    }
-    return `<a href="${entry.permalink}">${entry.title}</a>`
+  isBuildMode() {
+    return this.settings.mode === 'build'
   },
 
-  filterPostsByType(type) {
-    return this.posts.filter(p => p.type === type)
+  isPostPage() {
+    return this.page === 'post'
+  },
+
+  isSubPage() {
+    return this.page === 'subpage'
+  },
+
+  isHomePage() {
+    return this.page === 'homepage'
+  },
+
+  isCategoryPage() {
+    return this.page === 'category'
+  },
+
+  isCollectionPage() {
+    return this.page === 'collection'
   },
 
   assetsPath() {
@@ -91,39 +80,30 @@ module.exports = {
     return `${this.settings.site.title}`
   },
 
-  is(value1, value2) {
-    return value1 === value2
+  map(...keyValues) {
+    return keyValues.reduce((result, keyOrValue, index) => {
+      if (index % 2 > 0) {
+        return result
+      }
+      return {
+        ...result,
+        [keyOrValue]: keyValues[index + 1]
+      }
+    }, {})
   },
 
-  isNot(value1, value2) {
-    return value1 !== value2
+  // TODO: Adapt mentions to new content model
+  mention(permalink, options) {
+    const pattern = new RegExp('^(|\/)' + permalink)
+    const entry = [
+      this.homepage,
+      ...this.posts,
+      ...this.categories,
+      ...this.subpages
+    ].find(e => pattern.test(e.permalink))
+    if (options.fn) {
+      return options.fn(entry)
+    }
+    return `<a href="${entry.permalink}">${entry.title}</a>`
   },
-
-  isEnabled(featureName) {
-    return this.settings[featureName] !== 'off'
-  },
-
-  isStartMode() {
-    return this.settings.mode === 'start'
-  },
-
-  isBuildMode() {
-    return this.settings.mode === 'build'
-  },
-
-  isPostPage() {
-    return this.page === 'post'
-  },
-
-  isSubPage() {
-    return this.page === 'subpage'
-  },
-
-  isHomePage() {
-    return this.page === 'homepage'
-  },
-
-  isCategoryPage() {
-    return this.page === 'category'
-  }
 }

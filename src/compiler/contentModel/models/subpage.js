@@ -1,121 +1,117 @@
-const _ = require('lodash')
-const { join } = require('path')
-const Settings = require('../../../settings')
-const { getSlug, makePermalink, removeExtension, maybeRawHTMLType } = require('../../../helpers')
-const contentTypes = require('../contentTypes')
-const parseTemplate = require('../parseTemplate')
-const { isLocalAsset } = require('./localAsset')
-
-const DEFAULT_TYPE = 'basic'
-
-const isSubpage = (fsObject) => {
-  return fsObject.type === contentTypes.SUBPAGE
+const { join, resolve } = require('path')
+const { isTemplateFile, makePermalink } = require('../helpers')
+const models = {
+  _baseEntry: require('./_baseEntry'),
+  attachment: require('./attachment'),
 }
 
-const isFolderedSubpageIndex = (fsObject) => {
-  return fsObject.type === contentTypes.FOLDERED_SUBPAGE_INDEX
+const defaultSettings = {
+  pagesDirectory: 'pages',
+  mode: 'start'
 }
+module.exports = function Subpage(settings = defaultSettings) {
+  const indexFileNameOptions = ['page', 'index']
+  const pagesDirectoryNameOptions = [settings.pagesDirectory, 'subpages', 'pages']
 
-const getTranscript = (metadata, localAssets) => {
-  if (!localAssets || !localAssets.length) {
-    return undefined
+  const isSubpageIndexFile = (node) => {
+    return (
+      isTemplateFile(node) &&
+      node.name.match(
+        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+      )
+    )
   }
-  const paths = [
-    metadata.transcript,
-    /transcript\.(txt|srt|html)$/,
-    /.srt$/,
-  ]
-  const pathExpressions = paths.filter(Boolean).map(p => new RegExp(p))
-  const matchingAssets = pathExpressions
-    .map(path => {
-      return localAssets.find(({ name }) => {
-        return path.test(name)
-      })
-    })
-    .filter(Boolean)
-  const [firstMatch] = matchingAssets
-  return firstMatch && firstMatch.content
-}
 
-const getSubpagePermalink = (fsObject, foldered) => {
-  const { permalinkPrefix } = Settings.getSettings()
-  return makePermalink({
-    prefix: permalinkPrefix,
-    parts: [fsObject.name],
-    addHTMLExtension: !foldered
-  })
-}
+  const isFolderedSubpage = (node) => {
+    return node.children?.find(isSubpageIndexFile)
+  }
 
-const getSubpageOutputPath = (fsObject, foldered) => {
-  const { out } = Settings.getSettings()
-  const slug = getSlug(fsObject.name)
-  const parts = [out, slug, foldered ? 'index' : ''].filter(Boolean)
-  return join(...parts) + '.html'
-}
-
-const _createSubpage = (fsObject, { foldered }) => {
-  const { pagesDirectory } = Settings.getSettings()
-
-  const pageFile = foldered ?
-    fsObject.children.find(isFolderedSubpageIndex) :
-    fsObject
-
-  const localAssets = foldered ?
-    fsObject.children.filter(isLocalAsset) :
-    []
-
-  const permalink = getSubpagePermalink(fsObject, foldered)
-  const metadata = parseTemplate(pageFile)
+  const isPagesDirectory = (node) => {
+    return (
+      node.children &&
+      node.name.match(
+        new RegExp(`^(${pagesDirectoryNameOptions.join('|')})$`)
+      )
+    )
+  }
 
   return {
-    ..._.omit(fsObject, 'children'),
-    type: contentTypes.SUBPAGE,
-    data: {
-      type: metadata.type || maybeRawHTMLType(pageFile?.extension) || DEFAULT_TYPE,
-      title: metadata.title || removeExtension(fsObject.name),
-      cover: metadata.cover ? [permalink, metadata.cover].join('/') : '',
-      media: metadata.media ? [permalink, metadata.media].join('/') : '',
-      content: metadata.content,
-      summary: metadata.summary,
-      tags: metadata.tags,
-      publishDatePrototype: {
-        value: metadata.publishDate || fsObject.stats.birthtime,
-        checkCache: !metadata.publishDate
-      },
-      mentions: metadata.mentions,
-      ...metadata.attributes,
-      slug: getSlug(fsObject.name),
-      permalink,
-      path: pageFile.path.replace(new RegExp(`^${pagesDirectory}`), ''),
-      outputPath: getSubpageOutputPath(fsObject, foldered),
-      foldered,
-      localAssets,
-      transcript: getTranscript(metadata, localAssets)
+    match: node => isTemplateFile(node) || isFolderedSubpage(node),
+    matchPagesDirectory: node => isPagesDirectory(node),
+
+    create: (node, context) => {
+      const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
+
+      const permalink = makePermalink(
+        context.peek().permalink,
+        baseEntryProps.slug
+      ) + (baseEntryProps.hasIndex ? '' : '.html')
+
+      const outputPath = join(
+        context.peek().outputPath,
+        baseEntryProps.slug
+      )
+
+      const pageContext = {
+        title: baseEntryProps.title,
+        slug: baseEntryProps.slug,
+        permalink,
+        outputPath
+      }
+
+      return {
+        ...baseEntryProps,
+        ...pageContext,
+        context,
+        attachments: baseEntryProps.attachments.map(
+          attachment => attachment(context.push({
+            ...pageContext,
+            key: 'page'
+          }))
+        )
+      }
+    },
+
+    afterEffects: (contentModel, subpage) => {
+      subpage.attachments.forEach(attachment => {
+        models.attachment().afterEffects(contentModel, attachment)
+      })
+    },
+
+    render: (renderer, subpage, { contentModel, settings, debug }) => {
+      const renderSubpage = () => {
+        return renderer.render({
+          templates: [
+            `pages/${subpage.template}`,
+            `pages/subpage/${subpage.contentType}`,
+            `pages/subpage/default`
+          ],
+          outputPath: join(...[
+            subpage.outputPath,
+            subpage.hasIndex ? 'index' : ''
+          ]) + '.html',
+          content: subpage.content,
+          data: {
+            ...contentModel,
+            subpage,
+            settings,
+            debug
+          }
+        })
+      }
+
+      const renderAttachments = () => {
+        return Promise.all(
+          subpage.attachments.map(attachment => {
+            return models.attachment().render(renderer, attachment)
+          })
+        )
+      }
+
+      return Promise.all([
+        renderSubpage(),
+        renderAttachments()
+      ])
     }
   }
-}
-
-const createSubpage = (fsObject) => {
-  return _createSubpage(fsObject, {
-    foldered: false
-  })
-}
-
-const createFolderedSubpage = (fsObject) => {
-  return _createSubpage(fsObject, {
-    foldered: true
-  })
-}
-
-const createFolderedSubpageIndex = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.FOLDERED_SUBPAGE_INDEX
-  }
-}
-
-module.exports = {
-  createSubpage,
-  createFolderedSubpage,
-  createFolderedSubpageIndex
 }

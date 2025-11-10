@@ -1,9 +1,9 @@
 import api from '../api.js'
 
 const updateSettings = () => {
-  const values = ['fi', 'en', 'tr']
+  const values = ['a', 'b', 'c', 'd']
   return api.settings.update({
-    language: values[Math.floor(Math.random() * values.length)]
+    aNewSetting: values[Math.floor(Math.random() * values.length)]
   })
 }
 

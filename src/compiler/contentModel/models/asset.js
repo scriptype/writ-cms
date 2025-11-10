@@ -1,22 +1,56 @@
-const contentTypes = require('../contentTypes')
+const { join, resolve } = require('path')
+const { makePermalink } = require('../helpers')
 
-const createAsset = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.ASSET
-  }
+const defaultSettings = {
+  assetsDirectory: 'assets',
+  mode: 'start'
 }
+module.exports = function Asset(settings = defaultSettings) {
+  const assetsDirectoryNameOptions = [settings.assetsDirectory, 'assets']
 
-const createAssets = (fsObject) => {
-  return {
-    ...fsObject,
-    type: contentTypes.ASSETS,
-    data: fsObject.children.map(createAsset)
+  const isAssetsDirectory = (node) => {
+    return (
+      node.children &&
+      node.name.match(
+        new RegExp(`^(${assetsDirectoryNameOptions.join('|')})$`)
+      )
+    )
   }
-}
 
-module.exports = {
-  ...contentTypes,
-  createAsset,
-  createAssets
+  return {
+    match: node => true,
+    matchAssetsDirectory: isAssetsDirectory,
+
+    create: (node, context) => {
+      const permalink = makePermalink(
+        context.peek().permalink,
+        settings.assetsDirectory,
+        node.name
+      )
+
+      const outputPath = join(
+        context.peek().outputPath,
+        settings.assetsDirectory,
+        node.name
+      )
+
+      return {
+        ...node,
+        context,
+        permalink,
+        outputPath,
+        date: new Date(node.stats.birthtime || Date.now())
+      }
+    },
+
+    afterEffects: (contentModel, asset) => {},
+
+    render: (renderer, asset) => {
+      return renderer.copy({
+        src: asset.absolutePath,
+        dest: asset.outputPath,
+        recursive: !!asset.children
+      })
+    }
+  }
 }

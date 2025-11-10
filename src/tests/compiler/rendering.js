@@ -1,8 +1,7 @@
 const { join } = require('path')
 const { join: joinPosix } = require('path').posix
 const test = require('tape')
-const { getPageUrl, getAdjacentPageUrl, paginate } = require('../../compiler/rendering/helpers/pagination')
-const { filterPosts } = require('../../compiler/rendering/helpers/filterPosts')
+const { getPageUrl, getAdjacentPageUrl, paginate } = require('../../compiler/renderer/pagination')
 
 const casesForGetPageUrl = (t, basePermalink) => {
   t.equal(
@@ -329,57 +328,5 @@ test('compiler/rendering', t => {
         )
       }
     })
-  })
-
-  t.test('filterPost', async () => {
-    const result1 = filterPosts({
-      'exclude post types': 'photo'
-    }, [
-      { type: 'text' },
-      { type: 'photo' }
-    ])
-
-    t.true(
-      result1.length === 1 && result1[0].type === 'text',
-      'Exclude a post type'
-    )
-
-    const result2 = filterPosts({
-      'include post types': 'text'
-    }, [
-      { type: 'text' },
-      { type: 'photo' }
-    ])
-
-    t.true(
-      result2.length === 1 && result2[0].type === 'text',
-      'Include a post type'
-    )
-
-    const result3 = filterPosts({
-      'exclude post types': 'photo, text'
-    }, [
-      { type: 'text' },
-      { type: 'photo' },
-      { type: 'audio' }
-    ])
-
-    t.true(
-      result3.length === 1 && result3[0].type === 'audio',
-      'Exclude multiple post types'
-    )
-
-    const result4 = filterPosts({
-      'include post types': 'audio, photo'
-    }, [
-      { type: 'text' },
-      { type: 'photo' },
-      { type: 'audio' }
-    ])
-
-    t.true(
-      result4.length === 2 && result4.map(p => p.type).join() === 'photo,audio',
-      'Include multiple post types'
-    )
   })
 })

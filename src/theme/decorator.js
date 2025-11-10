@@ -4,17 +4,11 @@ const Settings = require('../settings')
 const {
   ASSETS,
   PARTIALS,
-  PARTIALS2,
   TEMPLATE_HELPERS
 } = require('./constants')
 
 const createThemeDecorator = new DecoratorFactory((state, methods) => {
-  const {
-    rootDirectory,
-    themeDirectory,
-    theme,
-    compilerVersion
-  } = Settings.getSettings()
+  const { rootDirectory, themeDirectory, theme } = Settings.getSettings()
   const customThemePath = join(rootDirectory, themeDirectory)
   const baseThemePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
 
@@ -61,7 +55,7 @@ const createThemeDecorator = new DecoratorFactory((state, methods) => {
     templatePartials: (value) => {
       return [
         ...value,
-        join(__dirname, 'common', compilerVersion === 2 ? PARTIALS2.from : PARTIALS.from),
+        join(__dirname, 'common', PARTIALS.from),
         join(baseThemePath, PARTIALS.from),
         join(customThemePath, PARTIALS.to)
       ]

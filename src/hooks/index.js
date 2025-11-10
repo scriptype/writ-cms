@@ -1,7 +1,6 @@
 const createDecorator = require('./decorator')
 
 const decorationKeyToMethod = {
-  dictionary: 'useDictionary',
   template: 'useTemplate',
   templatePartials: 'useTemplatePartials',
   templateHelpers: 'useTemplateHelpers',
@@ -12,7 +11,6 @@ const decorationKeyToMethod = {
 
 const State = {
   hooks: {
-    dictionary: [],
     assets: [],
     contentModel: [],
     previewApi: [],
@@ -28,11 +26,6 @@ const Methods = {
       const method = decorationKeyToMethod[decorationKey]
       Methods[method].call(Methods, decorator[decorationKey])
     })
-    return this
-  },
-
-  useDictionary(fn) {
-    State.hooks.dictionary.push(fn)
     return this
   },
 

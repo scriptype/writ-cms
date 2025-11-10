@@ -2,19 +2,15 @@ const _ = require('lodash')
 const Debug = require('./debug')
 const Settings = require('./settings')
 const Decorations = require('./decorations')
-const VersionControl = require('./version-control')
 const Theme = require('./theme')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
 const CNAME = require('./cname')
-const Dictionary = require('./dictionary')
 const ContentTypes = require('./content-types')
 const FileSystemParser = require('./lib/FileSystemParser')
-const ContentModel1 = require('./compiler/contentModel')
-const ContentModel2 = require('./compiler/contentModel2')
-const Rendering1 = require('./compiler/rendering')
-const Rendering2 = require('./compiler/rendering2/renderer')
+const ContentModel = require('./compiler/contentModel')
+const Renderer = require('./compiler/renderer')
 const Compiler = require('./compiler')
 const Assets = require('./assets')
 const Preview = require('./preview')
@@ -56,8 +52,6 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   const settings = Settings.getSettings()
   await Expansions.init()
   Decorations.register(
-    Dictionary.decorator(),
-    VersionControl.decorator(),
     Theme.decorator(),
     Preview.decorator(),
     Expansions.decorator(),
@@ -66,8 +60,6 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await Theme.init({
     refresh: refreshTheme
   })
-  await VersionControl.init()
-  await Dictionary.init()
   await SiteDirectory.create()
   await CNAME.create()
 
@@ -75,16 +67,13 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
     debug: Debug.debugLog
   }
 
-  let contentTypes = []
-  if (settings.compilerVersion === 2) {
-    contentTypes = await ContentTypes.init(
-      _.pick(settings, [
-        'rootDirectory',
-        'contentTypesDirectory'
-      ]),
-      logger
-    )
-  }
+  const contentTypes = await ContentTypes.init(
+    _.pick(settings, [
+      'rootDirectory',
+      'contentTypesDirectory'
+    ]),
+    logger
+  )
 
   const { fileSystemTree, contentModel } = await new Compiler({
     fileSystemParser: new FileSystemParser(
@@ -96,30 +85,21 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
       logger
     ),
 
-    contentModel: settings.compilerVersion === 2 ?
-      new ContentModel2({
-          ..._.pick(settings, [
-            'permalinkPrefix',
-            'out',
-            'defaultCategoryName',
-            'assetsDirectory',
-            'pagesDirectory',
-            'homepageDirectory',
-            'site',
-            'mode',
-            'search',
-            'rss',
-            'syntaxHighlighting'
-          ]),
-          debug: Debug.getDebug()
-        },
-        contentTypes
-      ) :
-      ContentModel1,
+    contentModel: new ContentModel({
+      ..._.pick(settings, [
+        'permalinkPrefix',
+        'out',
+        'defaultCategoryName',
+        'assetsDirectory',
+        'pagesDirectory',
+        'homepageDirectory',
+        'site',
+        'mode'
+      ]),
+      debug: Debug.getDebug()
+    }, contentTypes),
 
-    renderer: settings.compilerVersion === 2 ?
-      Rendering2 :
-      Rendering1
+    renderer: Renderer
   }).compile()
 
   await Assets.copyAssets()

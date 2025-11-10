@@ -312,65 +312,9 @@ test('builds after theme/templates folder is deleted', async t => {
   })
 })
 
-test('creates tag indices', async t => {
-  const dir = await createTempDir(t)
 
-  const fileNameIn = 'hello.txt'
-  const fileNameOut = 'hello.html'
-  await dir.mkFile(fileNameIn, 'Hello!')
 
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    exportDirectoryPaths: {
-      notExists: ['tags']
-    }
-  })
-
-  const tags = ['test-tag', 'test-tag-2']
-  const frontMatter = `---\n` +
-    `tags: ${tags.join(', ')}\n` +
-    `---\n`
-
-  await dir.mkFile(fileNameIn, `${frontMatter}Hello!`)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    exportDirectoryPaths: {
-      exists: ['tags']
-    }
-  })
-
-  const { exportDirectory } = writ.getDefaultSettings()
-  const tagDirectoryContents = await readdir(join(dir.name, exportDirectory, 'tags'))
-  t.true(
-    tags.every(tag => tagDirectoryContents.includes(tag)),
-    'Creates tag indices'
-  )
-
-  t.true(
-    tagDirectoryContents.includes('index.html'),
-    'Creates tags listing page'
-  )
-
-  const tagIndexFolders = await Promise.all(
-    tagDirectoryContents
-      .filter(tagIndex => tagIndex !== 'index.html')
-      .map(tagIndex => readdir(join(dir.name, exportDirectory, 'tags', tagIndex)))
-  )
-
-  t.true(
-    tagIndexFolders.every(folder => folder.includes('index.html')),
-    'Tag indices are folders with index.html'
-  )
-})
-
-test('creates tag indices', async t => {
+test('renders mentions correctly', async t => {
   const dir = await createTempDir(t)
 
   const mentioned = {
@@ -623,19 +567,12 @@ test('hooks', async t => {
   const assetsDir = await createTempDir(t)
   const partialsDir = await createTempDir(t)
 
-  const testDictionaryWord = 'yazarlar'
   const testAssetName = 'test-asset.jpg'
   const testAuthorNames = ['random', 'human', 'names']
   await assetsDir.mkFile(testAssetName, '')
   await partialsDir.mkFile('hello.hbs', 'world')
 
   writ
-    .useDictionary((value) => {
-      return {
-        ...value,
-        authors: testDictionaryWord
-      }
-    })
     .useAssets((value) => {
       return [
         ...value,
@@ -666,7 +603,7 @@ test('hooks', async t => {
       }
     })
     .useTemplate((value) => {
-      return `${value} <p>{{>hello}} {{lookup 'authors'}}: {{andInBetween authors}}</p>`
+      return `${value} <p>{{>hello}} authors: {{andInBetween authors}}</p>`
     })
 
   await writ.build({
@@ -677,12 +614,6 @@ test('hooks', async t => {
 
   const indexHTMLPath = join(dir.name, exportDirectory, 'index.html')
   const indexHTMLContent = await readFile(indexHTMLPath, { encoding: 'utf-8' })
-
-  t.match(
-    indexHTMLContent,
-    new RegExp(`world ${testDictionaryWord}: random and human and names`),
-    'useDictionary, useContentModel, useTemplatePartials, useTemplateHelpers, useTemplate hooks'
-  )
 
   const testAssetsPath = join(dir.name, exportDirectory, assetsDirectory, 'test')
   const testAssetsDir = await readdir(testAssetsPath)

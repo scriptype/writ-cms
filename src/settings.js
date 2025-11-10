@@ -4,12 +4,11 @@ const { loadJSON } = require('./helpers')
 const Debug = require('./debug')
 
 const defaultSettings = (rootDirectory) => ({
-  language: "en",
   title: basename(resolve(rootDirectory)),
   description: "A future work",
   url: "",
   icon: "assets/common/writ-icon-512.png",
-  theme: "default",
+  theme: "zen",
   permalinkPrefix: "/",
   defaultCategoryName: "",
   contentTypesDirectory: "schema",
@@ -20,9 +19,6 @@ const defaultSettings = (rootDirectory) => ({
   themeDirectory: "theme",
   contentDirectory: "content",
   cname: "",
-  syntaxHighlighting: "off",
-  search: "off",
-  rss: "off",
   ignorePaths: [
     ".git",
     ".gitignore",
@@ -33,10 +29,8 @@ const defaultSettings = (rootDirectory) => ({
     "CNAME"
   ],
   expansions: [],
-  revisionHistory: "manual", // auto | manual | off
   previewPort: 3000,
-  postsPerPage: 15,
-  compilerVersion: 1
+  postsPerPage: 15
 })
 
 const getIgnoreRegExp = ({ ignorePaths, exportDirectory, themeDirectory }) => {
@@ -70,7 +64,6 @@ module.exports = {
     }
     _settings = _.omit({
       ...userSettings,
-      theme: userSettings.compilerVersion === 1 ? _settings.theme : 'zen',
       site: {
         title: userSettings.title,
         description: userSettings.description,
