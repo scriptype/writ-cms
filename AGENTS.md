@@ -19,3 +19,11 @@
 
 ## Test File Operations
 - Use `Promise.all()` to parallelize independent async file operations (mkdir, writeFile, etc.) instead of awaiting them serially
+
+## Test Suite Design
+- Write lean tests that avoid redundancy while covering optimal paths and edge cases
+- Each test should demonstrate one distinct behavior or scenario, not repeat what other tests already cover
+- Focus on meaningful differences: testing the same logic with different data types (strings vs numbers) is redundant; test different behavior patterns instead
+- Include edge cases and boundary conditions (empty inputs, zero values, falsy values, etc.)
+- Remove tests that are functionally identical to existing ones, even if they test the same function in different scenarios
+- Prioritize tests that demonstrate unexpected or complex behaviors over tests that verify basic functionality with different data types
