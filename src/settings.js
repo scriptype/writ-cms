@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const { basename, join, resolve } = require('path')
-const { loadJSON } = require('./helpers')
+const { loadJSON } = require('./lib/fileSystemHelpers')
 const Debug = require('./debug')
 
 const defaultSettings = (rootDirectory) => ({

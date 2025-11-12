@@ -1,7 +1,7 @@
+const slug = require('slug')
 const { getDefaultSettings } = require('./settings')
 const Hooks = require('./hooks')
 const { startUp } = require('./routines')
-const helpers = require('./helpers')
 
 const start = async ({
   rootDirectory,
@@ -47,5 +47,7 @@ module.exports = {
   start,
   build,
   getDefaultSettings,
-  helpers
+  helpers: {
+    slug
+  }
 }

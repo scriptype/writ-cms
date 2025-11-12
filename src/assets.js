@@ -3,7 +3,7 @@ const { resolve, join, basename } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
 const { decorate } = require('./decorations')
-const { ensureDirectory } = require('./helpers')
+const { ensureDirectory } = require('./lib/fileSystemHelpers')
 
 const getBasePath = async () => {
   const { rootDirectory, contentDirectory } = Settings.getSettings()

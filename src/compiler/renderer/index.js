@@ -3,7 +3,7 @@ const { stat, readdir, writeFile, cp } = require('fs/promises')
 const { dirname, extname, join } = require('path')
 const { debugLog } = require('../../debug')
 const { decorate } = require('../../decorations')
-const { isDirectory, readFileContent, ensureDirectory } = require('../../helpers')
+const { isDirectory, readFileContent, ensureDirectory } = require('../../lib/fileSystemHelpers')
 const { paginate } = require('./pagination')
 
 const isTemplateFile = (fileName) => {

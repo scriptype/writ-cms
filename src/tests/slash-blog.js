@@ -53,7 +53,7 @@ test('properly builds to be served at /blog in build mode', async t => {
     subpage
   } = await createBlog(t)
 
-  const { replaceExtension, getSlug } = writ.helpers
+  const { slug } = writ.helpers
   const { exportDirectory } = writ.getDefaultSettings()
 
   await writ.build({
@@ -63,8 +63,8 @@ test('properly builds to be served at /blog in build mode', async t => {
   await common.builds(t, dir.name, {
     exportDirectoryPaths: {
       exists: [
-        getSlug(subpage.name) + '.html',
-        getSlug(category1.name)
+        slug(subpage.name) + '.html',
+        slug(category1.name)
       ],
       notExists: ['blog']
     }
@@ -98,7 +98,7 @@ test('properly builds to be served at /blog in start mode', async t => {
     subpage
   } = await createBlog()
 
-  const { replaceExtension, getSlug } = writ.helpers
+  const { slug } = writ.helpers
   const { exportDirectory } = writ.getDefaultSettings()
 
   const watcher = await writ.start({
@@ -109,8 +109,8 @@ test('properly builds to be served at /blog in start mode', async t => {
   await common.builds(t, dir.name, {
     exportDirectoryPaths: {
       exists: [
-        getSlug(subpage.name) + '.html',
-        getSlug(category1.name)
+        slug(subpage.name) + '.html',
+        slug(category1.name)
       ],
       notExists: ['blog']
     }

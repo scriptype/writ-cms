@@ -1,7 +1,7 @@
 const bodyParser = require('body-parser')
+const slug = require('slug')
 const { debugLog } = require('../debug')
 const Settings = require('../settings')
-const { getSlug } = require('../helpers')
 const { decorate } = require('../decorations')
 
 const next = (promise, thenPromise) => {
@@ -15,7 +15,7 @@ const decorateApi = async (compilePromise) => {
   const utils = {
     settings: Settings.getSettings(),
     debugLog,
-    getSlug
+    slug
   }
   const decoratedApi = await decorate('previewApi', [])
   return decoratedApi.map(api => ({

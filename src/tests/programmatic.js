@@ -84,7 +84,7 @@ test('empty folder in root is an empty category', async t => {
       exists: [folderName]
     },
     exportDirectoryPaths: {
-      exists: [writ.helpers.getSlug(folderName)]
+      exists: [writ.helpers.slug(folderName)]
     }
   })
 })
@@ -118,13 +118,13 @@ test('post files in a category', async t => {
       exists: [categoryName]
     },
     exportDirectoryPaths: {
-      exists: [writ.helpers.getSlug(categoryName)]
+      exists: [writ.helpers.slug(categoryName)]
     }
   })
 
-  const categoryDir = await readdir(join(dir.name, exportDirectory, writ.helpers.getSlug(categoryName)))
+  const categoryDir = await readdir(join(dir.name, exportDirectory, writ.helpers.slug(categoryName)))
   const compiledPostNames = posts.map(post => {
-    return writ.helpers.getSlug(post).concat('.html')
+    return writ.helpers.slug(post).concat('.html')
   })
   hasPaths(t, categoryDir, compiledPostNames)
 })
@@ -199,7 +199,7 @@ test('subpages', async t => {
   ]
 
   const { exportDirectory, pagesDirectory } = writ.getDefaultSettings()
-  const { getSlug, replaceExtension } = writ.helpers
+  const { slug } = writ.helpers
 
   await dir.mkDir(pagesDirectory)
   await Promise.all(subpages.map(subpage => {
@@ -232,13 +232,13 @@ test('subpages', async t => {
     },
     exportDirectoryPaths: {
       exists: [
-        ...subpages.map(s => getSlug(s) + '.html'),
-        getSlug(folderedSubpage.folderName)
+        ...subpages.map(s => slug(s) + '.html'),
+        slug(folderedSubpage.folderName)
       ]
     }
   })
 
-  const exportFolderDir = await readdir(join(dir.name, exportDirectory, getSlug(folderedSubpage.folderName)))
+  const exportFolderDir = await readdir(join(dir.name, exportDirectory, slug(folderedSubpage.folderName)))
   expectPaths(t, exportFolderDir, {
     exists: [
       'index.html',
