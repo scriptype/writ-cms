@@ -16,7 +16,7 @@
   "nyc": {
     "all": true,
     "include": ["src/**/*.js"],
-    "exclude": ["src/**/*.spec.js", "tests/**/*"]
+    "exclude": ["src/**/*.spec.js", "src/tests/**/*"]
   },
   "repository": {
     "type": "git",
