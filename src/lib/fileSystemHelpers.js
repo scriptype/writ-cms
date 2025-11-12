@@ -24,9 +24,11 @@ const isDirectory = async (path) => {
 
 const ensureDirectory = async (path) => {
   try {
-    return await fs.mkdir(path, { recursive: true })
-  } catch (e) { } finally {
-    return Promise.resolve(true)
+    await fs.mkdir(path, { recursive: true })
+  } catch (error) {
+    if (error.code !== 'EEXIST') {
+      throw error
+    }
   }
 }
 

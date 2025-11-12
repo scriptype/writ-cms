@@ -198,9 +198,7 @@ test('ensureDirectory creates nonexistent directory', async (t) => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
   const newDir = path.join(tempDir, 'newdir')
 
-  const result = await ensureDirectory(newDir)
-
-  t.ok(result, 'returns true')
+  await ensureDirectory(newDir)
 
   const stats = await fs.stat(newDir)
 
@@ -212,14 +210,16 @@ test('ensureDirectory creates nonexistent directory', async (t) => {
   await fs.rm(tempDir, { recursive: true })
 })
 
-test('ensureDirectory with existing directory', async (t) => {
+test('ensureDirectory ignores if directory already exists', async (t) => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
 
-  const result = await ensureDirectory(tempDir)
+  await ensureDirectory(tempDir)
+
+  const stats = await fs.stat(tempDir)
 
   t.ok(
-    result,
-    'returns true for existing directory'
+    stats.isDirectory(),
+    'does not throw and directory still exists'
   )
 
   await fs.rm(tempDir, { recursive: true })
@@ -229,9 +229,7 @@ test('ensureDirectory creates nested directories', async (t) => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
   const nestedPath = path.join(tempDir, 'a', 'b', 'c')
 
-  const result = await ensureDirectory(nestedPath)
-
-  t.ok(result, 'returns true')
+  await ensureDirectory(nestedPath)
 
   const stats = await fs.stat(nestedPath)
 
@@ -243,11 +241,26 @@ test('ensureDirectory creates nested directories', async (t) => {
   await fs.rm(tempDir, { recursive: true })
 })
 
-test('ensureDirectory returns true on error', async (t) => {
-  const result = await ensureDirectory(null)
+test('ensureDirectory throws on invalid path parameter', async (t) => {
+  try {
+    await ensureDirectory(null)
+    t.fail('should have thrown error')
+  } catch (error) {
+    t.ok(
+      error instanceof TypeError,
+      'throws TypeError for null path'
+    )
+  }
+})
 
-  t.ok(
-    result,
-    'returns true even when mkdir fails'
-  )
+test('ensureDirectory throws on undefined path parameter', async (t) => {
+  try {
+    await ensureDirectory(undefined)
+    t.fail('should have thrown error')
+  } catch (error) {
+    t.ok(
+      error instanceof TypeError,
+      'throws TypeError for undefined path'
+    )
+  }
 })
