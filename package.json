@@ -13,6 +13,11 @@
     "test": "nyc --reporter=text-summary npm run tape",
     "test:ci": "nyc --reporter=lcov npm run tape"
   },
+  "nyc": {
+    "all": true,
+    "include": ["src/**/*.js"],
+    "exclude": ["src/**/*.spec.js"]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/scriptype/writ-cms.git"
