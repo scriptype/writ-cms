@@ -11,37 +11,6 @@ const {
 } = require('./utils')
 globalThis.fetch = globalThis.fetch || require('node-fetch')
 
-test('builds in empty directory', async t => {
-  const dir = await createTempDir(t)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name)
-})
-
-test('builds with a single txt file', async t => {
-  const dir = await createTempDir(t)
-
-  const fileNameIn = 'hello.txt'
-  const fileNameOut = 'hello.html'
-  await dir.mkFile(fileNameIn, 'Hello!')
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    rootDirectoryPaths: {
-      exists: [fileNameIn]
-    },
-    exportDirectoryPaths: {
-      exists: [fileNameOut]
-    }
-  })
-})
-
 test('builds after a file is deleted', async t => {
   const dir = await createTempDir(t)
 
