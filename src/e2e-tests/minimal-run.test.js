@@ -113,4 +113,36 @@ test('Minimal run', t => {
     }
   })
 
+  t.test('Rebuild after deleting a file', async t => {
+    t.plan(1)
+
+    const testDir = join(tmpdir(), 'minimal-run-deleted-file')
+    const rootDirectory = testDir
+    const exportDirectory = 'docs'
+
+    try {
+      await mkdir(testDir, { recursive: true })
+      await writeFile(join(testDir, 'hello.txt'), '# Title\n\nContent here')
+
+      await writ.build({
+        rootDirectory: testDir
+      })
+
+      await rm(join(testDir, 'hello.txt'))
+
+      await writ.build({
+        rootDirectory: testDir
+      })
+
+      const exportDirectoryContents = await readdir(join(rootDirectory, exportDirectory))
+
+      t.false(
+        exportDirectoryContents.includes('hello.html'),
+        'Deleted file wasnt rendered anymore'
+      )
+    } finally {
+      await rm(testDir, { recursive: true, force: true })
+    }
+  })
+
 })

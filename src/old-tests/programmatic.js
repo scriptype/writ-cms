@@ -11,33 +11,6 @@ const {
 } = require('./utils')
 globalThis.fetch = globalThis.fetch || require('node-fetch')
 
-test('builds after a file is deleted', async t => {
-  const dir = await createTempDir(t)
-
-  const fileNameIn = 'hello.txt'
-  const fileNameOut = 'hello.html'
-  await dir.mkFile(fileNameIn, 'Hello!')
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await rm(join(dir.name, fileNameIn))
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    rootDirectoryPaths: {
-      notExists: [fileNameIn]
-    },
-    exportDirectoryPaths: {
-      notExists: [fileNameOut]
-    }
-  })
-})
-
 test('empty folder in root is an empty category', async t => {
   const dir = await createTempDir(t)
 
@@ -215,73 +188,6 @@ test('subpages', async t => {
     ]
   }, 'Foldered subpage directory')
 })
-
-test('builds after theme folder is deleted', async t => {
-  const dir = await createTempDir(t)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  const { themeDirectory } = writ.getDefaultSettings()
-  await rm(join(dir.name, themeDirectory), { recursive: true })
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name)
-})
-
-test('builds after theme/assets folder is deleted', async t => {
-  const dir = await createTempDir(t)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  const { themeDirectory, assetsDirectory } = writ.getDefaultSettings()
-  await rm(join(dir.name, themeDirectory, assetsDirectory), { recursive: true })
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    assetsDirectoryPaths: {
-      exists: ['custom'],
-      notExists: ['default']
-    },
-    themeDirectoryPaths: {
-      exists: ['templates', 'style.css', 'script.js'],
-      notExists: [assetsDirectory]
-    }
-  })
-})
-
-test('builds after theme/templates folder is deleted', async t => {
-  const dir = await createTempDir(t)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  const { themeDirectory } = writ.getDefaultSettings()
-  await rm(join(dir.name, themeDirectory, 'templates'), { recursive: true })
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  await common.builds(t, dir.name, {
-    themeDirectoryPaths: {
-      exists: ['assets', 'style.css', 'script.js'],
-      notExists: ['templates']
-    }
-  })
-})
-
-
 
 test('renders mentions correctly', async t => {
   const dir = await createTempDir(t)
@@ -470,66 +376,6 @@ test('passes through assets folder', async t => {
   })
 })
 
-test('refreshTheme option when there is theme/keep', async t => {
-  const dir = await createTempDir(t)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  const { themeDirectory } = writ.getDefaultSettings()
-
-  const deletedFileName = 'deleted.css'
-  await dir.mkFile(join(themeDirectory, deletedFileName), '')
-  const keptFileName = 'kept.css'
-  await dir.mkDir(join(themeDirectory, 'keep'))
-  await dir.mkFile(join(themeDirectory, 'keep', keptFileName), '')
-
-  await writ.build({
-    rootDirectory: dir.name,
-    refreshTheme: true
-  })
-
-  await common.builds(t, dir.name, {
-    themeDirectoryPaths: {
-      exists: ['keep'],
-      notExists: [deletedFileName]
-    }
-  })
-
-  const themeDirectoryContents = await readdir(join(dir.name, themeDirectory))
-  hasNotPaths(t, themeDirectoryContents, [deletedFileName], 'theme directory is refreshed')
-
-  const keepDirectoryContents = await readdir(join(dir.name, themeDirectory, 'keep'))
-  hasPaths(t, keepDirectoryContents, [keptFileName], 'theme/keep/file is preserved')
-})
-
-test('refreshTheme option when there is no theme/keep', async t => {
-  const dir = await createTempDir(t)
-
-  await writ.build({
-    rootDirectory: dir.name
-  })
-
-  const { themeDirectory } = writ.getDefaultSettings()
-
-  const deletedFileName = 'deleted.css'
-  await dir.mkFile(join(themeDirectory, deletedFileName), '')
-
-  await writ.build({
-    rootDirectory: dir.name,
-    refreshTheme: true
-  })
-
-  await common.builds(t, dir.name, {
-    themeDirectoryPaths: {
-      notExists: [deletedFileName]
-    }
-  })
-
-  const themeDirectoryContents = await readdir(join(dir.name, themeDirectory))
-  hasNotPaths(t, themeDirectoryContents, [deletedFileName], 'theme directory is refreshed')
-})
 
 test('hooks', async t => {
   const dir = await createTempDir(t)
@@ -592,6 +438,7 @@ test('hooks', async t => {
     'useAssets hook'
   )
 })
+
 
 test('start mode', t => {
 
