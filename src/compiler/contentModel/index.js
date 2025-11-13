@@ -3,11 +3,12 @@ const _ = require('lodash')
 const frontMatter = require('front-matter')
 const ImmutableStack = require('../../lib/ImmutableStack')
 const { isTemplateFile } = require('./helpers')
+const createMatchers = require('./matchers')
 const models = {
-  homepage: require('./models/homepage'),
-  subpage: require('./models/subpage'),
+  Homepage: require('./models/homepage'),
+  Subpage: require('./models/subpage'),
   collection: require('./models/collection'),
-  asset: require('./models/asset')
+  Asset: require('./models/asset')
 }
 
 const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
@@ -146,6 +147,7 @@ class ContentModel {
       ...contentModelSettings
     }
     this.contentTypes = contentTypes
+    this.matchers = createMatchers(this.settings)
   }
 
   draftCheck(node) {
@@ -180,56 +182,55 @@ class ContentModel {
           ...(indexProps.attributes?.collectionAliases || [])
         ],
         mode: this.settings.mode
-      }, this.contentTypes),
+      }, this.contentTypes, this.matchers),
 
-      subpage: models.subpage({
-        pagesDirectory: this.settings.pagesDirectory,
-        mode: this.settings.mode
-      }),
+      Subpage: models.Subpage,
 
-      homepage: models.homepage({
-        homepageDirectory: this.settings.homepageDirectory,
-        mode: this.settings.mode
-      }),
+      Homepage: models.Homepage,
 
-      asset: models.asset({
-        assetsDirectory: this.settings.assetsDirectory,
-        mode: this.settings.mode
-      })
+      Asset: models.Asset
     }
 
     this.contentModel = {
-      homepage: this.models.homepage.create({
+      homepage: new this.models.Homepage({
         name: 'index',
         extension: 'md',
         content: ''
-      }, context),
+      }, context, { homepageDirectory: this.settings.homepageDirectory }),
       subpages: [],
       collections: [],
       assets: []
     }
 
     fileSystemTree.forEach(node => {
-      if (this.models.homepage.match(node)) {
-        this.contentModel.homepage = this.models.homepage.create(node, context)
+      if (this.matchers.homepage(node)) {
+        this.contentModel.homepage = new this.models.Homepage(node, context, {
+          homepageDirectory: this.settings.homepageDirectory
+        })
         return
       }
 
-      if (this.models.subpage.match(node)) {
+      if (this.matchers.subpage(node)) {
         return this.contentModel.subpages.push(
-          this.models.subpage.create(node, context)
+          new this.models.Subpage(node, context, {
+            pagesDirectory: this.settings.pagesDirectory
+          })
         )
       }
 
-      if (this.models.subpage.matchPagesDirectory(node)) {
+      if (this.matchers.pagesDirectory(node)) {
         return node.children.forEach(childNode => {
-          if (this.models.subpage.match(childNode)) {
+          if (this.matchers.subpage(childNode)) {
             this.contentModel.subpages.push(
-              this.models.subpage.create(childNode, context)
+              new this.models.subpage(childNode, context, {
+                pagesDirectory: this.settings.pagesDirectory
+              })
             )
-          } else if (this.models.asset.match(childNode)) {
+          } else if (this.matchers.asset(childNode)) {
             this.contentModel.assets.push(
-              this.models.asset.create(childNode, context)
+              new this.models.Asset(childNode, context, {
+                assetsDirectory: this.settings.assetsDirectory
+              })
             )
           }
         })
@@ -243,17 +244,21 @@ class ContentModel {
         return
       }
 
-      if (this.models.asset.matchAssetsDirectory(node)) {
+      if (this.matchers.assetsDirectory(node)) {
         return this.contentModel.assets.push(
           ...node.children.map(childNode => {
-            return this.models.asset.create(childNode, context)
+            return new this.models.Asset(childNode, context, {
+              assetsDirectory: this.settings.assetsDirectory
+            })
           })
         )
       }
 
-      if (this.models.asset.match(node)) {
+      if (this.matchers.asset(node)) {
         return this.contentModel.assets.push(
-          this.models.asset.create(node, context)
+          new this.models.Asset(node, context, {
+            assetsDirectory: this.settings.assetsDirectory
+          })
         )
       }
     })
@@ -270,19 +275,19 @@ class ContentModel {
     })
 
     this.contentModel.subpages.forEach(subpage => {
-      this.models.subpage.afterEffects(this.contentModel, subpage)
+      subpage.afterEffects(this.contentModel)
     })
 
-    this.models.homepage.afterEffects(this.contentModel, this.contentModel.homepage)
+    this.contentModel.homepage.afterEffects(this.contentModel)
 
     this.contentModel.assets.forEach(asset => {
-      this.models.asset.afterEffects(this.contentModel, asset)
+      asset.afterEffects(this.contentModel)
     })
   }
 
   render(renderer) {
     const renderHomepage = () => {
-      return this.models.homepage.render(renderer, this.contentModel.homepage, {
+      return this.contentModel.homepage.render(renderer, {
         contentModel: this.contentModel,
         settings: this.settings,
         debug: this.settings.debug
@@ -304,7 +309,7 @@ class ContentModel {
     const renderSubpages = () => {
       return Promise.all(
         this.contentModel.subpages.map(subpage => {
-          return this.models.subpage.render(renderer, subpage, {
+          return subpage.render(renderer, {
             contentModel: this.contentModel,
             settings: this.settings,
             debug: this.settings.debug
@@ -316,11 +321,7 @@ class ContentModel {
     const renderAssets = () => {
       return Promise.all(
         this.contentModel.assets.map(asset => {
-          return this.models.asset.render(renderer, asset, {
-            contentModel: this.contentModel,
-            settings: this.settings,
-            debug: this.settings.debug
-          })
+          return asset.render(renderer)
         })
       )
     }

@@ -1,56 +1,38 @@
-const { join, resolve } = require('path')
-const { makePermalink } = require('../helpers')
+const { join } = require('path')
+const { makePermalink } = require('../../../lib/contentModelHelpers')
+const ContentModelNode = require('../../../lib/ContentModelNode')
 
 const defaultSettings = {
-  assetsDirectory: 'assets',
-  mode: 'start'
+  assetsDirectory: 'assets'
 }
-module.exports = function Asset(settings = defaultSettings) {
-  const assetsDirectoryNameOptions = [settings.assetsDirectory, 'assets']
+class Asset extends ContentModelNode {
+  constructor(fsNode, context, settings = defaultSettings) {
+    super(fsNode, context, settings)
+  }
 
-  const isAssetsDirectory = (node) => {
-    return (
-      node.children &&
-      node.name.match(
-        new RegExp(`^(${assetsDirectoryNameOptions.join('|')})$`)
-      )
+  getPermalink() {
+    return makePermalink(
+      this.context.peek().permalink,
+      this.settings.assetsDirectory,
+      this.fsNode.name
     )
   }
 
-  return {
-    match: node => true,
-    matchAssetsDirectory: isAssetsDirectory,
+  getOutputPath() {
+    return join(
+      this.context.peek().outputPath,
+      this.settings.assetsDirectory,
+      this.fsNode.name
+    )
+  }
 
-    create: (node, context) => {
-      const permalink = makePermalink(
-        context.peek().permalink,
-        settings.assetsDirectory,
-        node.name
-      )
-
-      const outputPath = join(
-        context.peek().outputPath,
-        settings.assetsDirectory,
-        node.name
-      )
-
-      return {
-        ...node,
-        context,
-        permalink,
-        outputPath,
-        date: new Date(node.stats.birthtime || Date.now())
-      }
-    },
-
-    afterEffects: (contentModel, asset) => {},
-
-    render: (renderer, asset) => {
-      return renderer.copy({
-        src: asset.absolutePath,
-        dest: asset.outputPath,
-        recursive: !!asset.children
-      })
-    }
+  render(renderer) {
+    return renderer.copy({
+      src: this.fsNode.absolutePath,
+      dest: this.outputPath,
+      recursive: !!this.fsNode.children
+    })
   }
 }
+
+module.exports = Asset

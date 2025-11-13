@@ -1,43 +1,17 @@
-const { join } = require('path')
-const _ = require('lodash')
-const { makePermalink } = require('../helpers')
+const ContentModelNode = require('../../../lib/ContentModelNode')
 
-module.exports = function Attachment() {
-  return {
-    match: node => true,
+class Attachment extends ContentModelNode {
+  constructor(fsNode, context) {
+    super(fsNode, context)
+  }
 
-    create(node, context) {
-      const permalink = makePermalink(
-        ..._.compact([
-          context.peek()?.permalink,
-          node.name
-        ])
-      )
-
-      const outputPath = join(
-        ..._.compact([
-          context.peek()?.outputPath,
-          node.name
-        ])
-      )
-
-      return {
-        ...node,
-        context,
-        permalink,
-        outputPath,
-        date: new Date(node.stats.birthtime || Date.now())
-      }
-    },
-
-    afterEffects: (contentModel, attachment) => {},
-
-    render: (renderer, attachment) => {
-      return renderer.copy({
-        src: attachment.absolutePath,
-        dest: attachment.outputPath,
-        recursive: !!attachment.children
-      })
-    }
+  render(renderer) {
+    return renderer.copy({
+      src: this.fsNode.absolutePath,
+      dest: this.outputPath,
+      recursive: !!this.fsNode.children
+    })
   }
 }
+
+module.exports = Attachment

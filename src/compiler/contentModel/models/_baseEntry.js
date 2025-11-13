@@ -4,7 +4,7 @@ const slug = require('slug')
 const { templateExtensions, removeExtension, Markdown } = require('../helpers')
 
 const models = {
-  attachment: require('./attachment')
+  Attachment: require('./attachment')
 }
 
 const isIndexFile = (node, nameOptions) => {
@@ -17,21 +17,18 @@ const isIndexFile = (node, nameOptions) => {
   return node.name.match(namePattern)
 }
 
-function parseFolderedEntry(node, indexFileNameOptions) {
+function parseFolderedEntry(node, indexFileNameOptions, matchers) {
   const tree = {
     indexFile: null,
-    attachments: []
-  }
-  const subModels = {
-    attachment: models.attachment()
+    __attachmentNodes: []
   }
   node.children.forEach(childNode => {
     if (isIndexFile(childNode, indexFileNameOptions)) {
       tree.indexFile = childNode
       return
     }
-    if (subModels.attachment.match(childNode)) {
-      tree.attachments.push(subModels.attachment.create.bind(null, childNode))
+    if (matchers.attachment(childNode)) {
+      tree.__attachmentNodes.push(childNode)
     }
   })
   return tree
@@ -44,14 +41,14 @@ function parseContent(node, content) {
   return Markdown.parse(content)
 }
 
-function _baseEntry(node, indexFileNameOptions) {
+function _baseEntry(node, indexFileNameOptions, matchers) {
   const folderedEntry = node.children ?
-    parseFolderedEntry(node, indexFileNameOptions) :
+    parseFolderedEntry(node, indexFileNameOptions, matchers) :
     undefined
   const entryFile = folderedEntry?.indexFile || node
   const { attributes, body } = frontMatter(entryFile.content)
   const entryName = folderedEntry ? node.name : removeExtension(entryFile.name)
-  const attachments = folderedEntry?.attachments || []
+  const __attachmentNodes = folderedEntry?.__attachmentNodes || []
   const contentRaw = body || ''
   const content = parseContent(entryFile, contentRaw)
 
@@ -63,7 +60,7 @@ function _baseEntry(node, indexFileNameOptions) {
     slug: attributes.slug || slug(entryName),
     contentRaw,
     content,
-    attachments
+    __attachmentNodes
   }
 }
 

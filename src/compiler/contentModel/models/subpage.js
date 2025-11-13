@@ -1,117 +1,146 @@
-const { join, resolve } = require('path')
-const { isTemplateFile, makePermalink } = require('../helpers')
+const { join } = require('path')
+const ContentModelNode = require('../../../lib/ContentModelNode')
+const { templateExtensions, makePermalink } = require('../../../lib/contentModelHelpers')
+const { parseTextEntry } = require('../../../lib/parseTextEntry')
+
 const models = {
   _baseEntry: require('./_baseEntry'),
-  attachment: require('./attachment'),
+  collection: require('./collection'),
+  Attachment: require('./attachment'),
 }
 
 const defaultSettings = {
-  pagesDirectory: 'pages',
-  mode: 'start'
+  pagesDirectory: 'pages'
 }
-module.exports = function Subpage(settings = defaultSettings) {
-  const indexFileNameOptions = ['page', 'index']
-  const pagesDirectoryNameOptions = [settings.pagesDirectory, 'subpages', 'pages']
+class Subpage extends ContentModelNode {
+  constructor(fsNode, context, settings = defaultSettings) {
+    super(fsNode, context, settings)
 
-  const isSubpageIndexFile = (node) => {
-    return (
-      isTemplateFile(node) &&
-      node.name.match(
-        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-      )
-    )
-  }
+    const entryProperties = parseTextEntry(this.fsNode, this.subtree.indexFile)
 
-  const isFolderedSubpage = (node) => {
-    return node.children?.find(isSubpageIndexFile)
-  }
+    // re-call these because slug is only now ready to use :(
+    this.permalink = this.getPermalink(entryProperties.slug)
+    this.outputPath = this.getOutputPath(entryProperties.slug)
 
-  const isPagesDirectory = (node) => {
-    return (
-      node.children &&
-      node.name.match(
-        new RegExp(`^(${pagesDirectoryNameOptions.join('|')})$`)
-      )
-    )
-  }
+    const pageContext = {
+      title: entryProperties.title,
+      slug: entryProperties.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath
+    }
 
-  return {
-    match: node => isTemplateFile(node) || isFolderedSubpage(node),
-    matchPagesDirectory: node => isPagesDirectory(node),
-
-    create: (node, context) => {
-      const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
-
-      const permalink = makePermalink(
-        context.peek().permalink,
-        baseEntryProps.slug
-      ) + (baseEntryProps.hasIndex ? '' : '.html')
-
-      const outputPath = join(
-        context.peek().outputPath,
-        baseEntryProps.slug
-      )
-
-      const pageContext = {
-        title: baseEntryProps.title,
-        slug: baseEntryProps.slug,
-        permalink,
-        outputPath
-      }
-
-      return {
-        ...baseEntryProps,
-        ...pageContext,
-        context,
-        attachments: baseEntryProps.attachments.map(
-          attachment => attachment(context.push({
+    Object.assign(this, {
+      ...entryProperties,
+      ...pageContext,
+      context: this.context,
+      attachments: this.subtree.attachments.map(attachmentNode => {
+        return new models.Attachment(
+          attachmentNode,
+          this.context.push({
             ...pageContext,
             key: 'page'
-          }))
-        )
-      }
-    },
-
-    afterEffects: (contentModel, subpage) => {
-      subpage.attachments.forEach(attachment => {
-        models.attachment().afterEffects(contentModel, attachment)
-      })
-    },
-
-    render: (renderer, subpage, { contentModel, settings, debug }) => {
-      const renderSubpage = () => {
-        return renderer.render({
-          templates: [
-            `pages/${subpage.template}`,
-            `pages/subpage/${subpage.contentType}`,
-            `pages/subpage/default`
-          ],
-          outputPath: join(...[
-            subpage.outputPath,
-            subpage.hasIndex ? 'index' : ''
-          ]) + '.html',
-          content: subpage.content,
-          data: {
-            ...contentModel,
-            subpage,
-            settings,
-            debug
-          }
-        })
-      }
-
-      const renderAttachments = () => {
-        return Promise.all(
-          subpage.attachments.map(attachment => {
-            return models.attachment().render(renderer, attachment)
           })
         )
-      }
+      })
+    })
+  }
 
-      return Promise.all([
-        renderSubpage(),
-        renderAttachments()
-      ])
+  getPermalink(slug) {
+    return makePermalink(
+      this.context.peek().permalink,
+      this.slug || slug || ''
+    ) + (this.hasIndex ? '' : '.html')
+  }
+
+  getOutputPath(slug) {
+    console.log('subpage slug', this.slug || slug)
+    return join(
+      this.context.peek().outputPath,
+      this.slug || slug || ''
+    )
+  }
+
+  parseSubtree() {
+    const tree = {
+      indexFile: this.fsNode,
+      attachments: []
     }
+
+    if (!this.fsNode.children || !this.fsNode.children.length) {
+      return tree
+    }
+
+    const indexFileNameOptions = ['index']
+
+    const matchers = {
+      indexFile: (fsNode) => {
+        if (fsNode.children) {
+          return false
+        }
+        const names = indexFileNameOptions.join('|')
+        const extensions = templateExtensions.join('|')
+        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
+        return fsNode.name.match(namePattern)
+      },
+
+      attachment: (fsNode) => true
+    }
+
+    this.fsNode.children.forEach(childNode => {
+      if (matchers.indexFile(childNode, indexFileNameOptions)) {
+        tree.indexFile = childNode
+        return
+      }
+      if (matchers.attachment(childNode)) {
+        tree.attachments.push(childNode)
+      }
+    })
+
+    return tree
+  }
+
+  afterEffects(contentModel) {
+    this.attachments.forEach(attachment => {
+      attachment.afterEffects(contentModel)
+    })
+  }
+
+  render(renderer, { contentModel, settings, debug }) {
+    const renderSubpage = () => {
+      return renderer.render({
+        templates: [
+          `pages/${this.template}`,
+          `pages/subpage/${this.contentType}`,
+          `pages/subpage/default`
+        ],
+        outputPath: join(...[
+          this.outputPath,
+          this.hasIndex ? 'index' : ''
+        ]) + '.html',
+        content: this.content,
+        data: {
+          ...contentModel,
+          collections: contentModel.collections.map(models.collection().serialize),
+          subpage: this,
+          settings,
+          debug
+        }
+      })
+    }
+
+    const renderAttachments = () => {
+      return Promise.all(
+        this.attachments.map(attachment => {
+          return attachment.render(renderer)
+        })
+      )
+    }
+
+    return Promise.all([
+      renderSubpage(),
+      renderAttachments()
+    ])
   }
 }
+
+module.exports = Subpage
