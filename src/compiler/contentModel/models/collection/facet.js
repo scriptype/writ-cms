@@ -86,7 +86,7 @@ function createFacetField(facet, value) {
   }
 }
 
-function linkEntryFieldsToFacets(entry, facets) {
+function linkWithEntryFields(entry, facets) {
   const facetsContext = entry.context.throwUntil(c => c.facetKeys).peek()
   const facetKeys = facetsContext.facetKeys
   if (!facetKeys || !facetKeys.length) {
@@ -148,7 +148,7 @@ function Facet() {
 
     serialize,
 
-    linkEntryFieldsToFacets,
+    linkWithEntryFields,
 
     create: (key, map, context) => {
       const slug = makeSlug(key)
