@@ -12,9 +12,9 @@ const {
   safeStringify
 } = require('../../helpers')
 const models = {
-  attachment: require('../attachment'),
+  Attachment: require('../attachment'),
   category: require('./category'),
-  post: require('./post'),
+  Post: require('./post'),
   facet: require('./facet')
 }
 
@@ -75,6 +75,24 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
     return node.name.match(new RegExp(`^${parentNode.name}\\.json$`, 'i'))
   }
 
+  const matchers = {
+    postIndexFile: fsNode => {
+      const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
+      return (
+        isTemplateFile(fsNode) &&
+        fsNode.name.match(
+          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+        )
+      )
+    },
+
+    post: fsNode => {
+      return isTemplateFile(fsNode) || fsNode.children?.find(matchers.postIndexFile)
+    },
+
+    attachment: fsNode => true
+  }
+
   const draftCheck = (node) => {
     return settings.mode === 'start' || !node.draft
   }
@@ -109,9 +127,12 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
           ...defaultCategoryContext,
           key: 'category'
         })
-        const uncategorizedPost = childNode ?
-          childModels.post.create(childNode, postContext) :
-          childModels.post.createFromData(postData, postContext)
+        const uncategorizedPost = new models.Post(
+          childNode || postData,
+          postContext,
+          contentTypes,
+          { entryAlias: collectionContext.entryAlias }
+        )
         if (childModels.category.draftCheck(uncategorizedPost)) {
           defaultCategory.levelPosts.push(uncategorizedPost)
           defaultCategory.posts.push(uncategorizedPost)
@@ -170,13 +191,8 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       }
 
       const childModels = {
-        attachment: models.attachment(),
         category: models.category({
           categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
-          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
-          mode: settings.mode
-        }, contentTypes),
-        post: models.post({
           entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
           mode: settings.mode
         }, contentTypes)
@@ -187,15 +203,15 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
           return
         }
         if (isDataFile(childNode, node)) {
-          const data = JSON.parse(childNode.content)
+          const data = JSON.parse(childNode.content || '[]')
           if (!Array.isArray(data)) {
-            return console.log('Collection data should be an array of posts', childNode.name)
+            return console.log('Collection data should be an array of objects', childNode.name)
           }
           return data.forEach(entry => {
             addUncategorizedPost(null, entry)
           })
         }
-        if (childModels.post.match(childNode)) {
+        if (matchers.post(childNode)) {
           return addUncategorizedPost(childNode)
         }
         if (childModels.category.match(childNode)) {
@@ -212,9 +228,9 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
           }
           return
         }
-        if (childModels.attachment.match(childNode)) {
+        if (matchers.attachment(childNode)) {
           tree.attachments.push(
-            childModels.attachment.create(
+            new models.Attachment(
               childNode,
               context.push({
                 ...collectionContext,
@@ -269,11 +285,11 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       })
 
       collection.posts.forEach(post => {
-        models.post().afterEffects(contentModel, post, collection.facets)
+        post.afterEffects(contentModel, collection.facets)
       })
 
       collection.attachments.forEach(attachment => {
-        models.attachment().afterEffects(contentModel, attachment)
+        attachment.afterEffects(contentModel)
       })
 
       collection.facets.forEach(facet => {
@@ -338,7 +354,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       const renderAttachments = () => {
         return Promise.all(
           collection.attachments.map(attachment => {
-            return models.attachment().render(renderer, attachment)
+            return attachment.render(renderer, { contentModel, settings, debug })
           })
         )
       }
