@@ -10,9 +10,9 @@ const {
   sort
 } = require('../../helpers')
 const models = {
-  post: require('./post'),
+  Post: require('./post'),
   facet: require('./facet'),
-  attachment: require('../attachment')
+  Attachment: require('../attachment')
 }
 
 function parseContent(node, content) {
@@ -62,15 +62,27 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
     )
   }
 
-  const draftCheck = (node) => {
-    return settings.mode === 'start' || !node.draft
+  // copy-pasted from matchers.js
+  const matchers = {
+    postIndexFile: fsNode => {
+      const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
+      return (
+        isTemplateFile(fsNode) &&
+        fsNode.name.match(
+          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+        )
+      )
+    },
+
+    post: fsNode => {
+      return isTemplateFile(fsNode) || fsNode.children?.find(matchers.postIndexFile)
+    },
+
+    attachment: fsNode => true
   }
 
-  const childModels = {
-    attachment: models.attachment(),
-    post: models.post({
-      entryAlias: settings.entryAlias
-    }, contentTypes)
+  const draftCheck = (node) => {
+    return settings.mode === 'start' || !node.draft
   }
 
   return {
@@ -79,7 +91,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
     draftCheck,
 
     match: (node) => node.children?.find(childNode => {
-      const containsPosts = childModels.post.match(childNode)
+      const containsPosts = matchers.post(childNode)
       if (level > 3) {
         return containsPosts
       }
@@ -100,6 +112,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
           entryContentType: context.peek().entryContentType,
           entryAlias: context.peek().entryAlias,
           facetKeys: context.peek().facetKeys || [],
+          facets: [],
           sortBy: context.peek().sortBy,
           sortOrder: context.peek().sortOrder,
           content: '',
@@ -144,6 +157,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
         categoriesAlias: indexProps.attributes?.categoriesAlias || context.peek().categoriesAlias,
         entriesAlias: indexProps.attributes?.entriesAlias || context.peek().entriesAlias,
         facetKeys: context.peek().facetKeys || [],
+        facets: [],
         sortBy: indexProps.attributes?.sortBy || context.peek().sortBy,
         sortOrder: indexProps.attributes?.sortOrder || context.peek().sortOrder,
         title: indexProps.attributes?.title || node.name,
@@ -180,8 +194,13 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
         if (isCategoryIndexFile(childNode)) {
           return
         }
-        if (childModels.post.match(childNode)) {
-          const post = childModels.post.create(childNode, childContext)
+        if (matchers.post(childNode)) {
+          const post = new models.Post(
+            childNode,
+            childContext,
+            contentTypes,
+            { entryAlias: settings.entryAlias }
+          )
           if (draftCheck(post)) {
             tree.levelPosts.push(post)
             tree.posts.push(post)
@@ -200,9 +219,9 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
           }
           return
         }
-        if (childModels.attachment.match(childNode)) {
+        if (matchers.attachment(childNode)) {
           return tree.attachments.push(
-            childModels.attachment.create(childNode, childContext)
+            new models.Attachment(childNode, childContext)
           )
         }
       })
@@ -221,7 +240,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
       }
     },
 
-    afterEffects: (contentModel, category) => {
+    afterEffects: (contentModel, category, collectionFacets) => {
       if (category.facetKeys.length) {
         const categoryContext = _.omit(category, [
           'context',
@@ -251,11 +270,11 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
       category.posts.forEach(linkPosts)
 
       category.attachments.forEach(attachment => {
-        models.attachment().afterEffects(contentModel, attachment)
+        attachment.afterEffects(contentModel, attachment)
       })
     },
 
-    render: (renderer, category, { contentModel, settings, debug }) => {
+    render: (renderer, category, { contentModel, settings, debug, facets }) => {
       const renderCategory = () => {
         if (category.isDefaultCategory && !category.slug) {
           return
@@ -303,7 +322,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
       const renderPosts = () => {
         return Promise.all(
           category.levelPosts.map(post => {
-            return models.post().render(renderer, post, { contentModel, settings, debug })
+            return post.render(renderer, { contentModel, settings, debug })
           })
         )
       }
@@ -311,7 +330,7 @@ module.exports = function Category(settings = defaultSettings, contentTypes, lev
       const renderAttachments = () => {
         return Promise.all(
           category.attachments.map(attachment => {
-            return models.attachment().render(renderer, attachment)
+            return attachment.render(renderer, { contentModel, settings, debug })
           })
         )
       }
