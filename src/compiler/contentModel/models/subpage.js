@@ -19,8 +19,8 @@ class Subpage extends ContentModelNode {
     const entryProperties = parseTextEntry(this.fsNode, this.subtree.indexFile)
 
     // re-call these because slug is only now ready to use :(
-    this.permalink = this.getPermalink(entryProperties.slug)
-    this.outputPath = this.getOutputPath(entryProperties.slug)
+    this.permalink = this.getPermalink(entryProperties.slug, entryProperties.hasIndex)
+    this.outputPath = this.getOutputPath(entryProperties.slug, entryProperties.hasIndex)
 
     const pageContext = {
       title: entryProperties.title,
@@ -45,15 +45,14 @@ class Subpage extends ContentModelNode {
     })
   }
 
-  getPermalink(slug) {
+  getPermalink(slug, hasIndex) {
     return makePermalink(
       this.context.peek().permalink,
       this.slug || slug || ''
-    ) + (this.hasIndex ? '' : '.html')
+    ) + ((this.hasIndex || hasIndex) ? '' : '.html')
   }
 
-  getOutputPath(slug) {
-    console.log('subpage slug', this.slug || slug)
+  getOutputPath(slug, hasIndex) {
     return join(
       this.context.peek().outputPath,
       this.slug || slug || ''
