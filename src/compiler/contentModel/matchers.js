@@ -30,9 +30,21 @@ module.exports = function createMatchers(settings) {
 
     category: fsNode => {},
 
-    post: fsNode => {},
+    postIndexFile: fsNode => {
+      const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
+      return (
+        isTemplateFile(fsNode) &&
+        fsNode.name.match(
+          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+        )
+      )
+    },
 
-    isSubpageIndexFile: fsNode => {
+    post: fsNode => {
+      return isTemplateFile(fsNode) || fsNode.children?.find(matchers.postIndexFile)
+    },
+
+    subpageIndexFile: fsNode => {
       const indexFileNameOptions = ['page', 'index']
       return (
         isTemplateFile(fsNode) &&
@@ -42,12 +54,8 @@ module.exports = function createMatchers(settings) {
       )
     },
 
-    isFolderedSubpage: fsNode => {
-      return fsNode.children?.find(matchers.isSubpageIndexFile)
-    },
-
     subpage: fsNode => {
-      return isTemplateFile(fsNode) || matchers.isFolderedSubpage(fsNode)
+      return isTemplateFile(fsNode) || fsNode.children?.find(matchers.subpageIndexFile)
     },
 
     pagesDirectory: fsNode => {

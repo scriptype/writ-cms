@@ -1,143 +1,158 @@
 const { join } = require('path')
 const makeSlug = require('slug')
-const { isTemplateFile, makePermalink, Markdown } = require('../../helpers')
+const ContentModelNode = require('../../../../lib/ContentModelNode')
+const { templateExtensions, makePermalink, Markdown } = require('../../../../lib/contentModelHelpers')
+const { parseTextEntry } = require('../../../../lib/parseTextEntry')
+
 const models = {
   facet: require('./facet'),
-  _baseEntry: require('../_baseEntry'),
-  attachment: require('../attachment')
+  Attachment: require('../attachment')
 }
 
 const defaultSettings = {
-  entryAlias: undefined,
-  mode: 'start'
+  entryAlias: undefined
 }
-module.exports = function Post(settings = defaultSettings, contentTypes = []) {
-  const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
+class Post extends ContentModelNode {
+  constructor(fsNode, context, contentTypes, settings = defaultSettings) {
+    super(fsNode, context, settings)
 
-  const isPostIndexFile = (node) => {
-    return (
-      isTemplateFile(node) &&
-      node.name.match(
-        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-      )
+    const isFlatData = !fsNode.stats?.birthtime
+    const entryProperties = parseTextEntry(this.fsNode, this.subtree.indexFile, isFlatData)
+
+    // re-call these because slug is only now ready to use :(
+    this.permalink = this.getPermalink(entryProperties.slug, entryProperties.hasIndex)
+    this.outputPath = this.getOutputPath(entryProperties.slug, entryProperties.hasIndex)
+
+    const postContext = {
+      title: entryProperties.title,
+      slug: entryProperties.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath
+    }
+
+    const contentType = this.context.peek().entryContentType
+
+    Object.assign(this, {
+      ...entryProperties,
+      ...postContext,
+      context: this.context,
+      contentType,
+      schema: contentTypes.find(ct => ct.name === contentType),
+      attachments: this.subtree.attachments.map(attachmentNode => {
+        return new models.Attachment(
+          attachmentNode,
+          this.context.push({
+            ...postContext,
+            key: 'post'
+          })
+        )
+      })
+    })
+  }
+
+  getPermalink(slug, hasIndex) {
+    return makePermalink(
+      this.context.peek().permalink,
+      this.slug || slug || ''
+    ) + ((this.hasIndex || hasIndex) ? '' : '.html')
+  }
+
+  getOutputPath(slug, hasIndex) {
+    return join(
+      this.context.peek().outputPath,
+      this.slug || slug || ''
     )
   }
 
-  return {
-    match: (node) => (
-      isTemplateFile(node) || node.children?.find(isPostIndexFile)
-    ),
-
-    create: (node, context) => {
-      const baseEntryProps = models._baseEntry(node, indexFileNameOptions)
-
-      const permalink = makePermalink(
-        context.peek().permalink,
-        baseEntryProps.slug
-      ) + (node.children ? '' : '.html')
-
-      const outputPath = join(context.peek().outputPath, baseEntryProps.slug)
-
-      const postContext = {
-        title: baseEntryProps.title,
-        slug: baseEntryProps.slug,
-        permalink,
-        outputPath,
-      }
-
-      const contentType = context.peek().entryContentType
-
-      return {
-        ...baseEntryProps,
-        ...postContext,
-        context,
-        contentType,
-        schema: contentTypes.find(ct => ct.name === contentType),
-        date: new Date(baseEntryProps.date || baseEntryProps.stats.birthtime || Date.now()),
-        attachments: baseEntryProps.attachments.map(
-          attachment => attachment(context.push({
-            ...postContext,
-            key: 'post'
-          }))
-        )
-      }
-    },
-
-    createFromData: (data, context) => {
-      const slug = data.slug || makeSlug(data.title)
-
-      const postContext = {
-        title: data.title,
-        slug,
-        permalink: makePermalink(context.peek().permalink, slug) + '.html',
-        outputPath: join(context.peek().outputPath, slug),
-      }
-
-      const contentType = context.peek().entryContentType
-      const contentRaw = data.content || ''
-
-      return {
-        ...data,
-        ...postContext,
-        context,
-        contentType,
-        schema: contentTypes.find(ct => ct.name === contentType),
-        date: new Date(data.date || Date.now()),
-        contentRaw,
-        content: Markdown.parse(contentRaw),
-        attachments: []
-      }
-    },
-
-    afterEffects: (contentModel, post, facets) => {
-      models.facet().linkEntryFieldsToFacets(post, facets)
-
-      post.attachments.forEach(attachment => {
-        models.attachment().afterEffects(contentModel, attachment)
-      })
-    },
-
-    render: (renderer, post, { contentModel, settings, debug }) => {
-      const renderPost = () => {
-        const data = {
-          ...contentModel,
-          post,
-          settings,
-          debug
-        }
-        const entryAlias = post.context.peek().entryAlias
-        if (entryAlias) {
-          data[entryAlias] = data.post
-        }
-
-        return renderer.render({
-          templates: [
-            `pages/${post.template}`,
-            `pages/post/${entryAlias}`,
-            `pages/post/${post.contentType}`,
-            `pages/post/default`
-          ],
-          outputPath: join(...[
-            post.outputPath,
-            post.hasIndex ? 'index' : ''
-          ].filter(Boolean)) + '.html',
-          content: post.content,
-          data
-        })
-      }
-
-      const renderAttachments = () => {
-        return Promise.all(
-          post.attachments.map(attachment => {
-            return models.attachment().render(renderer, attachment)
-          })
-        )
-      }
-
-      return Promise.all([
-        renderPost(),
-        renderAttachments()
-      ])
+  parseSubtree() {
+    const tree = {
+      indexFile: this.fsNode,
+      attachments: []
     }
+
+    if (!this.fsNode.children || !this.fsNode.children.length) {
+      return tree
+    }
+
+    const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
+
+    const matchers = {
+      indexFile: (fsNode) => {
+        if (fsNode.children) {
+          return false
+        }
+        const names = indexFileNameOptions.join('|')
+        const extensions = templateExtensions.join('|')
+        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
+        return fsNode.name.match(namePattern)
+      },
+
+      attachment: (fsNode) => true
+    }
+
+    this.fsNode.children.forEach(childNode => {
+      if (matchers.indexFile(childNode, indexFileNameOptions)) {
+        tree.indexFile = childNode
+        return
+      }
+      if (matchers.attachment(childNode)) {
+        tree.attachments.push(childNode)
+      }
+    })
+
+    return tree
+  }
+
+  afterEffects(contentModel, collectionFacets) {
+    // TODO: feels like collection should handle this
+    models.facet().linkWithEntryFields(this, collectionFacets)
+
+    this.attachments.forEach(attachment => {
+      attachment.afterEffects(contentModel)
+    })
+  }
+
+  render(renderer, { contentModel, settings, debug }) {
+    const renderPost = () => {
+      const data = {
+        ...contentModel,
+        post: this,
+        settings,
+        debug
+      }
+      if (this.settings.entryAlias) {
+        data[this.settings.entryAlias] = data.post
+      }
+
+      return renderer.render({
+        templates: [
+          `pages/${this.template}`,
+          `pages/post/${this.settings.entryAlias}`,
+          `pages/post/${this.contentType}`,
+          `pages/post/default`
+        ],
+        outputPath: join(...[
+          this.outputPath,
+          this.hasIndex ? 'index' : ''
+        ].filter(Boolean)) + '.html',
+        content: this.content,
+        data
+      })
+    }
+
+    const renderAttachments = () => {
+      return Promise.all(
+        this.attachments.map(attachment => {
+          return attachment.render(renderer)
+        })
+      )
+    }
+
+    return Promise.all([
+      renderPost(),
+      renderAttachments()
+    ])
   }
 }
+
+module.exports = Post

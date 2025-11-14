@@ -19,7 +19,24 @@ const normalizeEntryName = (fsNode, indexNode) => {
   }
 }
 
-const parseTextEntry = (fsNode, indexNode) => {
+const parseFlatData = (data) => {
+  const contentRaw = data.content || ''
+  const content = Markdown.parse(contentRaw)
+
+  return {
+    ...data,
+    hasIndex: false,
+    title: data.title || '',
+    slug: data.slug || slug(data.title),
+    contentRaw,
+    content
+  }
+}
+
+const parseTextEntry = (fsNode, indexNode, isFlatData) => {
+  if (isFlatData) {
+    return parseFlatData(fsNode)
+  }
   const { attributes, body } = frontMatter(indexNode.content)
   const { hasIndex, entryName } = normalizeEntryName(fsNode, indexNode)
   const contentRaw = body || ''
@@ -39,5 +56,6 @@ const parseTextEntry = (fsNode, indexNode) => {
 module.exports = {
   parseContent,
   normalizeEntryName,
+  parseFlatData,
   parseTextEntry
 }
