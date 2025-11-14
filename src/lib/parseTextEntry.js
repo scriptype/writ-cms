@@ -22,12 +22,13 @@ const normalizeEntryName = (fsNode, indexNode) => {
 const parseFlatData = (data) => {
   const contentRaw = data.content || ''
   const content = Markdown.parse(contentRaw)
+  const title = data.title || ''
 
   return {
     ...data,
     hasIndex: false,
-    title: data.title || '',
-    slug: data.slug || slug(data.title),
+    title,
+    slug: data.slug || slug(title),
     contentRaw,
     content
   }
