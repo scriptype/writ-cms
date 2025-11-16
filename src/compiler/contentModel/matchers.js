@@ -28,7 +28,16 @@ module.exports = function createMatchers(settings) {
 
     collection: fsNode => {},
 
-    category: fsNode => {},
+    category: (fsNode) => {
+      fsNode.children?.find(childNode => {
+        const containsPosts = matchers.post(childNode)
+        if (settings.level > 3) {
+          return containsPosts
+        }
+        const containsSubCategories = matchers.category(childNode, settings.level)
+        return containsSubCategories || containsPosts
+      })
+    },
 
     postIndexFile: fsNode => {
       const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)

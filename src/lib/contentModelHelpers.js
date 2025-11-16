@@ -51,10 +51,31 @@ const Markdown = {
   },
 }
 
+const makeDateSlug = (date) => {
+  return date.toISOString().split('T')[0]
+}
+
+const _sortableValue = (value) => {
+  return typeof value === 'string' ? value.toLowerCase().charCodeAt(0) : value
+}
+
+const sort = (items, sortBy, sortOrder) => {
+  items.sort((a, b) => {
+    const sortableA = _sortableValue(a[sortBy])
+    const sortableB = _sortableValue(b[sortBy])
+    if (sortOrder === -1) {
+      return sortableB - sortableA
+    }
+    return sortableA - sortableB
+  })
+}
+
 module.exports = {
   templateExtensions,
   isTemplateFile,
   makePermalink,
   removeExtension,
-  Markdown
+  Markdown,
+  makeDateSlug,
+  sort
 }

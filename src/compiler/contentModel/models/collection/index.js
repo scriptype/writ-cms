@@ -11,9 +11,10 @@ const {
   Markdown,
   safeStringify
 } = require('../../helpers')
+
 const models = {
   Attachment: require('../attachment'),
-  category: require('./category'),
+  Category: require('./category'),
   Post: require('./post'),
   facet: require('./facet')
 }
@@ -76,6 +77,17 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
   }
 
   const matchers = {
+    category: (fsNode, level) => {
+      return fsNode.children?.find(childNode => {
+        const containsPosts = matchers.post(childNode)
+        if (level > 3) {
+          return containsPosts
+        }
+        const containsSubCategories = matchers.category(childNode, level)
+        return containsSubCategories || containsPosts
+      })
+    },
+
     postIndexFile: fsNode => {
       const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
       return (
@@ -110,9 +122,15 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       function addUncategorizedPost(childNode, postData) {
         let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
         if (!defaultCategory) {
-          defaultCategory = childModels.category.create(
+          defaultCategory = new models.Category(
             { isDefaultCategory: true },
-            context.push(collectionContext)
+            context.push(collectionContext),
+            {
+              categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
+              entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
+              mode: settings.mode,
+              contentTypes,
+            }
           )
           tree.categories.push(defaultCategory)
         }
@@ -133,9 +151,9 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
           contentTypes,
           { entryAlias: collectionContext.entryAlias }
         )
-        if (childModels.category.draftCheck(uncategorizedPost)) {
-          defaultCategory.levelPosts.push(uncategorizedPost)
-          defaultCategory.posts.push(uncategorizedPost)
+        if (models.Category.draftCheck(settings.mode, uncategorizedPost)) {
+          defaultCategory.subtree.levelPosts.push(uncategorizedPost)
+          defaultCategory.subtree.posts.push(uncategorizedPost)
           tree.levelPosts.push(uncategorizedPost)
           tree.posts.push(uncategorizedPost)
         }
@@ -190,14 +208,6 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         tree[entriesAlias] = tree.posts
       }
 
-      const childModels = {
-        category: models.category({
-          categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
-          entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
-          mode: settings.mode
-        }, contentTypes)
-      }
-
       node.children.forEach(childNode => {
         if (isCollectionIndexFile(childNode)) {
           return
@@ -214,17 +224,24 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
         if (matchers.post(childNode)) {
           return addUncategorizedPost(childNode)
         }
-        if (childModels.category.match(childNode)) {
-          const newCategory = childModels.category.create(
+        if (matchers.category(childNode, 1)) {
+          const newCategory = new models.Category(
             childNode,
             context.push({
               ...collectionContext,
               key: 'collection'
-            })
+            }),
+            {
+              categoryAlias: indexProps.attributes?.categoryAlias || contentType?.categoryAlias,
+              entryAlias: indexProps.attributes?.entryAlias || contentType?.entryAlias,
+              mode: settings.mode,
+              level: 1,
+              contentTypes,
+            }
           )
           if (draftCheck(newCategory)) {
             tree.categories.push(newCategory)
-            tree.posts.push(...newCategory.posts)
+            tree.posts.push(...newCategory.subtree.posts)
           }
           return
         }
@@ -281,7 +298,7 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       }
 
       collection.categories.forEach(category => {
-        models.category().afterEffects(contentModel, category, collection.facets)
+        category.afterEffects(contentModel, collection.facets)
       })
 
       collection.posts.forEach(post => {
@@ -362,8 +379,8 @@ module.exports = function Collection(settings = defaultSettings, contentTypes = 
       const renderCategories = () => {
         return Promise.all(
           collection.categories.map(category => {
-            return models.category().render(
-              renderer, category, { contentModel, settings, debug, facets: collection.facets }
+            return category.render(
+              renderer, { contentModel, settings, debug }
             )
           })
         )

@@ -1,356 +1,359 @@
-const _ = require('lodash')
-const frontMatter = require('front-matter')
 const makeSlug = require('slug')
-const { join } = require('path')
-const {
-  isTemplateFile,
-  Markdown,
-  makePermalink,
-  makeDateSlug,
-  sort
-} = require('../../helpers')
+const _ = require('lodash')
+const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
+const { makePermalink, isTemplateFile, sort } = require('../../../../lib/contentModelHelpers')
+
 const models = {
   Post: require('./post'),
   facet: require('./facet'),
   Attachment: require('../attachment')
 }
 
-function parseContent(node, content) {
-  if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
-    return content
-  }
-  return Markdown.parse(content)
-}
-
-function linkPosts(post, postIndex, posts) {
-  post.links = post.links || {}
-
-  const nextPost = posts[postIndex - 1]
-  if (nextPost) {
-    post.links.nextPost = {
-      title: nextPost.title,
-      permalink: nextPost.permalink
-    }
-  }
-  const previousPost = posts[postIndex + 1]
-  if (previousPost) {
-    post.links.previousPost = {
-      title: previousPost.title,
-      permalink: previousPost.permalink
-    }
-  }
-}
-
-function serialize(category) {
-  return {
-    ...category,
-    facets: category.facets.map(models.facet().serialize)
-  }
-}
-
 const defaultSettings = {
   categoryAlias: undefined,
   entryAlias: undefined,
-  mode: 'start'
+  mode: 'start',
+  level: 1,
+  contentTypes: []
 }
-module.exports = function Category(settings = defaultSettings, contentTypes, level = 1) {
-  const indexFileNameOptions = [settings.categoryAlias, 'category'].filter(Boolean)
+class Category extends ContentModelEntryNode {
+  static linkPosts(post, postIndex, posts) {
+    post.links = post.links || {}
 
-  const isCategoryIndexFile = (node) => {
-    return isTemplateFile(node) && node.name.match(
-      new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-    )
-  }
-
-  // copy-pasted from matchers.js
-  const matchers = {
-    postIndexFile: fsNode => {
-      const indexFileNameOptions = [settings.entryAlias, 'post', 'index'].filter(Boolean)
-      return (
-        isTemplateFile(fsNode) &&
-        fsNode.name.match(
-          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-        )
-      )
-    },
-
-    post: fsNode => {
-      return isTemplateFile(fsNode) || fsNode.children?.find(matchers.postIndexFile)
-    },
-
-    attachment: fsNode => true
-  }
-
-  const draftCheck = (node) => {
-    return settings.mode === 'start' || !node.draft
-  }
-
-  return {
-    serialize,
-
-    draftCheck,
-
-    match: (node) => node.children?.find(childNode => {
-      const containsPosts = matchers.post(childNode)
-      if (level > 3) {
-        return containsPosts
+    const nextPost = posts[postIndex - 1]
+    if (nextPost) {
+      post.links.nextPost = {
+        title: nextPost.title,
+        permalink: nextPost.permalink
       }
-      const containsSubCategories = Category().match(childNode)
-      return containsSubCategories || containsPosts
-    }),
-
-    create: (node, context) => {
-      if (node.isDefaultCategory) {
-        const title = context.peek().defaultCategoryName
-        const slug = makeSlug(title)
-        const { entriesAlias, categoriesAlias } = context.peek()
-
-        const defaultCategory = {
-          context,
-          contentType: context.peek().categoryContentType,
-          categoryContentType: context.peek().categoryContentType,
-          entryContentType: context.peek().entryContentType,
-          entryAlias: context.peek().entryAlias,
-          facetKeys: context.peek().facetKeys || [],
-          facets: [],
-          sortBy: context.peek().sortBy,
-          sortOrder: context.peek().sortOrder,
-          content: '',
-          contentRaw: '',
-          slug,
-          title,
-          permalink: makePermalink(context.peek().permalink, slug),
-          outputPath: join(context.peek().outputPath, slug),
-          isDefaultCategory: true,
-          posts: [],
-          levelPosts: [],
-          categories: [],
-          attachments: [],
-          level
-        }
-
-        if (entriesAlias) {
-          defaultCategory[entriesAlias] = defaultCategory.posts
-        }
-
-        if (categoriesAlias) {
-          defaultCategory[categoriesAlias] = defaultCategory.categories
-        }
-
-        return defaultCategory
+    }
+    const previousPost = posts[postIndex + 1]
+    if (previousPost) {
+      post.links.previousPost = {
+        title: previousPost.title,
+        permalink: previousPost.permalink
       }
+    }
+  }
 
-      const indexFile = node.children.find(isCategoryIndexFile)
-      const indexProps = indexFile ? frontMatter(indexFile.content) : {}
+  static serialize(category) {
+    return {
+      ...category,
+      facets: category.facets.map(models.facet().serialize),
+      posts: category.subtree.posts,
+      levelPosts: category.subtree.levelPosts,
+      categories: category.subtree.categories,
+      attachments: category.subtree.attachments
+    }
+  }
 
-      const slug = indexProps.attributes?.slug || makeSlug(node.name)
-      const permalink = makePermalink(context.peek().permalink, slug)
-      const outputPath = join(context.peek().outputPath, slug)
+  static draftCheck (mode, node) {
+    return mode === 'start' || !node.draft
+  }
 
-      const categoryContext = {
-        ...indexProps.attributes,
+  constructor(fsNode, context, settings = defaultSettings) {
+    super(fsNode, context, settings)
+
+    if (fsNode.isDefaultCategory) {
+      const title = context.peek().defaultCategoryName
+      const slug = makeSlug(title)
+      const { entriesAlias, categoriesAlias } = context.peek()
+
+      const defaultCategory = {
         contentType: context.peek().categoryContentType,
-        categoryContentType: indexProps.attributes?.categoryContentType || context.peek().categoryContentType,
-        entryContentType: indexProps.attributes?.entryContentType || context.peek().entryContentType,
-        categoryAlias: indexProps.attributes?.categoryAlias || context.peek().categoryAlias,
-        entryAlias: indexProps.attributes?.entryAlias || context.peek().entryAlias,
-        categoriesAlias: indexProps.attributes?.categoriesAlias || context.peek().categoriesAlias,
-        entriesAlias: indexProps.attributes?.entriesAlias || context.peek().entriesAlias,
+        categoryContentType: context.peek().categoryContentType,
+        entryContentType: context.peek().entryContentType,
+        entryAlias: context.peek().entryAlias,
         facetKeys: context.peek().facetKeys || [],
         facets: [],
-        sortBy: indexProps.attributes?.sortBy || context.peek().sortBy,
-        sortOrder: indexProps.attributes?.sortOrder || context.peek().sortOrder,
-        title: indexProps.attributes?.title || node.name,
+        sortBy: context.peek().sortBy,
+        sortOrder: context.peek().sortOrder,
+        content: '',
+        contentRaw: '',
         slug,
-        permalink,
-        outputPath,
-        level
+        title,
+        isDefaultCategory: true,
+        level: this.settings.level
       }
-
-      const tree = {
-        categories: [],
-        posts: [],
-        levelPosts: [],
-        attachments: []
-      }
-
-      const { entriesAlias, categoriesAlias } = categoryContext
 
       if (entriesAlias) {
-        tree[entriesAlias] = tree.posts
+        defaultCategory[entriesAlias] = defaultCategory.posts
       }
 
       if (categoriesAlias) {
-        tree[categoriesAlias] = tree.categories
+        defaultCategory[categoriesAlias] = defaultCategory.categories
       }
 
-      const contextKey = level === 1 ? 'category' : `subCategory${level - 1}`
-      node.children.forEach(childNode => {
-        const childContext = context.push({
-          ...categoryContext,
-          key: contextKey
+      return Object.assign(this, defaultCategory)
+    }
+
+    const categoryContext = {
+      contentType: context.peek().categoryContentType,
+      categoryContentType: this.categoryContentType || context.peek().categoryContentType,
+      entryContentType: this.entryContentType || context.peek().entryContentType,
+      categoryAlias: this.categoryAlias || context.peek().categoryAlias,
+      entryAlias: this.entryAlias || context.peek().entryAlias,
+      categoriesAlias: this.categoriesAlias || context.peek().categoriesAlias,
+      entriesAlias: this.entriesAlias || context.peek().entriesAlias,
+      facetKeys: context.peek().facetKeys || [],
+      facets: [],
+      sortBy: this.sortBy || context.peek().sortBy,
+      sortOrder: this.sortOrder || context.peek().sortOrder,
+      title: this.title || fsNode.name,
+      slug: this.slug,
+      level: this.settings.level
+    }
+
+    Object.assign(this, categoryContext)
+
+    // TODO: move this stuff along with aliases to serialize
+    this.posts = this.subtree.posts
+    this.attachments = this.subtree.attachments
+  }
+
+  getPermalink() {
+    if (this.fsNode.isDefaultCategory) {
+      return this.context.peek().permalink
+    }
+    return makePermalink(
+      this.context.peek().permalink,
+      this.slug
+    )
+  }
+
+  getSubtreeMatchers() {
+    // copy-pasted from matchers.js
+    return {
+      indexFile: fsNode => {
+        const indexFileNameOptions = [this.settings.categoryAlias, 'category'].filter(Boolean)
+        return isTemplateFile(fsNode) && fsNode.name.match(
+          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+        )
+      },
+
+      category: (fsNode, level) => {
+        return fsNode.children?.find(childNode => {
+          const containsPosts = this.matchers.post(childNode)
+          if (level > 3) {
+            return containsPosts
+          }
+          const containsSubCategories = this.matchers.category(childNode, level)
+          return containsSubCategories || containsPosts
         })
+      },
 
-        if (isCategoryIndexFile(childNode)) {
-          return
-        }
-        if (matchers.post(childNode)) {
-          const post = new models.Post(
-            childNode,
-            childContext,
-            contentTypes,
-            { entryAlias: settings.entryAlias }
+      postIndexFile: fsNode => {
+        const indexFileNameOptions = [this.entryAlias, 'post', 'index'].filter(Boolean)
+        return (
+          isTemplateFile(fsNode) &&
+          fsNode.name.match(
+            new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
           )
-          if (draftCheck(post)) {
-            tree.levelPosts.push(post)
-            tree.posts.push(post)
-          }
-          return
-        }
-        if (Category().match(childNode)) {
-          const SubCategoryModel = Category({
-            entryAlias: categoryContext.entryAlias || settings.entryAlias,
-            categoryAlias: categoryContext.categoryAlias || settings.categoryAlias
-          }, contentTypes, level + 1)
-          const subCategory = SubCategoryModel.create(childNode, childContext)
-          if (draftCheck(subCategory)) {
-            tree.categories.push(subCategory)
-            tree.posts.push(...subCategory.posts)
-          }
-          return
-        }
-        if (matchers.attachment(childNode)) {
-          return tree.attachments.push(
-            new models.Attachment(childNode, childContext)
-          )
-        }
-      })
+        )
+      },
 
-      const contentRaw = indexProps.body || ''
-      const content = indexFile ?
-        parseContent(indexFile, contentRaw) :
-        ''
+      post: fsNode => {
+        return isTemplateFile(fsNode) || fsNode.children?.find(this.matchers.postIndexFile)
+      },
 
-      return {
-        ...categoryContext,
-        ...tree,
-        context,
-        contentRaw,
-        content
-      }
-    },
+      attachment: fsNode => true
+    }
+  }
 
-    afterEffects: (contentModel, category, collectionFacets) => {
-      if (category.facetKeys.length) {
-        const categoryContext = _.omit(category, [
+  parseSubtree() {
+    const tree = {
+      indexFile: this.indexFile,
+      categories: [],
+      posts: [],
+      levelPosts: [],
+      attachments: []
+    }
+
+    if (this.entriesAlias) {
+      tree[this.entriesAlias] = tree.posts
+    }
+
+    if (this.categoriesAlias) {
+      tree[this.categoriesAlias] = tree.categories
+    }
+
+    if (!this.fsNode.children || !this.fsNode.children.length) {
+      return tree
+    }
+
+    const contextKey = this.settings.level === 1 ?
+      'category' :
+      `subCategory${this.settings.level - 1}`
+
+    this.fsNode.children.forEach(childNode => {
+      const childContext = this.context.push({
+        ..._.omit(this, [
           'context',
           'contentRaw',
           'content',
-          'categories',
-          'posts',
-          'attachments',
           'facets'
-        ])
+        ]),
+        key: contextKey
+      })
 
-        category.facets = models.facet().collectFacets(
-          category.posts,
-          category.facetKeys,
-          category.context.push({
-            ...categoryContext,
-            key: 'category'
-          })
-        )
+      if (this.matchers.indexFile(childNode)) {
+        return
       }
 
-      category.categories.forEach(subCategory => {
-        Category().afterEffects(contentModel, subCategory)
-      })
-
-      sort(category.posts, category.sortBy, category.sortOrder)
-      category.posts.forEach(linkPosts)
-
-      category.attachments.forEach(attachment => {
-        attachment.afterEffects(contentModel, attachment)
-      })
-    },
-
-    render: (renderer, category, { contentModel, settings, debug, facets }) => {
-      const renderCategory = () => {
-        if (category.isDefaultCategory && !category.slug) {
-          return
+      if (this.matchers.post(childNode)) {
+        const post = new models.Post(
+          childNode,
+          childContext,
+          this.settings.contentTypes,
+          { entryAlias: this.settings.entryAlias }
+        )
+        if (Category.draftCheck(this.settings.mode, post)) {
+          tree.levelPosts.push(post)
+          tree.posts.push(post)
         }
-        return renderer.paginate({
-          basePermalink: category.permalink,
-          posts: category.posts,
-          postsPerPage: category.postsPerPage || 15, //category.context.peek().postsPerPage
-          outputDir: category.outputPath,
-          render: async ({ outputPath, pageOfPosts, paginationData }) => {
-            const data = {
-              ...contentModel,
-              category: serialize(category),
-              pagination: paginationData,
-              posts: pageOfPosts,
-              settings,
-              debug
-            }
-            const categoryAlias = category.context.peek().categoryAlias
-            if (categoryAlias) {
-              data[categoryAlias] = data.category
-            }
-            return renderer.render({
-              templates: [
-                `pages/${category.template}`,
-                `pages/category/${category.contentType}`,
-                `pages/category/default`
-              ],
-              outputPath,
-              content: category.content,
-              data
-            })
+        return
+      }
+
+      if (this.matchers.category(childNode, this.settings.level)) {
+        const subCategory = new Category(
+          childNode,
+          childContext,
+          {
+            contentTypes: this.settings.contentTypes,
+            entryAlias: this.entryAlias || this.settings.entryAlias,
+            categoryAlias: this.categoryAlias || this.settings.categoryAlias,
+            level: this.settings.level + 1
           }
-        })
-      }
-
-      const renderSubCategories = () => {
-        return Promise.all(
-          category.categories.map(subCategory => {
-            return Category().render(renderer, subCategory, { contentModel, settings, debug })
-          })
         )
-      }
-
-      const renderPosts = () => {
-        return Promise.all(
-          category.levelPosts.map(post => {
-            return post.render(renderer, { contentModel, settings, debug })
-          })
-        )
-      }
-
-      const renderAttachments = () => {
-        return Promise.all(
-          category.attachments.map(attachment => {
-            return attachment.render(renderer, { contentModel, settings, debug })
-          })
-        )
-      }
-
-      const renderFacets = () => {
-        if (!category.facets?.length) {
-          return
+        if (Category.draftCheck(this.settings.mode, subCategory)) {
+          tree.categories.push(subCategory)
+          tree.posts.push(...subCategory.posts)
         }
-        return models.facet().render(
-          renderer, category.facets, { contentModel, settings, debug }
-        )
+        return
       }
 
-      return Promise.all([
-        renderCategory(),
-        renderSubCategories(),
-        renderPosts(),
-        renderAttachments(),
-        renderFacets()
+      if (this.matchers.attachment(childNode)) {
+        return tree.attachments.push(
+          new models.Attachment(childNode, childContext)
+        )
+      }
+    })
+
+    return tree
+  }
+
+  afterEffects(contentModel, collectionFacets) {
+    if (this.facetKeys.length) {
+      const categoryContext = _.omit(this, [
+        'context',
+        'contentRaw',
+        'content',
+        'categories',
+        'posts',
+        'attachments',
+        'facets'
       ])
+
+      this.facets = models.facet().collectFacets(
+        this.subtree.posts,
+        this.facetKeys,
+        this.context.push({
+          ...categoryContext,
+          key: 'category'
+        })
+      )
     }
+
+    this.subtree.categories.forEach(subCategory => {
+      subCategory.afterEffects(contentModel, collectionFacets)
+    })
+
+    sort(this.subtree.posts, this.sortBy, this.sortOrder)
+    this.subtree.posts.forEach(Category.linkPosts)
+
+    this.subtree.attachments.forEach(attachment => {
+      attachment.afterEffects(contentModel)
+    })
+  }
+
+  render(renderer, { contentModel, settings, debug }) {
+    const renderCategory = () => {
+      if (this.isDefaultCategory && !this.slug) {
+        return
+      }
+      return renderer.paginate({
+        basePermalink: this.permalink,
+        posts: this.subtree.posts,
+        postsPerPage: this.postsPerPage || 15, //this.context.peek().postsPerPage
+        outputDir: this.outputPath,
+        render: async ({ outputPath, pageOfPosts, paginationData }) => {
+          const data = {
+            ...contentModel,
+            category: Category.serialize(this),
+            pagination: paginationData,
+            posts: pageOfPosts,
+            settings,
+            debug
+          }
+          const categoryAlias = this.context.peek().categoryAlias
+          if (categoryAlias) {
+            data[categoryAlias] = data.category
+          }
+          return renderer.render({
+            templates: [
+              `pages/${this.template}`,
+              `pages/category/${this.contentType}`,
+              `pages/category/default`
+            ],
+            outputPath,
+            content: this.content,
+            data
+          })
+        }
+      })
+    }
+
+    const renderSubCategories = () => {
+      return Promise.all(
+        this.subtree.categories.map(subCategory => {
+          return subCategory.render(renderer, { contentModel, settings, debug })
+        })
+      )
+    }
+
+    const renderPosts = () => {
+      return Promise.all(
+        this.subtree.levelPosts.map(post => {
+          return post.render(renderer, { contentModel, settings, debug })
+        })
+      )
+    }
+
+    const renderAttachments = () => {
+      return Promise.all(
+        this.subtree.attachments.map(attachment => {
+          return attachment.render(renderer, { contentModel, settings, debug })
+        })
+      )
+    }
+
+    const renderFacets = () => {
+      if (!this.facets?.length) {
+        return
+      }
+      return models.facet().render(
+        renderer, this.facets, { contentModel, settings, debug }
+      )
+    }
+
+    return Promise.all([
+      renderCategory(),
+      renderSubCategories(),
+      renderPosts(),
+      renderAttachments(),
+      renderFacets()
+    ])
   }
 }
+
+module.exports = Category

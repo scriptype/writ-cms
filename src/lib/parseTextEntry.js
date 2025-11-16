@@ -41,7 +41,7 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
   const { attributes, body } = frontMatter(indexNode.content)
   const { hasIndex, entryName } = normalizeEntryName(fsNode, indexNode)
   const contentRaw = body || ''
-  const content = parseContent(indexNode, contentRaw)
+  const content = indexNode.children ? '' : parseContent(indexNode, contentRaw)
 
   return {
     ..._.omit(fsNode, 'children'),
