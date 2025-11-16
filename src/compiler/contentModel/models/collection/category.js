@@ -36,14 +36,22 @@ class Category extends ContentModelEntryNode {
     }
   }
 
-  static serialize(category) {
-    return {
+  static serialize(category, entriesAlias, categoriesAlias) {
+    const data = {
       ...category,
       facets: category.facets.map(models.facet().serialize),
       posts: category.subtree.posts,
       levelPosts: category.subtree.levelPosts,
       categories: category.subtree.categories,
       attachments: category.subtree.attachments
+    }
+
+    if (entiresAlias) {
+      data[entriesAlias] = data.posts
+    }
+
+    if (categoriesAlias) {
+      data[entriesAlias] = data.categories
     }
   }
 
@@ -63,21 +71,24 @@ class Category extends ContentModelEntryNode {
         contentType: context.peek().categoryContentType,
         categoryContentType: context.peek().categoryContentType,
         entryContentType: context.peek().entryContentType,
+        categoryAlias: context.peek().categoryAlias,
         entryAlias: context.peek().entryAlias,
+        categoriesAlias: context.peek().categoriesAlias,
+        entriesAlias: context.peek().entriesAlias,
         facetKeys: context.peek().facetKeys || [],
         facets: [],
         sortBy: context.peek().sortBy,
         sortOrder: context.peek().sortOrder,
+        title,
+        slug,
         content: '',
         contentRaw: '',
-        slug,
-        title,
         isDefaultCategory: true,
         level: this.settings.level
       }
 
       if (entriesAlias) {
-        defaultCategory[entriesAlias] = defaultCategory.posts
+        defaultCategory[entriesAlias] = defaultCategory.levelPosts.posts
       }
 
       if (categoriesAlias) {
@@ -105,10 +116,6 @@ class Category extends ContentModelEntryNode {
     }
 
     Object.assign(this, categoryContext)
-
-    // TODO: move this stuff along with aliases to serialize
-    this.posts = this.subtree.posts
-    this.attachments = this.subtree.attachments
   }
 
   getPermalink() {
@@ -227,7 +234,7 @@ class Category extends ContentModelEntryNode {
         )
         if (Category.draftCheck(this.settings.mode, subCategory)) {
           tree.categories.push(subCategory)
-          tree.posts.push(...subCategory.posts)
+          tree.posts.push(...subCategory.subtree.posts)
         }
         return
       }
@@ -289,7 +296,7 @@ class Category extends ContentModelEntryNode {
         render: async ({ outputPath, pageOfPosts, paginationData }) => {
           const data = {
             ...contentModel,
-            category: Category.serialize(this),
+            category: Category.serialize(this, this.entriesAlias, this.categoriesAlias),
             pagination: paginationData,
             posts: pageOfPosts,
             settings,
@@ -298,6 +305,9 @@ class Category extends ContentModelEntryNode {
           const categoryAlias = this.context.peek().categoryAlias
           if (categoryAlias) {
             data[categoryAlias] = data.category
+          }
+          if (this.entriesAlias) {
+            data[this.entriesAlias] = data.posts
           }
           return renderer.render({
             templates: [
