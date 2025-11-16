@@ -1,10 +1,8 @@
 const { join } = require('path')
-const ContentModelNode = require('../../../lib/ContentModelNode')
-const { templateExtensions, makePermalink } = require('../../../lib/contentModelHelpers')
-const { parseTextEntry } = require('../../../lib/parseTextEntry')
+const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
+const { templateExtensions } = require('../../../lib/contentModelHelpers')
 
 const models = {
-  _baseEntry: require('./_baseEntry'),
   collection: require('./collection'),
   Attachment: require('./attachment'),
 }
@@ -12,51 +10,33 @@ const models = {
 const defaultSettings = {
   pagesDirectory: 'pages'
 }
-class Subpage extends ContentModelNode {
+class Subpage extends ContentModelEntryNode {
+  static serialize(subpage) {
+    return {
+      ...subpage,
+      attachments: subpage.subtree.attachments
+    }
+  }
+
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
+  }
 
-    const entryProperties = parseTextEntry(this.fsNode, this.subtree.indexFile)
+  getSubtreeMatchers() {
+    return {
+      indexFile: (fsNode) => {
+        if (fsNode.children) {
+          return false
+        }
+        const indexFileNameOptions = ['index']
+        const names = indexFileNameOptions.join('|')
+        const extensions = templateExtensions.join('|')
+        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
+        return fsNode.name.match(namePattern)
+      },
 
-    // re-call these because slug is only now ready to use :(
-    this.permalink = this.getPermalink(entryProperties.slug, entryProperties.hasIndex)
-    this.outputPath = this.getOutputPath(entryProperties.slug, entryProperties.hasIndex)
-
-    const pageContext = {
-      title: entryProperties.title,
-      slug: entryProperties.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath
+      attachment: (fsNode) => true
     }
-
-    Object.assign(this, {
-      ...entryProperties,
-      ...pageContext,
-      context: this.context,
-      attachments: this.subtree.attachments.map(attachmentNode => {
-        return new models.Attachment(
-          attachmentNode,
-          this.context.push({
-            ...pageContext,
-            key: 'page'
-          })
-        )
-      })
-    })
-  }
-
-  getPermalink(slug, hasIndex) {
-    return makePermalink(
-      this.context.peek().permalink,
-      this.slug || slug || ''
-    ) + ((this.hasIndex || hasIndex) ? '' : '.html')
-  }
-
-  getOutputPath(slug, hasIndex) {
-    return join(
-      this.context.peek().outputPath,
-      this.slug || slug || ''
-    )
   }
 
   parseSubtree() {
@@ -69,29 +49,22 @@ class Subpage extends ContentModelNode {
       return tree
     }
 
-    const indexFileNameOptions = ['index']
-
-    const matchers = {
-      indexFile: (fsNode) => {
-        if (fsNode.children) {
-          return false
-        }
-        const names = indexFileNameOptions.join('|')
-        const extensions = templateExtensions.join('|')
-        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
-        return fsNode.name.match(namePattern)
-      },
-
-      attachment: (fsNode) => true
-    }
+    const context = this.context.push({
+      title: this.title,
+      slug: this.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath,
+      key: 'page'
+    })
 
     this.fsNode.children.forEach(childNode => {
-      if (matchers.indexFile(childNode, indexFileNameOptions)) {
-        tree.indexFile = childNode
+      if (this.matchers.indexFile(childNode)) {
         return
       }
-      if (matchers.attachment(childNode)) {
-        tree.attachments.push(childNode)
+      if (this.matchers.attachment(childNode)) {
+        tree.attachments.push(
+          new models.Attachment(childNode, context)
+        )
       }
     })
 
@@ -99,7 +72,7 @@ class Subpage extends ContentModelNode {
   }
 
   afterEffects(contentModel) {
-    this.attachments.forEach(attachment => {
+    this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)
     })
   }
@@ -120,7 +93,7 @@ class Subpage extends ContentModelNode {
         data: {
           ...contentModel,
           collections: contentModel.collections.map(models.collection().serialize),
-          subpage: this,
+          subpage: Subpage.serialize(this),
           settings,
           debug
         }
@@ -129,7 +102,7 @@ class Subpage extends ContentModelNode {
 
     const renderAttachments = () => {
       return Promise.all(
-        this.attachments.map(attachment => {
+        this.subtree.attachments.map(attachment => {
           return attachment.render(renderer)
         })
       )

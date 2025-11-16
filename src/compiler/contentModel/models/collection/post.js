@@ -1,8 +1,6 @@
 const { join } = require('path')
-const makeSlug = require('slug')
-const ContentModelNode = require('../../../../lib/ContentModelNode')
-const { templateExtensions, makePermalink, Markdown } = require('../../../../lib/contentModelHelpers')
-const { parseTextEntry } = require('../../../../lib/parseTextEntry')
+const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
+const { templateExtensions } = require('../../../../lib/contentModelHelpers')
 
 const models = {
   facet: require('./facet'),
@@ -12,56 +10,36 @@ const models = {
 const defaultSettings = {
   entryAlias: undefined
 }
-class Post extends ContentModelNode {
+class Post extends ContentModelEntryNode {
+  static serialize(post) {
+    return {
+      ...post,
+      attachments: post.subtree.attachments
+    }
+  }
+
   constructor(fsNode, context, contentTypes, settings = defaultSettings) {
     super(fsNode, context, settings)
 
-    const isFlatData = !fsNode.stats?.birthtime
-    const entryProperties = parseTextEntry(this.fsNode, this.subtree.indexFile, isFlatData)
+    this.contentType = this.context.peek().entryContentType
+    this.schema = contentTypes.find(ct => ct.name === this.contentType)
+  }
 
-    // re-call these because slug is only now ready to use :(
-    this.permalink = this.getPermalink(entryProperties.slug, entryProperties.hasIndex)
-    this.outputPath = this.getOutputPath(entryProperties.slug, entryProperties.hasIndex)
+  getSubtreeMatchers() {
+    return {
+      indexFile: (fsNode) => {
+        if (fsNode.children) {
+          return false
+        }
+        const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
+        const names = indexFileNameOptions.join('|')
+        const extensions = templateExtensions.join('|')
+        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
+        return fsNode.name.match(namePattern)
+      },
 
-    const postContext = {
-      title: entryProperties.title,
-      slug: entryProperties.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath
+      attachment: (fsNode) => true
     }
-
-    const contentType = this.context.peek().entryContentType
-
-    Object.assign(this, {
-      ...entryProperties,
-      ...postContext,
-      context: this.context,
-      contentType,
-      schema: contentTypes.find(ct => ct.name === contentType),
-      attachments: this.subtree.attachments.map(attachmentNode => {
-        return new models.Attachment(
-          attachmentNode,
-          this.context.push({
-            ...postContext,
-            key: 'post'
-          })
-        )
-      })
-    })
-  }
-
-  getPermalink(slug, hasIndex) {
-    return makePermalink(
-      this.context.peek().permalink,
-      this.slug || slug || ''
-    ) + ((this.hasIndex || hasIndex) ? '' : '.html')
-  }
-
-  getOutputPath(slug, hasIndex) {
-    return join(
-      this.context.peek().outputPath,
-      this.slug || slug || ''
-    )
   }
 
   parseSubtree() {
@@ -74,29 +52,22 @@ class Post extends ContentModelNode {
       return tree
     }
 
-    const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
-
-    const matchers = {
-      indexFile: (fsNode) => {
-        if (fsNode.children) {
-          return false
-        }
-        const names = indexFileNameOptions.join('|')
-        const extensions = templateExtensions.join('|')
-        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
-        return fsNode.name.match(namePattern)
-      },
-
-      attachment: (fsNode) => true
-    }
+    const context = this.context.push({
+      title: this.title,
+      slug: this.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath,
+      key: 'post'
+    })
 
     this.fsNode.children.forEach(childNode => {
-      if (matchers.indexFile(childNode, indexFileNameOptions)) {
-        tree.indexFile = childNode
+      if (this.matchers.indexFile(childNode)) {
         return
       }
-      if (matchers.attachment(childNode)) {
-        tree.attachments.push(childNode)
+      if (this.matchers.attachment(childNode)) {
+        tree.attachments.push(
+          new models.Attachment(childNode, context)
+        )
       }
     })
 
@@ -107,7 +78,7 @@ class Post extends ContentModelNode {
     // TODO: feels like collection should handle this
     models.facet().linkWithEntryFields(this, collectionFacets)
 
-    this.attachments.forEach(attachment => {
+    this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)
     })
   }
@@ -116,7 +87,7 @@ class Post extends ContentModelNode {
     const renderPost = () => {
       const data = {
         ...contentModel,
-        post: this,
+        post: Post.serialize(this),
         settings,
         debug
       }
@@ -142,7 +113,7 @@ class Post extends ContentModelNode {
 
     const renderAttachments = () => {
       return Promise.all(
-        this.attachments.map(attachment => {
+        this.subtree.attachments.map(attachment => {
           return attachment.render(renderer)
         })
       )

@@ -1,11 +1,11 @@
 const { join } = require('path')
 const { makePermalink } = require('../../../lib/contentModelHelpers')
-const ContentModelNode = require('../../../lib/ContentModelNode')
+const ContentModelResourceNode = require('../../../lib/ContentModelResourceNode')
 
 const defaultSettings = {
   assetsDirectory: 'assets'
 }
-class Asset extends ContentModelNode {
+class Asset extends ContentModelResourceNode {
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
   }

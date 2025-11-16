@@ -1,6 +1,6 @@
-const ContentModelNode = require('../../../lib/ContentModelNode')
+const ContentModelResourceNode = require('../../../lib/ContentModelResourceNode')
 
-class Attachment extends ContentModelNode {
+class Attachment extends ContentModelResourceNode {
   constructor(fsNode, context) {
     super(fsNode, context)
   }

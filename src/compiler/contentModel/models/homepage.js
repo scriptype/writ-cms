@@ -1,7 +1,6 @@
 const { join } = require('path')
-const ContentModelNode = require('../../../lib/ContentModelNode')
+const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
 const { templateExtensions } = require('../../../lib/contentModelHelpers')
-const { parseTextEntry } = require('../../../lib/parseTextEntry')
 
 const models = {
   Attachment: require('./attachment'),
@@ -11,29 +10,16 @@ const models = {
 const defaultSettings = {
   homepageDirectory: 'homepage'
 }
-class Homepage extends ContentModelNode {
+class Homepage extends ContentModelEntryNode {
+  static serialize(homepage) {
+    return {
+      ...homepage,
+      attachments: homepage.subtree.attachments
+    }
+  }
+
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-
-    const entryProperties = parseTextEntry(this.fsNode, this.subtree.indexFile)
-
-    const pageContext = {
-      title: entryProperties.title,
-      slug: entryProperties.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath
-    }
-
-    Object.assign(this, {
-      ...entryProperties,
-      ...pageContext,
-      context: this.context,
-      attachments: this.subtree.attachments.map(attachmentNode => {
-        return new models.Attachment(attachmentNode, {
-          homepage: pageContext
-        })
-      })
-    })
   }
 
   getPermalink() {
@@ -42,6 +28,23 @@ class Homepage extends ContentModelNode {
 
   getOutputPath() {
     return this.context.peek().outputPath
+  }
+
+  getSubtreeMatchers() {
+    return {
+      indexFile: (fsNode) => {
+        const indexFileNameOptions = ['index']
+        if (fsNode.children) {
+          return false
+        }
+        const names = indexFileNameOptions.join('|')
+        const extensions = templateExtensions.join('|')
+        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
+        return fsNode.name.match(namePattern)
+      },
+
+      attachment: (fsNode) => true
+    }
   }
 
   parseSubtree() {
@@ -54,29 +57,23 @@ class Homepage extends ContentModelNode {
       return tree
     }
 
-    const indexFileNameOptions = ['index']
-
-    const matchers = {
-      indexFile: (fsNode) => {
-        if (fsNode.children) {
-          return false
-        }
-        const names = indexFileNameOptions.join('|')
-        const extensions = templateExtensions.join('|')
-        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
-        return fsNode.name.match(namePattern)
-      },
-
-      attachment: (fsNode) => true
+    const context = {
+      homepage: {
+        title: this.title,
+        slug: this.slug,
+        permalink: this.permalink,
+        outputPath: this.outputPath
+      }
     }
 
     this.fsNode.children.forEach(childNode => {
-      if (matchers.indexFile(childNode, indexFileNameOptions)) {
-        tree.indexFile = childNode
+      if (this.matchers.indexFile(childNode)) {
         return
       }
-      if (matchers.attachment(childNode)) {
-        tree.attachments.push(childNode)
+      if (this.matchers.attachment(childNode)) {
+        tree.attachments.push(
+          new models.Attachment(childNode, context)
+        )
       }
     })
 
@@ -84,7 +81,7 @@ class Homepage extends ContentModelNode {
   }
 
   afterEffects(contentModel) {
-    this.attachments.forEach(attachment => {
+    this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)
     })
   }
@@ -110,7 +107,7 @@ class Homepage extends ContentModelNode {
 
     const renderAttachments = () => {
       return Promise.all(
-        this.attachments.map(attachment => {
+        this.subtree.attachments.map(attachment => {
           return attachment.render(renderer)
         })
       )
