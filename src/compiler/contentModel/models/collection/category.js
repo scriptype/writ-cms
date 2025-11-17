@@ -53,6 +53,8 @@ class Category extends ContentModelEntryNode {
     if (categoriesAlias) {
       data[entriesAlias] = data.categories
     }
+
+    return data
   }
 
   static draftCheck (mode, node) {
