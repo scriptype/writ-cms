@@ -46,7 +46,7 @@ class Category extends ContentModelEntryNode {
       attachments: category.subtree.attachments
     }
 
-    if (entiresAlias) {
+    if (entriesAlias) {
       data[entriesAlias] = data.posts
     }
 
