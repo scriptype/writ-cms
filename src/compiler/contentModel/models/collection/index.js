@@ -46,7 +46,7 @@ class Collection extends ContentModelEntryNode {
   }
 
   static serialize(collection) {
-    return {
+    const data = {
       ...collection,
       facets: collection.facets.map(models.facet().serialize),
       categories: collection.subtree.categories.map(models.Category.serialize),
@@ -54,6 +54,16 @@ class Collection extends ContentModelEntryNode {
       levelPosts: collection.subtree.levelPosts.map(models.Post.serialize),
       attachments: collection.subtree.attachments.map(models.Attachment.serialize)
     }
+
+    if (collection.categoriesAlias) {
+      data[collection.categoriesAlias] = data.categories
+    }
+
+    if (collection.entriesAlias) {
+      data[collection.entriesAlias] = data.posts
+    }
+
+    return data
   }
 
 
@@ -124,7 +134,7 @@ class Collection extends ContentModelEntryNode {
       },
 
       postIndexFile: fsNode => {
-        const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
+        const indexFileNameOptions = [this.settings.contentType?.entryAlias, 'post', 'index'].filter(Boolean)
         return (
           isTemplateFile(fsNode) &&
           fsNode.name.match(
@@ -199,6 +209,8 @@ class Collection extends ContentModelEntryNode {
             contentTypes: this.settings.contentTypes,
             entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
             categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
+            entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
+            categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
             mode: this.settings.mode,
             level: 1,
           }
@@ -230,6 +242,7 @@ class Collection extends ContentModelEntryNode {
       ]),
       defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
       facetKeys: this.facets || this.settings.contentType?.facets || [],
+      entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
       key: 'collection'
     })
 
@@ -241,6 +254,9 @@ class Collection extends ContentModelEntryNode {
         {
           categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
           entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
+          entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
+          categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
+          entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
           mode: this.settings.mode,
           contentTypes: this.settings.contentTypes,
         }
@@ -259,7 +275,7 @@ class Collection extends ContentModelEntryNode {
       childNode || postData,
       postContext,
       this.settings.contentTypes,
-      { entryAlias: childContext.entryAlias }
+      { entryAlias: this.entryAlias || this.settings.contentType?.entryAlias }
     )
     if (models.Category.draftCheck(this.settings.mode, uncategorizedPost)) {
       defaultCategory.subtree.levelPosts.push(uncategorizedPost)

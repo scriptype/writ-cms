@@ -36,7 +36,7 @@ class Category extends ContentModelEntryNode {
     }
   }
 
-  static serialize(category, entriesAlias, categoriesAlias) {
+  static serialize(category) {
     const data = {
       ...category,
       facets: category.facets.map(models.facet().serialize),
@@ -46,12 +46,12 @@ class Category extends ContentModelEntryNode {
       attachments: category.subtree.attachments.map(models.Attachment.serialize)
     }
 
-    if (entriesAlias) {
-      data[entriesAlias] = data.posts
+    if (category.entriesAlias) {
+      data[category.entriesAlias] = data.posts
     }
 
-    if (categoriesAlias) {
-      data[entriesAlias] = data.categories
+    if (category.categoriesAlias) {
+      data[category.categoriesAlias] = data.categories
     }
 
     return data
@@ -67,7 +67,7 @@ class Category extends ContentModelEntryNode {
     if (fsNode.isDefaultCategory) {
       const title = context.peek().defaultCategoryName
       const slug = makeSlug(title)
-      const { entriesAlias, categoriesAlias } = context.peek()
+      const { entriesAlias, categoriesAlias } = this.settings
 
       const defaultCategory = {
         contentType: context.peek().categoryContentType,
@@ -152,7 +152,7 @@ class Category extends ContentModelEntryNode {
       },
 
       postIndexFile: fsNode => {
-        const indexFileNameOptions = [this.entryAlias, 'post', 'index'].filter(Boolean)
+        const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
         return (
           isTemplateFile(fsNode) &&
           fsNode.name.match(
@@ -178,12 +178,15 @@ class Category extends ContentModelEntryNode {
       attachments: []
     }
 
-    if (this.entriesAlias) {
-      tree[this.entriesAlias] = tree.posts
+    const entriesAlias = this.entriesAlias || this.settings.entriesAlias || this.context.peek().entriesAlias
+    const categoriesAlias = this.categoriesAlias || this.settings.categoriesAlias || this.context.peek().categoriesAlias
+
+    if (entriesAlias) {
+      tree[entriesAlias] = tree.posts
     }
 
-    if (this.categoriesAlias) {
-      tree[this.categoriesAlias] = tree.categories
+    if (categoriesAlias) {
+      tree[categoriesAlias] = tree.categories
     }
 
     if (!this.fsNode.children || !this.fsNode.children.length) {
@@ -231,6 +234,8 @@ class Category extends ContentModelEntryNode {
             contentTypes: this.settings.contentTypes,
             entryAlias: this.entryAlias || this.settings.entryAlias,
             categoryAlias: this.categoryAlias || this.settings.categoryAlias,
+            entriesAlias: this.entriesAlias || this.settings.entriesAlias,
+            categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
             level: this.settings.level + 1
           }
         )
@@ -298,18 +303,18 @@ class Category extends ContentModelEntryNode {
         render: async ({ outputPath, pageOfPosts, paginationData }) => {
           const data = {
             ...contentModel,
-            category: Category.serialize(this, this.entriesAlias, this.categoriesAlias),
+            category: Category.serialize(this),
             pagination: paginationData,
             posts: pageOfPosts,
             settings,
             debug
           }
-          const categoryAlias = this.context.peek().categoryAlias
+          const { categoryAlias, entriesAlias } = this.settings
           if (categoryAlias) {
             data[categoryAlias] = data.category
           }
-          if (this.entriesAlias) {
-            data[this.entriesAlias] = data.posts
+          if (entriesAlias) {
+            data[entriesAlias] = data.posts
           }
           return renderer.render({
             templates: [
