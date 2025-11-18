@@ -220,7 +220,7 @@ class ContentModel {
         return node.children.forEach(childNode => {
           if (this.matchers.subpage(childNode)) {
             this.contentModel.subpages.push(
-              new models.subpage(childNode, context, {
+              new models.Subpage(childNode, context, {
                 pagesDirectory: this.settings.pagesDirectory
               })
             )
