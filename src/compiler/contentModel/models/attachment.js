@@ -1,6 +1,10 @@
 const ContentModelResourceNode = require('../../../lib/ContentModelResourceNode')
 
 class Attachment extends ContentModelResourceNode {
+  static serialize(attachment) {
+    return attachment
+  }
+
   constructor(fsNode, context) {
     super(fsNode, context)
   }

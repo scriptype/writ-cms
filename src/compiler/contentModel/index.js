@@ -2,12 +2,13 @@ const { resolve } = require('path')
 const _ = require('lodash')
 const frontMatter = require('front-matter')
 const ImmutableStack = require('../../lib/ImmutableStack')
-const { isTemplateFile } = require('./helpers')
+const { removeExtension, isTemplateFile } = require('../../lib/contentModelHelpers')
 const createMatchers = require('./matchers')
+
 const models = {
   Homepage: require('./models/homepage'),
   Subpage: require('./models/subpage'),
-  collection: require('./models/collection'),
+  Collection: require('./models/collection'),
   Asset: require('./models/asset')
 }
 
@@ -88,7 +89,7 @@ const linkBack = (post, entry, key) => {
 
 const linkEntries = (contentModel) => {
   contentModel.collections.forEach(collection => {
-    collection.posts.forEach(post => {
+    collection.subtree.posts.forEach(post => {
       const fields = Object.keys(post)
       Object.keys(post).forEach(key => {
         const value = post[key]
@@ -141,6 +142,15 @@ const defaultContentModelSettings = {
   mode: 'start'
 }
 class ContentModel {
+  static serialize(contentModel) {
+    return {
+      homepage: models.Homepage.serialize(contentModel.homepage),
+      subpages: contentModel.subpages.map(models.Subpage.serialize),
+      collections: contentModel.collections.map(models.Collection.serialize),
+      assets: contentModel.assets.map(models.Asset.serialize)
+    }
+  }
+
   constructor(contentModelSettings = defaultContentModelSettings, contentTypes = []) {
     this.settings = {
       ...defaultContentModelSettings,
@@ -172,39 +182,27 @@ class ContentModel {
       permalink: this.settings.permalinkPrefix
     }])
 
-    this.models = {
-      collection: models.collection({
-        defaultCategoryName: this.settings.defaultCategoryName,
-        collectionAliases: [
-          ...this.contentTypes
-            .filter(ct => ct.model === 'collection')
-            .map(ct => ct.collectionAlias),
-          ...(indexProps.attributes?.collectionAliases || [])
-        ],
-        mode: this.settings.mode
-      }, this.contentTypes, this.matchers),
-
-      Subpage: models.Subpage,
-
-      Homepage: models.Homepage,
-
-      Asset: models.Asset
-    }
-
     this.contentModel = {
-      homepage: new this.models.Homepage({
-        name: 'index',
-        extension: 'md',
-        content: ''
-      }, context, { homepageDirectory: this.settings.homepageDirectory }),
+      homepage: new models.Homepage(
+        { name: 'index', extension: 'md', content: '' },
+        context,
+        { homepageDirectory: this.settings.homepageDirectory }
+      ),
       subpages: [],
       collections: [],
       assets: []
     }
 
+    this.collectionAliases = [
+      ...this.contentTypes
+      .filter(ct => ct.model === 'collection')
+      .map(ct => ct.collectionAlias),
+      ...(indexProps.attributes?.collectionAliases || [])
+    ]
+
     fileSystemTree.forEach(node => {
       if (this.matchers.homepage(node)) {
-        this.contentModel.homepage = new this.models.Homepage(node, context, {
+        this.contentModel.homepage = new models.Homepage(node, context, {
           homepageDirectory: this.settings.homepageDirectory
         })
         return
@@ -212,7 +210,7 @@ class ContentModel {
 
       if (this.matchers.subpage(node)) {
         return this.contentModel.subpages.push(
-          new this.models.Subpage(node, context, {
+          new models.Subpage(node, context, {
             pagesDirectory: this.settings.pagesDirectory
           })
         )
@@ -222,13 +220,13 @@ class ContentModel {
         return node.children.forEach(childNode => {
           if (this.matchers.subpage(childNode)) {
             this.contentModel.subpages.push(
-              new this.models.subpage(childNode, context, {
+              new models.subpage(childNode, context, {
                 pagesDirectory: this.settings.pagesDirectory
               })
             )
           } else if (this.matchers.asset(childNode)) {
             this.contentModel.assets.push(
-              new this.models.Asset(childNode, context, {
+              new models.Asset(childNode, context, {
                 assetsDirectory: this.settings.assetsDirectory
               })
             )
@@ -236,8 +234,25 @@ class ContentModel {
         })
       }
 
-      if (this.models.collection.match(node)) {
-        const collection = this.models.collection.create(node, context)
+      if (this.matchers.collection(node, this.collectionAliases)) {
+        const indexFile = node.children.find(
+          this.matchers.collectionIndexFile(this.collectionAliases)
+        )
+
+        const contentType = this.contentTypes
+          .filter(ct => ct.model === 'collection')
+          .find(ct => {
+            return ct.collectionAlias === (indexFile ? removeExtension(indexFile.name) : node.name)
+          })
+
+        const collection = new models.Collection(node, context, {
+          defaultCategoryName: this.settings.defaultCategoryName,
+          collectionAliases: this.collectionAliases,
+          mode: this.settings.mode,
+          contentTypes: this.contentTypes,
+          contentType
+        })
+
         if (this.draftCheck(collection)) {
           this.contentModel.collections.push(collection)
         }
@@ -247,7 +262,7 @@ class ContentModel {
       if (this.matchers.assetsDirectory(node)) {
         return this.contentModel.assets.push(
           ...node.children.map(childNode => {
-            return new this.models.Asset(childNode, context, {
+            return new models.Asset(childNode, context, {
               assetsDirectory: this.settings.assetsDirectory
             })
           })
@@ -256,7 +271,7 @@ class ContentModel {
 
       if (this.matchers.asset(node)) {
         return this.contentModel.assets.push(
-          new this.models.Asset(node, context, {
+          new models.Asset(node, context, {
             assetsDirectory: this.settings.assetsDirectory
           })
         )
@@ -271,7 +286,7 @@ class ContentModel {
     linkEntries(this.contentModel)
 
     this.contentModel.collections.forEach(collection => {
-      this.models.collection.afterEffects(this.contentModel, collection)
+      collection.afterEffects(this.contentModel)
     })
 
     this.contentModel.subpages.forEach(subpage => {
@@ -288,7 +303,7 @@ class ContentModel {
   render(renderer) {
     const renderHomepage = () => {
       return this.contentModel.homepage.render(renderer, {
-        contentModel: this.contentModel,
+        contentModel: ContentModel.serialize(this.contentModel),
         settings: this.settings,
         debug: this.settings.debug
       })
@@ -297,8 +312,8 @@ class ContentModel {
     const renderCollections = () => {
       return Promise.all(
         this.contentModel.collections.map(collection => {
-          return this.models.collection.render( renderer, collection, {
-            contentModel: this.contentModel,
+          return collection.render(renderer, {
+            contentModel: ContentModel.serialize(this.contentModel),
             settings: this.settings,
             debug: this.settings.debug
           })
@@ -310,7 +325,7 @@ class ContentModel {
       return Promise.all(
         this.contentModel.subpages.map(subpage => {
           return subpage.render(renderer, {
-            contentModel: this.contentModel,
+            contentModel: ContentModel.serialize(this.contentModel),
             settings: this.settings,
             debug: this.settings.debug
           })

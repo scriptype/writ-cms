@@ -1,4 +1,5 @@
 const { join } = require('path')
+const makeSlug = require('slug')
 const { makePermalink } = require('./contentModelHelpers')
 const { parseTextEntry } = require('./parseTextEntry')
 const ContentModelNode = require('./ContentModelNode')
@@ -21,6 +22,7 @@ class ContentModelEntryNode extends ContentModelNode {
 
     Object.assign(this, entryProperties)
 
+    this.slug = this.getSlug()
     this.permalink = this.getPermalink()
     this.outputPath = this.getOutputPath()
 
@@ -29,6 +31,10 @@ class ContentModelEntryNode extends ContentModelNode {
 
   getIndexFile() {
     return this.fsNode.children?.find(this.matchers.indexFile) || this.fsNode
+  }
+
+  getSlug() {
+    return this.slug
   }
 
   getPermalink() {

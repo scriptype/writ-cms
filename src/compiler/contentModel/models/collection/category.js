@@ -40,10 +40,10 @@ class Category extends ContentModelEntryNode {
     const data = {
       ...category,
       facets: category.facets.map(models.facet().serialize),
-      posts: category.subtree.posts,
-      levelPosts: category.subtree.levelPosts,
-      categories: category.subtree.categories,
-      attachments: category.subtree.attachments
+      posts: category.subtree.posts.map(models.Post.serialize),
+      levelPosts: category.subtree.levelPosts.map(models.Post.serialize),
+      categories: category.subtree.categories.map(Category.serialize),
+      attachments: category.subtree.attachments.map(models.Attachment.serialize)
     }
 
     if (entriesAlias) {

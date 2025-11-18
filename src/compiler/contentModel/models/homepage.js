@@ -3,8 +3,7 @@ const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
 const { templateExtensions } = require('../../../lib/contentModelHelpers')
 
 const models = {
-  Attachment: require('./attachment'),
-  collection: require('./collection')
+  Attachment: require('./attachment')
 }
 
 const defaultSettings = {
@@ -14,7 +13,7 @@ class Homepage extends ContentModelEntryNode {
   static serialize(homepage) {
     return {
       ...homepage,
-      attachments: homepage.subtree.attachments
+      attachments: homepage.subtree.attachments.map(models.Attachment.serialize)
     }
   }
 
@@ -98,7 +97,6 @@ class Homepage extends ContentModelEntryNode {
         content: this.content,
         data: {
           ...contentModel,
-          collections: contentModel.collections.map(models.collection().serialize),
           settings,
           debug
         }

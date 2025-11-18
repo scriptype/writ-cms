@@ -46,6 +46,7 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
   return {
     ..._.omit(fsNode, 'children'),
     ...attributes,
+    __originalAttributes__: attributes,
     hasIndex,
     title: attributes.title || entryName,
     slug: attributes.slug || slug(entryName),

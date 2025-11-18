@@ -3,7 +3,6 @@ const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
 const { templateExtensions } = require('../../../lib/contentModelHelpers')
 
 const models = {
-  collection: require('./collection'),
   Attachment: require('./attachment'),
 }
 
@@ -14,7 +13,7 @@ class Subpage extends ContentModelEntryNode {
   static serialize(subpage) {
     return {
       ...subpage,
-      attachments: subpage.subtree.attachments
+      attachments: subpage.subtree.attachments.map(models.Attachment.serialize)
     }
   }
 
@@ -92,7 +91,6 @@ class Subpage extends ContentModelEntryNode {
         content: this.content,
         data: {
           ...contentModel,
-          collections: contentModel.collections.map(models.collection().serialize),
           subpage: Subpage.serialize(this),
           settings,
           debug

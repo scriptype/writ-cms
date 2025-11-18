@@ -26,7 +26,25 @@ module.exports = function createMatchers(settings) {
       return matchers.homepageFile(fsNode) || matchers.homepageDirectory(fsNode)
     },
 
-    collection: fsNode => {},
+    collectionIndexFile: (collectionAliases) => (fsNode) => {
+      const indexFileNameOptions = [ ...collectionAliases, 'collection' ].filter(Boolean)
+
+      return isTemplateFile(fsNode) && fsNode.name.match(
+        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
+      )
+    },
+
+    collectionDataFile: (fsNode, parentNode) => {
+      return fsNode.name.match(new RegExp(`^${parentNode.name}\\.json$`, 'i'))
+    },
+
+    collection: (fsNode, collectionAliases) => {
+      const hasCollectionIndex = fsNode.children?.find(matchers.collectionIndexFile(collectionAliases))
+      const hasCollectionData = fsNode.children?.find(childNode => {
+        return matchers.collectionDataFile(childNode, fsNode)
+      })
+      return hasCollectionIndex || hasCollectionData
+    },
 
     category: (fsNode) => {
       fsNode.children?.find(childNode => {

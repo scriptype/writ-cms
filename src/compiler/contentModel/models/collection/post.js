@@ -14,7 +14,7 @@ class Post extends ContentModelEntryNode {
   static serialize(post) {
     return {
       ...post,
-      attachments: post.subtree.attachments
+      attachments: post.subtree.attachments.map(models.Attachment.serialize)
     }
   }
 

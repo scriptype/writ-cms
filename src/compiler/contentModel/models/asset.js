@@ -6,6 +6,10 @@ const defaultSettings = {
   assetsDirectory: 'assets'
 }
 class Asset extends ContentModelResourceNode {
+  static serialize(asset) {
+    return asset
+  }
+
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
   }
