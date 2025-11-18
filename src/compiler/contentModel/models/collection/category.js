@@ -90,7 +90,7 @@ class Category extends ContentModelEntryNode {
       }
 
       if (entriesAlias) {
-        defaultCategory[entriesAlias] = defaultCategory.levelPosts.posts
+        defaultCategory[entriesAlias] = defaultCategory.levelPosts
       }
 
       if (categoriesAlias) {
