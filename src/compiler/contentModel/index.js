@@ -32,7 +32,7 @@ const findLinkedEntry = (contentModel, link) => {
 
   for (const categorySlug of link.categorySlugs) {
     const categorySlugRe = new RegExp(categorySlug, 'i')
-    const category = container.categories?.find(c => c.slug.match(categorySlugRe))
+    const category = container.subtree.categories?.find(c => c.slug.match(categorySlugRe))
     if (!category) {
       break
     }
@@ -46,12 +46,12 @@ const findLinkedEntry = (contentModel, link) => {
     if (node.slug?.match(entrySlugRe)) {
       return node
     }
-    const match = node.levelPosts?.find(p => p.slug.match(entrySlugRe))
+    const match = node.subtree.levelPosts?.find(p => p.slug.match(entrySlugRe))
     if (match) {
       return match
     }
-    if (node.categories) {
-      queue.push(...node.categories)
+    if (node.subtree.categories) {
+      queue.push(...node.subtree.categories)
     }
   }
 
