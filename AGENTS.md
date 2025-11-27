@@ -4,6 +4,7 @@
 - Always use curly braces {} for control structures (if, for, while, etc.), even if the body is a single statement
 - Keep lines shorter than 80 columns
 - For multiple expressions with logical operators (&&, ||), break lines after each operator
+- No trailing whitespace at the end of lines
 
 ## Test Assertions Formatting
 - Assertion function call on one line (e.g., `t.ok(`, `t.equal(`, `t.notOk(`)
