@@ -15,8 +15,14 @@
   },
   "nyc": {
     "all": true,
-    "include": ["src/**/*.js"],
-    "exclude": ["src/**/*.spec.js", "src/old-tests/**/*", "src/e2e-tests/**/*"]
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "src/**/*.spec.js",
+      "src/old-tests/**/*",
+      "src/e2e-tests/**/*"
+    ]
   },
   "repository": {
     "type": "git",
