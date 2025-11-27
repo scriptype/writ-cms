@@ -43,6 +43,7 @@
     "turndown": "^7.1.1"
   },
   "devDependencies": {
+    "cheerio": "^1.1.2",
     "husky": "^8.0.0",
     "node-fetch": "^2.7.0",
     "nyc": "^15.1.0",

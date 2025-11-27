@@ -1,0 +1,51 @@
+{{#>base page="subpage"}}
+  <h1>{{settings.site.title}}</h1>
+
+  {{#with subpage}}
+
+    <h2>{{title}}</h2>
+
+    <div>{{> @partial-block .. }}</div>
+
+    <div>
+    {{#each context.items as |layer|}}
+      {{#if layer.title}}
+        <a href="{{layer.permalink}}">{{layer.title}}</a> &raquo;
+      {{/if}}
+    {{/each}}
+    </div>
+
+    <div>
+    {{#if date}}
+    Date: {{dateMedium date}}
+    {{/if}}
+    </div>
+
+    <div>
+    {{#if links.relations}}
+      Relations:
+      <ul>
+        {{#each relation.entries as |entry|}}
+          <li><a href="{{entry.permalink}}">{{entry.title}}</a></li>
+        {{/each}}
+      </ul>
+    {{else}}
+      no relations
+    {{/if}}
+    </div>
+
+    <div>
+    {{#if links.mentionedBy}}
+      Mentions:
+      <ul>
+        {{#each links.mentionedBy as |mentioner|}}
+        <li><a href="{{mentioner.permalink}}">{{mentioner.title}}</a></li>
+        {{/each}}
+      </ul>
+    {{else}}
+      no mentions
+    {{/if}}
+    </div>
+
+  {{/with}}
+{{/base}}
