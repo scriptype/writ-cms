@@ -208,6 +208,7 @@ class Collection extends ContentModelEntryNode {
           {
             contentTypes: this.settings.contentTypes,
             entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
+            entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
             categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
             entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
             categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
@@ -274,8 +275,10 @@ class Collection extends ContentModelEntryNode {
     const uncategorizedPost = new models.Post(
       childNode || postData,
       postContext,
-      this.settings.contentTypes,
-      { entryAlias: this.entryAlias || this.settings.contentType?.entryAlias }
+      {
+        entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
+        contentTypes: this.settings.contentTypes
+      }
     )
     if (models.Category.draftCheck(this.settings.mode, uncategorizedPost)) {
       defaultCategory.subtree.levelPosts.push(uncategorizedPost)

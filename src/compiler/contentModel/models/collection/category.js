@@ -107,7 +107,7 @@ class Category extends ContentModelEntryNode {
       categoryAlias: this.categoryAlias || context.peek().categoryAlias,
       entryAlias: this.entryAlias || context.peek().entryAlias,
       categoriesAlias: this.categoriesAlias || context.peek().categoriesAlias,
-      entriesAlias: this.entriesAlias || context.peek().entriesAlias,
+      entriesAlias: this.entriesAlias || this.settings.entriesAlias || context.peek().entriesAlias,
       facetKeys: context.peek().facetKeys || [],
       facets: [],
       sortBy: this.sortBy || context.peek().sortBy,
@@ -216,8 +216,11 @@ class Category extends ContentModelEntryNode {
         const post = new models.Post(
           childNode,
           childContext,
-          this.settings.contentTypes,
-          { entryAlias: this.settings.entryAlias }
+          {
+            entryAlias: this.settings.entryAlias,
+            entryContentType: this.entryContentType || this.settings.entryContentType,
+            contentTypes: this.settings.contentTypes
+          }
         )
         if (Category.draftCheck(this.settings.mode, post)) {
           tree.levelPosts.push(post)
@@ -232,6 +235,7 @@ class Category extends ContentModelEntryNode {
           childContext,
           {
             contentTypes: this.settings.contentTypes,
+            entryContentType: this.entryContentType || this.settings.entryContentType,
             entryAlias: this.entryAlias || this.settings.entryAlias,
             categoryAlias: this.categoryAlias || this.settings.categoryAlias,
             entriesAlias: this.entriesAlias || this.settings.entriesAlias,

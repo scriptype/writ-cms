@@ -8,7 +8,8 @@ const models = {
 }
 
 const defaultSettings = {
-  entryAlias: undefined
+  entryAlias: undefined,
+  contentTypes: []
 }
 class Post extends ContentModelEntryNode {
   static serialize(post) {
@@ -18,11 +19,11 @@ class Post extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, context, contentTypes, settings = defaultSettings) {
+  constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
 
-    this.contentType = this.context.peek().entryContentType
-    this.schema = contentTypes.find(ct => ct.name === this.contentType)
+    this.contentType = this.context.peek().entryContentType || this.settings.entryContentType
+    this.schema = this.settings.contentTypes.find(ct => ct.name === this.contentType)
   }
 
   getSubtreeMatchers() {
