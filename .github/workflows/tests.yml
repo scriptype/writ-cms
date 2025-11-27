@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        node: [18, 20, 21]
+        node: [19, 22, 24]
 
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
     steps:
