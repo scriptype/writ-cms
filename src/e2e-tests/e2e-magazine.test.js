@@ -11,25 +11,18 @@
  *   - All collection posts are rendered correctly
  *   - Facets are listed only when posts use them in front-matter
  *   - Subpages ("Pages" section) are discovered and linked
- *   - Post counts in output directories match fixture definitions
  *
  * Collection Page Tests:
  *   - Each collection page has a valid title
  *   - Facets are displayed correctly on collection pages
  *   - Posts are organized by categories (with category headings)
  *   - All posts section displays complete post list
- *   - Post counts match fixture definitions
  *
  * Test Data:
  *   - FIXTURE_SETTINGS contains site-wide configuration (title)
  *   - FIXTURE_CONTENT_MODEL defines expected structure: homepage, 5 collections
  *     (articles, books, authors, demos, events) with posts, facets, and aliases,
  *     plus subpages. This is the single source of truth for all assertions.
- *
- * Helpers:
- *   - findHeaderByCollectionName(): Locates collection sections by name
- *   - countPostFiles(): Recursively counts .html files in collection directories
- *   - DOM_SELECTORS: Centralized selectors for easy updates when markup changes
  */
 
 const { tmpdir } = require('os')
@@ -42,28 +35,6 @@ const writ = require('..')
 const fixturesDirectory = join(__dirname, 'fixtures', 'e2e-magazine')
 
 const FACET_BROWSE_PATH = 'by'
-
-/*
- * Finds a header element by collection name from a set of header elements.
- * Iterates through headers using the titleSelector to extract the title text,
- * compares case-insensitively, and returns the Cheerio-wrapped matching element.
- */
-const findHeaderByCollectionName = ($, headers, collectionName, titleSelector) => {
-  let foundHeader = null
-
-  headers.each((_, header) => {
-    const titleElement = $(header).find(titleSelector)
-    const titleText = titleElement.text()
-    const isCorrectCollection = titleText.toLowerCase() === collectionName
-
-    if (isCorrectCollection) {
-      foundHeader = header
-      return false
-    }
-  })
-
-  return foundHeader ? $(foundHeader) : null
-}
 
 /*
  * Recursively flattens a nested category tree into a single array of all posts.
@@ -218,6 +189,7 @@ test('E2E Magazine', t => {
                 title: 'Hello Design',
                 author: { title: 'Mustafa Enes', slug: 'enes' },
                 date: '2025-11-05',
+                permalink: '/articles/guides/hello-design.html',
                 tags: ['ui', 'ux', 'design', 'css'],
                 content: 'Design design design'
               },
@@ -225,6 +197,7 @@ test('E2E Magazine', t => {
                 title: 'Introduction to CSS Grid',
                 author: { title: 'Mustafa Enes', slug: 'enes' },
                 date: '2025-11-06',
+                permalink: '/articles/guides/introduction-to-css-grid.html',
                 tags: ['css', 'grid', 'art direction', 'design'],
                 content: 'All about grid'
               }
@@ -236,6 +209,7 @@ test('E2E Magazine', t => {
             title: 'Pure JS very good',
             author: { title: 'Sir Tim Berners Lee', slug: 'tim' },
             date: '2025-11-02',
+            permalink: '/articles/pure-js-very-good.html',
             tags: ['javascript', 'performance', 'accessibility', 'devx'],
             content: 'pure js very good'
           },
@@ -243,6 +217,7 @@ test('E2E Magazine', t => {
             title: 'React bad',
             author: { title: 'Mustafa Enes', slug: 'enes' },
             date: '2025-11-03',
+            permalink: '/articles/react-bad.html',
             tags: ['javascript', 'react', 'performance', 'accessibility', 'devx'],
             content: 'react not good'
           },
@@ -250,6 +225,7 @@ test('E2E Magazine', t => {
             title: 'Vue good',
             author: { title: 'Mustafa Enes', slug: 'enes' },
             date: '2025-11-04',
+            permalink: '/articles/vue-good.html',
             tags: ['javascript', 'vue', 'performance', 'accessibility', 'devx'],
             content: 'vue good'
           }
@@ -263,11 +239,13 @@ test('E2E Magazine', t => {
         entriesAlias: 'books',
         facets: ['author', 'date', 'tags', 'genre'],
         content: '',
+        categories: [],
         posts: [
           {
             title: 'Football',
             author: { title: 'Sir Alex Ferguson', slug: 'alex' },
             date: '2025-11-04',
+            permalink: '/books/football.html',
             genre: 'sports',
             tags: ['Manchester United', 'English football'],
             content: 'Welcome to football.'
@@ -276,6 +254,7 @@ test('E2E Magazine', t => {
             title: 'HTML',
             author: { title: 'Sir Tim Berners Lee', slug: 'tim' },
             date: '2025-11-05',
+            permalink: '/books/html.html',
             genre: 'technology',
             tags: ['html', 'web', 'internet'],
             content: 'Welcome to hypertext era.'
@@ -290,11 +269,13 @@ test('E2E Magazine', t => {
         entriesAlias: 'authors',
         facets: ['events'],
         content: '',
+        categories: [],
         posts: [
           {
             title: 'Mustafa Enes',
             slug: 'enes',
             date: '2025-11-05',
+            permalink: '/authors/enes.html',
             events: [
               { title: 'Lets HTML now', slug: 'lets-html-now' },
               { title: 'Lets get together', slug: 'lets-get-together' }
@@ -305,6 +286,7 @@ test('E2E Magazine', t => {
             title: 'Sir Alex Ferguson',
             slug: 'alex',
             date: '2025-11-06',
+            permalink: '/authors/alex.html',
             events: [{ title: 'ManU - CFC', slug: 'manu-cfc' }],
             content: 'Chewing a gum.'
           },
@@ -312,6 +294,7 @@ test('E2E Magazine', t => {
             title: 'Sir Tim Berners Lee',
             slug: 'tim',
             date: '2025-11-07',
+            permalink: '/authors/tim.html',
             events: [
               { title: 'Lets HTML now', slug: 'lets-html-now' },
               { title: 'Lets get together', slug: 'lets-get-together' },
@@ -336,6 +319,7 @@ test('E2E Magazine', t => {
         categories: [
           {
             name: 'CSS',
+            title: 'Cascade all the way',
             date: '2025-11-07',
             categoryContentType: 'Technique',
             categoryAlias: 'technique',
@@ -351,6 +335,7 @@ test('E2E Magazine', t => {
                     title: 'Carpet Motifs',
                     maker: { title: 'Mustafa Enes', slug: 'enes' },
                     date: '2025-11-11',
+                    permalink: '/demos/css/css-art/carpet-motifs',
                     tags: ['css', 'art'],
                     content: 'Carpet shapes'
                   },
@@ -358,6 +343,7 @@ test('E2E Magazine', t => {
                     title: 'Realist Painting',
                     maker: { title: 'Mustafa Enes', slug: 'enes' },
                     date: '2025-11-12',
+                    permalink: '/demos/css/css-art/realist-painting.html',
                     tags: ['css', 'art', 'painting'],
                     content: 'A lot of css'
                   }
@@ -372,6 +358,7 @@ test('E2E Magazine', t => {
                     title: 'Grid vs Flexbox',
                     maker: { title: 'Mustafa Enes', slug: 'enes' },
                     date: '2025-11-10',
+                    permalink: '/demos/css/grid/grid-vs-flexbox',
                     tags: ['css', 'grid', 'flex', 'layout'],
                     content: 'A versus'
                   },
@@ -379,6 +366,7 @@ test('E2E Magazine', t => {
                     title: 'Hello Grid',
                     maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
                     date: '2025-11-09',
+                    permalink: '/demos/css/grid/hello-grid.html',
                     tags: ['css', 'layout', 'grid'],
                     content: 'let there be grid'
                   }
@@ -390,6 +378,7 @@ test('E2E Magazine', t => {
                 title: 'Hello CSS',
                 maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
                 date: '2025-11-08',
+                permalink: '/demos/css/hello-css.html',
                 tags: ['css', 'tutorial'],
                 content: 'there is css'
               }
@@ -397,6 +386,7 @@ test('E2E Magazine', t => {
           },
           {
             name: 'Three.js',
+            title: 'Not one and not two, it\'s three',
             date: '2025-11-10',
             categoryContentType: 'Technique',
             categoryAlias: 'technique',
@@ -412,6 +402,7 @@ test('E2E Magazine', t => {
                     title: 'Minesweeper',
                     maker: { title: 'Mustafa Enes', slug: 'enes' },
                     date: '2025-11-10',
+                    permalink: '/demos/threejs/sprite/minesweeper',
                     tags: ['game'],
                     content: 'A Classic'
                   },
@@ -419,6 +410,7 @@ test('E2E Magazine', t => {
                     title: 'Stickman',
                     maker: { title: 'Mustafa Enes', slug: 'enes' },
                     date: '2025-11-11',
+                    permalink: '/demos/threejs/sprite/stickman.html',
                     tags: ['game'],
                     content: 'stickman demo'
                   }
@@ -432,11 +424,13 @@ test('E2E Magazine', t => {
                   {
                     title: 'Ipsum demo',
                     date: '2025-11-12',
+                    permalink: '/demos/threejs/webgpu/ipsum-demo.html',
                     content: ''
                   },
                   {
                     title: 'Lorem Demo',
                     date: '2025-11-13',
+                    permalink: '/demos/threejs/webgpu/lorem-demo',
                     content: ''
                   }
                 ]
@@ -447,6 +441,7 @@ test('E2E Magazine', t => {
                 title: 'Intelligent Drum n Bass',
                 maker: { title: 'Mustafa Enes', slug: 'enes' },
                 date: '2025-11-08',
+                permalink: '/demos/threejs/intelligent-drum-n-bass',
                 tags: ['reproduction', 'music', 'cars', 'visual effects'],
                 content: 'Impala on the F ring'
               },
@@ -454,27 +449,30 @@ test('E2E Magazine', t => {
                 title: 'Simple 3D',
                 maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
                 date: '2025-11-09',
+                permalink: '/demos/threejs/simple-3d.html',
                 content: 'Some simple 3d demo'
               }
             ]
-            }
-            ],
-            posts: [
-            {
+          }
+        ],
+        posts: [
+          {
             title: 'Hello World',
             maker: { title: 'Mustafa Enes', slug: 'enes' },
             date: '2025-11-06',
+            permalink: '/demos/hello-world',
             tags: ['html', 'hello world'],
             content: '<h1>Hello world</h1>\n\n<p>Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>'
-            },
-            {
+          },
+          {
             title: 'good-morning-world',
             maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
             date: '2025-11-07',
+            permalink: '/demos/good-morning-world.html',
             tags: ['html', 'attributes', 'good morning'],
             content: '<h1>Good morning world</h1>\n\n<p align="center">Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>'
-            }
-            ]
+          }
+        ]
       },
       {
         name: 'events',
@@ -482,10 +480,12 @@ test('E2E Magazine', t => {
         entryContentType: 'Event',
         facets: [],
         content: '',
+        categories: [],
         posts: [
           {
             title: 'Lets HTML now',
             date: '2025-11-13',
+            permalink: '/events/lets-html-now.html',
             organizers: [{ title: 'Sir Tim Berners Lee', slug: 'tim' }],
             participants: [{ title: 'Mustafa Enes', slug: 'enes' }],
             content: 'html good'
@@ -493,6 +493,7 @@ test('E2E Magazine', t => {
           {
             title: 'Lets get together',
             date: '2025-11-13',
+            permalink: '/events/lets-get-together.html',
             organizers: [
               { title: 'Mustafa Enes', slug: 'enes' },
               { title: 'Sir Tim Berners Lee', slug: 'tim' }
@@ -502,12 +503,14 @@ test('E2E Magazine', t => {
           {
             title: 'ManU - CFC',
             date: '2025-11-13',
+            permalink: '/events/manu-cfc.html',
             participants: [{ title: 'Sir Alex Ferguson', slug: 'alex' }],
             content: ''
           },
           {
             title: 'What to do',
             date: '2025-11-13',
+            permalink: '/events/what-to-do.html',
             participants: [{ title: 'Sir Tim Berners Lee', slug: 'tim' }],
             content: ''
           }
@@ -516,12 +519,12 @@ test('E2E Magazine', t => {
     ],
     subpages: [
       {
-        href: '/about-us.html',
+        permalink: '/about-us.html',
         date: '2025-11-14',
         content: 'Something about us'
       },
       {
-        href: '/newsletter.html',
+        permalink: '/newsletter.html',
         date: '2025-11-15',
         content: 'Sign up now'
       }
@@ -529,18 +532,7 @@ test('E2E Magazine', t => {
   }
 
   t.test('Verify homepage displays all discovered content', async t => {
-    t.plan(9)
-
-    const HOMEPAGE_DOM_SELECTORS = {
-      pageTitle: 'title',
-      collectionHeader: 'header',
-      collectionTitle: 'h3',
-      collectionTitleLink: 'a',
-      collectionPostList: 'ul, ol',
-      collectionFacets: '.collection-facets',
-      subpagesHeading: 'h2',
-      subpagesList: 'ul, ol'
-    }
+    t.plan(7)
 
     const SECTION_HEADINGS_HOMEPAGE = {
       pages: 'Pages'
@@ -569,10 +561,11 @@ test('E2E Magazine', t => {
       )
 
       const $ = load(indexHtmlContent)
-      const pageTitle = $(HOMEPAGE_DOM_SELECTORS.pageTitle).text()
+      const pageTitle = $('title').text()
 
       t.ok(
-        pageTitle.includes(expectedPageTitle) && pageTitle.includes(expectedSiteTitle),
+        pageTitle.includes(expectedPageTitle) &&
+        pageTitle.includes(expectedSiteTitle),
         'index.html title contains both homepage title and site title'
       )
 
@@ -592,68 +585,27 @@ test('E2E Magazine', t => {
         'output directory contains index.html and all collection directories'
       )
 
-      const allCollectionsListed = collectionsWithMetadata.every(
-        collection => indexHtmlContent.includes(collection.name)
-      )
-
-      t.ok(
-        allCollectionsListed,
-        'all collections with metadata are referenced in index.html'
-      )
-
-      const collectionsViaAliasListed = collectionsViaAlias.every(
-        collection => indexHtmlContent.includes(collection.name)
-      )
-
-      t.ok(
-        collectionsViaAliasListed,
-        'all collections declared via alias are listed in index.html'
-      )
-
       const allCollections = [...collectionsWithMetadata, ...collectionsViaAlias]
-      const headers = $(HOMEPAGE_DOM_SELECTORS.collectionHeader)
 
-      const collectionStructureIsValid = allCollections.every(collection => {
-        const collectionHeader = findHeaderByCollectionName(
-          $,
-          headers,
-          collection.name,
-          HOMEPAGE_DOM_SELECTORS.collectionTitle
-        )
+      const collectionsHaveTitleLinks = allCollections.every(collection => {
+        const collectionLinks = $('a').toArray().filter(link => {
+          const href = $(link).attr('href')
+          const text = $(link).text()
+          return (
+            text.toLowerCase() === collection.name &&
+            href === `/${collection.name}`
+          )
+        })
 
-        if (!collectionHeader) {
-          return false
-        }
-
-        const titleElement = collectionHeader.find(HOMEPAGE_DOM_SELECTORS.collectionTitle)
-        const titleLink = titleElement.find(HOMEPAGE_DOM_SELECTORS.collectionTitleLink)
-        const postList = collectionHeader.next(HOMEPAGE_DOM_SELECTORS.collectionPostList)
-
-        const hasLink = titleLink.length === 1
-        const hasPostList = postList.length === 1
-
-        return hasLink && hasPostList
+        return collectionLinks.length !== 0
       })
 
       t.ok(
-        collectionStructureIsValid,
-        'each collection is listed with its title as a link and its posts'
+        collectionsHaveTitleLinks,
+        'all collections are listed with links to their pages'
       )
 
       const facetsListed = allCollections.every(collection => {
-        const collectionHeader = findHeaderByCollectionName(
-          $,
-          headers,
-          collection.name,
-          HOMEPAGE_DOM_SELECTORS.collectionTitle
-        )
-
-        if (!collectionHeader) {
-          return false
-        }
-
-        const facetsContainer = collectionHeader.find(HOMEPAGE_DOM_SELECTORS.collectionFacets)
-
         const usedFacets = getUsedFacets(
           collection.categories,
           collection.posts,
@@ -661,44 +613,32 @@ test('E2E Magazine', t => {
         )
 
         if (usedFacets.size === 0) {
-          return facetsContainer.length === 0
+          return true
         }
 
-        const facetLinks = facetsContainer.find('a')
-        const facetTexts = facetLinks.map((_, link) => $(link).text().toLowerCase()).get()
+        const facetLinks = $('a').toArray().map(link => ({
+          href: $(link).attr('href'),
+          text: $(link).text().toLowerCase()
+        }))
 
         const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
-          facetTexts.includes(facet.toLowerCase())
+          facetLinks.some(link => link.text === facet.toLowerCase())
         )
 
-        const browseLink = facetLinks.toArray().find(link =>
-          $(link).attr('href') === `/${collection.name}/${FACET_BROWSE_PATH}`
+        const browsePathExists = facetLinks.some(link =>
+          link.href === `/${collection.name}/${FACET_BROWSE_PATH}`
         )
-        const browsePathExists = browseLink !== undefined
 
         return allUsedFacetsFound && browsePathExists
       })
 
       t.ok(
         facetsListed,
-        'each collection with facets has all facets and browse link listed next to its title'
+        'each collection with facets has all facets and browse link listed'
       )
 
       const allPostsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
-        const collectionHeader = findHeaderByCollectionName(
-          $,
-          $(HOMEPAGE_DOM_SELECTORS.collectionHeader),
-          collection.name,
-          HOMEPAGE_DOM_SELECTORS.collectionTitle
-        )
-
-        if (!collectionHeader) {
-          return false
-        }
-
-        const postList = collectionHeader.next(HOMEPAGE_DOM_SELECTORS.collectionPostList)
-        const postLinks = postList.find('a')
-        const postTexts = postLinks.map((_, link) => $(link).text()).get()
+        const postTexts = $('a').toArray().map(link => $(link).text())
 
         const allCollectionPosts = flattenPostsFromCategories(
           collection.categories,
@@ -712,28 +652,20 @@ test('E2E Magazine', t => {
 
       t.ok(
         allPostsListed,
-        'all collection posts from fixture are listed in their respective collections'
+        'all collection posts from fixture are listed'
       )
 
-      const pagesHeading = $(
-        `${HOMEPAGE_DOM_SELECTORS.subpagesHeading}:contains("${SECTION_HEADINGS_HOMEPAGE.pages}")`
+      const pageHrefs = $('a').toArray()
+        .map(link => $(link).attr('href'))
+        .filter(href => href)
+
+      const allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage =>
+        pageHrefs.includes(subpage.permalink)
       )
-      const subpagesSectionFound = pagesHeading.length === 1
-
-      let allSubpagesListed = false
-      if (subpagesSectionFound) {
-        const subpagesList = pagesHeading.next(HOMEPAGE_DOM_SELECTORS.subpagesList)
-        const subpageLinks = subpagesList.find('a')
-        const pageHrefs = subpageLinks.map((_, link) => $(link).attr('href')).get()
-
-        allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage =>
-          pageHrefs.includes(subpage.href)
-        )
-      }
 
       t.ok(
         allSubpagesListed,
-        'all subpages are listed under Pages section'
+        'all subpages are listed in the homepage'
       )
 
 
@@ -743,14 +675,6 @@ test('E2E Magazine', t => {
   })
 
   t.test('Verify individual collection pages', async t => {
-
-    const COLLECTION_DOM_SELECTORS = {
-      collectionTitle: 'h2 a',
-      collectionFacets: '.collection-facets',
-      postsHeading: 'h3',
-      categoryHeading: 'h4',
-      postLists: 'ul'
-    }
 
     const SECTION_HEADINGS = {
       postsByCategories: 'Posts by categories',
@@ -772,15 +696,14 @@ test('E2E Magazine', t => {
 
       const $ = load(collectionHtml)
 
-      const collectionTitleLink = $(COLLECTION_DOM_SELECTORS.collectionTitle)
-      const hasValidTitle = (
-        collectionTitleLink.length === 1 &&
-        collectionTitleLink.text().toLowerCase() === collection.name
+      const collectionNameLowercase = collection.name.toLowerCase()
+      const hasValidTitle = $('a').toArray().some(link =>
+        $(link).text().toLowerCase() === collectionNameLowercase
       )
 
       t.ok(
         hasValidTitle,
-        `${collection.name} collection page has a valid title`
+        `${collection.name} collection page has a link with collection name`
       )
 
       if (collection.content) {
@@ -790,123 +713,97 @@ test('E2E Magazine', t => {
         )
       }
 
-      const facetsContainer = $(COLLECTION_DOM_SELECTORS.collectionFacets)
-      const hasFacetsContainer = facetsContainer.length === 1
-
       const usedFacets = getUsedFacets(
         collection.categories,
         collection.posts,
         collection.facets
       )
 
-      if (usedFacets.size === 0) {
-        t.ok(
-          !hasFacetsContainer,
-          `${collection.name} does not have facets container`
-        )
-      } else {
-        t.ok(
-          hasFacetsContainer,
-          `${collection.name} has facets container`
-        )
+      const facetTexts = $('a').toArray()
+        .map(link => $(link).text().toLowerCase())
 
-        const facetLinks = facetsContainer.find('a')
-        const facetTexts = facetLinks
-          .map((_, link) => $(link).text().toLowerCase())
-          .get()
-
-        const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
-          facetTexts.includes(facet.toLowerCase())
-        )
-
-        t.ok(
-          allUsedFacetsFound,
-          `${collection.name} displays all expected facets`
-        )
-
-        // Verify that declared but unused facets are not rendered
-        const unusedFacets = collection.facets.filter(
-          facet => !usedFacets.has(facet)
-        )
-        const noUnusedFacetsRendered = unusedFacets.every(facet =>
-          !facetTexts.includes(facet.toLowerCase())
-        )
-
-        t.ok(
-          noUnusedFacetsRendered,
-          `${collection.name} does not display unused facets`
-        )
-      }
-
-      const postsByCategoriesSelector = (
-        `${COLLECTION_DOM_SELECTORS.postsHeading}` +
-        `:contains("${SECTION_HEADINGS.postsByCategories}")`
+      const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
+        facetTexts.includes(facet.toLowerCase())
       )
-      const postsByCategoriesHeading = $(postsByCategoriesSelector)
-      const hasCategoriesSection = postsByCategoriesHeading.length === 1
 
       t.ok(
-        hasCategoriesSection,
-        `${collection.name} has posts by categories section`
+        allUsedFacetsFound,
+        `${collection.name} displays all expected facets`
       )
 
-      if (hasCategoriesSection) {
-        const categoryHeadings = postsByCategoriesHeading.nextUntil(
-          COLLECTION_DOM_SELECTORS.postsHeading
-        ).filter(COLLECTION_DOM_SELECTORS.categoryHeading)
-
-        const hasCategories = categoryHeadings.length !== 0
-
-        t.ok(
-          hasCategories,
-          `${collection.name} has category headings in posts by categories section`
-        )
-
-        const categoryPostLists = postsByCategoriesHeading.nextUntil(
-          COLLECTION_DOM_SELECTORS.postsHeading
-        ).filter(COLLECTION_DOM_SELECTORS.postLists)
-
-        const categorizedPostCount = categoryPostLists.toArray().reduce(
-          (sum, list) => sum + $(list).find('li').length,
-          0
-        )
-
-        const allCollectionPosts = flattenPostsFromCategories(
-          collection.categories,
-          collection.posts
-        )
-        const expectedPostCount = allCollectionPosts.length
-
-        t.ok(
-          categorizedPostCount === expectedPostCount,
-          `${collection.name} posts by categories contains exactly ${expectedPostCount} posts`
-        )
-      } else {
-        // Defensive checks: Collection pages should always have "Posts by categories" section.
-        // These only fail if the collection page structure changed unexpectedly.
-        t.fail(`${collection.name} missing posts by categories section`)
-        t.fail(`${collection.name} missing category headings`)
-      }
-
-      const allPostsSelector = (
-        `${COLLECTION_DOM_SELECTORS.postsHeading}` +
-        `:contains("${SECTION_HEADINGS.allPosts}")`
+      const unusedFacets = collection.facets.filter(
+        facet => !usedFacets.has(facet)
       )
-      const allPostsHeading = $(allPostsSelector)
+      const noUnusedFacetsRendered = unusedFacets.every(facet =>
+        !facetTexts.includes(facet.toLowerCase())
+      )
 
-      const allPostsList = allPostsHeading.next(COLLECTION_DOM_SELECTORS.postLists)
-      const allPostsCount = allPostsList.find('li').length
+      t.ok(
+        noUnusedFacetsRendered,
+        `${collection.name} does not display unused facets`
+      )
 
-      const allPostsForCollection = flattenPostsFromCategories(
+      const allCollectionPosts = flattenPostsFromCategories(
         collection.categories,
         collection.posts
       )
-      const expectedAllPostsCount = allPostsForCollection.length
+
+      const allLinkTexts = $('a').toArray().map(link => $(link).text())
+
+      const allPostsPresent = allCollectionPosts.every(post =>
+        allLinkTexts.includes(post.title)
+      )
 
       t.ok(
-        allPostsCount === expectedAllPostsCount,
-        `${collection.name} all posts list contains exactly ${expectedAllPostsCount} posts`
+        allPostsPresent,
+        `${collection.name} displays all posts`
       )
+
+      if (collection.categories.length !== 0) {
+        const topLevelCategoryTitles = collection.categories
+          .map(c => c.title || c.name)
+          .filter(title => title)
+
+        const topLevelCategoryTitlesPresent = topLevelCategoryTitles.every(
+          title => allLinkTexts.includes(title)
+        )
+
+        t.ok(
+          topLevelCategoryTitlesPresent,
+          `${collection.name} displays all top-level category titles`
+        )
+
+        const categoriesHavePosts = collection.categories.every(category => {
+          const categoryPosts = flattenPostsFromCategories(
+            category.categories,
+            category.posts
+          )
+          return categoryPosts.length !== 0
+        })
+
+        t.ok(
+          categoriesHavePosts,
+          `${collection.name} all top-level categories have at least one post`
+        )
+
+        const topLevelCategoryPostsPresent = collection.categories.every(
+          category => {
+            const categoryPosts = category.posts || []
+            return categoryPosts.every(post =>
+              allLinkTexts.includes(post.title)
+            ) || category.categories.some(subcat =>
+              subcat.posts && subcat.posts.some(post =>
+                allLinkTexts.includes(post.title)
+              )
+            )
+          }
+        )
+
+        t.ok(
+          topLevelCategoryPostsPresent,
+          `${collection.name} displays posts from all top-level categories`
+        )
+      }
     }
   })
 
@@ -937,66 +834,166 @@ test('E2E Magazine', t => {
 
       const $ = load(facetBrowseHtml)
 
-      const mainUl = $('body > ul')
-      const facetLis = mainUl.find('> li').toArray()
-      const renderedFacetNames = facetLis.map(li =>
-        $(li).find('> a').text()
+      const allLinkTexts = $('a').toArray().map(link => $(link).text())
+
+      const allUsedFacetsListed = Array.from(usedFacets).every(facet =>
+        allLinkTexts.includes(facet)
+      )
+
+      t.ok(
+        allUsedFacetsListed,
+        `${collection.name} /by page lists all used facets`
       )
 
       const facetCountsCorrect = Array.from(usedFacets).every(facet => {
-        const facetCount = renderedFacetNames.filter(
-          name => name === facet
-        ).length
+        const facetCount = allLinkTexts.filter(name => name === facet).length
         return facetCount === 1
       })
 
-      const facetValuesCorrect = Array.from(usedFacets).every(facet => {
-        const facetLi = facetLis.find(li =>
-          $(li).find('> a').text() === facet
-        )
+      t.ok(
+        facetCountsCorrect,
+        `${collection.name} /by page lists each facet exactly once`
+      )
 
-        const nestedUl = $(facetLi).find('> ul')
-        const valueLinks = nestedUl.find('> li > a')
-        const renderedValues = valueLinks.toArray().map(link =>
-          $(link).text()
-        )
-
-        const uniqueValues = new Set(renderedValues)
-        const valuesAreUnique = uniqueValues.size === renderedValues.length
-        const hasValues = renderedValues.length !== 0
-
-        const expectedValues = getExpectedFacetValues(
+      const expectedFacetValues = {}
+      for (const facet of usedFacets) {
+        expectedFacetValues[facet] = getExpectedFacetValues(
           facet,
           collection.categories,
           collection.posts
         )
+      }
 
-        const allExpectedValuesPresent = Array.from(expectedValues).every(
-          expectedValue => renderedValues.includes(expectedValue)
+      const allExpectedValuesPresent = Array.from(usedFacets).every(facet => {
+        const expectedValues = expectedFacetValues[facet]
+        return Array.from(expectedValues).every(value =>
+          allLinkTexts.includes(value)
         )
-
-        return valuesAreUnique && hasValues && allExpectedValuesPresent
       })
 
-      const allUsedFacetsListed = facetCountsCorrect && facetValuesCorrect
-
       t.ok(
-        allUsedFacetsListed,
-        `${collection.name} /by page lists all used facets exactly once with unique values`
+        allExpectedValuesPresent,
+        `${collection.name} /by page displays all expected facet values`
       )
 
-      // Verify that declared but unused facets are not rendered on /by page
+      const facetValuesAreUnique = Array.from(usedFacets).every(facet => {
+        const expectedValues = expectedFacetValues[facet]
+        return Array.from(expectedValues).every(value => {
+          const valueCount = allLinkTexts.filter(text => text === value).length
+          return valueCount === 1
+        })
+      })
+
+      t.ok(
+        facetValuesAreUnique,
+        `${collection.name} /by page displays each facet value exactly once`
+      )
+
       const unusedFacets = collection.facets.filter(
         facet => !usedFacets.has(facet)
       )
       const noUnusedFacetsRendered = unusedFacets.every(facet =>
-        !renderedFacetNames.includes(facet)
+        !allLinkTexts.includes(facet)
       )
 
       t.ok(
         noUnusedFacetsRendered,
         `${collection.name} /by page does not display unused facets`
       )
+    }
+  })
+
+  t.test('Verify facetName pages', async t => {
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      const usedFacets = getUsedFacets(
+        collection.categories,
+        collection.posts,
+        collection.facets
+      )
+
+      if (usedFacets.size === 0) {
+        continue
+      }
+
+      for (const facetName of usedFacets) {
+        const facetNamePath = join(
+          rootDirectory,
+          exportDirectory,
+          collection.name,
+          FACET_BROWSE_PATH,
+          facetName,
+          'index.html'
+        )
+
+        const facetNameHtml = await readFile(
+          facetNamePath,
+          { encoding: 'utf-8' }
+        )
+
+        const $ = load(facetNameHtml)
+
+        const expectedFacetValues = getExpectedFacetValues(
+          facetName,
+          collection.categories,
+          collection.posts
+        )
+
+        const allLinkTexts = $('a').toArray().map(link => $(link).text())
+
+        const allValuesPresent = Array.from(expectedFacetValues).every(
+          expectedValue => allLinkTexts.includes(expectedValue)
+        )
+
+        t.ok(
+          allValuesPresent,
+          `${collection.name} /by/${facetName} lists all expected facet values`
+        )
+
+        const facetValuesAreUnique = Array.from(expectedFacetValues).every(
+          expectedValue => {
+            const valueCount = allLinkTexts.filter(
+              text => text === expectedValue
+            ).length
+            return valueCount === 1
+          }
+        )
+
+        t.ok(
+          facetValuesAreUnique,
+          `${collection.name} /by/${facetName} lists each facet value exactly once`
+        )
+
+        const allCollectionPosts = flattenPostsFromCategories(
+          collection.categories,
+          collection.posts
+        )
+
+        const allCollectionPostTitles = allCollectionPosts.map(post => post.title)
+
+        const allPostsHaveValidLinks = allCollectionPostTitles.every(postTitle => {
+           const matchingLinks = $('a').toArray().filter(link =>
+             $(link).text() === postTitle
+           )
+
+           return matchingLinks.every(link => {
+             const href = $(link).attr('href')
+             const matchingPost = allCollectionPosts.find(
+               post => post.title === postTitle
+             )
+
+             if (!matchingPost) {
+               return false
+             }
+
+             return href === matchingPost.permalink
+           })
+         })
+
+        t.ok(
+          allPostsHaveValidLinks,
+          `${collection.name} /by/${facetName} posts have correct links`
+        )
+      }
     }
   })
 

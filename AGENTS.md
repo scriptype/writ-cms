@@ -6,6 +6,7 @@
 - For multiple expressions with logical operators (&&, ||), break lines after each operator
 - No trailing whitespace at the end of lines
 - In multiline comments, add blank lines between logical points for readability
+- Respect existing indentation style when editing files (maintain consistency with surrounding code)
 
 ## Test Assertions Formatting
 - Assertion function call on one line (e.g., `t.ok(`, `t.equal(`, `t.notOk(`)
