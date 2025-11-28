@@ -5,5 +5,3 @@ tags: [html, hello world]
 <h1>Hello world</h1>
 
 <p>Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>
-
-<p>Dolor totam tempora distinctio voluptas architecto Minima iste maiores beatae laborum vel Autem accusamus ab perspiciatis excepturi eligendi officia in Quas quidem iste nobis similique quisquam. Ducimus ratione animi pariatur!</p>

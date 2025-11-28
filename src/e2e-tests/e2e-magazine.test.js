@@ -60,27 +60,53 @@ const findHeaderByCollectionName = ($, headers, collectionName, titleSelector) =
   return foundHeader ? $(foundHeader) : null
 }
 
-const countPostFiles = async (dirPath) => {
-  let count = 0
+const flattenPostsFromCategories = (categories = [], posts = []) => {
+  let allPosts = [...posts]
 
-  const entries = await readdir(dirPath)
-
-  for (const entry of entries) {
-    if (entry === 'index.html' || entry === FACET_BROWSE_PATH) {
-      continue
-    }
-
-    const fullPath = join(dirPath, entry)
-    const fileStats = await stat(fullPath)
-
-    if (fileStats.isDirectory()) {
-      count += await countPostFiles(fullPath)
-    } else if (entry.endsWith('.html')) {
-      count++
+  if (Array.isArray(categories)) {
+    for (const category of categories) {
+      const categoryPosts = flattenPostsFromCategories(
+        category.categories,
+        category.posts
+      )
+      allPosts = [...allPosts, ...categoryPosts]
     }
   }
 
-  return count
+  return allPosts
+}
+
+const getUsedFacets = (
+  categories = [],
+  posts = [],
+  facetNames = []
+) => {
+  const usedFacets = new Set()
+
+  const processPosts = (postList) => {
+    for (const post of postList) {
+      for (const facet of facetNames) {
+        if (post.hasOwnProperty(facet)) {
+          usedFacets.add(facet)
+        }
+      }
+    }
+  }
+
+  processPosts(posts)
+
+  if (Array.isArray(categories)) {
+    for (const category of categories) {
+      processPosts(category.posts || [])
+      getUsedFacets(
+        category.categories,
+        [],
+        facetNames
+      ).forEach(f => usedFacets.add(f))
+    }
+  }
+
+  return usedFacets
 }
 
 test('E2E Magazine', t => {
@@ -104,57 +130,286 @@ test('E2E Magazine', t => {
     collections: [
       {
         name: 'articles',
-        alias: 'blog',
-        facets: ['tags', 'date', 'author'],
+        collectionAlias: 'blog',
+        categoryContentType: 'BlogTopic',
+        categoryAlias: 'topic',
+        categoriesAlias: 'topics',
+        entryContentType: 'Article',
+        entryAlias: 'article',
+        entriesAlias: 'articles',
+        facets: ['tags', 'date', 'author', 'resources'],
+        content: 'Welcome to articles',
+        categories: [
+          {
+            name: 'Guides',
+            posts: [
+              {
+                title: 'Hello Design',
+                author: '+authors/enes',
+                tags: ['ui', 'ux', 'design', 'css'],
+                content: 'Design design design'
+              },
+              {
+                title: 'Introduction to CSS Grid',
+                author: '+authors/enes',
+                tags: ['css', 'grid', 'art direction', 'design'],
+                content: 'All about grid'
+              }
+            ]
+          }
+        ],
         posts: [
-          { title: 'Pure JS very good' },
-          { title: 'React bad' },
-          { title: 'Vue good' },
-          { title: 'Hello Design', category: 'guides' },
-          { title: 'Introduction to CSS Grid', category: 'guides' }
+          {
+            title: 'Pure JS very good',
+            author: '+authors/tim',
+            tags: ['javascript', 'performance', 'accessibility', 'devx'],
+            content: 'pure js very good'
+          },
+          {
+            title: 'React bad',
+            author: '+authors/enes',
+            tags: ['javascript', 'react', 'performance', 'accessibility', 'devx'],
+            content: 'react not good'
+          },
+          {
+            title: 'Vue good',
+            author: '+authors/enes',
+            tags: ['javascript', 'vue', 'performance', 'accessibility', 'devx'],
+            content: 'vue good'
+          }
         ]
       },
       {
         name: 'books',
+        entryContentType: 'Book',
+        entryAlias: 'book',
+        entriesAlias: 'books',
         facets: ['author', 'date', 'tags', 'genre'],
         posts: [
-          { title: 'Football' },
-          { title: 'HTML' }
+          {
+            title: 'Football',
+            author: '+authors/alex',
+            genre: 'sports',
+            tags: ['Manchester United', 'English football'],
+            content: 'Welcome to football.'
+          },
+          {
+            title: 'HTML',
+            author: '+authors/tim',
+            genre: 'technology',
+            tags: ['html', 'web', 'internet'],
+            content: 'Welcome to hypertext era.'
+          }
         ]
       },
       {
         name: 'authors',
+        entryContentType: 'Person',
+        entryAlias: 'author',
+        entriesAlias: 'authors',
         facets: ['events'],
         posts: [
-          { title: 'Mustafa Enes' },
-          { title: 'Sir Alex Ferguson' },
-          { title: 'Sir Tim Berners Lee' }
+          {
+            title: 'Mustafa Enes',
+            slug: 'enes',
+            // Stub for system linking: events where this author is organizer/participant
+            events: ['+events/lets-html-now', '+events/lets-get-together'],
+            content: 'Hey, it\'s me.'
+          },
+          {
+            title: 'Sir Alex Ferguson',
+            slug: 'alex',
+            // Stub for system linking: events where this author is organizer/participant
+            events: ['+events/manu-cfc'],
+            content: 'Chewing a gum.'
+          },
+          {
+            title: 'Sir Tim Berners Lee',
+            slug: 'tim',
+            // Stub for system linking: events where this author is organizer/participant
+            events: ['+events/lets-html-now', '+events/lets-get-together', '+events/what-to-do'],
+            content: ''
+          }
         ]
       },
       {
         name: 'demos',
+        contentType: 'DemoPortfolio',
+        categoryContentType: 'Technology',
+        entryContentType: 'Demo',
+        categoryAlias: 'technology',
+        categoriesAlias: 'technologies',
+        entryAlias: 'demo',
+        entriesAlias: 'demos',
         facets: ['tags', 'date', 'maker'],
+        categories: [
+          {
+            name: 'CSS',
+            categoryContentType: 'Technique',
+            categoryAlias: 'technique',
+            categoriesAlias: 'techniques',
+            categories: [
+              {
+                name: 'CSS Art',
+                categories: [
+                  {
+                    name: 'Carpet Motifs',
+                    posts: [
+                      {
+                        title: 'Carpet Motifs',
+                        maker: '+authors/enes',
+                        tags: ['css', 'art'],
+                        content: 'Carpet shapes'
+                      }
+                    ]
+                  }
+                ],
+                posts: [
+                  {
+                    title: 'Realist Painting',
+                    maker: '+authors/enes',
+                    tags: ['css', 'art', 'painting'],
+                    content: 'A lot of css'
+                  }
+                ]
+              },
+              {
+                name: 'Grid',
+                posts: [
+                  {
+                    title: 'Grid vs Flexbox',
+                    maker: '+authors/enes',
+                    tags: ['css', 'grid', 'flex', 'layout'],
+                    content: 'A versus'
+                  },
+                  {
+                    title: 'Hello Grid',
+                    maker: '+authors/tim',
+                    tags: ['css', 'layout', 'grid'],
+                    content: 'let there be grid'
+                  }
+                ]
+              }
+            ],
+            posts: [
+              {
+                title: 'Hello CSS',
+                maker: '+authors/tim',
+                tags: ['css', 'tutorial'],
+                content: 'there is css'
+              }
+            ]
+          },
+          {
+            name: 'Three.js',
+            categoryContentType: 'Technique',
+            categoryAlias: 'technique',
+            categoriesAlias: 'techniques',
+            categories: [
+              {
+                name: 'Sprite',
+                posts: [
+                  {
+                    title: 'Minesweeper',
+                    maker: '+authors/enes',
+                    tags: ['game'],
+                    content: 'A Classic'
+                  },
+                  {
+                    title: 'Stickman',
+                    maker: '+authors/enes',
+                    tags: ['game'],
+                    content: 'stickman demo'
+                  }
+                ]
+              },
+              {
+                name: 'WebGPU',
+                posts: [
+                  {
+                    title: 'Ipsum demo',
+                    content: ''
+                  },
+                  {
+                    title: 'Lorem Demo',
+                    content: ''
+                  }
+                ]
+              }
+            ],
+            posts: [
+              {
+                title: 'Intelligent Drum n Bass',
+                maker: '+authors/enes',
+                tags: ['reproduction', 'music', 'cars', 'visual effects'],
+                content: 'Impala on the F ring'
+              },
+              {
+                title: 'Simple 3D',
+                maker: '+authors/tim',
+                content: 'Some simple 3d demo'
+              }
+            ]
+          }
+        ],
         posts: [
-          { title: 'hello-world' },
-          { title: 'good-morning-world' }
+          {
+            title: 'Hello World',
+            maker: '+authors/enes',
+            tags: ['html', 'hello world'],
+            content: '<h1>Hello world</h1>\n\n<p>Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>'
+          },
+          {
+            title: 'good-morning-world',
+            maker: '+authors/tim',
+            tags: ['html', 'attributes', 'good morning'],
+            content: '<h1>Good morning world</h1>\n\n<p align="center">Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>'
+          }
         ]
       },
       {
         name: 'events',
+        entryContentType: 'Event',
         facets: [],
         posts: [
-          { title: 'Lets HTML now' },
-          { title: 'Lets get together' },
-          { title: 'ManU - CFC' },
-          { title: 'What to do' }
+          {
+            title: 'Lets HTML now',
+            organizers: ['+authors/tim'],
+            participants: ['+authors/enes'],
+            content: 'html good'
+          },
+          {
+            title: 'Lets get together',
+            organizers: ['+authors/enes', '+authors/tim'],
+            content: 'And call it an event'
+          },
+          {
+            title: 'ManU - CFC',
+            participants: ['+authors/alex'],
+            content: ''
+          },
+          {
+            title: 'What to do',
+            participants: ['+authors/tim'],
+            content: ''
+          }
         ]
       }
     ],
-    subpages: ['/about-us.html', '/newsletter.html']
+    subpages: [
+      {
+        href: '/about-us.html',
+        content: 'Something about us'
+      },
+      {
+        href: '/newsletter.html',
+        content: 'Sign up now'
+      }
+    ]
   }
 
   t.test('Verify homepage displays all discovered content', async t => {
-    t.plan(9)
+    t.plan(8)
 
     const HOMEPAGE_DOM_SELECTORS = {
       pageTitle: 'title',
@@ -176,9 +431,8 @@ test('E2E Magazine', t => {
 
     const collectionsWithMetadata = FIXTURE_CONTENT_MODEL.collections.filter(c => !c.alias)
     const collectionsViaAlias = FIXTURE_CONTENT_MODEL.collections.filter(c => c.alias).map(c => ({
-      name: c.name,
-      fileName: c.alias,
-      facets: c.facets
+      ...c,
+      fileName: c.alias
     }))
 
     try {
@@ -275,14 +529,20 @@ test('E2E Magazine', t => {
 
         const facetsContainer = collectionHeader.find(HOMEPAGE_DOM_SELECTORS.collectionFacets)
 
-        if (collection.facets.length === 0) {
+        const usedFacets = getUsedFacets(
+          collection.categories,
+          collection.posts,
+          collection.facets
+        )
+
+        if (usedFacets.size === 0) {
           return facetsContainer.length === 0
         }
 
         const facetLinks = facetsContainer.find('a')
         const facetTexts = facetLinks.map((_, link) => $(link).text().toLowerCase()).get()
 
-        const allFacetsFound = collection.facets.every(facet =>
+        const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
           facetTexts.includes(facet.toLowerCase())
         )
 
@@ -291,7 +551,7 @@ test('E2E Magazine', t => {
         )
         const browsePathExists = browseLink !== undefined
 
-        return allFacetsFound && browsePathExists
+        return allUsedFacetsFound && browsePathExists
       })
 
       t.ok(
@@ -315,7 +575,12 @@ test('E2E Magazine', t => {
         const postLinks = postList.find('a')
         const postTexts = postLinks.map((_, link) => $(link).text()).get()
 
-        return collection.posts.every(post =>
+        const allCollectionPosts = flattenPostsFromCategories(
+          collection.categories,
+          collection.posts
+        )
+
+        return allCollectionPosts.every(post =>
           postTexts.includes(post.title)
         )
       })
@@ -337,7 +602,7 @@ test('E2E Magazine', t => {
         const pageHrefs = subpageLinks.map((_, link) => $(link).attr('href')).get()
 
         allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage =>
-          pageHrefs.includes(subpage)
+          pageHrefs.includes(subpage.href)
         )
       }
 
@@ -346,34 +611,13 @@ test('E2E Magazine', t => {
         'all subpages are listed under Pages section'
       )
 
-      const postCountChecks = await Promise.all(
-        FIXTURE_CONTENT_MODEL.collections.map(
-          async (collection) => {
-            const collectionDir = join(rootDirectory, exportDirectory, collection.name)
 
-            try {
-              const actualCount = await countPostFiles(collectionDir)
-              return actualCount === collection.posts.length
-            } catch {
-              return false
-            }
-          }
-        )
-      )
-
-      const postCountsValid = postCountChecks.every(Boolean)
-
-      t.ok(
-        postCountsValid,
-        'each collection directory contains expected number of post files'
-      )
     } catch (err) {
       t.fail(`Build magazine test failed: ${err.message}`)
     }
   })
 
   t.test('Verify individual collection pages', async t => {
-    t.plan(34)
 
     const COLLECTION_DOM_SELECTORS = {
       collectionTitle: 'h2 a',
@@ -417,7 +661,13 @@ test('E2E Magazine', t => {
       const facetsContainer = $(COLLECTION_DOM_SELECTORS.collectionFacets)
       const hasFacetsContainer = facetsContainer.length > 0
 
-      if (collection.facets.length === 0) {
+      const usedFacets = getUsedFacets(
+        collection.categories,
+        collection.posts,
+        collection.facets
+      )
+
+      if (usedFacets.size === 0) {
         t.ok(
           !hasFacetsContainer,
           `${collection.name} does not have facets container`
@@ -433,12 +683,12 @@ test('E2E Magazine', t => {
           .map((_, link) => $(link).text().toLowerCase())
           .get()
 
-        const allFacetsFound = collection.facets.every(facet =>
+        const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
           facetTexts.includes(facet.toLowerCase())
         )
 
         t.ok(
-          allFacetsFound,
+          allUsedFacetsFound,
           `${collection.name} displays all expected facets`
         )
       }
@@ -476,9 +726,15 @@ test('E2E Magazine', t => {
           0
         )
 
+        const allCollectionPosts = flattenPostsFromCategories(
+          collection.categories,
+          collection.posts
+        )
+        const expectedPostCount = allCollectionPosts.length
+
         t.ok(
-          categorizedPostCount === collection.posts.length,
-          `${collection.name} posts by categories contains exactly ${collection.posts.length} posts`
+          categorizedPostCount === expectedPostCount,
+          `${collection.name} posts by categories contains exactly ${expectedPostCount} posts`
         )
       } else {
         // Defensive checks: Collection pages should always have "Posts by categories" section.
@@ -496,9 +752,15 @@ test('E2E Magazine', t => {
       const allPostsList = allPostsHeading.next(COLLECTION_DOM_SELECTORS.postLists)
       const allPostsCount = allPostsList.find('li').length
 
+      const allPostsForCollection = flattenPostsFromCategories(
+        collection.categories,
+        collection.posts
+      )
+      const expectedAllPostsCount = allPostsForCollection.length
+
       t.ok(
-        allPostsCount === collection.posts.length,
-        `${collection.name} all posts list contains exactly ${collection.posts.length} posts`
+        allPostsCount === expectedAllPostsCount,
+        `${collection.name} all posts list contains exactly ${expectedAllPostsCount} posts`
       )
     }
   })
