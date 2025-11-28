@@ -43,6 +43,11 @@ const fixturesDirectory = join(__dirname, 'fixtures', 'e2e-magazine')
 
 const FACET_BROWSE_PATH = 'by'
 
+/*
+ * Finds a header element by collection name from a set of header elements.
+ * Iterates through headers using the titleSelector to extract the title text,
+ * compares case-insensitively, and returns the Cheerio-wrapped matching element.
+ */
 const findHeaderByCollectionName = ($, headers, collectionName, titleSelector) => {
   let foundHeader = null
 
@@ -60,6 +65,10 @@ const findHeaderByCollectionName = ($, headers, collectionName, titleSelector) =
   return foundHeader ? $(foundHeader) : null
 }
 
+/*
+ * Recursively flattens a nested category tree into a single array of all posts.
+ * Combines direct posts with posts from all nested categories at any depth.
+ */
 const flattenPostsFromCategories = (categories = [], posts = []) => {
   let allPosts = [...posts]
 
@@ -76,6 +85,11 @@ const flattenPostsFromCategories = (categories = [], posts = []) => {
   return allPosts
 }
 
+/*
+ * Recursively determines which facets are actually used by any post
+ * in the collection and its nested categories. Only returns facets
+ * from the provided facetNames list that have at least one post using them.
+ */
 const getUsedFacets = (
   categories = [],
   posts = [],
@@ -109,6 +123,51 @@ const getUsedFacets = (
   return usedFacets
 }
 
+/*
+ * Recursively collects all unique values for a given facet across posts
+ * and nested categories. Handles both single values and array values.
+ * Used to verify that all expected facet values are rendered on /by pages.
+ */
+const getExpectedFacetValues = (
+  facetName,
+  categories = [],
+  posts = []
+) => {
+  const values = new Set()
+
+  const processPosts = (postList) => {
+    for (const post of postList) {
+      if (post.hasOwnProperty(facetName)) {
+        const value = post[facetName]
+        if (Array.isArray(value)) {
+          value.forEach(v => {
+            const processedValue = typeof v === 'object' && v.title ? v.title : v
+            values.add(processedValue)
+          })
+        } else if (value) {
+          const processedValue = typeof value === 'object' && value.title ? value.title : value
+          values.add(processedValue)
+        }
+      }
+    }
+  }
+
+  processPosts(posts)
+
+  if (Array.isArray(categories)) {
+    for (const category of categories) {
+      processPosts(category.posts || [])
+      getExpectedFacetValues(
+        facetName,
+        category.categories || [],
+        []
+      ).forEach(v => values.add(v))
+    }
+  }
+
+  return values
+}
+
 test('E2E Magazine', t => {
 
   const testDir = join(tmpdir(), 'e2e-magazine-build')
@@ -116,9 +175,16 @@ test('E2E Magazine', t => {
   const exportDirectory = 'docs'
   let indexHtmlContent
 
-  // Stub content model and settings representing the fixture's structure
-  // Facets are only listed if at least one post in the collection uses them in front-matter
-  // Date is automatically added to every post by the system
+  /*
+   * Stub content model and settings representing the fixture's structure.
+   *
+   * Facets are only listed if at least one post in the collection uses them
+   * in front-matter. Date is automatically added to every post by the system.
+   *
+   * Linked fields (author, events, organizers, participants) are represented
+   * as objects with title and slug properties, mirroring how the compiler
+   * transforms linked references.
+   */
   const FIXTURE_SETTINGS = {
     title: 'Web Maganize'
   }
@@ -126,11 +192,13 @@ test('E2E Magazine', t => {
   const FIXTURE_CONTENT_MODEL = {
     homepage: {
       title: 'Home',
+      date: '2025-11-01',
       content: 'Welcome to E2E Magazine'
     },
     collections: [
       {
         name: 'articles',
+        date: '2025-11-02',
         collectionAlias: 'blog',
         categoryContentType: 'BlogTopic',
         categoryAlias: 'topic',
@@ -143,17 +211,20 @@ test('E2E Magazine', t => {
         categories: [
           {
             name: 'Guides',
+            date: '2025-11-03',
             content: '',
             posts: [
               {
                 title: 'Hello Design',
-                author: '+authors/enes',
+                author: { title: 'Mustafa Enes', slug: 'enes' },
+                date: '2025-11-05',
                 tags: ['ui', 'ux', 'design', 'css'],
                 content: 'Design design design'
               },
               {
                 title: 'Introduction to CSS Grid',
-                author: '+authors/enes',
+                author: { title: 'Mustafa Enes', slug: 'enes' },
+                date: '2025-11-06',
                 tags: ['css', 'grid', 'art direction', 'design'],
                 content: 'All about grid'
               }
@@ -163,19 +234,22 @@ test('E2E Magazine', t => {
         posts: [
           {
             title: 'Pure JS very good',
-            author: '+authors/tim',
+            author: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+            date: '2025-11-02',
             tags: ['javascript', 'performance', 'accessibility', 'devx'],
             content: 'pure js very good'
           },
           {
             title: 'React bad',
-            author: '+authors/enes',
+            author: { title: 'Mustafa Enes', slug: 'enes' },
+            date: '2025-11-03',
             tags: ['javascript', 'react', 'performance', 'accessibility', 'devx'],
             content: 'react not good'
           },
           {
             title: 'Vue good',
-            author: '+authors/enes',
+            author: { title: 'Mustafa Enes', slug: 'enes' },
+            date: '2025-11-04',
             tags: ['javascript', 'vue', 'performance', 'accessibility', 'devx'],
             content: 'vue good'
           }
@@ -183,6 +257,7 @@ test('E2E Magazine', t => {
       },
       {
         name: 'books',
+        date: '2025-11-04',
         entryContentType: 'Book',
         entryAlias: 'book',
         entriesAlias: 'books',
@@ -191,14 +266,16 @@ test('E2E Magazine', t => {
         posts: [
           {
             title: 'Football',
-            author: '+authors/alex',
+            author: { title: 'Sir Alex Ferguson', slug: 'alex' },
+            date: '2025-11-04',
             genre: 'sports',
             tags: ['Manchester United', 'English football'],
             content: 'Welcome to football.'
           },
           {
             title: 'HTML',
-            author: '+authors/tim',
+            author: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+            date: '2025-11-05',
             genre: 'technology',
             tags: ['html', 'web', 'internet'],
             content: 'Welcome to hypertext era.'
@@ -207,6 +284,7 @@ test('E2E Magazine', t => {
       },
       {
         name: 'authors',
+        date: '2025-11-05',
         entryContentType: 'Person',
         entryAlias: 'author',
         entriesAlias: 'authors',
@@ -216,28 +294,36 @@ test('E2E Magazine', t => {
           {
             title: 'Mustafa Enes',
             slug: 'enes',
-            // Stub for system linking: events where this author is organizer/participant
-            events: ['+events/lets-html-now', '+events/lets-get-together'],
+            date: '2025-11-05',
+            events: [
+              { title: 'Lets HTML now', slug: 'lets-html-now' },
+              { title: 'Lets get together', slug: 'lets-get-together' }
+            ],
             content: 'Hey, it\'s me.'
           },
           {
             title: 'Sir Alex Ferguson',
             slug: 'alex',
-            // Stub for system linking: events where this author is organizer/participant
-            events: ['+events/manu-cfc'],
+            date: '2025-11-06',
+            events: [{ title: 'ManU - CFC', slug: 'manu-cfc' }],
             content: 'Chewing a gum.'
           },
           {
             title: 'Sir Tim Berners Lee',
             slug: 'tim',
-            // Stub for system linking: events where this author is organizer/participant
-            events: ['+events/lets-html-now', '+events/lets-get-together', '+events/what-to-do'],
+            date: '2025-11-07',
+            events: [
+              { title: 'Lets HTML now', slug: 'lets-html-now' },
+              { title: 'Lets get together', slug: 'lets-get-together' },
+              { title: 'What to do', slug: 'what-to-do' }
+            ],
             content: ''
           }
         ]
       },
       {
         name: 'demos',
+        date: '2025-11-06',
         contentType: 'DemoPortfolio',
         categoryContentType: 'Technology',
         entryContentType: 'Demo',
@@ -250,6 +336,7 @@ test('E2E Magazine', t => {
         categories: [
           {
             name: 'CSS',
+            date: '2025-11-07',
             categoryContentType: 'Technique',
             categoryAlias: 'technique',
             categoriesAlias: 'techniques',
@@ -257,17 +344,20 @@ test('E2E Magazine', t => {
             categories: [
               {
                 name: 'CSS Art',
+                date: '2025-11-08',
                 content: '',
                 posts: [
                   {
                     title: 'Carpet Motifs',
-                    maker: '+authors/enes',
+                    maker: { title: 'Mustafa Enes', slug: 'enes' },
+                    date: '2025-11-11',
                     tags: ['css', 'art'],
                     content: 'Carpet shapes'
                   },
                   {
                     title: 'Realist Painting',
-                    maker: '+authors/enes',
+                    maker: { title: 'Mustafa Enes', slug: 'enes' },
+                    date: '2025-11-12',
                     tags: ['css', 'art', 'painting'],
                     content: 'A lot of css'
                   }
@@ -275,17 +365,20 @@ test('E2E Magazine', t => {
               },
               {
                 name: 'Grid',
+                date: '2025-11-09',
                 content: '',
                 posts: [
                   {
                     title: 'Grid vs Flexbox',
-                    maker: '+authors/enes',
+                    maker: { title: 'Mustafa Enes', slug: 'enes' },
+                    date: '2025-11-10',
                     tags: ['css', 'grid', 'flex', 'layout'],
                     content: 'A versus'
                   },
                   {
                     title: 'Hello Grid',
-                    maker: '+authors/tim',
+                    maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+                    date: '2025-11-09',
                     tags: ['css', 'layout', 'grid'],
                     content: 'let there be grid'
                   }
@@ -295,7 +388,8 @@ test('E2E Magazine', t => {
             posts: [
               {
                 title: 'Hello CSS',
-                maker: '+authors/tim',
+                maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+                date: '2025-11-08',
                 tags: ['css', 'tutorial'],
                 content: 'there is css'
               }
@@ -303,6 +397,7 @@ test('E2E Magazine', t => {
           },
           {
             name: 'Three.js',
+            date: '2025-11-10',
             categoryContentType: 'Technique',
             categoryAlias: 'technique',
             categoriesAlias: 'techniques',
@@ -310,17 +405,20 @@ test('E2E Magazine', t => {
             categories: [
               {
                 name: 'Sprite',
+                date: '2025-11-11',
                 content: '',
                 posts: [
                   {
                     title: 'Minesweeper',
-                    maker: '+authors/enes',
+                    maker: { title: 'Mustafa Enes', slug: 'enes' },
+                    date: '2025-11-10',
                     tags: ['game'],
                     content: 'A Classic'
                   },
                   {
                     title: 'Stickman',
-                    maker: '+authors/enes',
+                    maker: { title: 'Mustafa Enes', slug: 'enes' },
+                    date: '2025-11-11',
                     tags: ['game'],
                     content: 'stickman demo'
                   }
@@ -328,14 +426,17 @@ test('E2E Magazine', t => {
               },
               {
                 name: 'WebGPU',
+                date: '2025-11-12',
                 content: '',
                 posts: [
                   {
                     title: 'Ipsum demo',
+                    date: '2025-11-12',
                     content: ''
                   },
                   {
                     title: 'Lorem Demo',
+                    date: '2025-11-13',
                     content: ''
                   }
                 ]
@@ -344,58 +445,70 @@ test('E2E Magazine', t => {
             posts: [
               {
                 title: 'Intelligent Drum n Bass',
-                maker: '+authors/enes',
+                maker: { title: 'Mustafa Enes', slug: 'enes' },
+                date: '2025-11-08',
                 tags: ['reproduction', 'music', 'cars', 'visual effects'],
                 content: 'Impala on the F ring'
               },
               {
                 title: 'Simple 3D',
-                maker: '+authors/tim',
+                maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+                date: '2025-11-09',
                 content: 'Some simple 3d demo'
               }
             ]
-          }
-        ],
-        posts: [
-          {
+            }
+            ],
+            posts: [
+            {
             title: 'Hello World',
-            maker: '+authors/enes',
+            maker: { title: 'Mustafa Enes', slug: 'enes' },
+            date: '2025-11-06',
             tags: ['html', 'hello world'],
             content: '<h1>Hello world</h1>\n\n<p>Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>'
-          },
-          {
+            },
+            {
             title: 'good-morning-world',
-            maker: '+authors/tim',
+            maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+            date: '2025-11-07',
             tags: ['html', 'attributes', 'good morning'],
             content: '<h1>Good morning world</h1>\n\n<p align="center">Elit dolorum iure porro optio vel eveniet Quos labore ab deleniti labore asperiores. Blanditiis magni suscipit hic ut delectus Libero atque porro harum cum tempora Ullam culpa distinctio dignissimos ex.</p>'
-          }
-        ]
+            }
+            ]
       },
       {
         name: 'events',
+        date: '2025-11-13',
         entryContentType: 'Event',
         facets: [],
         content: '',
         posts: [
           {
             title: 'Lets HTML now',
-            organizers: ['+authors/tim'],
-            participants: ['+authors/enes'],
+            date: '2025-11-13',
+            organizers: [{ title: 'Sir Tim Berners Lee', slug: 'tim' }],
+            participants: [{ title: 'Mustafa Enes', slug: 'enes' }],
             content: 'html good'
           },
           {
             title: 'Lets get together',
-            organizers: ['+authors/enes', '+authors/tim'],
+            date: '2025-11-13',
+            organizers: [
+              { title: 'Mustafa Enes', slug: 'enes' },
+              { title: 'Sir Tim Berners Lee', slug: 'tim' }
+            ],
             content: 'And call it an event'
           },
           {
             title: 'ManU - CFC',
-            participants: ['+authors/alex'],
+            date: '2025-11-13',
+            participants: [{ title: 'Sir Alex Ferguson', slug: 'alex' }],
             content: ''
           },
           {
             title: 'What to do',
-            participants: ['+authors/tim'],
+            date: '2025-11-13',
+            participants: [{ title: 'Sir Tim Berners Lee', slug: 'tim' }],
             content: ''
           }
         ]
@@ -404,10 +517,12 @@ test('E2E Magazine', t => {
     subpages: [
       {
         href: '/about-us.html',
+        date: '2025-11-14',
         content: 'Something about us'
       },
       {
         href: '/newsletter.html',
+        date: '2025-11-15',
         content: 'Sign up now'
       }
     ]
@@ -514,8 +629,8 @@ test('E2E Magazine', t => {
         const titleLink = titleElement.find(HOMEPAGE_DOM_SELECTORS.collectionTitleLink)
         const postList = collectionHeader.next(HOMEPAGE_DOM_SELECTORS.collectionPostList)
 
-        const hasLink = titleLink.length > 0
-        const hasPostList = postList.length > 0
+        const hasLink = titleLink.length === 1
+        const hasPostList = postList.length === 1
 
         return hasLink && hasPostList
       })
@@ -603,7 +718,7 @@ test('E2E Magazine', t => {
       const pagesHeading = $(
         `${HOMEPAGE_DOM_SELECTORS.subpagesHeading}:contains("${SECTION_HEADINGS_HOMEPAGE.pages}")`
       )
-      const subpagesSectionFound = pagesHeading.length > 0
+      const subpagesSectionFound = pagesHeading.length === 1
 
       let allSubpagesListed = false
       if (subpagesSectionFound) {
@@ -659,7 +774,7 @@ test('E2E Magazine', t => {
 
       const collectionTitleLink = $(COLLECTION_DOM_SELECTORS.collectionTitle)
       const hasValidTitle = (
-        collectionTitleLink.length > 0 &&
+        collectionTitleLink.length === 1 &&
         collectionTitleLink.text().toLowerCase() === collection.name
       )
 
@@ -676,7 +791,7 @@ test('E2E Magazine', t => {
       }
 
       const facetsContainer = $(COLLECTION_DOM_SELECTORS.collectionFacets)
-      const hasFacetsContainer = facetsContainer.length > 0
+      const hasFacetsContainer = facetsContainer.length === 1
 
       const usedFacets = getUsedFacets(
         collection.categories,
@@ -708,6 +823,19 @@ test('E2E Magazine', t => {
           allUsedFacetsFound,
           `${collection.name} displays all expected facets`
         )
+
+        // Verify that declared but unused facets are not rendered
+        const unusedFacets = collection.facets.filter(
+          facet => !usedFacets.has(facet)
+        )
+        const noUnusedFacetsRendered = unusedFacets.every(facet =>
+          !facetTexts.includes(facet.toLowerCase())
+        )
+
+        t.ok(
+          noUnusedFacetsRendered,
+          `${collection.name} does not display unused facets`
+        )
       }
 
       const postsByCategoriesSelector = (
@@ -715,7 +843,7 @@ test('E2E Magazine', t => {
         `:contains("${SECTION_HEADINGS.postsByCategories}")`
       )
       const postsByCategoriesHeading = $(postsByCategoriesSelector)
-      const hasCategoriesSection = postsByCategoriesHeading.length > 0
+      const hasCategoriesSection = postsByCategoriesHeading.length === 1
 
       t.ok(
         hasCategoriesSection,
@@ -727,7 +855,7 @@ test('E2E Magazine', t => {
           COLLECTION_DOM_SELECTORS.postsHeading
         ).filter(COLLECTION_DOM_SELECTORS.categoryHeading)
 
-        const hasCategories = categoryHeadings.length > 0
+        const hasCategories = categoryHeadings.length !== 0
 
         t.ok(
           hasCategories,
@@ -778,6 +906,96 @@ test('E2E Magazine', t => {
       t.ok(
         allPostsCount === expectedAllPostsCount,
         `${collection.name} all posts list contains exactly ${expectedAllPostsCount} posts`
+      )
+    }
+  })
+
+  t.test('Verify facet browse pages', async t => {
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      const usedFacets = getUsedFacets(
+        collection.categories,
+        collection.posts,
+        collection.facets
+      )
+
+      if (usedFacets.size === 0) {
+        continue
+      }
+
+      const facetBrowsePath = join(
+        rootDirectory,
+        exportDirectory,
+        collection.name,
+        FACET_BROWSE_PATH,
+        'index.html'
+      )
+
+      const facetBrowseHtml = await readFile(
+        facetBrowsePath,
+        { encoding: 'utf-8' }
+      )
+
+      const $ = load(facetBrowseHtml)
+
+      const mainUl = $('body > ul')
+      const facetLis = mainUl.find('> li').toArray()
+      const renderedFacetNames = facetLis.map(li =>
+        $(li).find('> a').text()
+      )
+
+      const facetCountsCorrect = Array.from(usedFacets).every(facet => {
+        const facetCount = renderedFacetNames.filter(
+          name => name === facet
+        ).length
+        return facetCount === 1
+      })
+
+      const facetValuesCorrect = Array.from(usedFacets).every(facet => {
+        const facetLi = facetLis.find(li =>
+          $(li).find('> a').text() === facet
+        )
+
+        const nestedUl = $(facetLi).find('> ul')
+        const valueLinks = nestedUl.find('> li > a')
+        const renderedValues = valueLinks.toArray().map(link =>
+          $(link).text()
+        )
+
+        const uniqueValues = new Set(renderedValues)
+        const valuesAreUnique = uniqueValues.size === renderedValues.length
+        const hasValues = renderedValues.length !== 0
+
+        const expectedValues = getExpectedFacetValues(
+          facet,
+          collection.categories,
+          collection.posts
+        )
+
+        const allExpectedValuesPresent = Array.from(expectedValues).every(
+          expectedValue => renderedValues.includes(expectedValue)
+        )
+
+        return valuesAreUnique && hasValues && allExpectedValuesPresent
+      })
+
+      const allUsedFacetsListed = facetCountsCorrect && facetValuesCorrect
+
+      t.ok(
+        allUsedFacetsListed,
+        `${collection.name} /by page lists all used facets exactly once with unique values`
+      )
+
+      // Verify that declared but unused facets are not rendered on /by page
+      const unusedFacets = collection.facets.filter(
+        facet => !usedFacets.has(facet)
+      )
+      const noUnusedFacetsRendered = unusedFacets.every(facet =>
+        !renderedFacetNames.includes(facet)
+      )
+
+      t.ok(
+        noUnusedFacetsRendered,
+        `${collection.name} /by page does not display unused facets`
       )
     }
   })
