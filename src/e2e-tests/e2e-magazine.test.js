@@ -125,7 +125,8 @@ test('E2E Magazine', t => {
 
   const FIXTURE_CONTENT_MODEL = {
     homepage: {
-      title: 'Home'
+      title: 'Home',
+      content: 'Welcome to E2E Magazine'
     },
     collections: [
       {
@@ -142,6 +143,7 @@ test('E2E Magazine', t => {
         categories: [
           {
             name: 'Guides',
+            content: '',
             posts: [
               {
                 title: 'Hello Design',
@@ -185,6 +187,7 @@ test('E2E Magazine', t => {
         entryAlias: 'book',
         entriesAlias: 'books',
         facets: ['author', 'date', 'tags', 'genre'],
+        content: '',
         posts: [
           {
             title: 'Football',
@@ -208,6 +211,7 @@ test('E2E Magazine', t => {
         entryAlias: 'author',
         entriesAlias: 'authors',
         facets: ['events'],
+        content: '',
         posts: [
           {
             title: 'Mustafa Enes',
@@ -242,29 +246,25 @@ test('E2E Magazine', t => {
         entryAlias: 'demo',
         entriesAlias: 'demos',
         facets: ['tags', 'date', 'maker'],
+        content: '<h1 id="good-luck-running-these">Good luck running these</h1>',
         categories: [
           {
             name: 'CSS',
             categoryContentType: 'Technique',
             categoryAlias: 'technique',
             categoriesAlias: 'techniques',
+            content: '<h1 id="welcome-to-cascade">Welcome to cascade</h1>',
             categories: [
               {
                 name: 'CSS Art',
-                categories: [
-                  {
-                    name: 'Carpet Motifs',
-                    posts: [
-                      {
-                        title: 'Carpet Motifs',
-                        maker: '+authors/enes',
-                        tags: ['css', 'art'],
-                        content: 'Carpet shapes'
-                      }
-                    ]
-                  }
-                ],
+                content: '',
                 posts: [
+                  {
+                    title: 'Carpet Motifs',
+                    maker: '+authors/enes',
+                    tags: ['css', 'art'],
+                    content: 'Carpet shapes'
+                  },
                   {
                     title: 'Realist Painting',
                     maker: '+authors/enes',
@@ -275,6 +275,7 @@ test('E2E Magazine', t => {
               },
               {
                 name: 'Grid',
+                content: '',
                 posts: [
                   {
                     title: 'Grid vs Flexbox',
@@ -305,9 +306,11 @@ test('E2E Magazine', t => {
             categoryContentType: 'Technique',
             categoryAlias: 'technique',
             categoriesAlias: 'techniques',
+            content: '<h1 id="welcome-to-three-stuff">Welcome to three stuff</h1>',
             categories: [
               {
                 name: 'Sprite',
+                content: '',
                 posts: [
                   {
                     title: 'Minesweeper',
@@ -325,6 +328,7 @@ test('E2E Magazine', t => {
               },
               {
                 name: 'WebGPU',
+                content: '',
                 posts: [
                   {
                     title: 'Ipsum demo',
@@ -371,6 +375,7 @@ test('E2E Magazine', t => {
         name: 'events',
         entryContentType: 'Event',
         facets: [],
+        content: '',
         posts: [
           {
             title: 'Lets HTML now',
@@ -409,7 +414,7 @@ test('E2E Magazine', t => {
   }
 
   t.test('Verify homepage displays all discovered content', async t => {
-    t.plan(8)
+    t.plan(9)
 
     const HOMEPAGE_DOM_SELECTORS = {
       pageTitle: 'title',
@@ -454,6 +459,11 @@ test('E2E Magazine', t => {
       t.ok(
         pageTitle.includes(expectedPageTitle) && pageTitle.includes(expectedSiteTitle),
         'index.html title contains both homepage title and site title'
+      )
+
+      t.ok(
+        indexHtmlContent.includes(FIXTURE_CONTENT_MODEL.homepage.content),
+        'homepage index.html contains homepage content'
       )
 
       const outputDirContents = await readdir(join(rootDirectory, exportDirectory))
@@ -657,6 +667,13 @@ test('E2E Magazine', t => {
         hasValidTitle,
         `${collection.name} collection page has a valid title`
       )
+
+      if (collection.content) {
+        t.ok(
+          collectionHtml.includes(collection.content),
+          `${collection.name} collection index.html contains collection content`
+        )
+      }
 
       const facetsContainer = $(COLLECTION_DOM_SELECTORS.collectionFacets)
       const hasFacetsContainer = facetsContainer.length > 0
