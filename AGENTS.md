@@ -9,6 +9,8 @@
 - Respect existing indentation style when editing files (maintain consistency with surrounding code)
 - Keep ternary operator `?` at the end of the line, not at the start of the next line (avoid JSHint misleading line break warning)
 - Respect default JSHint rules and do not change coding style in ways that cause JSHint to report warnings
+- Keep short destructured imports on a single line (e.g., `const { foo, bar } = require('./module')`)
+- Break destructured imports across multiple lines only when they exceed 80 columns or contain many items
 
 ## Test Assertions Formatting
 - Assertion function call on one line (e.g., `t.ok(`, `t.equal(`, `t.notOk(`)
