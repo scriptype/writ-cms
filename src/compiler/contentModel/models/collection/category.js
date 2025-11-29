@@ -205,6 +205,7 @@ class Category extends ContentModelEntryNode {
           'content',
           'facets'
         ]),
+        facetKeys: this.facets || this.context.peek().facetKeys || [],
         key: contextKey
       })
 
