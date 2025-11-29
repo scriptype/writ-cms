@@ -164,6 +164,21 @@ const getFacetValueTitle = (facetValue) => {
   return facetValue
 }
 
+/*
+ * Recursively collects all posts from a category and its subcategories.
+ */
+const flattenCategoryPosts = (category) => {
+  let allPosts = [...(category.posts || [])]
+
+  if (Array.isArray(category.categories)) {
+    for (const subCategory of category.categories) {
+      allPosts = [...allPosts, ...flattenCategoryPosts(subCategory)]
+    }
+  }
+
+  return allPosts
+}
+
 test('E2E Magazine', async t => {
 
   const testDir = join(tmpdir(), 'e2e-magazine-build')
@@ -182,7 +197,7 @@ test('E2E Magazine', async t => {
    * transforms linked references.
    */
   const FIXTURE_SETTINGS = {
-    title: 'Web Maganize'
+    title: 'Web Magazine'
   }
 
   const FIXTURE_CONTENT_MODEL = {
@@ -207,6 +222,7 @@ test('E2E Magazine', async t => {
         categories: [
           {
             name: 'Guides',
+            slug: 'guides',
             date: '2025-11-03',
             content: '',
             posts: [
@@ -344,6 +360,7 @@ test('E2E Magazine', async t => {
         categories: [
           {
             name: 'CSS',
+            slug: 'css',
             title: 'Cascade all the way',
             date: '2025-11-07',
             categoryContentType: 'Technique',
@@ -353,6 +370,7 @@ test('E2E Magazine', async t => {
             categories: [
               {
                 name: 'CSS Art',
+                slug: 'css-art',
                 date: '2025-11-08',
                 content: '',
                 posts: [
@@ -376,6 +394,7 @@ test('E2E Magazine', async t => {
               },
               {
                 name: 'Grid',
+                slug: 'grid',
                 date: '2025-11-09',
                 content: '',
                 posts: [
@@ -411,6 +430,7 @@ test('E2E Magazine', async t => {
           },
           {
             name: 'Three.js',
+            slug: 'threejs',
             title: 'Not one and not two, it\'s three',
             date: '2025-11-10',
             categoryContentType: 'Technique',
@@ -420,6 +440,7 @@ test('E2E Magazine', async t => {
             categories: [
               {
                 name: 'Sprite',
+                slug: 'sprite',
                 date: '2025-11-11',
                 content: '',
                 posts: [
@@ -443,6 +464,7 @@ test('E2E Magazine', async t => {
               },
               {
                 name: 'WebGPU',
+                slug: 'webgpu',
                 date: '2025-11-12',
                 content: '',
                 posts: [
@@ -584,12 +606,6 @@ test('E2E Magazine', async t => {
     const expectedPageTitle = FIXTURE_CONTENT_MODEL.homepage.title
     const expectedSiteTitle = FIXTURE_SETTINGS.title
 
-    const collectionsWithMetadata = FIXTURE_CONTENT_MODEL.collections.filter(c => !c.alias)
-    const collectionsViaAlias = FIXTURE_CONTENT_MODEL.collections.filter(c => c.alias).map(c => ({
-      ...c,
-      fileName: c.alias
-    }))
-
     const $ = load(indexHtmlContent)
     const pageTitle = $('title').text()
 
@@ -606,7 +622,7 @@ test('E2E Magazine', async t => {
 
     const outputDirContents = await readdir(join(rootDirectory, exportDirectory))
     const hasIndexHtml = outputDirContents.includes('index.html')
-    const hasCollectionDirectories = collectionsWithMetadata.every(
+    const hasCollectionDirectories = FIXTURE_CONTENT_MODEL.collections.every(
       collection => outputDirContents.includes(collection.name)
     )
 
@@ -615,7 +631,7 @@ test('E2E Magazine', async t => {
       'output directory contains index.html and all collection directories'
     )
 
-    const allCollections = [...collectionsWithMetadata, ...collectionsViaAlias]
+    const allCollections = FIXTURE_CONTENT_MODEL.collections
 
     const collectionsHaveTitleLinks = allCollections.every(collection => {
       const collectionLinks = $('a').toArray().filter(link => {
@@ -1002,23 +1018,23 @@ test('E2E Magazine', async t => {
         const allCollectionPostTitles = allCollectionPosts.map(post => post.title)
 
         const allPostsHaveValidLinks = allCollectionPostTitles.every(postTitle => {
-           const matchingLinks = $('a').toArray().filter(link =>
-             $(link).text() === postTitle
-           )
+          const matchingLinks = $('a').toArray().filter(link =>
+            $(link).text() === postTitle
+          )
 
-           return matchingLinks.every(link => {
-             const href = $(link).attr('href')
-             const matchingPost = allCollectionPosts.find(
-               post => post.title === postTitle
-             )
+          return matchingLinks.every(link => {
+            const href = $(link).attr('href')
+            const matchingPost = allCollectionPosts.find(
+              post => post.title === postTitle
+            )
 
-             if (!matchingPost) {
-               return false
-             }
+            if (!matchingPost) {
+              return false
+            }
 
-             return href === matchingPost.permalink
-           })
-         })
+            return href === matchingPost.permalink
+          })
+        })
 
         t.ok(
           allPostsHaveValidLinks,
@@ -1098,7 +1114,7 @@ test('E2E Magazine', async t => {
 
           t.ok(
             allPostsPresent,
-            `${collection.name} /by/${facetName}/${facetValueTitle} lists all posts with this facet value`
+            `${collection.name} /by/${facetName}/${facetValueSlug} lists all posts with this facet value`
           )
 
           const allPostsHaveValidLinks = postsWithFacetValue.every(post => {
@@ -1114,7 +1130,7 @@ test('E2E Magazine', async t => {
 
           t.ok(
             allPostsHaveValidLinks,
-            `${collection.name} /by/${facetName}/${facetValueTitle} posts have correct links`
+            `${collection.name} /by/${facetName}/${facetValueSlug} posts have correct links`
           )
         }
       }
@@ -1156,6 +1172,367 @@ test('E2E Magazine', async t => {
             `${collection.name} /by check failed: ${err.message}`
           )
         }
+      }
+    }
+  })
+
+  t.test('Verify category facet browse pages', async t => {
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      if (!collection.categories || collection.categories.length === 0) {
+        continue
+      }
+
+      const processCategory = async (
+        category,
+        parentPath = ''
+      ) => {
+        const categoryPath = parentPath
+          ? `${parentPath}/${category.slug}`
+          : category.slug
+
+        const categoryPosts = flattenCategoryPosts(category)
+
+        const usedFacets = getUsedFacets(
+          category.categories,
+          category.posts,
+          collection.facets
+        )
+
+        if (usedFacets.size !== 0) {
+          const facetBrowsePath = join(
+            rootDirectory,
+            exportDirectory,
+            collection.name,
+            categoryPath,
+            FACET_BROWSE_PATH,
+            'index.html'
+          )
+
+          try {
+            const facetBrowseHtml = await readFile(
+              facetBrowsePath,
+              { encoding: 'utf-8' }
+            )
+
+            const $ = load(facetBrowseHtml)
+            const allLinkTexts = $('a').toArray().map(link => $(link).text())
+
+            const allUsedFacetsListed = Array.from(usedFacets).every(facet =>
+              allLinkTexts.includes(facet)
+            )
+
+            t.ok(
+              allUsedFacetsListed,
+              `${collection.name}/${categoryPath}/by page lists all used facets`
+            )
+
+            const facetCountsCorrect = Array.from(usedFacets).every(facet => {
+              const facetCount = allLinkTexts.filter(name => name === facet).length
+              return facetCount === 1
+            })
+
+            t.ok(
+              facetCountsCorrect,
+              `${collection.name}/${categoryPath}/by page lists each facet exactly once`
+            )
+          } catch (err) {
+            t.fail(
+              `${collection.name}/${categoryPath}/by page: ${err.message}`
+            )
+          }
+        }
+
+        if (Array.isArray(category.categories)) {
+          for (const subCategory of category.categories) {
+            await processCategory(subCategory, categoryPath)
+          }
+        }
+      }
+
+      for (const category of collection.categories) {
+        await processCategory(category)
+      }
+    }
+  })
+
+  t.test('Verify category facetName pages', async t => {
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      if (!collection.categories || collection.categories.length === 0) {
+        continue
+      }
+
+      const processCategory = async (
+        category,
+        parentPath = ''
+      ) => {
+        const categoryPath = parentPath
+          ? `${parentPath}/${category.slug}`
+          : category.slug
+
+        const categoryPosts = flattenCategoryPosts(category)
+
+        const usedFacets = getUsedFacets(
+          category.categories,
+          category.posts,
+          collection.facets
+        )
+
+        if (usedFacets.size !== 0) {
+          for (const facetName of usedFacets) {
+            const facetNamePath = join(
+              rootDirectory,
+              exportDirectory,
+              collection.name,
+              categoryPath,
+              FACET_BROWSE_PATH,
+              facetName,
+              'index.html'
+            )
+
+            try {
+              const facetNameHtml = await readFile(
+                facetNamePath,
+                { encoding: 'utf-8' }
+              )
+
+              const $ = load(facetNameHtml)
+              const allLinkTexts = $('a').toArray().map(link => $(link).text())
+
+              const expectedFacetValues = getExpectedFacetValues(
+                facetName,
+                category.categories,
+                category.posts
+              )
+
+              const allValuesPresent = Array.from(expectedFacetValues).every(
+                expectedValue => {
+                  const title = getFacetValueTitle(expectedValue)
+                  return allLinkTexts.includes(title)
+                }
+              )
+
+              t.ok(
+                allValuesPresent,
+                `${collection.name}/${categoryPath}/by/${facetName} lists all expected facet values`
+              )
+
+              const facetValuesAreUnique = Array.from(expectedFacetValues).every(
+                expectedValue => {
+                  const title = getFacetValueTitle(expectedValue)
+                  const valueCount = allLinkTexts.filter(
+                    text => text === title
+                  ).length
+                  return valueCount === 1
+                }
+              )
+
+              t.ok(
+                facetValuesAreUnique,
+                `${collection.name}/${categoryPath}/by/${facetName} lists each facet value exactly once`
+              )
+            } catch (err) {
+              t.fail(
+                `${collection.name}/${categoryPath}/by/${facetName} page: ${err.message}`
+              )
+            }
+          }
+        }
+
+        if (Array.isArray(category.categories)) {
+          for (const subCategory of category.categories) {
+            await processCategory(subCategory, categoryPath)
+          }
+        }
+      }
+
+      for (const category of collection.categories) {
+        await processCategory(category)
+      }
+    }
+  })
+
+  t.test('Verify category facetValue pages', async t => {
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      if (!collection.categories || collection.categories.length === 0) {
+        continue
+      }
+
+      const processCategory = async (
+        category,
+        parentPath = ''
+      ) => {
+        const categoryPath = parentPath
+          ? `${parentPath}/${category.slug}`
+          : category.slug
+
+        const categoryPosts = flattenCategoryPosts(category)
+
+        const usedFacets = getUsedFacets(
+          category.categories,
+          category.posts,
+          collection.facets
+        )
+
+        if (usedFacets.size !== 0) {
+          for (const facetName of usedFacets) {
+            const expectedFacetValues = getExpectedFacetValues(
+              facetName,
+              category.categories,
+              category.posts
+            )
+
+            for (const facetValue of expectedFacetValues) {
+              const facetValueSlug = getFacetValueSlug(facetValue)
+              const facetValueTitle = getFacetValueTitle(facetValue)
+
+              const facetValuePath = join(
+                rootDirectory,
+                exportDirectory,
+                collection.name,
+                categoryPath,
+                FACET_BROWSE_PATH,
+                facetName,
+                facetValueSlug,
+                'index.html'
+              )
+
+              try {
+                const facetValueHtml = await readFile(
+                  facetValuePath,
+                  { encoding: 'utf-8' }
+                )
+
+                const $ = load(facetValueHtml)
+
+                const postsWithFacetValue = categoryPosts.filter(post => {
+                  if (!post.hasOwnProperty(facetName)) {
+                    return false
+                  }
+
+                  const value = post[facetName]
+                  if (Array.isArray(value)) {
+                    return value.some(v => {
+                      const vTitle = getFacetValueTitle(v)
+                      return vTitle === facetValueTitle
+                    })
+                  } else {
+                    const vTitle = getFacetValueTitle(value)
+                    return vTitle === facetValueTitle
+                  }
+                })
+
+                const allLinkTexts = $('a').toArray().map(link => $(link).text())
+
+                const allPostsPresent = postsWithFacetValue.every(post =>
+                  allLinkTexts.includes(post.title)
+                )
+
+                t.ok(
+                  allPostsPresent,
+                  `${collection.name}/${categoryPath}/by/${facetName}/${facetValueSlug} lists all posts with this facet value`
+                )
+
+                const allPostsHaveValidLinks = postsWithFacetValue.every(post => {
+                  const matchingLinks = $('a').toArray().filter(link =>
+                    $(link).text() === post.title
+                  )
+
+                  return matchingLinks.every(link => {
+                    const href = $(link).attr('href')
+                    return href === post.permalink
+                  })
+                })
+
+                t.ok(
+                  allPostsHaveValidLinks,
+                  `${collection.name}/${categoryPath}/by/${facetName}/${facetValueSlug} posts have correct links`
+                )
+              } catch (err) {
+                t.fail(
+                  `${collection.name}/${categoryPath}/by/${facetName}/${facetValueTitle} page: ${err.message}`
+                )
+              }
+            }
+          }
+        }
+
+        if (Array.isArray(category.categories)) {
+          for (const subCategory of category.categories) {
+            await processCategory(subCategory, categoryPath)
+          }
+        }
+      }
+
+      for (const category of collection.categories) {
+        await processCategory(category)
+      }
+    }
+  })
+
+  t.test('Verify no category facet pages for categories with zero used facets', async t => {
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      if (!collection.categories || collection.categories.length === 0) {
+        continue
+      }
+
+      const processCategory = async (
+        category,
+        parentPath = ''
+      ) => {
+        const categoryPath = parentPath
+          ? `${parentPath}/${category.slug}`
+          : category.slug
+
+        const usedFacets = getUsedFacets(
+          category.categories,
+          category.posts,
+          collection.facets
+        )
+
+        if (usedFacets.size !== 0) {
+          if (Array.isArray(category.categories)) {
+            for (const subCategory of category.categories) {
+              await processCategory(subCategory, categoryPath)
+            }
+          }
+          return
+        }
+
+        const facetBrowseDir = join(
+          rootDirectory,
+          exportDirectory,
+          collection.name,
+          categoryPath,
+          FACET_BROWSE_PATH
+        )
+
+        try {
+          await stat(facetBrowseDir)
+          t.fail(
+            `${collection.name}/${categoryPath}/by directory should not exist when no facets are used`
+          )
+        } catch (err) {
+          if (err.code === 'ENOENT') {
+            t.ok(
+              true,
+              `${collection.name}/${categoryPath}/by directory does not exist when no facets are used`
+            )
+          } else {
+            t.fail(
+              `${collection.name}/${categoryPath}/by check failed: ${err.message}`
+            )
+          }
+        }
+
+        if (Array.isArray(category.categories)) {
+          for (const subCategory of category.categories) {
+            await processCategory(subCategory, categoryPath)
+          }
+        }
+      }
+
+      for (const category of collection.categories) {
+        await processCategory(category)
       }
     }
   })
