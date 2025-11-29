@@ -139,7 +139,7 @@ const getExpectedFacetValues = (
   return values
 }
 
-test('E2E Magazine', t => {
+test('E2E Magazine', async t => {
 
   const testDir = join(tmpdir(), 'e2e-magazine-build')
   const rootDirectory = testDir
@@ -531,6 +531,24 @@ test('E2E Magazine', t => {
     ]
   }
 
+  try {
+    await mkdir(testDir, { recursive: true })
+    await cp(fixturesDirectory, rootDirectory, { recursive: true })
+
+    await writ.build({
+      rootDirectory,
+      refreshTheme: true
+    })
+
+    indexHtmlContent = await readFile(
+      join(rootDirectory, exportDirectory, 'index.html'),
+      { encoding: 'utf-8' }
+    )
+  } catch (err) {
+    t.fail(`Build magazine test failed: ${err.message}`)
+    return
+  }
+
   t.test('Verify homepage displays all discovered content', async t => {
     t.plan(7)
 
@@ -547,131 +565,113 @@ test('E2E Magazine', t => {
       fileName: c.alias
     }))
 
-    try {
-      await mkdir(testDir, { recursive: true })
-      await cp(fixturesDirectory, rootDirectory, { recursive: true })
+    const $ = load(indexHtmlContent)
+    const pageTitle = $('title').text()
 
-      await writ.build({
-        rootDirectory
-      })
+    t.ok(
+      pageTitle.includes(expectedPageTitle) &&
+      pageTitle.includes(expectedSiteTitle),
+      'index.html title contains both homepage title and site title'
+    )
 
-      indexHtmlContent = await readFile(
-        join(rootDirectory, exportDirectory, 'index.html'),
-        { encoding: 'utf-8' }
-      )
+    t.ok(
+      indexHtmlContent.includes(FIXTURE_CONTENT_MODEL.homepage.content),
+      'homepage index.html contains homepage content'
+    )
 
-      const $ = load(indexHtmlContent)
-      const pageTitle = $('title').text()
+    const outputDirContents = await readdir(join(rootDirectory, exportDirectory))
+    const hasIndexHtml = outputDirContents.includes('index.html')
+    const hasCollectionDirectories = collectionsWithMetadata.every(
+      collection => outputDirContents.includes(collection.name)
+    )
 
-      t.ok(
-        pageTitle.includes(expectedPageTitle) &&
-        pageTitle.includes(expectedSiteTitle),
-        'index.html title contains both homepage title and site title'
-      )
+    t.ok(
+      hasIndexHtml && hasCollectionDirectories,
+      'output directory contains index.html and all collection directories'
+    )
 
-      t.ok(
-        indexHtmlContent.includes(FIXTURE_CONTENT_MODEL.homepage.content),
-        'homepage index.html contains homepage content'
-      )
+    const allCollections = [...collectionsWithMetadata, ...collectionsViaAlias]
 
-      const outputDirContents = await readdir(join(rootDirectory, exportDirectory))
-      const hasIndexHtml = outputDirContents.includes('index.html')
-      const hasCollectionDirectories = collectionsWithMetadata.every(
-        collection => outputDirContents.includes(collection.name)
-      )
-
-      t.ok(
-        hasIndexHtml && hasCollectionDirectories,
-        'output directory contains index.html and all collection directories'
-      )
-
-      const allCollections = [...collectionsWithMetadata, ...collectionsViaAlias]
-
-      const collectionsHaveTitleLinks = allCollections.every(collection => {
-        const collectionLinks = $('a').toArray().filter(link => {
-          const href = $(link).attr('href')
-          const text = $(link).text()
-          return (
-            text.toLowerCase() === collection.name &&
-            href === `/${collection.name}`
-          )
-        })
-
-        return collectionLinks.length !== 0
-      })
-
-      t.ok(
-        collectionsHaveTitleLinks,
-        'all collections are listed with links to their pages'
-      )
-
-      const facetsListed = allCollections.every(collection => {
-        const usedFacets = getUsedFacets(
-          collection.categories,
-          collection.posts,
-          collection.facets
-        )
-
-        if (usedFacets.size === 0) {
-          return true
-        }
-
-        const facetLinks = $('a').toArray().map(link => ({
-          href: $(link).attr('href'),
-          text: $(link).text().toLowerCase()
-        }))
-
-        const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
-          facetLinks.some(link => link.text === facet.toLowerCase())
-        )
-
-        const browsePathExists = facetLinks.some(link =>
-          link.href === `/${collection.name}/${FACET_BROWSE_PATH}`
-        )
-
-        return allUsedFacetsFound && browsePathExists
-      })
-
-      t.ok(
-        facetsListed,
-        'each collection with facets has all facets and browse link listed'
-      )
-
-      const allPostsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
-        const postTexts = $('a').toArray().map(link => $(link).text())
-
-        const allCollectionPosts = flattenPostsFromCategories(
-          collection.categories,
-          collection.posts
-        )
-
-        return allCollectionPosts.every(post =>
-          postTexts.includes(post.title)
+    const collectionsHaveTitleLinks = allCollections.every(collection => {
+      const collectionLinks = $('a').toArray().filter(link => {
+        const href = $(link).attr('href')
+        const text = $(link).text()
+        return (
+          text.toLowerCase() === collection.name &&
+          href === `/${collection.name}`
         )
       })
 
-      t.ok(
-        allPostsListed,
-        'all collection posts from fixture are listed'
+      return collectionLinks.length !== 0
+    })
+
+    t.ok(
+      collectionsHaveTitleLinks,
+      'all collections are listed with links to their pages'
+    )
+
+    const facetsListed = allCollections.every(collection => {
+      const usedFacets = getUsedFacets(
+        collection.categories,
+        collection.posts,
+        collection.facets
       )
 
-      const pageHrefs = $('a').toArray()
-        .map(link => $(link).attr('href'))
-        .filter(href => href)
+      if (usedFacets.size === 0) {
+        return true
+      }
 
-      const allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage =>
-        pageHrefs.includes(subpage.permalink)
+      const facetLinks = $('a').toArray().map(link => ({
+        href: $(link).attr('href'),
+        text: $(link).text().toLowerCase()
+      }))
+
+      const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
+        facetLinks.some(link => link.text === facet.toLowerCase())
       )
 
-      t.ok(
-        allSubpagesListed,
-        'all subpages are listed in the homepage'
+      const browsePathExists = facetLinks.some(link =>
+        link.href === `/${collection.name}/${FACET_BROWSE_PATH}`
       )
 
+      return allUsedFacetsFound && browsePathExists
+    })
 
-    } catch (err) {
-      t.fail(`Build magazine test failed: ${err.message}`)
-    }
+    t.ok(
+      facetsListed,
+      'each collection with facets has all facets and browse link listed'
+    )
+
+    const allPostsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
+      const postTexts = $('a').toArray().map(link => $(link).text())
+
+      const allCollectionPosts = flattenPostsFromCategories(
+        collection.categories,
+        collection.posts
+      )
+
+      return allCollectionPosts.every(post =>
+        postTexts.includes(post.title)
+      )
+    })
+
+    t.ok(
+      allPostsListed,
+      'all collection posts from fixture are listed'
+    )
+
+    const pageHrefs = $('a').toArray()
+      .map(link => $(link).attr('href'))
+      .filter(href => href)
+
+    const allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage =>
+      pageHrefs.includes(subpage.permalink)
+    )
+
+    t.ok(
+      allSubpagesListed,
+      'all subpages are listed in the homepage'
+    )
   })
 
   t.test('Verify individual collection pages', async t => {
