@@ -69,9 +69,9 @@ test('E2E Magazine - Collection Pages', async t => {
       const $ = load(collectionHtml)
 
       const collectionNameLowercase = collection.name.toLowerCase()
-      const hasValidTitle = $('a').toArray().some(link =>
-        $(link).text().toLowerCase() === collectionNameLowercase
-      )
+      const hasValidTitle = $('a').toArray().some(link => {
+        return $(link).text().toLowerCase() === collectionNameLowercase
+      })
 
       t.ok(
         hasValidTitle,

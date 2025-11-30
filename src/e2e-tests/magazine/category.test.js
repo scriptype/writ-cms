@@ -119,9 +119,9 @@ test('E2E Magazine - Category Pages', async t => {
         const $ = load(categoryHtml)
 
         const categoryTitle = category.title || category.name
-        const hasCategoryTitle = $('a').toArray().some(link =>
-          $(link).text() === categoryTitle
-        )
+        const hasCategoryTitle = $('a').toArray().some(link => {
+          return $(link).text() === categoryTitle
+        })
 
         t.ok(
           hasCategoryTitle,
