@@ -91,27 +91,50 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.facets
       )
 
-      const facetTexts = $('a').toArray()
-        .map(link => $(link).text().toLowerCase())
+      const allLinks = $('a').toArray()
 
-      const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
-        facetTexts.includes(facet.toLowerCase())
-      )
+      if (usedFacets.size !== 0) {
+        const browseFacetsHref = `/${collection.name}/${FACET_BROWSE_PATH}`
+        const hasBrowseFacetsLink = allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === 'by' && linkHref === browseFacetsHref
+        })
+
+        t.ok(
+          hasBrowseFacetsLink,
+          `${collection.name} has browse facets link`
+        )
+      }
+
+      const allUsedFacetsLinked = Array.from(usedFacets).every(facet => {
+        const facetPageHref = `/${collection.name}/${FACET_BROWSE_PATH}/${facet}`
+        return allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === facet && linkHref === facetPageHref
+        })
+      })
 
       t.ok(
-        allUsedFacetsFound,
-        `${collection.name} displays all expected facets`
+        allUsedFacetsLinked,
+        `${collection.name} displays all expected facets with correct links`
       )
 
       const unusedFacets = collection.facets.filter(
         facet => !usedFacets.has(facet)
       )
-      const noUnusedFacetsRendered = unusedFacets.every(facet =>
-        !facetTexts.includes(facet.toLowerCase())
-      )
+      const noUnusedFacetsLinked = unusedFacets.every(facet => {
+        const facetPageHref = `/${collection.name}/${FACET_BROWSE_PATH}/${facet}`
+        return !allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === facet && linkHref === facetPageHref
+        })
+      })
 
       t.ok(
-        noUnusedFacetsRendered,
+        noUnusedFacetsLinked,
         `${collection.name} does not display unused facets`
       )
 
@@ -120,16 +143,20 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.posts
       )
 
-      const allLinkTexts = $('a').toArray().map(link => $(link).text())
-
-      const allPostsPresent = allCollectionPosts.every(post =>
-        allLinkTexts.includes(post.title)
-      )
+      const allPostsLinked = allCollectionPosts.every(post => {
+        return allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === post.title && linkHref === post.permalink
+        })
+      })
 
       t.ok(
-        allPostsPresent,
-        `${collection.name} displays all posts`
+        allPostsLinked,
+        `${collection.name} displays all posts with correct links`
       )
+
+      const allLinkTexts = allLinks.map(link => $(link).text())
 
       if (collection.categories.length !== 0) {
         const topLevelCategoryTitles = collection.categories
@@ -156,6 +183,23 @@ test('E2E Magazine - Collection Pages', async t => {
         t.ok(
           categoriesHavePosts,
           `${collection.name} all top-level categories have at least one post`
+        )
+
+        const allCategoriesHaveValidLinks = collection.categories.every(
+          category => {
+            const categoryHref = `/${collection.name}/${category.slug}`
+            const categoryTitle = category.title || category.name
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === categoryTitle && linkHref === categoryHref
+            })
+          }
+        )
+
+        t.ok(
+          allCategoriesHaveValidLinks,
+          `${collection.name} displays categories with correct links`
         )
 
         const topLevelCategoryPostsPresent = collection.categories.every(

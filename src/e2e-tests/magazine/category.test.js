@@ -2,6 +2,7 @@
  * Category Page Tests
  *
  * Tests that verify category pages within collections:
+ *   - Individual category pages display correctly
  *   - Facet browse pages are rendered correctly for categories
  *   - Facet name pages are rendered correctly for categories
  *   - Facet value pages are rendered correctly for categories
@@ -93,6 +94,192 @@ test('E2E Magazine - Category Pages', async t => {
     t.fail(`Build magazine test failed: ${err.message}`)
     return
   }
+
+  t.test('Verify individual category pages', async t => {
+    const processCategoryPages = async (
+      collection,
+      category,
+      categoryPath,
+      parentPath = ''
+    ) => {
+      const categoryIndexPath = join(
+        rootDirectory,
+        exportDirectory,
+        collection.name,
+        categoryPath,
+        'index.html'
+      )
+
+      try {
+        const categoryHtml = await readFile(
+          categoryIndexPath,
+          { encoding: 'utf-8' }
+        )
+
+        const $ = load(categoryHtml)
+
+        const categoryTitle = category.title || category.name
+        const hasCategoryTitle = $('a').toArray().some(link =>
+          $(link).text() === categoryTitle
+        )
+
+        t.ok(
+          hasCategoryTitle,
+          `${collection.name}/${categoryPath} displays category title`
+        )
+
+        if (category.content) {
+          const bodyContent = $('body').html()
+          const hasExactContent = bodyContent.includes(category.content)
+
+          t.ok(
+            hasExactContent,
+            `${collection.name}/${categoryPath} contains category content`
+          )
+        }
+
+        const usedFacets = getUsedFacets(
+          category.categories,
+          category.posts,
+          collection.facets
+        )
+
+        const allLinks = $('a').toArray()
+
+        if (usedFacets.size !== 0) {
+          const browseFacetsHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}`
+          const hasBrowseFacetsLink = allLinks.some(link => {
+            const linkText = $(link).text()
+            const linkHref = $(link).attr('href')
+            return linkText === 'by' && linkHref === browseFacetsHref
+          })
+
+          t.ok(
+            hasBrowseFacetsLink,
+            `${collection.name}/${categoryPath} has browse facets link`
+          )
+        }
+
+        const allUsedFacetsLinked = Array.from(usedFacets).every(facet => {
+          const facetPageHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
+          return allLinks.some(link => {
+            const linkText = $(link).text()
+            const linkHref = $(link).attr('href')
+            return linkText === facet && linkHref === facetPageHref
+          })
+        })
+
+        t.ok(
+          allUsedFacetsLinked,
+          `${collection.name}/${categoryPath} displays all used facets with correct links`
+        )
+
+        const unusedFacets = collection.facets.filter(
+          facet => !usedFacets.has(facet)
+        )
+        const noUnusedFacetsLinked = unusedFacets.every(facet => {
+          const facetPageHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
+          return !allLinks.some(link => {
+            const linkText = $(link).text()
+            const linkHref = $(link).attr('href')
+            return linkText === facet && linkHref === facetPageHref
+          })
+        })
+
+        t.ok(
+          noUnusedFacetsLinked,
+          `${collection.name}/${categoryPath} does not display unused facets`
+        )
+
+        const categoryPosts = flattenCategoryPosts(category)
+
+        const allPostsLinked = categoryPosts.every(post => {
+          return allLinks.some(link => {
+            const linkText = $(link).text()
+            const linkHref = $(link).attr('href')
+            return linkText === post.title && linkHref === post.permalink
+          })
+        })
+
+        t.ok(
+          allPostsLinked,
+          `${collection.name}/${categoryPath} displays all posts with correct links`
+        )
+
+        const allLinkTexts = allLinks.map(link => $(link).text())
+
+        if (Array.isArray(category.categories) && category.categories.length !== 0) {
+          const directSubcategoryTitles = category.categories
+            .map(c => c.title || c.name)
+            .filter(title => title)
+
+          const directSubcategoriesPresent = directSubcategoryTitles.every(
+            title => allLinkTexts.includes(title)
+          )
+
+          t.ok(
+            directSubcategoriesPresent,
+            `${collection.name}/${categoryPath} displays all direct subcategories`
+          )
+
+          const subcategoriesHavePosts = category.categories.every(
+            subcat => {
+              const subcatPosts = flattenCategoryPosts(subcat)
+              return subcatPosts.length !== 0
+            }
+          )
+
+          t.ok(
+            subcategoriesHavePosts,
+            `${collection.name}/${categoryPath} all direct subcategories have at least one post`
+          )
+
+          const allSubcategoriesHaveValidLinks = category.categories.every(
+            subcat => {
+              const subcategoryHref = `/${collection.name}/${categoryPath}/${subcat.slug}`
+              const subcategoryTitle = subcat.title || subcat.name
+              return allLinks.some(link => {
+                const linkText = $(link).text()
+                const linkHref = $(link).attr('href')
+                return linkText === subcategoryTitle && linkHref === subcategoryHref
+              })
+            }
+          )
+
+          t.ok(
+            allSubcategoriesHaveValidLinks,
+            `${collection.name}/${categoryPath} displays subcategories with correct links`
+          )
+        }
+      } catch (err) {
+        t.fail(
+          `${collection.name}/${categoryPath} index.html: ${err.message}`
+        )
+      }
+
+      if (Array.isArray(category.categories)) {
+        for (const subCategory of category.categories) {
+          const subcategoryPath = `${categoryPath}/${subCategory.slug}`
+          await processCategoryPages(
+            collection,
+            subCategory,
+            subcategoryPath,
+            categoryPath
+          )
+        }
+      }
+    }
+
+    for (const collection of FIXTURE_CONTENT_MODEL.collections) {
+      if (!collection.categories || collection.categories.length === 0) {
+        continue
+      }
+
+      for (const category of collection.categories) {
+        await processCategoryPages(collection, category, category.slug)
+      }
+    }
+  })
 
   t.test('Verify category facet browse pages', async t => {
     const testBrowsePage = async (collection, category, categoryPath, usedFacets) => {

@@ -238,7 +238,7 @@ const FIXTURE_CONTENT_MODEL = {
           categoryContentType: 'Technique',
           categoryAlias: 'technique',
           categoriesAlias: 'techniques',
-          content: '<h1 id="welcome-to-three-stuff">Welcome to three stuff</h1>',
+          content: '<h1>Welcome to three stuff</h1>',
           categories: [
             {
               name: 'Sprite',

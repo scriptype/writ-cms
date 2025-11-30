@@ -3,7 +3,8 @@
 - Always use block statements even if it could be a one-liner
 - Always use curly braces {} for control structures (if, for, while, etc.), even if the body is a single statement
 - Keep lines shorter than 80 columns (including comments)
-- For multiple expressions with logical operators (&&, ||), break lines after each operator
+- Don't break a line just because it slightly exceeds 80 columns; keep it on one line if adding a few extra characters is necessary for clarity or to avoid awkward continuation
+- For multiple expressions with logical operators (&&, ||), break lines after each operator only when the combined expression is significantly long
 - No trailing whitespace at the end of lines
 - In multiline comments, add blank lines between logical points for readability
 - Respect existing indentation style when editing files (maintain consistency with surrounding code)
