@@ -368,11 +368,13 @@ const FIXTURE_CONTENT_MODEL = {
   ],
   subpages: [
     {
+      title: 'About us',
       permalink: '/about-us.html',
       date: '2025-11-14',
       content: 'Something about us'
     },
     {
+      title: 'Hear from us all the time',
       permalink: '/newsletter.html',
       date: '2025-11-15',
       content: 'Sign up now'

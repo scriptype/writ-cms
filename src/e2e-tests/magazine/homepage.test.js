@@ -82,16 +82,15 @@ test('E2E Magazine - Homepage', async t => {
   const allCollections = FIXTURE_CONTENT_MODEL.collections
 
   const collectionsHaveTitleLinks = allCollections.every(collection => {
-    const collectionLinks = $('a').toArray().filter(link => {
-      const href = $(link).attr('href')
-      const text = $(link).text()
+    const allLinks = $('a').toArray()
+    return allLinks.some(link => {
+      const linkText = $(link).text()
+      const linkHref = $(link).attr('href')
       return (
-        text.toLowerCase() === collection.name &&
-        href === `/${collection.name}`
+        linkText.toLowerCase() === collection.name &&
+        linkHref === `/${collection.name}`
       )
     })
-
-    return collectionLinks.length !== 0
   })
 
   t.ok(
@@ -115,9 +114,12 @@ test('E2E Magazine - Homepage', async t => {
       text: $(link).text().toLowerCase()
     }))
 
-    const allUsedFacetsFound = Array.from(usedFacets).every(facet =>
-      facetLinks.some(link => link.text === facet.toLowerCase())
-    )
+    const allUsedFacetsFound = Array.from(usedFacets).every(facet => {
+      const facetPageHref = `/${collection.name}/${FACET_BROWSE_PATH}/${facet}`
+      return facetLinks.some(link =>
+        link.text === facet.toLowerCase() && link.href === facetPageHref
+      )
+    })
 
     const browsePathExists = facetLinks.some(link =>
       link.href === `/${collection.name}/${FACET_BROWSE_PATH}`
@@ -132,16 +134,20 @@ test('E2E Magazine - Homepage', async t => {
   )
 
   const allPostsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
-    const postTexts = $('a').toArray().map(link => $(link).text())
+    const allLinks = $('a').toArray()
 
     const allCollectionPosts = flattenPostsFromCategories(
       collection.categories,
       collection.posts
     )
 
-    return allCollectionPosts.every(post =>
-      postTexts.includes(post.title)
-    )
+    return allCollectionPosts.every(post => {
+      return allLinks.some(link => {
+        const linkText = $(link).text()
+        const linkHref = $(link).attr('href')
+        return linkText === post.title && linkHref === post.permalink
+      })
+    })
   })
 
   t.ok(
@@ -149,13 +155,15 @@ test('E2E Magazine - Homepage', async t => {
     'all collection posts from fixture are listed'
   )
 
-  const pageHrefs = $('a').toArray()
-    .map(link => $(link).attr('href'))
-    .filter(href => href)
+  const allLinks = $('a').toArray()
 
-  const allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage =>
-    pageHrefs.includes(subpage.permalink)
-  )
+  const allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage => {
+    return allLinks.some(link => {
+      const linkText = $(link).text()
+      const linkHref = $(link).attr('href')
+      return linkText === subpage.title && linkHref === subpage.permalink
+    })
+  })
 
   t.ok(
     allSubpagesListed,

@@ -249,12 +249,17 @@ test('E2E Magazine - Collection Pages', async t => {
       )
 
       const $ = load(facetBrowseHtml)
+      const allLinks = $('a').toArray()
+      const allLinkTexts = allLinks.map(link => $(link).text())
 
-      const allLinkTexts = $('a').toArray().map(link => $(link).text())
-
-      const allUsedFacetsListed = Array.from(usedFacets).every(facet =>
-        allLinkTexts.includes(facet)
-      )
+      const allUsedFacetsListed = Array.from(usedFacets).every(facet => {
+        const facetPageHref = `/${collection.name}/${FACET_BROWSE_PATH}/${facet}`
+        return allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === facet && linkHref === facetPageHref
+        })
+      })
 
       t.ok(
         allUsedFacetsListed,
@@ -262,7 +267,12 @@ test('E2E Magazine - Collection Pages', async t => {
       )
 
       const facetCountsCorrect = Array.from(usedFacets).every(facet => {
-        const facetCount = allLinkTexts.filter(name => name === facet).length
+        const facetPageHref = `/${collection.name}/${FACET_BROWSE_PATH}/${facet}`
+        const facetCount = allLinks.filter(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === facet && linkHref === facetPageHref
+        }).length
         return facetCount === 1
       })
 
@@ -349,6 +359,7 @@ test('E2E Magazine - Collection Pages', async t => {
         )
 
         const $ = load(facetNameHtml)
+        const allLinks = $('a').toArray()
 
         const expectedFacetValues = getExpectedFacetValues(
           facetName,
@@ -356,12 +367,13 @@ test('E2E Magazine - Collection Pages', async t => {
           collection.posts
         )
 
-        const allLinkTexts = $('a').toArray().map(link => $(link).text())
-
         const allValuesPresent = Array.from(expectedFacetValues).every(
           expectedValue => {
-            const title = getFacetValueTitle(expectedValue)
-            return allLinkTexts.includes(title)
+            const facetValueSlug = getFacetValueSlug(expectedValue)
+            return allLinks.some(link => {
+              const linkHref = $(link).attr('href')
+              return linkHref === facetValueSlug
+            })
           }
         )
 
@@ -372,10 +384,11 @@ test('E2E Magazine - Collection Pages', async t => {
 
         const facetValuesAreUnique = Array.from(expectedFacetValues).every(
           expectedValue => {
-            const title = getFacetValueTitle(expectedValue)
-            const valueCount = allLinkTexts.filter(
-              text => text === title
-            ).length
+            const facetValueSlug = getFacetValueSlug(expectedValue)
+            const valueCount = allLinks.filter(link => {
+              const linkHref = $(link).attr('href')
+              return linkHref === facetValueSlug
+            }).length
             return valueCount === 1
           }
         )
@@ -463,6 +476,7 @@ test('E2E Magazine - Collection Pages', async t => {
           )
 
           const $ = load(facetValueHtml)
+          const allLinks = $('a').toArray()
 
           const postsWithFacetValue = allCollectionPosts.filter(post => {
             if (!post.hasOwnProperty(facetName)) {
@@ -481,11 +495,13 @@ test('E2E Magazine - Collection Pages', async t => {
             }
           })
 
-          const allLinkTexts = $('a').toArray().map(link => $(link).text())
-
-          const allPostsPresent = postsWithFacetValue.every(post =>
-            allLinkTexts.includes(post.title)
-          )
+          const allPostsPresent = postsWithFacetValue.every(post => {
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === post.title && linkHref === post.permalink
+            })
+          })
 
           t.ok(
             allPostsPresent,
@@ -493,13 +509,10 @@ test('E2E Magazine - Collection Pages', async t => {
           )
 
           const allPostsHaveValidLinks = postsWithFacetValue.every(post => {
-            const matchingLinks = $('a').toArray().filter(link =>
-              $(link).text() === post.title
-            )
-
-            return matchingLinks.every(link => {
-              const href = $(link).attr('href')
-              return href === post.permalink
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === post.title && linkHref === post.permalink
             })
           })
 
