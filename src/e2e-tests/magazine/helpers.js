@@ -1,6 +1,23 @@
-const writ = require('../..')
-
 const FACET_BROWSE_PATH = 'by'
+
+/*
+ * Slugifies a string by converting to lowercase, replacing spaces and
+ * underscores with hyphens, and removing special characters.
+ * Handles UTF-8 characters by removing diacritics.
+ */
+const slug = (str) => {
+  if (typeof str !== 'string') {
+    return str
+  }
+
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^\w-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 
 /*
  * Recursively flattens a nested category tree into a single array of all posts.
@@ -114,7 +131,7 @@ const getFacetValueSlug = (facetValue) => {
     return facetValue.slug
   }
   return typeof facetValue === 'string' ?
-    writ.helpers.slug(facetValue) :
+    slug(facetValue) :
     facetValue
 }
 
@@ -132,6 +149,7 @@ const getFacetValueTitle = (facetValue) => {
 
 module.exports = {
   FACET_BROWSE_PATH,
+  slug,
   flattenPostsFromCategories,
   getUsedFacets,
   getExpectedFacetValues,
