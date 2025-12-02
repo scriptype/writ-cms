@@ -73,7 +73,7 @@ test('E2E Magazine - Post Pages', async t => {
 
         if (post.content) {
           t.ok(
-            postHtml.includes(post.content),
+            postHtml.replace(/\r\n/g, '\n').includes(post.content),
             `${post.permalink} contains post content`
           )
         }
