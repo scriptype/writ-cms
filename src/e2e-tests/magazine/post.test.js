@@ -68,13 +68,13 @@ test('E2E Magazine - Post Pages', async t => {
 
         t.ok(
           postHtml.includes(post.title),
-          `${collectionName}${post.permalink} displays post title`
+          `${post.permalink} displays post title`
         )
 
         if (post.content) {
           t.ok(
             postHtml.includes(post.content),
-            `${collectionName}${post.permalink} contains post content`
+            `${post.permalink} contains post content`
           )
         }
 
@@ -111,7 +111,7 @@ test('E2E Magazine - Post Pages', async t => {
         */
       } catch (err) {
         t.fail(
-          `${collectionName}${post.permalink} page: ${err.message}`
+          `${post.permalink} page: ${err.message}`
         )
       }
     }
@@ -138,7 +138,7 @@ test('E2E Magazine - Post Pages', async t => {
 
           t.ok(
             hasPrevLink,
-            `${collectionName}${post.permalink} has link to previous post`
+            `${post.permalink} has link to previous post`
           )
 
           if (!hasPrevLink) {
@@ -178,7 +178,7 @@ test('E2E Magazine - Post Pages', async t => {
 
           t.ok(
             hasNextLink,
-            `${collectionName}${post.permalink} has link to next post`
+            `${post.permalink} has link to next post`
           )
 
           if (!hasNextLink) {
@@ -208,7 +208,7 @@ test('E2E Magazine - Post Pages', async t => {
         }
       } catch (err) {
         t.fail(
-          `${collectionName}${post.permalink} prev/next links: ${err.message}`
+          `${post.permalink} prev/next links: ${err.message}`
         )
       }
     }
