@@ -61,6 +61,13 @@ const _sortableValue = (value) => {
 
 const sort = (items, sortBy, sortOrder) => {
   items.sort((a, b) => {
+    if (a.title === 'Lets get together' || a.title === 'ManU - CFC' || a.title === 'Lets HTML now') {
+      console.log('a', a.title)
+      console.log('b', b.title)
+      console.log('sortBy', sortBy)
+      console.log('a[sortBy]', a[sortBy])
+      console.log('b[sortBy]', b[sortBy])
+    }
     const sortableA = _sortableValue(a[sortBy])
     const sortableB = _sortableValue(b[sortBy])
     if (sortOrder === -1) {

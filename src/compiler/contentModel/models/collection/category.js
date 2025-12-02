@@ -79,7 +79,7 @@ class Category extends ContentModelEntryNode {
         entriesAlias: context.peek().entriesAlias,
         facetKeys: context.peek().facetKeys || [],
         facets: [],
-        sortBy: context.peek().sortBy,
+        sortBy: context.peek().sortBy || 'date',
         sortOrder: context.peek().sortOrder,
         title,
         slug,
@@ -287,6 +287,7 @@ class Category extends ContentModelEntryNode {
       subCategory.afterEffects(contentModel, collectionFacets)
     })
 
+    console.log('category', this.isDefaultCategory, 'afterEffects sort')
     sort(this.subtree.posts, this.sortBy, this.sortOrder)
     this.subtree.posts.forEach(Category.linkPosts)
 
