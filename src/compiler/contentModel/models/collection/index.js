@@ -289,7 +289,6 @@ class Collection extends ContentModelEntryNode {
   }
 
   afterEffects(contentModel) {
-    console.log('collection afterEffects sort')
     sort(this.subtree.posts, this.sortBy, this.sortOrder)
     Collection.locatePinnedEntries(this.subtree.posts)
 

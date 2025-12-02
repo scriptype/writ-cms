@@ -287,7 +287,6 @@ class Category extends ContentModelEntryNode {
       subCategory.afterEffects(contentModel, collectionFacets)
     })
 
-    console.log('category', this.isDefaultCategory, 'afterEffects sort')
     sort(this.subtree.posts, this.sortBy, this.sortOrder)
     this.subtree.posts.forEach(Category.linkPosts)
 
