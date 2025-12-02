@@ -317,33 +317,178 @@ test('Theme', t => {
     }
   })
 
-  /*
-  t.test('refreshTheme option when there is no theme/keep', async t => {
-    const dir = await createTempDir(t)
+  t.test('theme/keep will recursively override custom theme paths', async t => {
+    t.plan(3)
 
-    await writ.build({
-      rootDirectory: dir.name
-    })
+    const testDir = join(tmpdir(), 'theme-keep-override')
+    const rootDirectory = testDir
+    const themeDirectory = 'theme'
 
-    const { themeDirectory } = writ.getDefaultSettings()
+    try {
+      await mkdir(testDir, { recursive: true })
 
-    const deletedFileName = 'deleted.css'
-    await dir.mkFile(join(themeDirectory, deletedFileName), '')
+      await writ.build({
+        rootDirectory: testDir
+      })
 
-    await writ.build({
-      rootDirectory: dir.name,
-      refreshTheme: true
-    })
+      const themePath = join(testDir, themeDirectory)
+      const keepPath = join(themePath, 'keep')
+      const assetsPath = join(themePath, 'assets')
 
-    await common.builds(t, dir.name, {
-      themeDirectoryPaths: {
-        notExists: [deletedFileName]
-      }
-    })
+      // Count files in assets before override
+      const assetsContentsBefore = await readdir(
+        assetsPath,
+        { recursive: true, withFileTypes: true }
+      )
+      const fileCountBefore = assetsContentsBefore.filter(
+        e => !e.isDirectory()
+      ).length
 
-    const themeDirectoryContents = await readdir(join(dir.name, themeDirectory))
-    hasNotPaths(t, themeDirectoryContents, [deletedFileName], 'theme directory is refreshed')
+      // Create one customized file in keep
+      await mkdir(join(keepPath, 'assets'), { recursive: true })
+      await writeFile(
+        join(keepPath, 'assets', 'custom.css'),
+        'customized styles'
+      )
+
+      await writ.build({
+        rootDirectory: testDir,
+        refreshTheme: true
+      })
+
+      const assetsContentsAfter = await readdir(
+        assetsPath,
+        { recursive: true, withFileTypes: true }
+      )
+      const fileCountAfter = assetsContentsAfter.filter(
+        e => !e.isDirectory()
+      ).length
+
+      const customCssContent = await readFile(
+        join(assetsPath, 'custom.css'),
+        'utf-8'
+      )
+
+      t.equal(
+        customCssContent,
+        'customized styles',
+        'custom file from keep is applied'
+      )
+
+      t.ok(
+        fileCountAfter > 1,
+        'assets folder contains multiple files'
+      )
+
+      t.equal(
+        fileCountAfter,
+        fileCountBefore + 1,
+        'assets folder has original files plus the new one (not replaced)'
+      )
+    } finally {
+      await rm(testDir, { recursive: true, force: true })
+    }
   })
-  */
+
+  t.test('theme/keep respects deep nesting without replacing parent folders', async t => {
+    t.plan(2)
+
+    const testDir = join(tmpdir(), 'theme-keep-deep-nesting')
+    const rootDirectory = testDir
+    const themeDirectory = 'theme'
+
+    try {
+      await mkdir(testDir, { recursive: true })
+
+      await writ.build({
+        rootDirectory: testDir
+      })
+
+      const themePath = join(testDir, themeDirectory)
+      const keepPath = join(themePath, 'keep')
+
+      // Create deeply nested file in keep
+      const deepPath = join(keepPath, 'deep', 'nested', 'folder', 'structure')
+      await mkdir(deepPath, { recursive: true })
+      await writeFile(
+        join(deepPath, 'custom.txt'),
+        'deeply nested content'
+      )
+
+      await writ.build({
+        rootDirectory: testDir,
+        refreshTheme: true
+      })
+
+      const deepThemePath = join(
+        themePath,
+        'deep',
+        'nested',
+        'folder',
+        'structure'
+      )
+      const deepContent = await readFile(
+        join(deepThemePath, 'custom.txt'),
+        'utf-8'
+      )
+
+      t.equal(
+        deepContent,
+        'deeply nested content',
+        'deeply nested file from keep is applied'
+      )
+
+      const deepFolderContents = await readdir(deepThemePath)
+      t.equal(
+        deepFolderContents.length,
+        1,
+        'deep folder only contains the custom file (no existing files to preserve)'
+      )
+    } finally {
+      await rm(testDir, { recursive: true, force: true })
+    }
+  })
+
+  t.test('when keep has a file where theme has a directory with the same name', async t => {
+    t.plan(1)
+
+    const testDir = join(tmpdir(), 'theme-keep-file-dir-collision')
+    const rootDirectory = testDir
+    const themeDirectory = 'theme'
+
+    try {
+      await mkdir(testDir, { recursive: true })
+
+      await writ.build({
+        rootDirectory: testDir
+      })
+
+      const themePath = join(testDir, themeDirectory)
+      const keepPath = join(themePath, 'keep')
+
+      // Create a file in keep where theme likely has a directory
+      // (assets exists in theme and has subdirectories)
+      await mkdir(keepPath, { recursive: true })
+      await writeFile(
+        join(keepPath, 'assets'),
+        'file content'
+      )
+
+      try {
+        await writ.build({
+          rootDirectory: testDir,
+          refreshTheme: true
+        })
+        t.fail('should have thrown an error when file collides with directory')
+      } catch (e) {
+        t.ok(
+          e,
+          'error is thrown when file in keep tries to overwrite directory in theme'
+        )
+      }
+    } finally {
+      await rm(testDir, { recursive: true, force: true })
+    }
+  })
 
 })

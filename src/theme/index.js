@@ -60,6 +60,28 @@ const Methods = (() => {
       }
     }
 
+    const applyKeepOverrides = async (keepBackupPath, themePath) => {
+      const entries = await readdir(keepBackupPath, {
+        recursive: true,
+        withFileTypes: true
+      })
+
+      await Promise.all(
+        entries
+          .filter(entry => !entry.isDirectory())
+          .map(entry => {
+            const relativePath = join(
+              entry.parentPath.replace(keepBackupPath, ''),
+              entry.name
+            )
+            return cp(
+              join(keepBackupPath, relativePath),
+              join(themePath, relativePath)
+            )
+          })
+      )
+    }
+
     const refreshThemeDir = async (themePath, keepBackupPath, keepPath) => {
       try {
         Debug.debugLog('rm -r', themePath)
@@ -67,6 +89,8 @@ const Methods = (() => {
         await makeCustomThemeDirectory(themePath)
         if (keepBackupPath) {
           await cp(keepBackupPath, keepPath, { recursive: true })
+          // Apply keep directory customizations, file by file
+          await applyKeepOverrides(keepBackupPath, themePath)
         }
       } catch (e) {
         console.log(`Failed refreshing ${customThemePath}`)
