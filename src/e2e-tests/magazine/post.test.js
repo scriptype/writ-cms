@@ -140,6 +140,31 @@ test('E2E Magazine - Post Pages', async t => {
             hasPrevLink,
             `${collectionName}${post.permalink} has link to previous post`
           )
+
+          if (!hasPrevLink) {
+            console.log(`
+
+            ======
+
+            previous post link not found
+
+
+            ---
+            `)
+            console.log('linkTexts', allLinks.map(link => $(link).text().trim()))
+            console.log('previousPost.title', post.links.previousPost.title)
+            console.log(`
+            ---
+            `)
+            console.log('linkHrefs', allLinks.map(link => $(link).attr('href')))
+            console.log('previousPost.permalink', post.links.previousPost.permalink)
+            console.log(`
+            ---
+
+            ======
+
+            `)
+          }
         }
 
         if (post.links.nextPost) {
@@ -155,6 +180,31 @@ test('E2E Magazine - Post Pages', async t => {
             hasNextLink,
             `${collectionName}${post.permalink} has link to next post`
           )
+
+          if (!hasNextLink) {
+            console.log(`
+
+            ======
+
+            next post link not found
+
+
+            ---
+            `)
+            console.log('linkTexts', allLinks.map(link => $(link).text().trim()))
+            console.log('nextPost.title', post.links.nextPost.title)
+            console.log(`
+            ---
+            `)
+            console.log('linkHrefs', allLinks.map(link => $(link).attr('href')))
+            console.log('nextPost.permalink', post.links.nextPost.permalink)
+            console.log(`
+            ---
+
+            ======
+
+            `)
+          }
         }
       } catch (err) {
         t.fail(
