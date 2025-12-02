@@ -3,5 +3,6 @@ title: Cascade all the way
 categoryContentType: Technique
 categoryAlias: technique
 categoriesAlias: techniques
+date: 2025-11-07
 ---
 # Welcome to cascade

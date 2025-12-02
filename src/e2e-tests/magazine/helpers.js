@@ -1,6 +1,21 @@
 const FACET_BROWSE_PATH = 'by'
 
 /*
+ * Flattens all posts from a fixture model by extracting posts from all
+ * collections and their nested categories.
+ */
+const flattenAllPosts = (fixtureModel) => {
+  let allPosts = []
+  for (const collection of fixtureModel.collections) {
+    allPosts = [
+      ...allPosts,
+      ...flattenPostsFromCategories(collection.categories, collection.posts)
+    ]
+  }
+  return allPosts
+}
+
+/*
  * Slugifies a string by converting to lowercase, replacing spaces and
  * underscores with hyphens, and removing special characters.
  * Handles UTF-8 characters by removing diacritics.
@@ -149,6 +164,7 @@ const getFacetValueTitle = (facetValue) => {
 
 module.exports = {
   FACET_BROWSE_PATH,
+  flattenAllPosts,
   slug,
   flattenPostsFromCategories,
   getUsedFacets,
