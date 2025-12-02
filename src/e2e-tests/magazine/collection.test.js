@@ -385,11 +385,31 @@ test('E2E Magazine - Collection Pages', async t => {
         const facetValuesAreUnique = Array.from(expectedFacetValues).every(
           expectedValue => {
             const facetValueSlug = getFacetValueSlug(expectedValue)
-            const valueCount = allLinks.filter(link => {
+            const matchingFacetValueLinks = allLinks.filter(link => {
               const linkHref = $(link).attr('href')
               return linkHref === facetValueSlug
-            }).length
-            return valueCount === 1
+            })
+            if (matchingFacetValueLinks.length !== 1) {
+              console.log(`
+
+              * * *
+
+              matchingFacetValueLinks
+
+              * * *
+              `)
+              console.log(matchingFacetValueLinks)
+              console.log(`
+
+              * * *
+
+              allLinks
+
+              * * *
+              `)
+              console.log(allLinks)
+            }
+            return matchingFacetValueLinks.length === 1
           }
         )
 
