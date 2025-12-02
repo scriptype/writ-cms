@@ -129,10 +129,7 @@ test('E2E Magazine - Post Pages', async t => {
 
         if (post.links.previousPost) {
           const hasPrevLink = allLinks.some(link => {
-            const linkText = $(link).text()
-              .replace(/^«\s*/, '')
-              .replace(/\s*«\s*$/, '')
-              .trim()
+            const linkText = $(link).text().trim()
             return (
               linkText === post.links.previousPost.title &&
               $(link).attr('href') === post.links.previousPost.permalink
@@ -147,10 +144,7 @@ test('E2E Magazine - Post Pages', async t => {
 
         if (post.links.nextPost) {
           const hasNextLink = allLinks.some(link => {
-            const linkText = $(link).text()
-              .replace(/\s*»\s*$/, '')
-              .replace(/^»\s*/, '')
-              .trim()
+            const linkText = $(link).text().trim()
             return (
               linkText === post.links.nextPost.title &&
               $(link).attr('href') === post.links.nextPost.permalink
