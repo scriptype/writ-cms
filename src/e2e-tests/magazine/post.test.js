@@ -112,6 +112,154 @@ test('E2E Magazine - Post Pages', async t => {
     }
   })
 
+  t.test('Verify Person post related content links', async t => {
+    for (const post of allPosts) {
+      if (post.contentType !== 'Person') {
+        continue
+      }
+
+      const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
+
+      try {
+        const postHtml = await readFile(postPath, { encoding: 'utf-8' })
+        const $ = load(postHtml)
+        const allLinks = $('a').toArray()
+
+        if (post.demos) {
+          const allDemosLinked = post.demos.every(demo => {
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === demo.title && linkHref === demo.permalink
+            })
+          })
+
+          t.ok(
+            allDemosLinked,
+            `${post.permalink} displays all demos with correct links`
+          )
+        }
+
+        if (post.articles) {
+          const allArticlesLinked = post.articles.every(article => {
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === article.title && linkHref === article.permalink
+            })
+          })
+
+          t.ok(
+            allArticlesLinked,
+            `${post.permalink} displays all articles with correct links`
+          )
+        }
+
+        if (post.books) {
+          const allBooksLinked = post.books.every(book => {
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === book.title && linkHref === book.permalink
+            })
+          })
+
+          t.ok(
+            allBooksLinked,
+            `${post.permalink} displays all books with correct links`
+          )
+        }
+
+        if (post.events) {
+          const allEventsLinked = post.events.every(event => {
+            return allLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === event.title && linkHref === event.permalink
+            })
+          })
+
+          t.ok(
+            allEventsLinked,
+            `${post.permalink} displays all events with correct links`
+          )
+        }
+      } catch (err) {
+        t.fail(
+          `${post.permalink} Person content links: ${err.message}`
+        )
+      }
+    }
+  })
+
+  t.test('Verify Demo post maker link', async t => {
+    for (const post of allPosts) {
+      if (post.contentType !== 'Demo') {
+        continue
+      }
+
+      const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
+
+      try {
+        const postHtml = await readFile(postPath, { encoding: 'utf-8' })
+        const $ = load(postHtml)
+        const allLinks = $('a').toArray()
+
+        const hasMakerLink = allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return (
+            linkText === post.maker.title &&
+            linkHref === `/authors/${post.maker.slug}.html`
+          )
+        })
+
+        t.ok(
+          hasMakerLink,
+          `${post.permalink} has link to maker with correct title and href`
+        )
+      } catch (err) {
+        t.fail(
+          `${post.permalink} Demo maker link: ${err.message}`
+        )
+      }
+    }
+  })
+
+  t.test('Verify Book post author link', async t => {
+    for (const post of allPosts) {
+      if (post.contentType !== 'Book' && post.contentType !== 'Article') {
+        continue
+      }
+
+      const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
+
+      try {
+        const postHtml = await readFile(postPath, { encoding: 'utf-8' })
+        const $ = load(postHtml)
+        const allLinks = $('a').toArray()
+
+        const hasAuthorLink = allLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return (
+            linkText === post.author.title &&
+            linkHref === `/authors/${post.author.slug}.html`
+          )
+        })
+
+        t.ok(
+          hasAuthorLink,
+          `${post.permalink} has link to author with correct title and href`
+        )
+      } catch (err) {
+        t.fail(
+          `${post.permalink} Book author link: ${err.message}`
+        )
+      }
+    }
+  })
+
   t.test('Verify previous/next post links', async t => {
     for (const post of allPosts) {
       const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
