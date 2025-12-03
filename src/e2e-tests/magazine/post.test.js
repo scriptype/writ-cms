@@ -226,7 +226,7 @@ test('E2E Magazine - Post Pages', async t => {
     }
   })
 
-  t.test('Verify Book post author link', async t => {
+  t.test('Verify Book/Article post author link', async t => {
     for (const post of allPosts) {
       if (post.contentType !== 'Book' && post.contentType !== 'Article') {
         continue
@@ -255,6 +255,29 @@ test('E2E Magazine - Post Pages', async t => {
       } catch (err) {
         t.fail(
           `${post.permalink} Book author link: ${err.message}`
+        )
+      }
+    }
+  })
+
+  t.test('Verify custom template rendering', async t => {
+    for (const post of allPosts) {
+      if (post.template !== 'ReactBadMKay') {
+        continue
+      }
+
+      const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
+
+      try {
+        const postHtml = await readFile(postPath, { encoding: 'utf-8' })
+
+        t.ok(
+          postHtml.includes('mmkaaay?'),
+          `${post.permalink} renders custom template content`
+        )
+      } catch (err) {
+        t.fail(
+          `${post.permalink} template rendering: ${err.message}`
         )
       }
     }

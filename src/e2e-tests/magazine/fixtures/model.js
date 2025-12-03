@@ -118,6 +118,7 @@ const FIXTURE_CONTENT_MODEL = {
           date: '2025-11-03',
           permalink: '/articles/react-bad.html',
           contentType: 'Article',
+          template: 'ReactBadMKay',
           tags: ['javascript', 'react', 'performance', 'accessibility', 'devx'],
           content: 'react not good',
           context: {
