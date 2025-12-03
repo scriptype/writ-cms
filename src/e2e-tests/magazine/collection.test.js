@@ -376,6 +376,33 @@ test('E2E Magazine - Collection Pages', async t => {
           }
         )
 
+        if (!allValuesPresent) {
+          console.log(`
+
+          * * * *
+
+           - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          | All expected facet values not found in facet name page. |
+           - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+          `)
+          console.log(`
+          Expected values:
+          `)
+          console.log(Array.from(expectedFacetValues))
+          console.log(`
+
+
+          All links found:
+          `)
+          console.log(allLinks)
+          console.log(`
+
+          * * * *
+
+          `)
+        }
+
         t.ok(
           allValuesPresent,
           `${collection.name} /by/${facetName} lists all expected facet values`
@@ -522,6 +549,33 @@ test('E2E Magazine - Collection Pages', async t => {
             })
           })
 
+          if (!allPostsPresent) {
+            console.log(`
+
+            * * * *
+
+             - - - - - - - - - - - - - - - - - - - - - - - - - -
+            | All expected posts not found in facet value page. |
+             - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+            `)
+            console.log(`
+            Expected values:
+            `)
+            console.log(postsWithFacetValue.map(({ title, permalink }) => ({ title, permalink })))
+            console.log(`
+
+
+            All links found:
+            `)
+            console.log(allLinks)
+            console.log(`
+
+            * * * *
+
+            `)
+          }
+
           t.ok(
             allPostsPresent,
             `${collection.name} /by/${facetName}/${facetValueSlug} lists all posts with this facet value`
@@ -534,6 +588,33 @@ test('E2E Magazine - Collection Pages', async t => {
               return linkText === post.title && linkHref === post.permalink
             })
           })
+
+          if (!allPostsHaveValidLinks) {
+            console.log(`
+
+            * * * *
+
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            | All posts don't have valid links in facet value page. |
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+            `)
+            console.log(`
+            Expected posts:
+            `)
+            console.log(postsWithFacetValue.map(({ title, permalink }) => ({ title, permalink })))
+            console.log(`
+
+
+            All links found:
+            `)
+            console.log(allLinks)
+            console.log(`
+
+            * * * *
+
+            `)
+          }
 
           t.ok(
             allPostsHaveValidLinks,
