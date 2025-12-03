@@ -24,7 +24,6 @@ const FIXTURE_CONTENT_MODEL = {
       content: 'Welcome to articles',
       categories: [
         {
-          name: 'Guides',
           title: 'Guides',
           slug: 'guides',
           date: '2025-11-03',
@@ -44,7 +43,6 @@ const FIXTURE_CONTENT_MODEL = {
                 },
                 categories: [
                   {
-                    name: 'Guides',
                     title: 'Guides',
                     permalink: '/articles/guides'
                   }
@@ -72,7 +70,6 @@ const FIXTURE_CONTENT_MODEL = {
                 },
                 categories: [
                   {
-                    name: 'Guides',
                     title: 'Guides',
                     permalink: '/articles/guides'
                   }
@@ -324,7 +321,6 @@ const FIXTURE_CONTENT_MODEL = {
       content: '<h1 id="good-luck-running-these">Good luck running these</h1>',
       categories: [
         {
-          name: 'CSS',
           slug: 'css',
           title: 'Cascade all the way',
           date: '2025-11-07',
@@ -334,7 +330,6 @@ const FIXTURE_CONTENT_MODEL = {
           content: '<h1 id="welcome-to-cascade">Welcome to cascade</h1>',
           categories: [
             {
-              name: 'CSS Art',
               title: 'CSS Art',
               slug: 'css-art',
               date: '2025-11-08',
@@ -354,12 +349,10 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'CSS',
                         title: 'Cascade all the way',
                         permalink: '/demos/css'
                       },
                       {
-                        name: 'CSS Art',
                         title: 'CSS Art',
                         permalink: '/demos/css/css-art'
                       }
@@ -387,12 +380,10 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'CSS',
                         title: 'Cascade all the way',
                         permalink: '/demos/css'
                       },
                       {
-                        name: 'CSS Art',
                         title: 'CSS Art',
                         permalink: '/demos/css/css-art'
                       }
@@ -412,7 +403,6 @@ const FIXTURE_CONTENT_MODEL = {
               ]
             },
             {
-              name: 'Grid',
               title: 'Grid',
               slug: 'grid',
               date: '2025-11-09',
@@ -432,12 +422,10 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'CSS',
                         title: 'Cascade all the way',
                         permalink: '/demos/css'
                       },
                       {
-                        name: 'Grid',
                         title: 'Grid',
                         permalink: '/demos/css/grid'
                       }
@@ -469,13 +457,11 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'CSS',
                         title: 'Cascade all the way',
                         slug: 'css',
                         permalink: '/demos/css'
                       },
                       {
-                        name: 'Grid',
                         title: 'Grid',
                         slug: 'grid',
                         permalink: '/demos/css/grid'
@@ -511,7 +497,6 @@ const FIXTURE_CONTENT_MODEL = {
                 },
                 categories: [
                   {
-                    name: 'CSS',
                     title: 'Cascade all the way',
                     permalink: '/demos/css'
                   }
@@ -528,7 +513,6 @@ const FIXTURE_CONTENT_MODEL = {
           ]
         },
         {
-          name: 'Three.js',
           slug: 'threejs',
           title: 'Not one and not two, it\'s three',
           date: '2025-11-10',
@@ -538,7 +522,6 @@ const FIXTURE_CONTENT_MODEL = {
           content: '<h1>Welcome to three stuff</h1>',
           categories: [
             {
-              name: 'Sprite',
               title: 'Sprite',
               slug: 'sprite',
               date: '2025-11-11',
@@ -558,12 +541,10 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'Three.js',
                         title: "Not one and not two, it's three",
                         permalink: '/demos/threejs'
                       },
                       {
-                        name: 'Sprite',
                         title: 'Sprite',
                         permalink: '/demos/threejs/sprite'
                       }
@@ -594,12 +575,10 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'Three.js',
                         title: "Not one and not two, it's three",
                         permalink: '/demos/threejs'
                       },
                       {
-                        name: 'Sprite',
                         title: 'Sprite',
                         permalink: '/demos/threejs/sprite'
                       }
@@ -619,7 +598,6 @@ const FIXTURE_CONTENT_MODEL = {
               ]
             },
             {
-              name: 'WebGPU',
               title: 'WebGPU',
               slug: 'webgpu',
               date: '2025-11-12',
@@ -637,12 +615,10 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'Three.js',
                         title: "Not one and not two, it's three",
                         permalink: '/demos/threejs'
                       },
                       {
-                        name: 'WebGPU',
                         title: 'WebGPU',
                         permalink: '/demos/threejs/webgpu'
                       }
@@ -671,13 +647,11 @@ const FIXTURE_CONTENT_MODEL = {
                     },
                     categories: [
                       {
-                        name: 'Three.js',
                         title: "Not one and not two, it's three",
                         slug: 'threejs',
                         permalink: '/demos/threejs'
                       },
                       {
-                        name: 'WebGPU',
                         title: 'WebGPU',
                         slug: 'webgpu',
                         permalink: '/demos/threejs/webgpu'
@@ -710,7 +684,6 @@ const FIXTURE_CONTENT_MODEL = {
                 },
                 categories: [
                   {
-                    name: 'Three.js',
                     title: "Not one and not two, it's three",
                     permalink: '/demos/threejs'
                   }
@@ -737,7 +710,6 @@ const FIXTURE_CONTENT_MODEL = {
                 },
                 categories: [
                   {
-                    name: 'Three.js',
                     title: "Not one and not two, it's three",
                     permalink: '/demos/threejs'
                   }
