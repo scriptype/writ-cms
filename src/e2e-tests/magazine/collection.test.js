@@ -160,7 +160,7 @@ test('E2E Magazine - Collection Pages', async t => {
 
       if (collection.categories.length !== 0) {
         const topLevelCategoryTitles = collection.categories
-          .map(c => c.title || c.name)
+          .map(c => c.title)
           .filter(title => title)
 
         const topLevelCategoryTitlesPresent = topLevelCategoryTitles.every(
@@ -188,11 +188,10 @@ test('E2E Magazine - Collection Pages', async t => {
         const allCategoriesHaveValidLinks = collection.categories.every(
           category => {
             const categoryHref = `/${collection.name}/${category.slug}`
-            const categoryTitle = category.title || category.name
             return allLinks.some(link => {
               const linkText = $(link).text()
               const linkHref = $(link).attr('href')
-              return linkText === categoryTitle && linkHref === categoryHref
+              return linkText === category.title && linkHref === categoryHref
             })
           }
         )

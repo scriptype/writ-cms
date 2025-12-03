@@ -118,9 +118,8 @@ test('E2E Magazine - Category Pages', async t => {
 
         const $ = load(categoryHtml)
 
-        const categoryTitle = category.title || category.name
         const hasCategoryTitle = $('a').toArray().some(link => {
-          return $(link).text() === categoryTitle
+          return $(link).text() === category.title
         })
 
         t.ok(
@@ -210,7 +209,7 @@ test('E2E Magazine - Category Pages', async t => {
 
         if (Array.isArray(category.categories) && category.categories.length !== 0) {
           const directSubcategoryTitles = category.categories
-            .map(c => c.title || c.name)
+            .map(c => c.title)
             .filter(title => title)
 
           const directSubcategoriesPresent = directSubcategoryTitles.every(
@@ -237,11 +236,10 @@ test('E2E Magazine - Category Pages', async t => {
           const allSubcategoriesHaveValidLinks = category.categories.every(
             subcat => {
               const subcategoryHref = `/${collection.name}/${categoryPath}/${subcat.slug}`
-              const subcategoryTitle = subcat.title || subcat.name
               return allLinks.some(link => {
                 const linkText = $(link).text()
                 const linkHref = $(link).attr('href')
-                return linkText === subcategoryTitle && linkHref === subcategoryHref
+                return linkText === subcat.title && linkHref === subcategoryHref
               })
             }
           )

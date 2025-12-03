@@ -11,6 +11,7 @@ const FIXTURE_CONTENT_MODEL = {
   collections: [
     {
       name: 'articles',
+      title: 'Articles',
       date: '2025-11-02',
       collectionAlias: 'blog',
       categoryContentType: 'BlogTopic',
@@ -24,6 +25,7 @@ const FIXTURE_CONTENT_MODEL = {
       categories: [
         {
           name: 'Guides',
+          title: 'Guides',
           slug: 'guides',
           date: '2025-11-03',
           content: '',
@@ -38,11 +40,13 @@ const FIXTURE_CONTENT_MODEL = {
               context: {
                 collection: {
                   name: 'articles',
+                  title: 'Articles',
                   permalink: '/articles'
                 },
                 categories: [
                   {
                     name: 'Guides',
+                    title: 'Guides',
                     permalink: '/articles/guides'
                   }
                 ]
@@ -65,11 +69,13 @@ const FIXTURE_CONTENT_MODEL = {
               context: {
                 collection: {
                   name: 'articles',
+                  title: 'Articles',
                   permalink: '/articles'
                 },
                 categories: [
                   {
                     name: 'Guides',
+                    title: 'Guides',
                     permalink: '/articles/guides'
                   }
                 ]
@@ -96,6 +102,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'articles',
+              title: 'Articles',
               permalink: '/articles'
             },
             categories: []
@@ -118,6 +125,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'articles',
+              title: 'Articles',
               permalink: '/articles'
             },
             categories: []
@@ -143,6 +151,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'articles',
+              title: 'Articles',
               permalink: '/articles'
             },
             categories: []
@@ -159,6 +168,7 @@ const FIXTURE_CONTENT_MODEL = {
     },
     {
       name: 'books',
+      title: 'Books',
       date: '2025-11-04',
       entryContentType: 'Book',
       entryAlias: 'book',
@@ -178,6 +188,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'books',
+              title: 'Books',
               permalink: '/books'
             },
             categories: []
@@ -201,6 +212,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'books',
+              title: 'Books',
               permalink: '/books'
             },
             categories: []
@@ -217,6 +229,7 @@ const FIXTURE_CONTENT_MODEL = {
     },
     {
       name: 'authors',
+      title: 'Authors',
       date: '2025-11-05',
       entryContentType: 'Person',
       entryAlias: 'author',
@@ -238,6 +251,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'authors',
+              title: 'Authors',
               permalink: '/authors'
             },
             categories: []
@@ -260,6 +274,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'authors',
+              title: 'Authors',
               permalink: '/authors'
             },
             categories: []
@@ -289,6 +304,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'authors',
+              title: 'Authors',
               permalink: '/authors'
             },
             categories: []
@@ -305,6 +321,7 @@ const FIXTURE_CONTENT_MODEL = {
     },
     {
       name: 'demos',
+      title: 'Demos',
       date: '2025-11-06',
       contentType: 'DemoPortfolio',
       categoryContentType: 'Technology',
@@ -328,6 +345,7 @@ const FIXTURE_CONTENT_MODEL = {
           categories: [
             {
               name: 'CSS Art',
+              title: 'CSS Art',
               slug: 'css-art',
               date: '2025-11-08',
               content: '',
@@ -342,15 +360,18 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'CSS',
+                        title: 'Cascade all the way',
                         permalink: '/demos/css'
                       },
                       {
                         name: 'CSS Art',
+                        title: 'CSS Art',
                         permalink: '/demos/css/css-art'
                       }
                     ]
@@ -373,15 +394,18 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'CSS',
+                        title: 'Cascade all the way',
                         permalink: '/demos/css'
                       },
                       {
                         name: 'CSS Art',
+                        title: 'CSS Art',
                         permalink: '/demos/css/css-art'
                       }
                     ]
@@ -401,6 +425,7 @@ const FIXTURE_CONTENT_MODEL = {
             },
             {
               name: 'Grid',
+              title: 'Grid',
               slug: 'grid',
               date: '2025-11-09',
               content: '',
@@ -415,15 +440,18 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'CSS',
+                        title: 'Cascade all the way',
                         permalink: '/demos/css'
                       },
                       {
                         name: 'Grid',
+                        title: 'Grid',
                         permalink: '/demos/css/grid'
                       }
                     ]
@@ -449,17 +477,20 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       slug: 'demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'CSS',
+                        title: 'Cascade all the way',
                         slug: 'css',
                         permalink: '/demos/css'
                       },
                       {
                         name: 'Grid',
+                        title: 'Grid',
                         slug: 'grid',
                         permalink: '/demos/css/grid'
                       }
@@ -490,11 +521,13 @@ const FIXTURE_CONTENT_MODEL = {
               context: {
                 collection: {
                   name: 'demos',
+                  title: 'Demos',
                   permalink: '/demos'
                 },
                 categories: [
                   {
                     name: 'CSS',
+                    title: 'Cascade all the way',
                     permalink: '/demos/css'
                   }
                 ]
@@ -521,6 +554,7 @@ const FIXTURE_CONTENT_MODEL = {
           categories: [
             {
               name: 'Sprite',
+              title: 'Sprite',
               slug: 'sprite',
               date: '2025-11-11',
               content: '',
@@ -535,15 +569,18 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'Three.js',
+                        title: "Not one and not two, it's three",
                         permalink: '/demos/threejs'
                       },
                       {
                         name: 'Sprite',
+                        title: 'Sprite',
                         permalink: '/demos/threejs/sprite'
                       }
                     ]
@@ -569,15 +606,18 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'Three.js',
+                        title: "Not one and not two, it's three",
                         permalink: '/demos/threejs'
                       },
                       {
                         name: 'Sprite',
+                        title: 'Sprite',
                         permalink: '/demos/threejs/sprite'
                       }
                     ]
@@ -597,6 +637,7 @@ const FIXTURE_CONTENT_MODEL = {
             },
             {
               name: 'WebGPU',
+              title: 'WebGPU',
               slug: 'webgpu',
               date: '2025-11-12',
               content: '',
@@ -609,15 +650,18 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'Three.js',
+                        title: "Not one and not two, it's three",
                         permalink: '/demos/threejs'
                       },
                       {
                         name: 'WebGPU',
+                        title: 'WebGPU',
                         permalink: '/demos/threejs/webgpu'
                       }
                     ]
@@ -641,17 +685,20 @@ const FIXTURE_CONTENT_MODEL = {
                   context: {
                     collection: {
                       name: 'demos',
+                      title: 'Demos',
                       slug: 'demos',
                       permalink: '/demos'
                     },
                     categories: [
                       {
                         name: 'Three.js',
+                        title: "Not one and not two, it's three",
                         slug: 'threejs',
                         permalink: '/demos/threejs'
                       },
                       {
                         name: 'WebGPU',
+                        title: 'WebGPU',
                         slug: 'webgpu',
                         permalink: '/demos/threejs/webgpu'
                       }
@@ -679,11 +726,13 @@ const FIXTURE_CONTENT_MODEL = {
               context: {
                 collection: {
                   name: 'demos',
+                  title: 'Demos',
                   permalink: '/demos'
                 },
                 categories: [
                   {
                     name: 'Three.js',
+                    title: "Not one and not two, it's three",
                     permalink: '/demos/threejs'
                   }
                 ]
@@ -705,11 +754,13 @@ const FIXTURE_CONTENT_MODEL = {
               context: {
                 collection: {
                   name: 'demos',
+                  title: 'Demos',
                   permalink: '/demos'
                 },
                 categories: [
                   {
                     name: 'Three.js',
+                    title: "Not one and not two, it's three",
                     permalink: '/demos/threejs'
                   }
                 ]
@@ -739,6 +790,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'demos',
+              title: 'Demos',
               permalink: '/demos'
             },
             categories: []
@@ -761,6 +813,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'demos',
+              title: 'Demos',
               permalink: '/demos'
             },
             categories: []
@@ -777,6 +830,7 @@ const FIXTURE_CONTENT_MODEL = {
     },
     {
       name: 'events',
+      title: 'Events',
       date: '2025-11-13',
       entryContentType: 'Event',
       facets: ['lorem', 'ipsum', 'dolor'],
@@ -793,6 +847,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'events',
+              title: 'Events',
               permalink: '/events'
             },
             categories: []
@@ -817,6 +872,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'events',
+              title: 'Events',
               permalink: '/events'
             },
             categories: []
@@ -841,6 +897,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'events',
+              title: 'Events',
               permalink: '/events'
             },
             categories: []
@@ -865,6 +922,7 @@ const FIXTURE_CONTENT_MODEL = {
           context: {
             collection: {
               name: 'events',
+              title: 'Events',
               permalink: '/events'
             },
             categories: []

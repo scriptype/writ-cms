@@ -60,7 +60,6 @@ test('E2E Magazine - Post Pages', async t => {
   t.test('Verify post pages render with correct content and metadata', async t => {
     for (const post of allPosts) {
       const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
-      const collectionName = post.context.collection.name
 
       try {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
@@ -83,32 +82,28 @@ test('E2E Magazine - Post Pages', async t => {
           const linkText = $(link).text()
           const linkHref = $(link).attr('href')
           return (
-            linkText.toLowerCase() === collectionName &&
+            linkText === post.context.collection.name &&
             linkHref === post.context.collection.permalink
           )
         })
 
-        /*
         t.ok(
           collectionLink,
-          `${collectionName}${post.permalink} has breadcrumb link to collection`
+          `${post.context.collection.name}${post.permalink} has breadcrumb link to collection`
         )
-        */
 
         const allCategoryLinksPresent = post.context.categories.every(cat => {
           return allLinks.some(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
-            return linkText === cat.name && linkHref === cat.permalink
+            return linkText === cat.title && linkHref === cat.permalink
           })
         })
 
-        /*
         t.ok(
           allCategoryLinksPresent,
-          `${collectionName}${post.permalink} has breadcrumb links to all categories`
+          `${post.context.collection.name}${post.permalink} has breadcrumb links to all categories`
         )
-        */
       } catch (err) {
         t.fail(
           `${post.permalink} page: ${err.message}`
@@ -120,7 +115,6 @@ test('E2E Magazine - Post Pages', async t => {
   t.test('Verify previous/next post links', async t => {
     for (const post of allPosts) {
       const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
-      const collectionName = post.context.collection.name
 
       try {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
