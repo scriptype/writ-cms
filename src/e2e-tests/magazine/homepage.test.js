@@ -71,7 +71,7 @@ test('E2E Magazine - Homepage', async t => {
   const outputDirContents = await readdir(join(rootDirectory, exportDirectory))
   const hasIndexHtml = outputDirContents.includes('index.html')
   const hasCollectionDirectories = FIXTURE_CONTENT_MODEL.collections.every(
-    collection => outputDirContents.includes(collection.name)
+    collection => outputDirContents.includes(collection.slug)
   )
 
   t.ok(
@@ -87,8 +87,8 @@ test('E2E Magazine - Homepage', async t => {
       const linkText = $(link).text()
       const linkHref = $(link).attr('href')
       return (
-        linkText.toLowerCase() === collection.name &&
-        linkHref === `/${collection.name}`
+        linkText === collection.title &&
+        linkHref === `/${collection.slug}`
       )
     })
   })
@@ -115,14 +115,14 @@ test('E2E Magazine - Homepage', async t => {
     }))
 
     const allUsedFacetsFound = Array.from(usedFacets).every(facet => {
-      const facetPageHref = `/${collection.name}/${FACET_BROWSE_PATH}/${facet}`
+      const facetPageHref = `/${collection.slug}/${FACET_BROWSE_PATH}/${facet}`
       return facetLinks.some(link =>
         link.text === facet.toLowerCase() && link.href === facetPageHref
       )
     })
 
     const browsePathExists = facetLinks.some(link =>
-      link.href === `/${collection.name}/${FACET_BROWSE_PATH}`
+      link.href === `/${collection.slug}/${FACET_BROWSE_PATH}`
     )
 
     return allUsedFacetsFound && browsePathExists

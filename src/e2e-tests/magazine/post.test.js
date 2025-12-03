@@ -82,14 +82,14 @@ test('E2E Magazine - Post Pages', async t => {
           const linkText = $(link).text()
           const linkHref = $(link).attr('href')
           return (
-            linkText === post.context.collection.name &&
+            linkText === post.context.collection.title &&
             linkHref === post.context.collection.permalink
           )
         })
 
         t.ok(
           collectionLink,
-          `${post.context.collection.name}${post.permalink} has breadcrumb link to collection`
+          `${post.permalink} has breadcrumb link to collection`
         )
 
         const allCategoryLinksPresent = post.context.categories.every(cat => {
@@ -102,7 +102,7 @@ test('E2E Magazine - Post Pages', async t => {
 
         t.ok(
           allCategoryLinksPresent,
-          `${post.context.collection.name}${post.permalink} has breadcrumb links to all categories`
+          `${post.permalink} has breadcrumb links to all categories`
         )
       } catch (err) {
         t.fail(

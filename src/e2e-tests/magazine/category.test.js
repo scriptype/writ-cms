@@ -105,7 +105,7 @@ test('E2E Magazine - Category Pages', async t => {
       const categoryIndexPath = join(
         rootDirectory,
         exportDirectory,
-        collection.name,
+        collection.slug,
         categoryPath,
         'index.html'
       )
@@ -124,7 +124,7 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           hasCategoryTitle,
-          `${collection.name}/${categoryPath} displays category title`
+          `${collection.slug}/${categoryPath} displays category title`
         )
 
         if (category.content) {
@@ -133,7 +133,7 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             hasExactContent,
-            `${collection.name}/${categoryPath} contains category content`
+            `${collection.slug}/${categoryPath} contains category content`
           )
         }
 
@@ -146,7 +146,7 @@ test('E2E Magazine - Category Pages', async t => {
         const allLinks = $('a').toArray()
 
         if (usedFacets.size !== 0) {
-          const browseFacetsHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}`
+          const browseFacetsHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}`
           const hasBrowseFacetsLink = allLinks.some(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
@@ -155,12 +155,12 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             hasBrowseFacetsLink,
-            `${collection.name}/${categoryPath} has browse facets link`
+            `${collection.slug}/${categoryPath} has browse facets link`
           )
         }
 
         const allUsedFacetsLinked = Array.from(usedFacets).every(facet => {
-          const facetPageHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
+          const facetPageHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
           return allLinks.some(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
@@ -170,14 +170,14 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           allUsedFacetsLinked,
-          `${collection.name}/${categoryPath} displays all used facets with correct links`
+          `${collection.slug}/${categoryPath} displays all used facets with correct links`
         )
 
         const unusedFacets = collection.facets.filter(
           facet => !usedFacets.has(facet)
         )
         const noUnusedFacetsLinked = unusedFacets.every(facet => {
-          const facetPageHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
+          const facetPageHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
           return !allLinks.some(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
@@ -187,7 +187,7 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           noUnusedFacetsLinked,
-          `${collection.name}/${categoryPath} does not display unused facets`
+          `${collection.slug}/${categoryPath} does not display unused facets`
         )
 
         const categoryPosts = flattenCategoryPosts(category)
@@ -202,7 +202,7 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           allPostsLinked,
-          `${collection.name}/${categoryPath} displays all posts with correct links`
+          `${collection.slug}/${categoryPath} displays all posts with correct links`
         )
 
         const allLinkTexts = allLinks.map(link => $(link).text())
@@ -218,7 +218,7 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             directSubcategoriesPresent,
-            `${collection.name}/${categoryPath} displays all direct subcategories`
+            `${collection.slug}/${categoryPath} displays all direct subcategories`
           )
 
           const subcategoriesHavePosts = category.categories.every(
@@ -230,12 +230,12 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             subcategoriesHavePosts,
-            `${collection.name}/${categoryPath} all direct subcategories have at least one post`
+            `${collection.slug}/${categoryPath} all direct subcategories have at least one post`
           )
 
           const allSubcategoriesHaveValidLinks = category.categories.every(
             subcat => {
-              const subcategoryHref = `/${collection.name}/${categoryPath}/${subcat.slug}`
+              const subcategoryHref = `/${collection.slug}/${categoryPath}/${subcat.slug}`
               return allLinks.some(link => {
                 const linkText = $(link).text()
                 const linkHref = $(link).attr('href')
@@ -246,12 +246,12 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             allSubcategoriesHaveValidLinks,
-            `${collection.name}/${categoryPath} displays subcategories with correct links`
+            `${collection.slug}/${categoryPath} displays subcategories with correct links`
           )
         }
       } catch (err) {
         t.fail(
-          `${collection.name}/${categoryPath} index.html: ${err.message}`
+          `${collection.slug}/${categoryPath} index.html: ${err.message}`
         )
       }
 
@@ -288,7 +288,7 @@ test('E2E Magazine - Category Pages', async t => {
       const facetBrowsePath = join(
         rootDirectory,
         exportDirectory,
-        collection.name,
+        collection.slug,
         categoryPath,
         FACET_BROWSE_PATH,
         'index.html'
@@ -304,7 +304,7 @@ test('E2E Magazine - Category Pages', async t => {
         const allLinks = $('a').toArray()
 
         const allUsedFacetsListed = Array.from(usedFacets).every(facet => {
-          const facetPageHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
+          const facetPageHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
           return allLinks.some(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
@@ -314,11 +314,11 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           allUsedFacetsListed,
-          `${collection.name}/${categoryPath}/by page lists all used facets`
+          `${collection.slug}/${categoryPath}/by page lists all used facets`
         )
 
         const facetCountsCorrect = Array.from(usedFacets).every(facet => {
-          const facetPageHref = `/${collection.name}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
+          const facetPageHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
           const facetCount = allLinks.filter(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
@@ -329,11 +329,11 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           facetCountsCorrect,
-          `${collection.name}/${categoryPath}/by page lists each facet exactly once`
+          `${collection.slug}/${categoryPath}/by page lists each facet exactly once`
         )
       } catch (err) {
         t.fail(
-          `${collection.name}/${categoryPath}/by page: ${err.message}`
+          `${collection.slug}/${categoryPath}/by page: ${err.message}`
         )
       }
     }
@@ -359,7 +359,7 @@ test('E2E Magazine - Category Pages', async t => {
         const facetNamePath = join(
           rootDirectory,
           exportDirectory,
-          collection.name,
+          collection.slug,
           categoryPath,
           FACET_BROWSE_PATH,
           facetName,
@@ -393,7 +393,7 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             allValuesPresent,
-            `${collection.name}/${categoryPath}/by/${facetName} lists all expected facet values`
+            `${collection.slug}/${categoryPath}/by/${facetName} lists all expected facet values`
           )
 
           const facetValuesAreUnique = Array.from(expectedFacetValues).every(
@@ -409,11 +409,11 @@ test('E2E Magazine - Category Pages', async t => {
 
           t.ok(
             facetValuesAreUnique,
-            `${collection.name}/${categoryPath}/by/${facetName} lists each facet value exactly once`
+            `${collection.slug}/${categoryPath}/by/${facetName} lists each facet value exactly once`
           )
         } catch (err) {
           t.fail(
-            `${collection.name}/${categoryPath}/by/${facetName} page: ${err.message}`
+            `${collection.slug}/${categoryPath}/by/${facetName} page: ${err.message}`
           )
         }
       }
@@ -452,7 +452,7 @@ test('E2E Magazine - Category Pages', async t => {
           const facetValuePath = join(
             rootDirectory,
             exportDirectory,
-            collection.name,
+            collection.slug,
             categoryPath,
             FACET_BROWSE_PATH,
             facetName,
@@ -496,7 +496,7 @@ test('E2E Magazine - Category Pages', async t => {
 
             t.ok(
               allPostsPresent,
-              `${collection.name}/${categoryPath}/by/${facetName}/${facetValueSlug} lists all posts with this facet value`
+              `${collection.slug}/${categoryPath}/by/${facetName}/${facetValueSlug} lists all posts with this facet value`
             )
 
             const allPostsHaveValidLinks = postsWithFacetValue.every(post => {
@@ -509,11 +509,11 @@ test('E2E Magazine - Category Pages', async t => {
 
             t.ok(
               allPostsHaveValidLinks,
-              `${collection.name}/${categoryPath}/by/${facetName}/${facetValueSlug} posts have correct links`
+              `${collection.slug}/${categoryPath}/by/${facetName}/${facetValueSlug} posts have correct links`
             )
           } catch (err) {
             t.fail(
-              `${collection.name}/${categoryPath}/by/${facetName}/${facetValueSlug} page: ${err.message}`
+              `${collection.slug}/${categoryPath}/by/${facetName}/${facetValueSlug} page: ${err.message}`
             )
           }
         }
@@ -540,7 +540,7 @@ test('E2E Magazine - Category Pages', async t => {
       const facetBrowseDir = join(
         rootDirectory,
         exportDirectory,
-        collection.name,
+        collection.slug,
         categoryPath,
         FACET_BROWSE_PATH
       )
@@ -548,17 +548,17 @@ test('E2E Magazine - Category Pages', async t => {
       try {
         await stat(facetBrowseDir)
         t.fail(
-          `${collection.name}/${categoryPath}/by directory should not exist when no facets are used`
+          `${collection.slug}/${categoryPath}/by directory should not exist when no facets are used`
         )
       } catch (err) {
         if (err.code === 'ENOENT') {
           t.ok(
             true,
-            `${collection.name}/${categoryPath}/by directory does not exist when no facets are used`
+            `${collection.slug}/${categoryPath}/by directory does not exist when no facets are used`
           )
         } else {
           t.fail(
-            `${collection.name}/${categoryPath}/by check failed: ${err.message}`
+            `${collection.slug}/${categoryPath}/by check failed: ${err.message}`
           )
         }
       }
