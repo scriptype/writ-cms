@@ -196,6 +196,8 @@ class Category extends ContentModelEntryNode {
           categoryAlias: this.categoryAlias || this.settings.categoryAlias,
           entriesAlias: this.entriesAlias || this.settings.entriesAlias,
           categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
+          sortBy: this.sortBy || this.settings.sortBy,
+          sortOrder: this.sortOrder || this.settings.sortOrder,
           facetKeys: this.settings.facetKeys,
           mode: this.settings.mode,
           level: this.settings.level + 1
@@ -243,7 +245,9 @@ class Category extends ContentModelEntryNode {
       subCategory.afterEffects(contentModel, collectionFacets)
     })
 
-    sort(this.subtree.posts, this.sortBy, this.sortOrder)
+    const sortBy = this.sortBy || this.settings.sortBy
+    const sortOrder = this.sortOrder || this.settings.sortOrder
+    sort(this.subtree.posts, sortBy, sortOrder)
     this.subtree.posts.forEach(Category.linkPosts)
 
     this.subtree.attachments.forEach(attachment => {
