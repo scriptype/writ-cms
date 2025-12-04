@@ -4,6 +4,7 @@ const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
 const createDecorator = require('./decorator')
+const { atomicReplace } = require('../lib/fileSystemHelpers')
 const {
   ASSETS,
   PARTIALS,
@@ -82,25 +83,34 @@ const Methods = (() => {
       )
     }
 
-    const refreshThemeDir = async (themePath, keepBackupPath, keepPath) => {
-      try {
-        Debug.debugLog('rm -r', themePath)
-        await rm(themePath, { recursive: true })
-        await makeCustomThemeDirectory(themePath)
+    const keepPath = join(customThemePath, KEEP_PATH)
+    const keepBackupPath = await backupKeepDir(keepPath)
+
+    try {
+      Debug.debugLog('refresh theme atomically')
+      // Work on a tempPath, then customThemePath gets swapped with it
+      await atomicReplace(customThemePath, async (tempPath) => {
+
+        await makeCustomThemeDirectory(tempPath, {
+          skipContainer: true // customThemePath is created by atomicReplace
+        })
+
         if (keepBackupPath) {
-          await cp(keepBackupPath, keepPath, { recursive: true })
-          // Apply keep directory customizations, file by file
-          await applyKeepOverrides(keepBackupPath, themePath)
+          await mkdir(join(tempPath, KEEP_PATH), { recursive: true })
+          await cp(keepBackupPath, join(tempPath, KEEP_PATH), {
+            recursive: true
+          })
+          await applyKeepOverrides(keepBackupPath, tempPath)
         }
-      } catch (e) {
-        console.log(`Failed refreshing ${customThemePath}`)
-        throw e
+      })
+    } catch (e) {
+      console.log(`Failed refreshing ${customThemePath}`)
+      throw e
+    } finally {
+      if (keepBackupPath) {
+        await rm(keepBackupPath, { recursive: true, force: true })
       }
     }
-
-    const keepPath = join(customThemePath, KEEP_PATH)
-    const tempPath = await backupKeepDir(keepPath)
-    return refreshThemeDir(customThemePath, tempPath, keepPath)
   }
 
   const collectCustomizerPaths = async (customThemePath) => {
@@ -166,8 +176,10 @@ const Methods = (() => {
     )
   }
 
-  const makeCustomThemeDirectory = async (customThemePath) => {
-    await mkdir(customThemePath)
+  const makeCustomThemeDirectory = async (customThemePath, options = {}) => {
+    if (!options.skipContainer) {
+      await mkdir(customThemePath)
+    }
 
     await Promise.all([
       mkdir(join(customThemePath, ASSETS)),

@@ -6,7 +6,8 @@ const {
   readFileContent,
   loadJSON,
   isDirectory,
-  ensureDirectory
+  ensureDirectory,
+  atomicReplace
 } = require('./fileSystemHelpers')
 
 test('readFileContent reads utf-8 file content', async (t) => {
@@ -263,4 +264,101 @@ test('ensureDirectory throws on undefined path parameter', async (t) => {
       'throws TypeError for undefined path'
     )
   }
+})
+
+test('atomicReplace builds in temp location then swaps', async (t) => {
+  const baseTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
+  const targetPath = path.join(baseTemp, 'target')
+
+  await atomicReplace(targetPath, async (tempPath) => {
+    await fs.writeFile(path.join(tempPath, 'file.txt'), 'content')
+  })
+
+  const content = await fs.readFile(path.join(targetPath, 'file.txt'), 'utf-8')
+
+  t.equal(
+    content,
+    'content',
+    'file was created in target directory'
+  )
+
+  await fs.rm(baseTemp, { recursive: true })
+})
+
+test('atomicReplace replaces existing directory', async (t) => {
+  const baseTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
+  const targetPath = path.join(baseTemp, 'target')
+
+  await fs.mkdir(targetPath)
+  await fs.writeFile(path.join(targetPath, 'old.txt'), 'old content')
+
+  await atomicReplace(targetPath, async (tempPath) => {
+    await fs.writeFile(path.join(tempPath, 'new.txt'), 'new content')
+  })
+
+  const exists = await fs.stat(path.join(targetPath, 'new.txt'))
+  const oldExists = await fs.stat(path.join(targetPath, 'old.txt')).catch(() => null)
+
+  t.ok(
+    exists.isFile(),
+    'new file exists in target'
+  )
+
+  t.notOk(
+    oldExists,
+    'old file was deleted'
+  )
+
+  await fs.rm(baseTemp, { recursive: true })
+})
+
+test('atomicReplace cleans up temp on build function error', async (t) => {
+  const baseTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
+  const targetPath = path.join(baseTemp, 'target')
+
+  try {
+    await atomicReplace(targetPath, async () => {
+      throw new Error('build failed')
+    })
+    t.fail('should have thrown error')
+  } catch (error) {
+    t.equal(
+      error.message,
+      'build failed',
+      'error is propagated'
+    )
+  }
+
+  const targetExists = await fs.stat(targetPath).catch(() => null)
+
+  t.notOk(
+    targetExists,
+    'target directory not created on failure'
+  )
+
+  await fs.rm(baseTemp, { recursive: true })
+})
+
+test('atomicReplace works with nested directories', async (t) => {
+  const baseTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
+  const targetPath = path.join(baseTemp, 'target')
+  const nestedPath = path.join('sub', 'nested', 'file.txt')
+
+  await atomicReplace(targetPath, async (tempPath) => {
+    await fs.mkdir(path.join(tempPath, 'sub', 'nested'), { recursive: true })
+    await fs.writeFile(path.join(tempPath, nestedPath), 'nested')
+  })
+
+  const content = await fs.readFile(
+    path.join(targetPath, nestedPath),
+    'utf-8'
+  )
+
+  t.equal(
+    content,
+    'nested',
+    'nested structure preserved'
+  )
+
+  await fs.rm(baseTemp, { recursive: true })
 })

@@ -1,4 +1,6 @@
 const fs = require('fs/promises')
+const { join } = require('path')
+const { tmpdir } = require('os')
 
 const readFileContent = path => {
   return fs.readFile(path, { encoding: 'utf-8' })
@@ -32,9 +34,28 @@ const ensureDirectory = async (path) => {
   }
 }
 
+/*
+ * Atomically replace a directory by building in isolation.
+ * Solves Windows EBUSY errors from rm() immediately after cp().
+ * Building in a separate temp location releases all file handles
+ * before the final swap.
+ */
+const atomicReplace = async (targetPath, buildFn) => {
+  const tempPath = await fs.mkdtemp(join(tmpdir(), 'atomic-replace-'))
+  try {
+    await buildFn(tempPath)
+    await fs.rm(targetPath, { recursive: true, force: true })
+    await fs.cp(tempPath, targetPath, { recursive: true })
+  } catch (error) {
+    await fs.rm(tempPath, { recursive: true, force: true })
+    throw error
+  }
+}
+
 module.exports = {
   readFileContent,
   loadJSON,
   isDirectory,
-  ensureDirectory
+  ensureDirectory,
+  atomicReplace
 }
