@@ -394,7 +394,7 @@ test('E2E Magazine - Collection Pages', async t => {
 
           All links found:
           `)
-          console.log(allLinks)
+          console.log(allLinks.map(link => $(link).text()))
           console.log(`
 
           * * * *
@@ -430,9 +430,13 @@ test('E2E Magazine - Collection Pages', async t => {
 
               allLinks
 
-              * * *
               `)
-              console.log(allLinks)
+              console.log(allLinks.map(link => $(link).text()))
+              console.log(`
+
+              * * * *
+
+              `)
             }
             return matchingFacetValueLinks.length === 1
           }
@@ -567,7 +571,7 @@ test('E2E Magazine - Collection Pages', async t => {
 
             All links found:
             `)
-            console.log(allLinks)
+            console.log(allLinks.map(link => $(link).text()))
             console.log(`
 
             * * * *
