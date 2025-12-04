@@ -56,7 +56,7 @@
     <div>
     {{#if links.previousPost}}
     Previous post:
-      <a href="{{links.previousPost.permalink}}">{{links.previousPost.title}}</a>
+      <a data-previous-post-link href="{{links.previousPost.permalink}}">{{links.previousPost.title}}</a>
     {{else}}
       this is the first post!
     {{/if}}
@@ -65,7 +65,7 @@
     <div>
     {{#if links.nextPost}}
       Next post:
-      <a href="{{links.nextPost.permalink}}">{{links.nextPost.title}}</a>
+      <a data-next-post-link href="{{links.nextPost.permalink}}">{{links.nextPost.title}}</a>
     {{else}}
       this is the last post!
     {{/if}}

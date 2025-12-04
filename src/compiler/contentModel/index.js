@@ -250,6 +250,8 @@ class ContentModel {
           collectionAliases: this.collectionAliases,
           mode: this.settings.mode,
           contentTypes: this.contentTypes,
+          sortBy: 'date',
+          sortOrder: -1,
           contentType
         })
 

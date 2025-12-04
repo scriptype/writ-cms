@@ -82,10 +82,10 @@ class Collection extends ContentModelEntryNode {
       categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
       entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
       entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
-      defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || settings.defaultCategoryName,
-      sortBy: this.sortBy || this.settings.contentType?.sortBy || 'date',
-      sortOrder: this.sortOrder || this.settings.contentType?.sortOrder || 1,
+      defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
       facetKeys: this.facets || this.settings.contentType?.facets || [],
+      sortBy: this.sortBy || this.settings.sortBy,
+      sortOrder: this.sortOrder || this.settings.sortOrder,
       facets: []
     })
   }
@@ -199,16 +199,16 @@ class Collection extends ContentModelEntryNode {
 
       if (this.matchers.category(childNode, 1)) {
         const categorySettings = {
-          defaultCategoryName: this.settings.defaultCategoryName,
+          defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
           contentTypes: this.settings.contentTypes,
           entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
           entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
           categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
           entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
           categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-          sortBy: this.sortBy || this.settings.contentType?.sortBy,
-          sortOrder: this.sortOrder || this.settings.contentType?.sortOrder,
           facetKeys: this.facets || this.settings.contentType?.facets,
+          sortBy: this.sortBy || this.settings.sortBy,
+          sortOrder: this.sortOrder || this.settings.sortOrder,
           mode: this.settings.mode,
           level: 1,
         }
@@ -242,15 +242,15 @@ class Collection extends ContentModelEntryNode {
     let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
     if (!defaultCategory) {
       const defaultCategorySettings = {
-        defaultCategoryName: this.settings.defaultCategoryName,
+        defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
         categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
         entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
         entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
         categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
         entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
-        sortBy: this.sortBy || this.settings.contentType?.sortBy,
-        sortOrder: this.sortOrder || this.settings.contentType?.sortOrder,
         facetKeys: this.facets || this.settings.contentType?.facets,
+        sortBy: this.sortBy || this.settings.sortBy,
+        sortOrder: this.sortOrder || this.settings.sortOrder,
         mode: this.settings.mode,
         contentTypes: this.settings.contentTypes,
       }
@@ -289,7 +289,9 @@ class Collection extends ContentModelEntryNode {
   }
 
   afterEffects(contentModel) {
-    sort(this.subtree.posts, this.sortBy, this.sortOrder)
+    const sortBy = this.sortBy || this.settings.sortBy
+    const sortOrder = this.sortOrder || this.settings.sortOrder
+    sort(this.subtree.posts, sortBy, sortOrder)
     Collection.locatePinnedEntries(this.subtree.posts)
 
     if (this.facetKeys.length) {

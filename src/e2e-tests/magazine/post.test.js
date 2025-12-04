@@ -285,91 +285,60 @@ test('E2E Magazine - Post Pages', async t => {
 
   t.test('Verify previous/next post links', async t => {
     for (const post of allPosts) {
-      const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
+      const postPath = await resolvePostPath(
+        rootDirectory,
+        exportDirectory,
+        post.permalink
+      )
 
       try {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
         const $ = load(postHtml)
-        const allLinks = $('a').toArray()
 
         if (post.links.previousPost) {
-          const hasPrevLink = allLinks.some(link => {
-            const linkText = $(link).text().trim()
-            return (
-              linkText === post.links.previousPost.title &&
-              $(link).attr('href') === post.links.previousPost.permalink
-            )
-          })
+          const prevLink = $('[data-previous-post-link]')
+          const prevLinkText = prevLink.text().trim()
+          const prevLinkHref = prevLink.attr('href')
 
-          t.ok(
-            hasPrevLink,
-            `${post.permalink} has link to previous post`
+          t.equal(
+            prevLinkText,
+            post.links.previousPost.title,
+            `${post.permalink} previous post link has correct title`
           )
 
-          if (!hasPrevLink) {
-            console.log(`
-
-            ======
-
-            previous post link not found
-
-
-            ---
-            `)
-            console.log('linkTexts', allLinks.map(link => $(link).text().trim()))
-            console.log('previousPost.title', post.links.previousPost.title)
-            console.log(`
-            ---
-            `)
-            console.log('linkHrefs', allLinks.map(link => $(link).attr('href')))
-            console.log('previousPost.permalink', post.links.previousPost.permalink)
-            console.log(`
-            ---
-
-            ======
-
-            `)
-          }
+          t.equal(
+            prevLinkHref,
+            post.links.previousPost.permalink,
+            `${post.permalink} previous post link has correct href`
+          )
+        } else {
+          t.ok(
+            postHtml.includes('this is the first post!'),
+            `${post.permalink} displays first post message`
+          )
         }
 
         if (post.links.nextPost) {
-          const hasNextLink = allLinks.some(link => {
-            const linkText = $(link).text().trim()
-            return (
-              linkText === post.links.nextPost.title &&
-              $(link).attr('href') === post.links.nextPost.permalink
-            )
-          })
+          const nextLink = $('[data-next-post-link]')
+          const nextLinkText = nextLink.text().trim()
+          const nextLinkHref = nextLink.attr('href')
 
-          t.ok(
-            hasNextLink,
-            `${post.permalink} has link to next post`
+          t.equal(
+            nextLinkText,
+            post.links.nextPost.title,
+            `${post.permalink} next post link has correct title`
           )
 
-          if (!hasNextLink) {
-            console.log(`
-
-            ======
-
-            next post link not found
-
-
-            ---
-            `)
-            console.log('linkTexts', allLinks.map(link => $(link).text().trim()))
-            console.log('nextPost.title', post.links.nextPost.title)
-            console.log(`
-            ---
-            `)
-            console.log('linkHrefs', allLinks.map(link => $(link).attr('href')))
-            console.log('nextPost.permalink', post.links.nextPost.permalink)
-            console.log(`
-            ---
-
-            ======
-
-            `)
-          }
+          t.equal(
+            nextLinkHref,
+            post.links.nextPost.permalink,
+            `${post.permalink} next post link has correct href`
+          )
+        } else {
+          t.ok(
+            postHtml.includes('this is the last post!'),
+            `${post.permalink} displays last post message`
+          )
         }
       } catch (err) {
         t.fail(

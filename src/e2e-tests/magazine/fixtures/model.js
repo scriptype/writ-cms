@@ -50,11 +50,11 @@ const FIXTURE_CONTENT_MODEL = {
                 ]
               },
               links: {
-                previousPost: {
+                previousPost: null,
+                nextPost: {
                   title: 'Introduction to CSS Grid',
                   permalink: '/articles/guides/introduction-to-css-grid.html'
-                },
-                nextPost: null
+                }
               }
             },
             {
@@ -78,11 +78,11 @@ const FIXTURE_CONTENT_MODEL = {
                 ]
               },
               links: {
-                previousPost: null,
-                nextPost: {
+                previousPost: {
                   title: 'Hello Design',
                   permalink: '/articles/guides/hello-design.html'
-                }
+                },
+                nextPost: null
               }
             }
           ]
@@ -105,11 +105,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: {
+            previousPost: null,
+            nextPost: {
               title: 'React bad',
               permalink: '/articles/react-bad.html'
-            },
-            nextPost: null
+            }
           }
         },
         {
@@ -130,12 +130,12 @@ const FIXTURE_CONTENT_MODEL = {
           },
           links: {
             previousPost: {
-              title: 'Vue good',
-              permalink: '/articles/vue-good.html'
-            },
-            nextPost: {
               title: 'Pure JS very good',
               permalink: '/articles/pure-js-very-good.html'
+            },
+            nextPost: {
+              title: 'Vue good',
+              permalink: '/articles/vue-good.html'
             }
           }
         },
@@ -155,11 +155,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: null,
-            nextPost: {
+            previousPost: {
               title: 'React bad',
               permalink: '/articles/react-bad.html'
-            }
+            },
+            nextPost: null
           }
         }
       ]
@@ -192,11 +192,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: {
+            previousPost: null,
+            nextPost: {
               title: 'HTML',
               permalink: '/books/html.html'
-            },
-            nextPost: null
+            }
           }
         },
         {
@@ -216,11 +216,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: null,
-            nextPost: {
+            previousPost: {
               title: 'Football',
               permalink: '/books/football.html'
-            }
+            },
+            nextPost: null
           }
         }
       ]
@@ -314,11 +314,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: {
+            previousPost: null,
+            nextPost: {
               title: 'Sir Alex Ferguson',
               permalink: '/authors/alex.html'
-            },
-            nextPost: null
+            }
           }
         },
         {
@@ -347,12 +347,12 @@ const FIXTURE_CONTENT_MODEL = {
           },
           links: {
             previousPost: {
-              title: 'Sir Tim Berners Lee',
-              permalink: '/authors/tim.html'
-            },
-            nextPost: {
               title: 'Mustafa Enes',
               permalink: '/authors/enes.html'
+            },
+            nextPost: {
+              title: 'Sir Tim Berners Lee',
+              permalink: '/authors/tim.html'
             }
           }
         },
@@ -420,11 +420,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: null,
-            nextPost: {
+            previousPost: {
               title: 'Sir Alex Ferguson',
               permalink: '/authors/alex.html'
-            }
+            },
+            nextPost: null
           }
         }
       ]
@@ -484,10 +484,13 @@ const FIXTURE_CONTENT_MODEL = {
                   },
                   links: {
                     previousPost: {
+                      title: 'Grid vs Flexbox',
+                      permalink: '/demos/css/grid/grid-vs-flexbox'
+                    },
+                    nextPost: {
                       title: 'Realist Painting',
                       permalink: '/demos/css/css-art/realist-painting.html'
-                    },
-                    nextPost: null
+                    }
                   }
                 },
                 {
@@ -516,13 +519,10 @@ const FIXTURE_CONTENT_MODEL = {
                   },
                   links: {
                     previousPost: {
-                      title: 'Grid vs Flexbox',
-                      permalink: '/demos/css/grid/grid-vs-flexbox'
-                    },
-                    nextPost: {
                       title: 'Carpet Motifs',
                       permalink: '/demos/css/css-art/carpet-motifs'
-                    }
+                    },
+                    nextPost: null
                   }
                 }
               ]
@@ -563,8 +563,8 @@ const FIXTURE_CONTENT_MODEL = {
                       permalink: '/demos/css/grid/hello-grid.html'
                     },
                     nextPost: {
-                      title: 'Realist Painting',
-                      permalink: '/demos/css/css-art/realist-painting.html'
+                      title: 'Carpet Motifs',
+                      permalink: '/demos/css/css-art/carpet-motifs'
                     }
                   }
                 },
@@ -681,12 +681,12 @@ const FIXTURE_CONTENT_MODEL = {
                   },
                   links: {
                     previousPost: {
-                      title: 'Stickman',
-                      permalink: '/demos/threejs/sprite/stickman.html'
-                    },
-                    nextPost: {
                       title: 'Simple 3D',
                       permalink: '/demos/threejs/simple-3d.html'
+                    },
+                    nextPost: {
+                      title: 'Stickman',
+                      permalink: '/demos/threejs/sprite/stickman.html'
                     }
                   }
                 },
@@ -716,12 +716,12 @@ const FIXTURE_CONTENT_MODEL = {
                   },
                   links: {
                     previousPost: {
-                      title: 'Ipsum demo',
-                      permalink: '/demos/threejs/webgpu/ipsum-demo.html'
-                    },
-                    nextPost: {
                       title: 'Minesweeper',
                       permalink: '/demos/threejs/sprite/minesweeper'
+                    },
+                    nextPost: {
+                      title: 'Ipsum demo',
+                      permalink: '/demos/threejs/webgpu/ipsum-demo.html'
                     }
                   }
                 }
@@ -756,12 +756,12 @@ const FIXTURE_CONTENT_MODEL = {
                   },
                   links: {
                     previousPost: {
-                      title: 'Lorem Demo',
-                      permalink: '/demos/threejs/webgpu/lorem-demo'
-                    },
-                    nextPost: {
                       title: 'Stickman',
                       permalink: '/demos/threejs/sprite/stickman.html'
+                    },
+                    nextPost: {
+                      title: 'Lorem Demo',
+                      permalink: '/demos/threejs/webgpu/lorem-demo'
                     }
                   }
                 },
@@ -789,11 +789,11 @@ const FIXTURE_CONTENT_MODEL = {
                     ]
                   },
                   links: {
-                    previousPost: null,
-                    nextPost: {
+                    previousPost: {
                       title: 'Ipsum demo',
                       permalink: '/demos/threejs/webgpu/ipsum-demo.html'
-                    }
+                    },
+                    nextPost: null
                   }
                 }
               ]
@@ -821,11 +821,11 @@ const FIXTURE_CONTENT_MODEL = {
                 ]
               },
               links: {
-                previousPost: {
+                previousPost: null,
+                nextPost: {
                   title: 'Simple 3D',
                   permalink: '/demos/threejs/simple-3d.html'
-                },
-                nextPost: null
+                }
               }
             },
             {
@@ -849,12 +849,12 @@ const FIXTURE_CONTENT_MODEL = {
               },
               links: {
                 previousPost: {
-                  title: 'Minesweeper',
-                  permalink: '/demos/threejs/sprite/minesweeper'
-                },
-                nextPost: {
                   title: 'Intelligent Drum n Bass',
                   permalink: '/demos/threejs/intelligent-drum-n-bass'
+                },
+                nextPost: {
+                  title: 'Minesweeper',
+                  permalink: '/demos/threejs/sprite/minesweeper'
                 }
               }
             }
@@ -878,11 +878,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: {
+            previousPost: null,
+            nextPost: {
               title: 'good-morning-world',
               permalink: '/demos/good-morning-world.html'
-            },
-            nextPost: null
+            }
           }
         },
         {
@@ -901,11 +901,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: null,
-            nextPost: {
+            previousPost: {
               title: 'Hello World',
               permalink: '/demos/hello-world'
-            }
+            },
+            nextPost: null
           }
         }
       ]
@@ -935,11 +935,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: {
+            previousPost: null,
+            nextPost: {
               title: 'Lets get together',
               permalink: '/events/lets-get-together.html'
-            },
-            nextPost: null
+            }
           }
         },
         {
@@ -961,12 +961,12 @@ const FIXTURE_CONTENT_MODEL = {
           },
           links: {
             previousPost: {
-              title: 'ManU - CFC',
-              permalink: '/events/manu-cfc.html'
-            },
-            nextPost: {
               title: 'Lets HTML now',
               permalink: '/events/lets-html-now.html'
+            },
+            nextPost: {
+              title: 'ManU - CFC',
+              permalink: '/events/manu-cfc.html'
             }
           }
         },
@@ -986,12 +986,12 @@ const FIXTURE_CONTENT_MODEL = {
           },
           links: {
             previousPost: {
-              title: 'What to do',
-              permalink: '/events/what-to-do.html'
-            },
-            nextPost: {
               title: 'Lets get together',
               permalink: '/events/lets-get-together.html'
+            },
+            nextPost: {
+              title: 'What to do',
+              permalink: '/events/what-to-do.html'
             }
           }
         },
@@ -1010,11 +1010,11 @@ const FIXTURE_CONTENT_MODEL = {
             categories: []
           },
           links: {
-            previousPost: null,
-            nextPost: {
+            previousPost: {
               title: 'ManU - CFC',
               permalink: '/events/manu-cfc.html'
-            }
+            },
+            nextPost: null
           }
         }
       ]
