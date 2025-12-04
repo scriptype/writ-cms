@@ -237,7 +237,7 @@ function Facet() {
                 }
               })
             })
-          })
+          }).flat()
         )
       }
 
