@@ -65,60 +65,23 @@ class Category extends ContentModelEntryNode {
     super(fsNode, context, settings)
 
     if (fsNode.isDefaultCategory) {
-      const title = context.peek().defaultCategoryName
-      const slug = makeSlug(title)
-      const { entriesAlias, categoriesAlias } = this.settings
-
-      const defaultCategory = {
-        contentType: context.peek().categoryContentType,
-        categoryContentType: context.peek().categoryContentType,
-        entryContentType: context.peek().entryContentType,
-        categoryAlias: context.peek().categoryAlias,
-        entryAlias: context.peek().entryAlias,
-        categoriesAlias: context.peek().categoriesAlias,
-        entriesAlias: context.peek().entriesAlias,
-        facetKeys: context.peek().facetKeys || [],
-        facets: [],
-        sortBy: context.peek().sortBy || 'date',
-        sortOrder: context.peek().sortOrder,
-        title,
-        slug,
-        content: '',
-        contentRaw: '',
-        isDefaultCategory: true,
-        level: this.settings.level
-      }
-
-      if (entriesAlias) {
-        defaultCategory[entriesAlias] = defaultCategory.levelPosts
-      }
-
-      if (categoriesAlias) {
-        defaultCategory[categoriesAlias] = defaultCategory.categories
-      }
-
-      return Object.assign(this, defaultCategory)
+      return this.makeDefaultCategory()
     }
-
-    const categoryContext = {
-      contentType: context.peek().categoryContentType,
-      categoryContentType: this.categoryContentType || context.peek().categoryContentType,
-      entryContentType: this.entryContentType || context.peek().entryContentType,
-      categoryAlias: this.categoryAlias || context.peek().categoryAlias,
-      entryAlias: this.entryAlias || context.peek().entryAlias,
-      categoriesAlias: this.categoriesAlias || context.peek().categoriesAlias,
-      entriesAlias: this.entriesAlias || this.settings.entriesAlias || context.peek().entriesAlias,
-      facetKeys: context.peek().facetKeys || [],
-      facets: [],
-      sortBy: this.sortBy || context.peek().sortBy,
-      sortOrder: this.sortOrder || context.peek().sortOrder,
-      title: this.title || fsNode.name,
-      slug: this.slug,
-      level: this.settings.level
-    }
-
-    Object.assign(this, categoryContext)
   }
+
+  makeDefaultCategory() {
+    const title = this.settings.defaultCategoryName
+
+    return Object.assign(this, {
+      facets: [],
+      title,
+      slug: makeSlug(title),
+      content: '',
+      contentRaw: '',
+      isDefaultCategory: true
+    })
+  }
+
 
   getPermalink() {
     if (this.fsNode.isDefaultCategory) {
@@ -178,8 +141,8 @@ class Category extends ContentModelEntryNode {
       attachments: []
     }
 
-    const entriesAlias = this.entriesAlias || this.settings.entriesAlias || this.context.peek().entriesAlias
-    const categoriesAlias = this.categoriesAlias || this.settings.categoriesAlias || this.context.peek().categoriesAlias
+    const entriesAlias = this.entriesAlias || this.settings.entriesAlias
+    const categoriesAlias = this.categoriesAlias || this.settings.categoriesAlias
 
     if (entriesAlias) {
       tree[entriesAlias] = tree.posts
@@ -197,32 +160,27 @@ class Category extends ContentModelEntryNode {
       'category' :
       `subCategory${this.settings.level - 1}`
 
-    this.fsNode.children.forEach(childNode => {
-      const childContext = this.context.push({
-        ..._.omit(this, [
-          'context',
-          'contentRaw',
-          'content',
-          'facets'
-        ]),
-        facetKeys: this.facets || this.context.peek().facetKeys || [],
-        key: contextKey
-      })
+    const childContext = this.context.push({
+      title: this.title,
+      slug: this.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath,
+      key: contextKey
+    })
 
+    this.fsNode.children.forEach(childNode => {
       if (this.matchers.indexFile(childNode)) {
         return
       }
 
       if (this.matchers.post(childNode)) {
-        const post = new models.Post(
-          childNode,
-          childContext,
-          {
-            entryAlias: this.settings.entryAlias,
-            entryContentType: this.entryContentType || this.settings.entryContentType,
-            contentTypes: this.settings.contentTypes
-          }
-        )
+        const postSettings = {
+          entryAlias: this.entryAlias || this.settings.entryAlias,
+          entryContentType: this.entryContentType || this.settings.entryContentType,
+          contentTypes: this.settings.contentTypes,
+          facetKeys: this.settings.facetKeys
+        }
+        const post = new models.Post(childNode, childContext, postSettings)
         if (Category.draftCheck(this.settings.mode, post)) {
           tree.levelPosts.push(post)
           tree.posts.push(post)
@@ -231,19 +189,18 @@ class Category extends ContentModelEntryNode {
       }
 
       if (this.matchers.category(childNode, this.settings.level)) {
-        const subCategory = new Category(
-          childNode,
-          childContext,
-          {
-            contentTypes: this.settings.contentTypes,
-            entryContentType: this.entryContentType || this.settings.entryContentType,
-            entryAlias: this.entryAlias || this.settings.entryAlias,
-            categoryAlias: this.categoryAlias || this.settings.categoryAlias,
-            entriesAlias: this.entriesAlias || this.settings.entriesAlias,
-            categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
-            level: this.settings.level + 1
-          }
-        )
+        const subCategorySettings = {
+          contentTypes: this.settings.contentTypes,
+          entryContentType: this.entryContentType || this.settings.entryContentType,
+          entryAlias: this.entryAlias || this.settings.entryAlias,
+          categoryAlias: this.categoryAlias || this.settings.categoryAlias,
+          entriesAlias: this.entriesAlias || this.settings.entriesAlias,
+          categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
+          facetKeys: this.settings.facetKeys,
+          mode: this.settings.mode,
+          level: this.settings.level + 1
+        }
+        const subCategory = new Category(childNode, childContext, subCategorySettings)
         if (Category.draftCheck(this.settings.mode, subCategory)) {
           tree.categories.push(subCategory)
           tree.posts.push(...subCategory.subtree.posts)
@@ -252,9 +209,9 @@ class Category extends ContentModelEntryNode {
       }
 
       if (this.matchers.attachment(childNode)) {
-        return tree.attachments.push(
-          new models.Attachment(childNode, childContext)
-        )
+        const attachmentSettings = {}
+        const attachment = new models.Attachment(childNode, childContext, attachmentSettings)
+        return tree.attachments.push(attachment)
       }
     })
 
@@ -262,24 +219,23 @@ class Category extends ContentModelEntryNode {
   }
 
   afterEffects(contentModel, collectionFacets) {
-    if (this.facetKeys.length) {
-      const categoryContext = _.omit(this, [
-        'context',
-        'contentRaw',
-        'content',
-        'categories',
-        'posts',
-        'attachments',
-        'facets'
-      ])
+    if (this.settings.facetKeys.length) {
+      const contextKey = this.settings.level === 1 ?
+        'category' :
+        `subCategory${this.settings.level - 1}`
+
+      const childContext = this.context.push({
+        title: this.title,
+        slug: this.slug,
+        permalink: this.permalink,
+        outputPath: this.outputPath,
+        key: contextKey
+      })
 
       this.facets = models.facet().collectFacets(
         this.subtree.posts,
-        this.facetKeys,
-        this.context.push({
-          ...categoryContext,
-          key: 'category'
-        })
+        this.settings.facetKeys,
+        childContext
       )
     }
 
@@ -303,7 +259,7 @@ class Category extends ContentModelEntryNode {
       return renderer.paginate({
         basePermalink: this.permalink,
         posts: this.subtree.posts,
-        postsPerPage: this.postsPerPage || 15, //this.context.peek().postsPerPage
+        postsPerPage: this.postsPerPage || 15, //this.settings.postsPerPage
         outputDir: this.outputPath,
         render: async ({ outputPath, pageOfPosts, paginationData }) => {
           const data = {

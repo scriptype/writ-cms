@@ -86,9 +86,7 @@ function createFacetField(facet, value) {
   }
 }
 
-function linkWithEntryFields(entry, facets) {
-  const facetsContext = entry.context.throwUntil(c => c.facetKeys).peek()
-  const facetKeys = facetsContext.facetKeys
+function linkWithEntryFields(entry, facets, facetKeys) {
   if (!facetKeys || !facetKeys.length) {
     return
   }

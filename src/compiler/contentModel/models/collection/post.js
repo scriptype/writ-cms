@@ -8,8 +8,10 @@ const models = {
 }
 
 const defaultSettings = {
+  entryContentType: undefined,
   entryAlias: undefined,
-  contentTypes: []
+  contentTypes: [],
+  facetKeys: []
 }
 class Post extends ContentModelEntryNode {
   static serialize(post) {
@@ -22,7 +24,7 @@ class Post extends ContentModelEntryNode {
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
 
-    this.contentType = this.context.peek().entryContentType || this.settings.entryContentType
+    this.contentType = this.settings.entryContentType
     this.schema = this.settings.contentTypes.find(ct => ct.name === this.contentType)
   }
 
@@ -53,7 +55,7 @@ class Post extends ContentModelEntryNode {
       return tree
     }
 
-    const context = this.context.push({
+    const childContext = this.context.push({
       title: this.title,
       slug: this.slug,
       permalink: this.permalink,
@@ -67,7 +69,7 @@ class Post extends ContentModelEntryNode {
       }
       if (this.matchers.attachment(childNode)) {
         tree.attachments.push(
-          new models.Attachment(childNode, context)
+          new models.Attachment(childNode, childContext)
         )
       }
     })
@@ -77,7 +79,7 @@ class Post extends ContentModelEntryNode {
 
   afterEffects(contentModel, collectionFacets) {
     // TODO: feels like collection should handle this
-    models.facet().linkWithEntryFields(this, collectionFacets)
+    models.facet().linkWithEntryFields(this, collectionFacets, this.settings.facetKeys)
 
     this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)

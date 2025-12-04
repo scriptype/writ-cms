@@ -161,14 +161,10 @@ class Collection extends ContentModelEntryNode {
     }
 
     const childContext = this.context.push({
-      ..._.omit(this, [
-        'context',
-        'contentRaw',
-        'content',
-        'facets'
-      ]),
-      defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
-      facetKeys: this.facets || this.settings.contentType?.facets || [],
+      title: this.title,
+      slug: this.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath,
       key: 'collection'
     })
 
@@ -202,20 +198,19 @@ class Collection extends ContentModelEntryNode {
       }
 
       if (this.matchers.category(childNode, 1)) {
-        const newCategory = new models.Category(
-          childNode,
-          childContext,
-          {
-            contentTypes: this.settings.contentTypes,
-            entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-            entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
-            categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
-            entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
-            categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-            mode: this.settings.mode,
-            level: 1,
-          }
-        )
+        const categorySettings = {
+          defaultCategoryName: this.settings.defaultCategoryName,
+          contentTypes: this.settings.contentTypes,
+          entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
+          entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
+          categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
+          entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
+          categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
+          facetKeys: this.facets || this.settings.contentType?.facets,
+          mode: this.settings.mode,
+          level: 1,
+        }
+        const newCategory = new models.Category(childNode, childContext, categorySettings)
         if (Collection.draftCheck(this.settings.mode, newCategory)) {
           tree.categories.push(newCategory)
           tree.posts.push(...newCategory.subtree.posts)
@@ -235,50 +230,51 @@ class Collection extends ContentModelEntryNode {
 
   addUncategorizedPost(childNode, postData, tree) {
     const childContext = this.context.push({
-      ..._.omit(this, [
-        'context',
-        'contentRaw',
-        'content',
-        'facets'
-      ]),
-      defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
-      facetKeys: this.facets || this.settings.contentType?.facets || [],
-      entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
+      title: this.title,
+      slug: this.slug,
+      permalink: this.permalink,
+      outputPath: this.outputPath,
       key: 'collection'
     })
 
     let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
     if (!defaultCategory) {
+      const defaultCategorySettings = {
+        defaultCategoryName: this.settings.defaultCategoryName,
+        categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
+        entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
+        entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
+        categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
+        entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
+        facetKeys: this.facets || this.settings.contentType?.facets,
+        mode: this.settings.mode,
+        contentTypes: this.settings.contentTypes,
+      }
       defaultCategory = new models.Category(
         { isDefaultCategory: true },
         childContext,
-        {
-          categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
-          entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-          entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
-          categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-          entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
-          mode: this.settings.mode,
-          contentTypes: this.settings.contentTypes,
-        }
+        defaultCategorySettings
       )
       tree.categories.push(defaultCategory)
     }
-    const defaultCategoryContext = _.omit(
-      defaultCategory,
-      ['posts', 'context', 'content', 'attachments']
-    )
-    const postContext = childContext.push({
-      ...defaultCategoryContext,
+
+    const defaultCategoryChildContext = childContext.push({
+      title: defaultCategory.title,
+      slug: defaultCategory.slug,
+      permalink: defaultCategory.permalink,
+      outputPath: defaultCategory.outputPath,
       key: 'category'
     })
+    const uncategorizedPostSettings = {
+      entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
+      entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
+      contentTypes: this.settings.contentTypes,
+      facetKeys: this.facets || this.settings.contentType?.facets,
+    }
     const uncategorizedPost = new models.Post(
       childNode || postData,
-      postContext,
-      {
-        entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-        contentTypes: this.settings.contentTypes
-      }
+      defaultCategoryChildContext,
+      uncategorizedPostSettings
     )
     if (models.Category.draftCheck(this.settings.mode, uncategorizedPost)) {
       defaultCategory.subtree.levelPosts.push(uncategorizedPost)
