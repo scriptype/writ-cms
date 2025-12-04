@@ -20,6 +20,6 @@ jobs:
     - name: install dependencies
       run: npm ci
     - name: run tests
-      run: npm run test:ci
+      run: for i in {1..4}; do npm run test:ci || exit 1; done
     - name: Coveralls
       uses: coverallsapp/github-action@v2
