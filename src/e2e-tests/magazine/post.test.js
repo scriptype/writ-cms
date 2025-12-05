@@ -65,20 +65,40 @@ test('E2E Magazine - Post Pages', async t => {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
         const $ = load(postHtml)
 
-        t.ok(
-          postHtml.includes(post.title),
-          `${post.permalink} displays post title`
+        const siteTitle = $('[data-site-title]').text()
+        t.equal(
+          siteTitle,
+          'Web Magazine',
+          `${post.permalink} has correct site title`
         )
 
-        if (post.content) {
-          t.ok(
-            postHtml.replace(/\r\n/g, '\n').includes(post.content),
-            `${post.permalink} contains post content`
+        const postTitle = $('[data-title]').text()
+
+        if (post.template === 'ReactBadMKay') {
+          t.equal(
+            postTitle,
+            `${post.title} mmkaaay?`,
+            `${post.permalink} has custom template content in title`
+          )
+        } else {
+          t.equal(
+            postTitle,
+            post.title,
+            `${post.permalink} has correct post title via data attribute`
           )
         }
 
-        const allLinks = $('a').toArray()
-        const collectionLink = allLinks.some(link => {
+        const contentElement = $('[data-content]')
+
+        if (post.content) {
+          t.ok(
+            contentElement.html().includes(post.content),
+            `${post.permalink} renders post content`
+          )
+        }
+
+        const breadcrumbLinks = $('[data-breadcrumb-link]').toArray()
+        const collectionLink = breadcrumbLinks.find(link => {
           const linkText = $(link).text()
           const linkHref = $(link).attr('href')
           return (
@@ -93,7 +113,7 @@ test('E2E Magazine - Post Pages', async t => {
         )
 
         const allCategoryLinksPresent = post.context.categories.every(cat => {
-          return allLinks.some(link => {
+          return breadcrumbLinks.some(link => {
             const linkText = $(link).text()
             const linkHref = $(link).attr('href')
             return linkText === cat.title && linkHref === cat.permalink
@@ -123,11 +143,11 @@ test('E2E Magazine - Post Pages', async t => {
       try {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
         const $ = load(postHtml)
-        const allLinks = $('a').toArray()
 
         if (post.demos) {
+          const demoLinks = $('[data-demo-link]').toArray()
           const allDemosLinked = post.demos.every(demo => {
-            return allLinks.some(link => {
+            return demoLinks.some(link => {
               const linkText = $(link).text()
               const linkHref = $(link).attr('href')
               return linkText === demo.title && linkHref === demo.permalink
@@ -141,8 +161,9 @@ test('E2E Magazine - Post Pages', async t => {
         }
 
         if (post.articles) {
+          const articleLinks = $('[data-article-link]').toArray()
           const allArticlesLinked = post.articles.every(article => {
-            return allLinks.some(link => {
+            return articleLinks.some(link => {
               const linkText = $(link).text()
               const linkHref = $(link).attr('href')
               return linkText === article.title && linkHref === article.permalink
@@ -156,8 +177,9 @@ test('E2E Magazine - Post Pages', async t => {
         }
 
         if (post.books) {
+          const bookLinks = $('[data-book-link]').toArray()
           const allBooksLinked = post.books.every(book => {
-            return allLinks.some(link => {
+            return bookLinks.some(link => {
               const linkText = $(link).text()
               const linkHref = $(link).attr('href')
               return linkText === book.title && linkHref === book.permalink
@@ -171,8 +193,9 @@ test('E2E Magazine - Post Pages', async t => {
         }
 
         if (post.events) {
+          const eventLinks = $('[data-event-link]').toArray()
           const allEventsLinked = post.events.every(event => {
-            return allLinks.some(link => {
+            return eventLinks.some(link => {
               const linkText = $(link).text()
               const linkHref = $(link).attr('href')
               return linkText === event.title && linkHref === event.permalink
@@ -203,20 +226,18 @@ test('E2E Magazine - Post Pages', async t => {
       try {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
         const $ = load(postHtml)
-        const allLinks = $('a').toArray()
+        const makerLink = $('[data-maker-link]')
 
-        const hasMakerLink = allLinks.some(link => {
-          const linkText = $(link).text()
-          const linkHref = $(link).attr('href')
-          return (
-            linkText === post.maker.title &&
-            linkHref === `/authors/${post.maker.slug}.html`
-          )
-        })
+        t.equal(
+          makerLink.text(),
+          post.maker.title,
+          `${post.permalink} maker link has correct title`
+        )
 
-        t.ok(
-          hasMakerLink,
-          `${post.permalink} has link to maker with correct title and href`
+        t.equal(
+          makerLink.attr('href'),
+          `/authors/${post.maker.slug}.html`,
+          `${post.permalink} maker link has correct href`
         )
       } catch (err) {
         t.fail(
@@ -237,20 +258,18 @@ test('E2E Magazine - Post Pages', async t => {
       try {
         const postHtml = await readFile(postPath, { encoding: 'utf-8' })
         const $ = load(postHtml)
-        const allLinks = $('a').toArray()
+        const authorLink = $('[data-author-link]')
 
-        const hasAuthorLink = allLinks.some(link => {
-          const linkText = $(link).text()
-          const linkHref = $(link).attr('href')
-          return (
-            linkText === post.author.title &&
-            linkHref === `/authors/${post.author.slug}.html`
-          )
-        })
+        t.equal(
+          authorLink.text(),
+          post.author.title,
+          `${post.permalink} author link has correct title`
+        )
 
-        t.ok(
-          hasAuthorLink,
-          `${post.permalink} has link to author with correct title and href`
+        t.equal(
+          authorLink.attr('href'),
+          `/authors/${post.author.slug}.html`,
+          `${post.permalink} author link has correct href`
         )
       } catch (err) {
         t.fail(

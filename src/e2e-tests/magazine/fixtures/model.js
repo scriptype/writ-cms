@@ -305,7 +305,7 @@ const FIXTURE_CONTENT_MODEL = {
             },
             { title: 'Vue good', slug: 'vue-good', permalink: '/articles/vue-good.html' }
           ],
-          content: 'Hey, it&#39;s me.',
+          content: "Hey, it's me.",
           context: {
             collection: {
               title: 'authors',
