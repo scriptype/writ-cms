@@ -321,7 +321,8 @@ class Category extends ContentModelEntryNode {
     }
 
     const renderFacets = () => {
-      if (!this.facets?.length) {
+      const isUntitledDefaultCategory = this.isDefaultCategory && !this.slug
+      if (isUntitledDefaultCategory || !this.facets?.length) {
         return
       }
       return models.facet().render(

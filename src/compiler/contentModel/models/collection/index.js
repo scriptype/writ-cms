@@ -294,17 +294,6 @@ class Collection extends ContentModelEntryNode {
         key: 'collection'
       })
 
-      console.log(`
-
-      * * *
-
-      Collection ${this.title}
-
-      subtree.posts: ${this.subtree.posts.map(p => p.title)}
-
-      * * *
-
-      `)
       this.facets = models.facet().collectFacets(
         this.subtree.posts,
         facetKeys,
@@ -405,12 +394,6 @@ class Collection extends ContentModelEntryNode {
     }
 
     const renderFacets = () => {
-      if (this.facets.length) {
-        /*
-          console.log(collection.title, 'facets')
-          console.dir(collection.facets, { depth: 3, color: true })
-          */
-      }
       return models.facet().render(
         renderer, this.facets, { contentModel, settings, debug }
       )
