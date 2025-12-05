@@ -1,29 +1,29 @@
 {{#>base page="post"}}
-  <h1>{{settings.site.title}}</h1>
+  <h1 data-site-title>{{settings.site.title}}</h1>
 
   {{#with post}}
 
-    <h2>{{title}}</h2>
+    <h2 data-title>{{title}}</h2>
 
-    <div>{{> @partial-block .. }}</div>
+    <div data-content>{{> @partial-block .. }}</div>
 
     <div>
     {{#each context.items as |layer|}}
       {{#if layer.title}}
-        <a href="{{layer.permalink}}">{{layer.title}}</a> &raquo;
+        <a data-breadcrumb-link href="{{layer.permalink}}">{{layer.title}}</a> &raquo;
       {{/if}}
     {{/each}}
     </div>
 
     <div>
     {{#if date}}
-    Date: {{dateMedium date}}
+    Date: <span data-date-text>{{dateMedium date}}</span>
     {{/if}}
     </div>
 
     <div>
     {{#if tags}}
-      Tags: {{tags}}
+      Tags: <span data-tags-text>{{tags}}</span>
     {{/if}}
     </div>
 
@@ -32,7 +32,7 @@
       Relations:
       <ul>
         {{#each relation.entries as |entry|}}
-          <li><a href="{{entry.permalink}}">{{entry.title}}</a></li>
+          <li><a data-relation-link href="{{entry.permalink}}">{{entry.title}}</a></li>
         {{/each}}
       </ul>
     {{else}}
@@ -45,7 +45,7 @@
       Mentions:
       <ul>
         {{#each links.mentionedBy as |mentioner|}}
-        <li><a href="{{mentioner.permalink}}">{{mentioner.title}}</a></li>
+        <li><a data-mention-link href="{{mentioner.permalink}}">{{mentioner.title}}</a></li>
         {{/each}}
       </ul>
     {{else}}

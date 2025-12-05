@@ -1,25 +1,39 @@
 {{#>base page="post"}}
-  <h1>{{settings.site.title}}</h1>
+  <h1 data-site-title>{{settings.site.title}}</h1>
 
   {{#with author}}
 
-    <h2>{{title}}</h2>
+    <h2 data-title>{{title}}</h2>
 
-    <div>{{> @partial-block .. }}</div>
+    <div data-content>{{> @partial-block .. }}</div>
 
     <div>
     {{#each context.items as |layer|}}
       {{#if layer.title}}
-        <a href="{{layer.permalink}}">{{layer.title}}</a> &raquo;
+        <a data-breadcrumb-link href="{{layer.permalink}}">{{layer.title}}</a> &raquo;
       {{/if}}
     {{/each}}
+    </div>
+
+    <div>
+    {{#if date}}
+      Date: <a data-date-link href="{{date}}">{{dateMedium date}}</a>
+    {{/if}}
+    </div>
+
+    <div>
+    {{#if tags}}
+      {{#each tags as |tag|}}
+        <a data-tag-link href="{{tag.facetPermalink}}">{{tag.value}}</a>
+      {{/each}}
+    {{/if}}
     </div>
 
     <div>
       {{#if articles}}
         Articles:
         {{#each articles as |article|}}
-          <a href="{{article.permalink}}">{{article.title}}</a>
+          <a data-article-link href="{{article.permalink}}">{{article.title}}</a>
         {{/each}}
       {{/if}}
     </div>
@@ -28,7 +42,7 @@
       {{#if demos}}
         Demos:
         {{#each demos as |demo|}}
-          <a href="{{demo.permalink}}">{{demo.title}}</a>
+          <a data-demo-link href="{{demo.permalink}}">{{demo.title}}</a>
         {{/each}}
       {{/if}}
     </div>
@@ -37,7 +51,7 @@
       {{#if books}}
         Books:
         {{#each books as |book|}}
-          <a href="{{book.permalink}}">{{book.title}}</a>
+          <a data-book-link href="{{book.permalink}}">{{book.title}}</a>
         {{/each}}
       {{/if}}
     </div>
@@ -46,23 +60,9 @@
       {{#if events}}
         Events:
         {{#each events as |event|}}
-          <a href="{{event.permalink}}">{{event.title}}</a>
+          <a data-event-link href="{{event.permalink}}">{{event.title}}</a>
         {{/each}}
       {{/if}}
-    </div>
-
-    <div>
-    {{#if date}}
-      Date: <a href="{{date}}">{{dateMedium date}}</a>
-    {{/if}}
-    </div>
-
-    <div>
-    {{#if tags}}
-      {{#each tags as |tag|}}
-        <a href="{{tag.facetPermalink}}">{{tag.value}}</a>
-      {{/each}}
-    {{/if}}
     </div>
 
     <div>
@@ -70,7 +70,7 @@
       Relations:
       <ul>
         {{#each relation.entries as |entry|}}
-          <li><a href="{{entry.permalink}}">{{entry.title}}</a></li>
+          <li><a data-relation-link href="{{entry.permalink}}">{{entry.title}}</a></li>
         {{/each}}
       </ul>
     {{else}}
@@ -83,7 +83,7 @@
       Mentions:
       <ul>
         {{#each links.mentionedBy as |mentioner|}}
-        <li><a href="{{mentioner.permalink}}">{{mentioner.title}}</a></li>
+        <li><a data-mention-link href="{{mentioner.permalink}}">{{mentioner.title}}</a></li>
         {{/each}}
       </ul>
     {{else}}
