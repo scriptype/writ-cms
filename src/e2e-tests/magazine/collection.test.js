@@ -611,7 +611,10 @@ test('E2E Magazine - Collection Pages', async t => {
 
             All links found:
             `)
-            console.log(allLinks)
+            console.log(allLinks.map(link => ({
+              title: $(link).text(),
+              href: $(link).attr('href')
+            })))
             console.log(`
 
             * * * *
