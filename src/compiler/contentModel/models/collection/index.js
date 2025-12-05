@@ -191,7 +191,7 @@ class Collection extends ContentModelEntryNode {
           categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
           entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
           categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-          facetKeys: this.facets || this.settings.contentType?.facets,
+          facetKeys: this.facets || this.settings.contentType?.facets || [],
           sortBy: this.sortBy || this.settings.sortBy,
           sortOrder: this.sortOrder || this.settings.sortOrder,
           mode: this.settings.mode,
@@ -233,7 +233,7 @@ class Collection extends ContentModelEntryNode {
         entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
         categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
         entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
-        facetKeys: this.facets || this.settings.contentType?.facets,
+        facetKeys: this.facets || this.settings.contentType?.facets || [],
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
         mode: this.settings.mode,
@@ -258,7 +258,7 @@ class Collection extends ContentModelEntryNode {
       entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
       entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
       contentTypes: this.settings.contentTypes,
-      facetKeys: this.facets || this.settings.contentType?.facets,
+      facetKeys: this.facets || this.settings.contentType?.facets || [],
     }
     const uncategorizedPost = new models.Post(
       childNode || postData,
@@ -280,7 +280,7 @@ class Collection extends ContentModelEntryNode {
     Collection.locatePinnedEntries(this.subtree.posts)
 
     // this.facets was front-matter property. store it as facetKeys
-    const facetKeys = this.facets || this.settings.contentType?.facets
+    const facetKeys = this.facets || this.settings.contentType?.facets || []
 
     // this.facets now becomes instances of facet model
     this.facets = []
