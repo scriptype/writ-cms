@@ -221,23 +221,6 @@ class Category extends ContentModelEntryNode {
   }
 
   afterEffects(contentModel, collectionFacets) {
-    console.log(`
-    * * * *
-    
-    Category ${this.title}
-
-
-    facetKeys: ${this.settings.facetKeys}
-
-    collectionFacets:
-
-    `)
-    console.log(collectionFacets.map(({ key, map }) => ({ key, size: map.size })))
-    console.log(`
-    
-
-    * * * *
-    `)
     if (this.settings.facetKeys.length) {
       const contextKey = this.settings.level === 1 ?
         'category' :

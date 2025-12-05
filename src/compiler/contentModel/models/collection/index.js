@@ -294,6 +294,17 @@ class Collection extends ContentModelEntryNode {
         key: 'collection'
       })
 
+      console.log(`
+
+      * * *
+
+      Collection ${this.title}
+
+      subtree.posts: ${this.subtree.posts.map(p => p.title)}
+
+      * * *
+
+      `)
       this.facets = models.facet().collectFacets(
         this.subtree.posts,
         facetKeys,
