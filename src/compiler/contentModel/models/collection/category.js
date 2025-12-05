@@ -258,9 +258,6 @@ class Category extends ContentModelEntryNode {
 
   render(renderer, { contentModel, settings, debug }) {
     const renderCategory = () => {
-      if (this.isDefaultCategory && !this.slug) {
-        return
-      }
       return renderer.paginate({
         basePermalink: this.permalink,
         posts: this.subtree.posts,
@@ -321,13 +318,21 @@ class Category extends ContentModelEntryNode {
     }
 
     const renderFacets = () => {
-      const isUntitledDefaultCategory = this.isDefaultCategory && !this.slug
-      if (isUntitledDefaultCategory || !this.facets?.length) {
+      if (!this.facets?.length) {
         return
       }
       return models.facet().render(
         renderer, this.facets, { contentModel, settings, debug }
       )
+    }
+
+    /*
+     * Collection doesn't render uncategorized posts, so it must be done here.
+     * An unnamed default category shouldn't render anything else. This way, we
+     * avoid race conditions with collection's rendering in the same paths. */
+    const isUntitledDefaultCategory = this.isDefaultCategory && !this.slug
+    if (isUntitledDefaultCategory) {
+      return renderPosts()
     }
 
     return Promise.all([
