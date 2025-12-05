@@ -14,7 +14,8 @@ const defaultSettings = {
   entryAlias: undefined,
   mode: 'start',
   level: 1,
-  contentTypes: []
+  contentTypes: [],
+  facetKeys: []
 }
 class Category extends ContentModelEntryNode {
   static linkPosts(post, postIndex, posts) {
