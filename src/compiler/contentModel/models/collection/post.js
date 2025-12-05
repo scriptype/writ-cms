@@ -81,7 +81,7 @@ class Post extends ContentModelEntryNode {
     console.log(`
     * * * *
     
-    Post
+    Post ${this.title}
 
 
     facetKeys: ${this.settings.facetKeys}
@@ -89,7 +89,7 @@ class Post extends ContentModelEntryNode {
     collectionFacets:
 
     `)
-    console.log(collectionFacets)
+    console.log(collectionFacets.map(({ key, map }) => ({ key, size: map.size })))
     console.log(`
     
 

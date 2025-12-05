@@ -224,7 +224,7 @@ class Category extends ContentModelEntryNode {
     console.log(`
     * * * *
     
-    Category
+    Category ${this.title}
 
 
     facetKeys: ${this.settings.facetKeys}
@@ -232,7 +232,7 @@ class Category extends ContentModelEntryNode {
     collectionFacets:
 
     `)
-    console.log(collectionFacets)
+    console.log(collectionFacets.map(({ key, map }) => ({ key, size: map.size })))
     console.log(`
     
 
