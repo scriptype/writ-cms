@@ -4,6 +4,8 @@ const { readdir, mkdir, rm, writeFile, readFile } = require('fs/promises')
 const test = require('tape')
 const writ = require('..')
 
+const sleep = (duration) => new Promise(resolve => setTimeout(resolve, duration))
+
 test('Theme', t => {
 
   t.test('Deleting theme folder will result in a fresh theme folder', async t => {
@@ -22,6 +24,7 @@ test('Theme', t => {
       })
 
       await rm(join(testDir, themeDirectory), { recursive: true })
+      await sleep(50)
 
       await writ.build({
         rootDirectory
@@ -98,6 +101,7 @@ test('Theme', t => {
       })
 
       await rm(join(testDir, themeDirectory, themeAssetsDirectory), { recursive: true })
+      await sleep(50)
 
       await writ.build({
         rootDirectory
@@ -175,6 +179,7 @@ test('Theme', t => {
 
       const { themeDirectory } = writ.getDefaultSettings()
       await rm(join(testDir, themeDirectory, themeTemplatesDirectory), { recursive: true })
+      await sleep(50)
 
       await writ.build({
         rootDirectory: testDir
