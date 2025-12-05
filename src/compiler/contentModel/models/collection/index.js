@@ -294,6 +294,8 @@ class Collection extends ContentModelEntryNode {
     sort(this.subtree.posts, sortBy, sortOrder)
     Collection.locatePinnedEntries(this.subtree.posts)
 
+    this.facets = []
+
     if (this.facetKeys.length) {
       const collectionContext = _.omit(this, [
         'context',
