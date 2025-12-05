@@ -394,7 +394,10 @@ test('E2E Magazine - Collection Pages', async t => {
 
           All links found:
           `)
-          console.log(allLinks.map(link => $(link).text()))
+          console.log(allLinks.map(link => ({
+            title: $(link).text(),
+            href: $(link).attr('href')
+          })))
           console.log(`
 
           * * * *
@@ -571,7 +574,10 @@ test('E2E Magazine - Collection Pages', async t => {
 
             All links found:
             `)
-            console.log(allLinks.map(link => $(link).text()))
+            console.log(allLinks.map(link => ({
+              title: $(link).text(),
+              href: $(link).attr('href')
+            })))
             console.log(`
 
             * * * *
