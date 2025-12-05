@@ -78,6 +78,23 @@ class Post extends ContentModelEntryNode {
   }
 
   afterEffects(contentModel, collectionFacets) {
+    console.log(`
+    * * * *
+    
+    Post
+
+
+    facetKeys: ${this.settings.facetKeys}
+
+    collectionFacets:
+
+    `)
+    console.log(collectionFacets)
+    console.log(`
+    
+
+    * * * *
+    `)
     // TODO: feels like collection should handle this
     models.facet().linkWithEntryFields(this, collectionFacets, this.settings.facetKeys)
 
