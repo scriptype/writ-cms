@@ -73,21 +73,6 @@ class Collection extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-
-    Object.assign(this, {
-      contentType: this.contentType || this.settings.contentType?.name || 'default',
-      categoryContentType: this.categoryContentType || this.settings.contentType?.categoryContentType || 'default',
-      entryContentType: this.entryContentType || this.settings.contentType?.entryContentType || 'default',
-      categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
-      categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-      entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-      entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
-      defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
-      facetKeys: this.facets || this.settings.contentType?.facets || [],
-      sortBy: this.sortBy || this.settings.sortBy,
-      sortOrder: this.sortOrder || this.settings.sortOrder,
-      facets: []
-    })
   }
 
   getSlug() {
@@ -134,7 +119,7 @@ class Collection extends ContentModelEntryNode {
       },
 
       postIndexFile: fsNode => {
-        const indexFileNameOptions = [this.settings.contentType?.entryAlias, 'post', 'index'].filter(Boolean)
+        const indexFileNameOptions = [this.entryAlias, this.settings.contentType?.entryAlias, 'post', 'index'].filter(Boolean)
         return (
           isTemplateFile(fsNode) &&
           fsNode.name.match(
@@ -294,26 +279,25 @@ class Collection extends ContentModelEntryNode {
     sort(this.subtree.posts, sortBy, sortOrder)
     Collection.locatePinnedEntries(this.subtree.posts)
 
+    // this.facets was front-matter property. store it as facetKeys
+    const facetKeys = this.facets || this.settings.contentType?.facets
+
+    // this.facets now becomes instances of facet model
     this.facets = []
 
-    if (this.facetKeys.length) {
-      const collectionContext = _.omit(this, [
-        'context',
-        'contentRaw',
-        'content',
-        'categories',
-        'posts',
-        'attachments',
-        'facets'
-      ])
+    if (facetKeys.length) {
+      const childContext = this.context.push({
+        title: this.title,
+        slug: this.slug,
+        permalink: this.permalink,
+        outputPath: this.outputPath,
+        key: 'collection'
+      })
 
       this.facets = models.facet().collectFacets(
         this.subtree.posts,
-        this.facetKeys,
-        this.context.push({
-          ...collectionContext,
-          key: 'collection'
-        })
+        facetKeys,
+        childContext
       )
     }
 
@@ -336,6 +320,7 @@ class Collection extends ContentModelEntryNode {
 
   render(renderer, { contentModel, settings, debug }) {
     const renderCollection = () => {
+      const contentType = this.contentType || this.settings.contentType?.name || 'default'
       const renderHTML = renderer.paginate({
         basePermalink: this.permalink,
         posts: this.subtree.posts,
@@ -345,7 +330,7 @@ class Collection extends ContentModelEntryNode {
           return renderer.render({
             templates: [
               `pages/${this.template}`,
-              `pages/collection/${this.contentType}`,
+              `pages/collection/${contentType}`,
               `pages/collection/default`
             ],
             outputPath,
