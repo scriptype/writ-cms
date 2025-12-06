@@ -1,0 +1,73 @@
+{{#>base page="category"}}
+
+  <style>
+    .category-header {
+      display: flex;
+      gap: .8em;
+      align-items: center;
+    }
+
+    .category-facets {
+      font-size: .8em;
+      font-variant: small-caps;
+    }
+  </style>
+
+  <h1 data-site-title>{{settings.site.title}}</h1>
+
+  <header class="category-header">
+    <h2><a data-title href="{{technique.permalink}}">{{technique.title}}</a></h2>
+
+    {{#if technique.facets.length}}
+    <div class="category-facets">
+      {{#if (is technique.permalink '/')}}
+      <a data-facet-browse-link href="by">by</a>:
+      {{else}}
+      <a data-facet-browse-link href="{{technique.permalink}}/by">by</a>:
+      {{/if}}
+      {{#each technique.facets as |facet|}}
+      <a data-facet-link href="{{facet.permalink}}">{{facet.title}}</a>
+      {{/each}}
+    </div>
+    {{/if}}
+  </header>
+
+  <div>
+    <div data-technique-title>{{technique.title}}</div>
+    <div data-technique-categories-length>{{technique.categories.length}}</div>
+    <div data-technique-techniques-length>{{technique.techniques.length}}</div>
+    <div data-technique-posts-length>{{technique.posts.length}}</div>
+    <div data-technique-demos-length>{{technique.demos.length}}</div>
+  </div>
+
+  <div>
+    <div data-category-title>{{category.title}}</div>
+    <div data-category-categories-length>{{category.categories.length}}</div>
+    <div data-category-techniques-length>{{category.techniques.length}}</div>
+    <div data-category-posts-length>{{category.posts.length}}</div>
+    <div data-category-demos-length>{{category.demos.length}}</div>
+  </div>
+
+  <div data-content>{{> @partial-block }}</div>
+
+  <p data-template-text>Welcome to technique template!</p>
+
+  {{#if technique.techniques.length}}
+  <h3>Posts by subcategories</h3>
+  {{#each technique.techniques as |subcategory| }}
+    <h4><a data-category-link href="{{subcategory.permalink}}">{{subcategory.title}}</a></h4>
+    <ul>
+      {{#each subcategory.demos as |post|}}
+      <li><a data-post-link href="{{post.permalink}}">{{post.title}}</a></li>
+      {{/each}}
+    </ul>
+  {{/each}}
+  {{/if}}
+
+  <h3>All posts</h3>
+  <ul>
+    {{#each technique.demos as |post|}}
+    <li><a data-post-link href="{{post.permalink}}">{{post.title}}</a></li>
+    {{/each}}
+  </ul>
+{{/base}}

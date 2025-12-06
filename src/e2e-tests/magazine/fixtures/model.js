@@ -27,7 +27,9 @@ const FIXTURE_CONTENT_MODEL = {
           title: 'Guides',
           slug: 'guides',
           date: '2025-11-03',
+          contentType: 'BlogTopic',
           content: '',
+          categories: [],
           posts: [
             {
               title: 'Hello Design',
@@ -447,6 +449,7 @@ const FIXTURE_CONTENT_MODEL = {
           slug: 'css',
           title: 'Cascade all the way',
           date: '2025-11-07',
+          contentType: 'Technology',
           categoryContentType: 'Technique',
           categoryAlias: 'technique',
           categoriesAlias: 'techniques',
@@ -456,7 +459,9 @@ const FIXTURE_CONTENT_MODEL = {
               title: 'CSS Art',
               slug: 'css-art',
               date: '2025-11-08',
+              contentType: 'Technique',
               content: '',
+              categories: [],
               posts: [
                 {
                   title: 'Carpet Motifs',
@@ -531,7 +536,9 @@ const FIXTURE_CONTENT_MODEL = {
               title: 'Grid',
               slug: 'grid',
               date: '2025-11-09',
+              contentType: 'Technique',
               content: '',
+              categories: [],
               posts: [
                 {
                   title: 'Grid vs Flexbox',
@@ -644,6 +651,7 @@ const FIXTURE_CONTENT_MODEL = {
           slug: 'threejs',
           title: 'Not one and not two, it\'s three',
           date: '2025-11-10',
+          contentType: 'Technology',
           categoryContentType: 'Technique',
           categoryAlias: 'technique',
           categoriesAlias: 'techniques',
@@ -653,7 +661,9 @@ const FIXTURE_CONTENT_MODEL = {
               title: 'Sprite',
               slug: 'sprite',
               date: '2025-11-11',
+              contentType: 'Technique',
               content: '',
+              categories: [],
               posts: [
                 {
                   title: 'Minesweeper',
@@ -731,7 +741,9 @@ const FIXTURE_CONTENT_MODEL = {
               title: 'WebGPU',
               slug: 'webgpu',
               date: '2025-11-12',
+              contentType: 'Technique',
               content: '',
+              categories: [],
               posts: [
                 {
                   title: 'Ipsum demo',

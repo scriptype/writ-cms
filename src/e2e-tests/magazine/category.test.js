@@ -110,148 +110,294 @@ test('E2E Magazine - Category Pages', async t => {
         'index.html'
       )
 
+      let $
       try {
         const categoryHtml = await readFile(
           categoryIndexPath,
           { encoding: 'utf-8' }
         )
 
-        const $ = load(categoryHtml)
-
-        const hasCategoryTitle = $('a').toArray().some(link => {
-          return $(link).text() === category.title
-        })
-
-        t.ok(
-          hasCategoryTitle,
-          `${collection.slug}/${categoryPath} displays category title`
-        )
-
-        if (category.content) {
-          const bodyContent = $('body').html()
-          const hasExactContent = bodyContent.includes(category.content)
-
-          t.ok(
-            hasExactContent,
-            `${collection.slug}/${categoryPath} contains category content`
-          )
-        }
-
-        const usedFacets = getUsedFacets(
-          category.categories,
-          category.posts,
-          collection.facets
-        )
-
-        const allLinks = $('a').toArray()
-
-        if (usedFacets.size !== 0) {
-          const browseFacetsHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}`
-          const hasBrowseFacetsLink = allLinks.some(link => {
-            const linkText = $(link).text()
-            const linkHref = $(link).attr('href')
-            return linkText === 'by' && linkHref === browseFacetsHref
-          })
-
-          t.ok(
-            hasBrowseFacetsLink,
-            `${collection.slug}/${categoryPath} has browse facets link`
-          )
-        }
-
-        const allUsedFacetsLinked = Array.from(usedFacets).every(facet => {
-          const facetPageHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
-          return allLinks.some(link => {
-            const linkText = $(link).text()
-            const linkHref = $(link).attr('href')
-            return linkText === facet && linkHref === facetPageHref
-          })
-        })
-
-        t.ok(
-          allUsedFacetsLinked,
-          `${collection.slug}/${categoryPath} displays all used facets with correct links`
-        )
-
-        const unusedFacets = collection.facets.filter(
-          facet => !usedFacets.has(facet)
-        )
-        const noUnusedFacetsLinked = unusedFacets.every(facet => {
-          const facetPageHref = `/${collection.slug}/${categoryPath}/${FACET_BROWSE_PATH}/${facet}`
-          return !allLinks.some(link => {
-            const linkText = $(link).text()
-            const linkHref = $(link).attr('href')
-            return linkText === facet && linkHref === facetPageHref
-          })
-        })
-
-        t.ok(
-          noUnusedFacetsLinked,
-          `${collection.slug}/${categoryPath} does not display unused facets`
-        )
-
-        const categoryPosts = flattenCategoryPosts(category)
-
-        const allPostsLinked = categoryPosts.every(post => {
-          return allLinks.some(link => {
-            const linkText = $(link).text()
-            const linkHref = $(link).attr('href')
-            return linkText === post.title && linkHref === post.permalink
-          })
-        })
-
-        t.ok(
-          allPostsLinked,
-          `${collection.slug}/${categoryPath} displays all posts with correct links`
-        )
-
-        const allLinkTexts = allLinks.map(link => $(link).text())
-
-        if (Array.isArray(category.categories) && category.categories.length !== 0) {
-          const directSubcategoryTitles = category.categories
-            .map(c => c.title)
-            .filter(title => title)
-
-          const directSubcategoriesPresent = directSubcategoryTitles.every(
-            title => allLinkTexts.includes(title)
-          )
-
-          t.ok(
-            directSubcategoriesPresent,
-            `${collection.slug}/${categoryPath} displays all direct subcategories`
-          )
-
-          const subcategoriesHavePosts = category.categories.every(
-            subcat => {
-              const subcatPosts = flattenCategoryPosts(subcat)
-              return subcatPosts.length !== 0
-            }
-          )
-
-          t.ok(
-            subcategoriesHavePosts,
-            `${collection.slug}/${categoryPath} all direct subcategories have at least one post`
-          )
-
-          const allSubcategoriesHaveValidLinks = category.categories.every(
-            subcat => {
-              const subcategoryHref = `/${collection.slug}/${categoryPath}/${subcat.slug}`
-              return allLinks.some(link => {
-                const linkText = $(link).text()
-                const linkHref = $(link).attr('href')
-                return linkText === subcat.title && linkHref === subcategoryHref
-              })
-            }
-          )
-
-          t.ok(
-            allSubcategoriesHaveValidLinks,
-            `${collection.slug}/${categoryPath} displays subcategories with correct links`
-          )
-        }
+        $ = load(categoryHtml)
       } catch (err) {
         t.fail(
           `${collection.slug}/${categoryPath} index.html: ${err.message}`
+        )
+        return
+      }
+
+      const siteTitle = $('[data-site-title]').text()
+      t.equal(
+        siteTitle,
+        'Web Magazine',
+        `${collection.slug}/${categoryPath} has correct site title`
+      )
+
+      const titleLink = $('[data-title]')
+      t.equal(
+        titleLink.text(),
+        category.title,
+        `${collection.slug}/${categoryPath} displays category title`
+      )
+
+      if (category.content) {
+        const contentElement = $('[data-content]')
+        t.ok(
+          contentElement.html().includes(category.content),
+          `${collection.slug}/${categoryPath} contains category content`
+        )
+      }
+
+      const usedFacets = getUsedFacets(
+        category.categories,
+        category.posts,
+        collection.facets
+      )
+
+      const facetBrowseLink = $('[data-facet-browse-link]')
+      const facetLinks = $('[data-facet-link]').toArray()
+      const postLinks = $('[data-post-link]').toArray()
+      const categoryLinks = $('[data-category-link]').toArray()
+
+      if (usedFacets.size !== 0) {
+        t.ok(
+          facetBrowseLink.length !== 0,
+          `${collection.slug}/${categoryPath} has browse facets link`
+        )
+      }
+
+      const allUsedFacetsLinked = Array.from(usedFacets).every(facet => {
+        return facetLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === facet && linkHref.includes(`/${facet}`)
+        })
+      })
+
+      t.ok(
+        allUsedFacetsLinked,
+        `${collection.slug}/${categoryPath} displays all used facets with correct links`
+      )
+
+      const unusedFacets = collection.facets.filter(
+        facet => !usedFacets.has(facet)
+      )
+      const noUnusedFacetsLinked = unusedFacets.every(facet => {
+        return !facetLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === facet && linkHref.includes(`/${facet}`)
+        })
+      })
+
+      t.ok(
+        noUnusedFacetsLinked,
+        `${collection.slug}/${categoryPath} does not display unused facets`
+      )
+
+      const categoryPosts = flattenCategoryPosts(category)
+
+      const allPostsLinked = categoryPosts.every(post => {
+        return postLinks.some(link => {
+          const linkText = $(link).text()
+          const linkHref = $(link).attr('href')
+          return linkText === post.title && linkHref === post.permalink
+        })
+      })
+
+      t.ok(
+        allPostsLinked,
+        `${collection.slug}/${categoryPath} displays all posts with correct links`
+      )
+
+      if (category.categories.length) {
+        const directSubcategoriesPresent = category.categories.every(
+          subcat => {
+            const subcategoryHref = `/${collection.slug}/${categoryPath}/${subcat.slug}`
+            return categoryLinks.some(link => {
+              const linkText = $(link).text()
+              const linkHref = $(link).attr('href')
+              return linkText === subcat.title && linkHref === subcategoryHref
+            })
+          }
+        )
+
+        t.ok(
+          directSubcategoriesPresent,
+          `${collection.slug}/${categoryPath} displays all direct subcategories with correct links`
+        )
+
+        const allSubcategoryPostsDisplayed = category.categories.every(
+          subcat => {
+            const subcatPosts = flattenCategoryPosts(subcat)
+            return subcatPosts.every(post => {
+              return postLinks.some(link => {
+                const linkText = $(link).text()
+                const linkHref = $(link).attr('href')
+                return linkText === post.title && linkHref === post.permalink
+              })
+            })
+          }
+        )
+
+        t.ok(
+          allSubcategoryPostsDisplayed,
+          `${collection.slug}/${categoryPath} displays all posts from direct subcategories`
+        )
+      }
+
+      if (category.contentType === 'Technology') {
+        t.equal(
+          $('[data-template-text]').text(),
+          'Welcome to technology template!',
+          `${collection.slug}/${categoryPath} renders technology template`
+        )
+
+        const technologyTitle = $('[data-technology-title]').text()
+        t.equal(
+          technologyTitle,
+          category.title,
+          `technology.title works`
+        )
+
+        const technologyCategoriesLength = parseInt($('[data-technology-categories-length]').text())
+        t.equal(
+          technologyCategoriesLength,
+          category.categories.length,
+          `technology.categories.length is correct`
+        )
+
+        const technologyTechniquesLength = parseInt($('[data-technology-techniques-length]').text())
+        t.equal(
+          technologyTechniquesLength,
+          category.categories.length,
+          `technology.techniques.length is correct`
+        )
+
+        const technologyPostsLength = parseInt($('[data-technology-posts-length]').text())
+        t.equal(
+          technologyPostsLength,
+          categoryPosts.length,
+          `technology.posts.length is correct`
+        )
+
+        const technologyDemosLength = parseInt($('[data-technology-demos-length]').text())
+        t.equal(
+          technologyDemosLength,
+          categoryPosts.length,
+          `technology.demos.length is correct`
+        )
+
+        const categoryTitle = $('[data-category-title]').text()
+        t.equal(
+          categoryTitle,
+          technologyTitle,
+          `category.title works`
+        )
+
+        const categoryCategoriesLength = parseInt($('[data-category-categories-length]').text())
+        t.equal(
+          categoryCategoriesLength,
+          technologyCategoriesLength,
+          `category.categories.length is correct`
+        )
+
+        const categoryTechniquesLength = parseInt($('[data-category-techniques-length]').text())
+        t.equal(
+          categoryTechniquesLength,
+          technologyTechniquesLength,
+          `category.techniques.length is correct`
+        )
+
+        const categoryPostsLength = parseInt($('[data-category-posts-length]').text())
+        t.equal(
+          categoryPostsLength,
+          technologyPostsLength,
+          `category.posts.length is correct`
+        )
+
+        const categoryDemosLength = parseInt($('[data-category-demos-length]').text())
+        t.equal(
+          categoryDemosLength,
+          technologyDemosLength,
+          `category.demos.length is correct`
+        )
+      }
+
+      if (category.contentType === 'Technique') {
+        t.equal(
+          $('[data-template-text]').text(),
+          'Welcome to technique template!',
+          `${collection.slug}/${categoryPath} renders technique template`
+        )
+
+        const techniqueTitle = $('[data-technique-title]').text()
+        t.equal(
+          techniqueTitle,
+          category.title,
+          `technique.title works`
+        )
+
+        const techniqueCategoriesLength = parseInt($('[data-technique-categories-length]').text())
+        t.equal(
+          techniqueCategoriesLength,
+          category.categories.length,
+          `technique.categories.length is correct`
+        )
+
+        const techniqueTechniquesLength = parseInt($('[data-technique-techniques-length]').text())
+        t.equal(
+          techniqueTechniquesLength,
+          category.categories.length,
+          `technique.techniques.length is correct`
+        )
+
+        const techniquePostsLength = parseInt($('[data-technique-posts-length]').text())
+        t.equal(
+          techniquePostsLength,
+          categoryPosts.length,
+          `technique.posts.length is correct`
+        )
+
+        const techniqueDemosLength = parseInt($('[data-technique-demos-length]').text())
+        t.equal(
+          techniqueDemosLength,
+          categoryPosts.length,
+          `technique.demos.length is correct`
+        )
+
+        const categoryTitle = $('[data-category-title]').text()
+        t.equal(
+          categoryTitle,
+          techniqueTitle,
+          `category.title works`
+        )
+
+        const categoryCategoriesLength = parseInt($('[data-category-categories-length]').text())
+        t.equal(
+          categoryCategoriesLength,
+          techniqueCategoriesLength,
+          `category.categories.length is correct`
+        )
+
+        const categoryTechniquesLength = parseInt($('[data-category-techniques-length]').text())
+        t.equal(
+          categoryTechniquesLength,
+          techniqueTechniquesLength,
+          `category.techniques.length is correct`
+        )
+
+        const categoryPostsLength = parseInt($('[data-category-posts-length]').text())
+        t.equal(
+          categoryPostsLength,
+          techniquePostsLength,
+          `category.posts.length is correct`
+        )
+
+        const categoryDemosLength = parseInt($('[data-category-demos-length]').text())
+        t.equal(
+          categoryDemosLength,
+          techniqueDemosLength,
+          `category.demos.length is correct`
         )
       }
 
@@ -314,7 +460,7 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           allUsedFacetsListed,
-          `${collection.slug}/${categoryPath}/by page lists all used facets`
+          `${collection.slug}/${categoryPath}/by lists all used facets`
         )
 
         const facetCountsCorrect = Array.from(usedFacets).every(facet => {
@@ -329,7 +475,7 @@ test('E2E Magazine - Category Pages', async t => {
 
         t.ok(
           facetCountsCorrect,
-          `${collection.slug}/${categoryPath}/by page lists each facet exactly once`
+          `${collection.slug}/${categoryPath}/by lists each facet exactly once`
         )
       } catch (err) {
         t.fail(

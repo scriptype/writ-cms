@@ -1,0 +1,73 @@
+{{#>base page="category"}}
+
+  <style>
+    .category-header {
+      display: flex;
+      gap: .8em;
+      align-items: center;
+    }
+
+    .category-facets {
+      font-size: .8em;
+      font-variant: small-caps;
+    }
+  </style>
+
+  <h1 data-site-title>{{settings.site.title}}</h1>
+
+  <header class="category-header">
+    <h2><a data-title href="{{technology.permalink}}">{{technology.title}}</a></h2>
+
+    {{#if technology.facets.length}}
+    <div class="category-facets">
+      {{#if (is technology.permalink '/')}}
+      <a data-facet-browse-link href="by">by</a>:
+      {{else}}
+      <a data-facet-browse-link href="{{technology.permalink}}/by">by</a>:
+      {{/if}}
+      {{#each technology.facets as |facet|}}
+      <a data-facet-link href="{{facet.permalink}}">{{facet.title}}</a>
+      {{/each}}
+    </div>
+    {{/if}}
+  </header>
+
+  <div data-content>{{> @partial-block }}</div>
+
+  <div>
+    <div data-technology-title>{{technology.title}}</div>
+    <div data-technology-categories-length>{{technology.categories.length}}</div>
+    <div data-technology-techniques-length>{{technology.techniques.length}}</div>
+    <div data-technology-posts-length>{{technology.posts.length}}</div>
+    <div data-technology-demos-length>{{technology.demos.length}}</div>
+  </div>
+
+  <div>
+    <div data-category-title>{{category.title}}</div>
+    <div data-category-categories-length>{{category.categories.length}}</div>
+    <div data-category-techniques-length>{{category.techniques.length}}</div>
+    <div data-category-posts-length>{{category.posts.length}}</div>
+    <div data-category-demos-length>{{category.demos.length}}</div>
+  </div>
+
+  <p data-template-text>Welcome to technology template!</p>
+
+  {{#if technology.techniques.length}}
+  <h3>Posts by subcategories</h3>
+  {{#each technology.techniques as |subcategory| }}
+    <h4><a data-category-link href="{{subcategory.permalink}}">{{subcategory.title}}</a></h4>
+    <ul>
+      {{#each subcategory.demos as |post|}}
+      <li><a data-post-link href="{{post.permalink}}">{{post.title}}</a></li>
+      {{/each}}
+    </ul>
+  {{/each}}
+  {{/if}}
+
+  <h3>All posts</h3>
+  <ul>
+    {{#each technology.demos as |post|}}
+    <li><a data-post-link href="{{post.permalink}}">{{post.title}}</a></li>
+    {{/each}}
+  </ul>
+{{/base}}
