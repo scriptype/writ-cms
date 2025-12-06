@@ -12,6 +12,8 @@ const models = {
 const defaultSettings = {
   categoryAlias: undefined,
   entryAlias: undefined,
+  categoriesAlias: undefined,
+  entriesAlias: undefined,
   mode: 'start',
   level: 1,
   contentTypes: [],
@@ -47,12 +49,16 @@ class Category extends ContentModelEntryNode {
       attachments: category.subtree.attachments.map(models.Attachment.serialize)
     }
 
-    if (category.entriesAlias) {
-      data[category.entriesAlias] = data.posts
+    // Alias for the posts key in category
+    const entriesAlias = category.entriesAlias || category.settings.entriesAlias
+    if (entriesAlias) {
+      data[entriesAlias] = data.posts
     }
 
-    if (category.categoriesAlias) {
-      data[category.categoriesAlias] = data.categories
+    // Alias for the categories key in category
+    const categoriesAlias = category.categoriesAlias || category.settings.categoriesAlias
+    if (categoriesAlias) {
+      data[categoriesAlias] = data.categories
     }
 
     return data
@@ -142,17 +148,6 @@ class Category extends ContentModelEntryNode {
       attachments: []
     }
 
-    const entriesAlias = this.entriesAlias || this.settings.entriesAlias
-    const categoriesAlias = this.categoriesAlias || this.settings.categoriesAlias
-
-    if (entriesAlias) {
-      tree[entriesAlias] = tree.posts
-    }
-
-    if (categoriesAlias) {
-      tree[categoriesAlias] = tree.categories
-    }
-
     if (!this.fsNode.children || !this.fsNode.children.length) {
       return tree
     }
@@ -193,6 +188,7 @@ class Category extends ContentModelEntryNode {
         const subCategorySettings = {
           contentTypes: this.settings.contentTypes,
           entryContentType: this.entryContentType || this.settings.entryContentType,
+          categoryContentType: this.categoryContentType || this.settings.categoryContentType,
           entryAlias: this.entryAlias || this.settings.entryAlias,
           categoryAlias: this.categoryAlias || this.settings.categoryAlias,
           entriesAlias: this.entriesAlias || this.settings.entriesAlias,
@@ -272,17 +268,23 @@ class Category extends ContentModelEntryNode {
             settings,
             debug
           }
-          const { categoryAlias, entriesAlias } = this.settings
-          if (categoryAlias) {
-            data[categoryAlias] = data.category
+
+          // Alias for the current category
+          if (this.settings.categoryAlias) {
+            data[this.settings.categoryAlias] = data.category
           }
+
+          // Alias for the paginated 'posts'
+          const entriesAlias = this.entriesAlias || this.settings.entriesAlias
           if (entriesAlias) {
             data[entriesAlias] = data.posts
           }
+
+          const contentType = this.contentType || this.settings.categoryContentType
           return renderer.render({
             templates: [
               `pages/${this.template}`,
-              `pages/category/${this.contentType}`,
+              `pages/category/${contentType}`,
               `pages/category/default`
             ],
             outputPath,
