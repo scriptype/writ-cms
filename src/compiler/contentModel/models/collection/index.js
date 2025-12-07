@@ -55,17 +55,20 @@ class Collection extends ContentModelEntryNode {
       attachments: collection.subtree.attachments.map(models.Attachment.serialize)
     }
 
-    if (collection.categoriesAlias) {
-      data[collection.categoriesAlias] = data.categories
+    // Alias for posts key in collection
+    const entriesAlias = collection.entriesAlias || collection.settings.contentType?.entriesAlias
+    if (entriesAlias) {
+      data[entriesAlias] = data.posts
     }
 
-    if (collection.entriesAlias) {
-      data[collection.entriesAlias] = data.posts
+    // Alias for categories key in collection
+    const categoriesAlias = collection.categoriesAlias || collection.settings.contentType?.categoriesAlias
+    if (categoriesAlias) {
+      data[categoriesAlias] = data.categories
     }
 
     return data
   }
-
 
   static draftCheck (mode, node) {
     return mode === 'start' || !node.draft
@@ -152,16 +155,6 @@ class Collection extends ContentModelEntryNode {
       outputPath: this.outputPath,
       key: 'collection'
     })
-
-    const categoriesAlias = this.categoriesAlias || this.settings.contentType?.categoriesAlias
-    if (categoriesAlias) {
-      tree[categoriesAlias] = tree.categories
-    }
-
-    const entriesAlias = this.entriesAlias || this.settings.contentType?.entriesAlias
-    if (entriesAlias) {
-      tree[entriesAlias] = tree.posts
-    }
 
     this.fsNode.children.forEach(childNode => {
       if (this.matchers.indexFile(childNode)) {
@@ -322,13 +315,34 @@ class Collection extends ContentModelEntryNode {
 
   render(renderer, { contentModel, settings, debug }) {
     const renderCollection = () => {
-      const contentType = this.contentType || this.settings.contentType?.name || 'default'
       const renderHTML = renderer.paginate({
         basePermalink: this.permalink,
         posts: this.subtree.posts,
         postsPerPage: this.postsPerPage || 15,
         outputDir: this.outputPath,
         render: async ({ outputPath, pageOfPosts, paginationData }) => {
+          const data = {
+            ...contentModel,
+            collection: Collection.serialize(this),
+            pagination: paginationData,
+            posts: pageOfPosts,
+            settings,
+            debug
+          }
+
+          // Alias for the current collection
+          if (this.settings.contentType?.collectionAlias) {
+            data[this.settings.contentType.collectionAlias] = data.collection
+          }
+
+          // Alias for the paginated 'posts'
+          const entriesAlias = this.entriesAlias || this.settings.contentType?.entriesAlias
+          if (entriesAlias) {
+            data[entriesAlias] = data.posts
+          }
+
+          const contentType = this.contentType || this.settings.contentType?.name
+
           return renderer.render({
             templates: [
               `pages/${this.template}`,
@@ -337,14 +351,7 @@ class Collection extends ContentModelEntryNode {
             ],
             outputPath,
             content: this.content,
-            data: {
-              ...contentModel,
-              collection: Collection.serialize(this),
-              pagination: paginationData,
-              posts: pageOfPosts,
-              settings,
-              debug
-            }
+            data
           })
         }
       })
