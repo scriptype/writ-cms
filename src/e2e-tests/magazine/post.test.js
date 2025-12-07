@@ -84,7 +84,7 @@ test('E2E Magazine - Post Pages', async t => {
           t.equal(
             postTitle,
             post.title,
-            `${post.permalink} has correct post title via data attribute`
+            `${post.permalink} has correct post title`
           )
         }
 
