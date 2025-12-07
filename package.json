@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src",
     "hookup": "husky install",
-    "tape": "tape \"src/**/*.spec.js\" \"src/e2e-tests/**/*.test.js\" | tap-spec",
+    "tape": "tape \"src/**/*.spec.js\" \"src/e2e-tests/**/*.test.js\" | tap-nyan",
     "test": "nyc --reporter=text-summary npm run tape",
     "test:ci": "nyc --reporter=lcov npm run tape",
     "test:watch": "nodemon --watch src --ext js,hbs --exec npm run tape"
