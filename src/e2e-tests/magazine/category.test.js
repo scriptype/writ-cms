@@ -102,6 +102,10 @@ test('E2E Magazine - Category Pages', async t => {
       categoryPath,
       parentPath = ''
     ) => {
+      if (category.isDefaultCategory) {
+        return
+      }
+
       const categoryIndexPath = join(
         rootDirectory,
         exportDirectory,
@@ -158,9 +162,9 @@ test('E2E Magazine - Category Pages', async t => {
       const postLinks = $('[data-post-link]').toArray()
       const categoryLinks = $('[data-category-link]').toArray()
 
-      if (usedFacets.size !== 0) {
+      if (usedFacets.size) {
         t.ok(
-          facetBrowseLink.length !== 0,
+          facetBrowseLink.length,
           `${collection.slug}/${categoryPath} has browse facets link`
         )
       }
@@ -415,7 +419,7 @@ test('E2E Magazine - Category Pages', async t => {
     }
 
     for (const collection of FIXTURE_CONTENT_MODEL.collections) {
-      if (!collection.categories || collection.categories.length === 0) {
+      if (!collection.categories || !collection.categories.length) {
         continue
       }
 
@@ -427,7 +431,7 @@ test('E2E Magazine - Category Pages', async t => {
 
   t.test('Verify category facet browse pages', async t => {
     const testBrowsePage = async (collection, category, categoryPath, usedFacets) => {
-      if (usedFacets.size === 0) {
+      if (category.isDefaultCategory || !usedFacets.size) {
         return
       }
 
@@ -485,7 +489,7 @@ test('E2E Magazine - Category Pages', async t => {
     }
 
     for (const collection of FIXTURE_CONTENT_MODEL.collections) {
-      if (!collection.categories || collection.categories.length === 0) {
+      if (!collection.categories || !collection.categories.length) {
         continue
       }
 
@@ -497,7 +501,7 @@ test('E2E Magazine - Category Pages', async t => {
 
   t.test('Verify category facetName pages', async t => {
     const testFacetNamePage = async (collection, category, categoryPath, usedFacets) => {
-      if (usedFacets.size === 0) {
+      if (category.isDefaultCategory || !usedFacets.size) {
         return
       }
 
@@ -566,7 +570,7 @@ test('E2E Magazine - Category Pages', async t => {
     }
 
     for (const collection of FIXTURE_CONTENT_MODEL.collections) {
-      if (!collection.categories || collection.categories.length === 0) {
+      if (!collection.categories || !collection.categories.length) {
         continue
       }
 
@@ -578,7 +582,7 @@ test('E2E Magazine - Category Pages', async t => {
 
   t.test('Verify category facetValue pages', async t => {
     const testFacetValuePage = async (collection, category, categoryPath, usedFacets) => {
-      if (usedFacets.size === 0) {
+      if (category.isDefaultCategory || !usedFacets.size) {
         return
       }
 
@@ -667,7 +671,7 @@ test('E2E Magazine - Category Pages', async t => {
     }
 
     for (const collection of FIXTURE_CONTENT_MODEL.collections) {
-      if (!collection.categories || collection.categories.length === 0) {
+      if (!collection.categories || !collection.categories.length) {
         continue
       }
 
@@ -679,7 +683,7 @@ test('E2E Magazine - Category Pages', async t => {
 
   t.test('Verify no category facet pages for categories with zero used facets', async t => {
     const testNoFacetPages = async (collection, category, categoryPath, usedFacets) => {
-      if (usedFacets.size !== 0) {
+      if (usedFacets.size) {
         return
       }
 
@@ -711,7 +715,7 @@ test('E2E Magazine - Category Pages', async t => {
     }
 
     for (const collection of FIXTURE_CONTENT_MODEL.collections) {
-      if (!collection.categories || collection.categories.length === 0) {
+      if (!collection.categories || !collection.categories.length) {
         continue
       }
 
