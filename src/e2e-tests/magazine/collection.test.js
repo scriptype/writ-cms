@@ -47,12 +47,6 @@ test('E2E Magazine - Collection Pages', async t => {
   }
 
   t.test('Verify individual collection pages', async t => {
-
-    const SECTION_HEADINGS = {
-      postsByCategories: 'Posts by categories',
-      allPosts: 'All posts'
-    }
-
     for (const collection of FIXTURE_CONTENT_MODEL.collections) {
       const collectionIndexPath = join(
         rootDirectory,
@@ -61,26 +55,128 @@ test('E2E Magazine - Collection Pages', async t => {
         'index.html'
       )
 
-      const collectionHtml = await readFile(
-        collectionIndexPath,
-        { encoding: 'utf-8' }
+      let $
+      try {
+        const collectionHtml = await readFile(
+          collectionIndexPath,
+          { encoding: 'utf-8' }
+        )
+        $ = load(collectionHtml)
+      } catch (err) {
+        t.fail(
+          `${collection.slug} collection index.html: ${err.message}`
+        )
+        continue
+      }
+
+      const siteTitle = $('[data-site-title]').text()
+      t.equal(
+        siteTitle,
+        'Web Magazine',
+        `${collection.slug} has correct site title`
       )
 
-      const $ = load(collectionHtml)
+      const titleLink = $('[data-title]')
+      t.equal(
+        titleLink.text(),
+        collection.title,
+        `${collection.slug} displays collection title`
+      )
 
-      const hasValidTitle = $('a').toArray().some(link => {
-        return $(link).text() === collection.title
-      })
-
-      t.ok(
-        hasValidTitle,
-        `${collection.slug} collection page has a link with collection name`
+      t.equal(
+        titleLink.attr('href'),
+        collection.permalink || `/${collection.slug}`,
+        `${collection.slug} title link has correct href`
       )
 
       if (collection.content) {
+        const contentElement = $('[data-content]')
         t.ok(
-          collectionHtml.includes(collection.content),
-          `${collection.slug} collection index.html contains collection content`
+          contentElement.html().includes(collection.content),
+          `${collection.slug} contains collection content`
+        )
+      }
+
+      if (collection.collectionAlias === 'blog') {
+        const templateText = $('[data-template-text]').text()
+        t.equal(
+          templateText,
+          'Welcome to the blog template!',
+          `${collection.slug} renders blog template text`
+        )
+
+        const blogTitle = $('[data-blog-title]').text()
+        t.equal(
+          blogTitle,
+          collection.title,
+          `${collection.slug} blog.title is correct`
+        )
+
+        const blogCategoriesLength = $('[data-blog-categories-length]').text()
+        t.equal(
+          parseInt(blogCategoriesLength),
+          collection.categories.length,
+          `${collection.slug} blog.categories.length is correct`
+        )
+
+        const collectionTitle = $('[data-collection-title]').text()
+        t.equal(
+          collectionTitle,
+          collection.title,
+          `${collection.slug} collection.title is correct`
+        )
+
+        const collectionCategoriesLength = $('[data-collection-categories-length]').text()
+        t.equal(
+          parseInt(collectionCategoriesLength),
+          collection.categories.length,
+          `${collection.slug} collection.categories.length is correct`
+        )
+
+        const blogTopicsLength = $('[data-blog-topics-length]').text()
+        t.equal(
+          parseInt(blogTopicsLength),
+          collection.categories.length,
+          `${collection.slug} blog.topics.length is correct`
+        )
+
+        const allBlogArticles = flattenPostsFromCategories(
+          collection.categories,
+          collection.posts
+        )
+
+        const blogPostsLength = $('[data-blog-posts-length]').text()
+        t.equal(
+          parseInt(blogPostsLength),
+          allBlogArticles.length,
+          `${collection.slug} blog.posts.length is correct`
+        )
+        const blogArticlesLength = $('[data-blog-articles-length]').text()
+        t.equal(
+          parseInt(blogArticlesLength),
+          allBlogArticles.length,
+          `${collection.slug} blog.articles.length is correct`
+        )
+
+        const collectionTopicsLength = $('[data-collection-topics-length]').text()
+        t.equal(
+          parseInt(collectionTopicsLength),
+          collection.categories.length,
+          `${collection.slug} collection.topics.length is correct`
+        )
+
+        const collectionPostsLength = $('[data-collection-posts-length]').text()
+        t.equal(
+          parseInt(collectionPostsLength),
+          allBlogArticles.length,
+          `${collection.slug} collection.posts.length is correct`
+        )
+
+        const collectionArticlesLength = $('[data-collection-articles-length]').text()
+        t.equal(
+          parseInt(collectionArticlesLength),
+          allBlogArticles.length,
+          `${collection.slug} collection.articles.length is correct`
         )
       }
 
@@ -90,49 +186,40 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.facets
       )
 
-      const allLinks = $('a').toArray()
-
-      if (usedFacets.size !== 0) {
-        const browseFacetsHref = `/${collection.slug}/${FACET_BROWSE_PATH}`
-        const hasBrowseFacetsLink = allLinks.some(link => {
-          const linkText = $(link).text()
-          const linkHref = $(link).attr('href')
-          return linkText === 'by' && linkHref === browseFacetsHref
-        })
-
-        t.ok(
-          hasBrowseFacetsLink,
+      if (usedFacets.size) {
+        const facetBrowseLink = $('[data-facet-browse-link]')
+        t.true(
+          facetBrowseLink.length,
           `${collection.slug} has browse facets link`
         )
       }
 
+      const facetNameLinks = $('[data-facet-name-link]').toArray()
       const allUsedFacetsLinked = Array.from(usedFacets).every(facet => {
-        const facetPageHref = `/${collection.slug}/${FACET_BROWSE_PATH}/${facet}`
-        return allLinks.some(link => {
+        const facetHref = `/${collection.slug}/${FACET_BROWSE_PATH}/${facet}`
+        return facetNameLinks.some(link => {
           const linkText = $(link).text()
           const linkHref = $(link).attr('href')
-          return linkText === facet && linkHref === facetPageHref
+          return linkText === facet && linkHref === facetHref
         })
       })
 
-      t.ok(
+      t.true(
         allUsedFacetsLinked,
-        `${collection.slug} displays all expected facets with correct links`
+        `${collection.slug} displays all used facets with correct links`
       )
 
-      const unusedFacets = collection.facets.filter(
-        facet => !usedFacets.has(facet)
-      )
+      const unusedFacets = collection.facets.filter(facet => !usedFacets.has(facet))
       const noUnusedFacetsLinked = unusedFacets.every(facet => {
-        const facetPageHref = `/${collection.slug}/${FACET_BROWSE_PATH}/${facet}`
-        return !allLinks.some(link => {
+        const facetHref = `/${collection.slug}/${FACET_BROWSE_PATH}/${facet}`
+        return !facetNameLinks.some(link => {
           const linkText = $(link).text()
           const linkHref = $(link).attr('href')
-          return linkText === facet && linkHref === facetPageHref
+          return linkText === facet && linkHref === facetHref
         })
       })
 
-      t.ok(
+      t.true(
         noUnusedFacetsLinked,
         `${collection.slug} does not display unused facets`
       )
@@ -142,80 +229,52 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.posts
       )
 
+      const postLinks = $('[data-post-link]').toArray()
       const allPostsLinked = allCollectionPosts.every(post => {
-        return allLinks.some(link => {
+        return postLinks.some(link => {
           const linkText = $(link).text()
           const linkHref = $(link).attr('href')
           return linkText === post.title && linkHref === post.permalink
         })
       })
 
-      t.ok(
+      t.true(
         allPostsLinked,
         `${collection.slug} displays all posts with correct links`
       )
 
-      const allLinkTexts = allLinks.map(link => $(link).text())
+      if (collection.categories.length) {
+        const categoryLinks = $('[data-category-link]').toArray()
 
-      if (collection.categories.length !== 0) {
-        const topLevelCategoryTitles = collection.categories
-          .map(c => c.title)
-          .filter(title => title)
+        const namedCategories = collection.categories.filter(c => c.title)
 
-        const topLevelCategoryTitlesPresent = topLevelCategoryTitles.every(
-          title => allLinkTexts.includes(title)
-        )
-
-        t.ok(
-          topLevelCategoryTitlesPresent,
-          `${collection.slug} displays all top-level category titles`
-        )
-
-        const categoriesHavePosts = collection.categories.every(category => {
-          const categoryPosts = flattenPostsFromCategories(
-            category.categories,
-            category.posts
-          )
-          return categoryPosts.length !== 0
+        const allCategoriesLinked = namedCategories.every(category => {
+          const categoryHref = `/${collection.slug}/${category.slug}`
+          return categoryLinks.some(link => {
+            const linkText = $(link).text()
+            const linkHref = $(link).attr('href')
+            return linkText === category.title && linkHref === categoryHref
+          })
         })
 
-        t.ok(
-          categoriesHavePosts,
-          `${collection.slug} all top-level categories have at least one post`
+        t.true(
+          allCategoriesLinked,
+          `${collection.slug} displays all top-level categories with correct links`
         )
 
-        const allCategoriesHaveValidLinks = collection.categories.every(
-          category => {
-            const categoryHref = `/${collection.slug}/${category.slug}`
-            return allLinks.some(link => {
+        const topLevelCategoryPostsPresent = namedCategories.every(category => {
+          return category.posts.every(post => {
+            return postLinks.some(link => {
               const linkText = $(link).text()
               const linkHref = $(link).attr('href')
-              return linkText === category.title && linkHref === categoryHref
+              return linkText === post.title && linkHref === post.permalink
             })
-          }
-        )
+          })
+        })
 
-        t.ok(
-          allCategoriesHaveValidLinks,
-          `${collection.slug} displays categories with correct links`
-        )
-
-        const topLevelCategoryPostsPresent = collection.categories.every(
-          category => {
-            const categoryPosts = category.posts || []
-            return categoryPosts.every(post =>
-              allLinkTexts.includes(post.title)
-            ) || category.categories.some(subcat =>
-              subcat.posts && subcat.posts.some(post =>
-                allLinkTexts.includes(post.title)
-              )
-            )
-          }
-        )
-
-        t.ok(
+        t.true(
           topLevelCategoryPostsPresent,
-          `${collection.slug} displays posts from all top-level categories`
+          `${collection.slug} displays all top-level category posts with correct links`
         )
       }
     }
@@ -229,7 +288,7 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.facets
       )
 
-      if (usedFacets.size === 0) {
+      if (!usedFacets.size) {
         continue
       }
 
@@ -241,12 +300,20 @@ test('E2E Magazine - Collection Pages', async t => {
         'index.html'
       )
 
-      const facetBrowseHtml = await readFile(
-        facetBrowsePath,
-        { encoding: 'utf-8' }
-      )
+      let $
+      try {
+        const facetBrowseHtml = await readFile(
+          facetBrowsePath,
+          { encoding: 'utf-8' }
+        )
+        $ = load(facetBrowseHtml)
+      } catch (err) {
+        t.fail(
+          `${collection.slug} /by page: ${err.message}`
+        )
+        continue
+      }
 
-      const $ = load(facetBrowseHtml)
       const allLinks = $('a').toArray()
       const allLinkTexts = allLinks.map(link => $(link).text())
 
@@ -259,7 +326,7 @@ test('E2E Magazine - Collection Pages', async t => {
         })
       })
 
-      t.ok(
+      t.true(
         allUsedFacetsListed,
         `${collection.slug} /by page lists all used facets`
       )
@@ -274,7 +341,7 @@ test('E2E Magazine - Collection Pages', async t => {
         return facetCount === 1
       })
 
-      t.ok(
+      t.true(
         facetCountsCorrect,
         `${collection.slug} /by page lists each facet exactly once`
       )
@@ -296,7 +363,7 @@ test('E2E Magazine - Collection Pages', async t => {
         })
       })
 
-      t.ok(
+      t.true(
         allExpectedValuesPresent,
         `${collection.slug} /by page displays all expected facet values`
       )
@@ -310,7 +377,7 @@ test('E2E Magazine - Collection Pages', async t => {
         })
       })
 
-      t.ok(
+      t.true(
         facetValuesAreUnique,
         `${collection.slug} /by page displays each facet value exactly once`
       )
@@ -322,7 +389,7 @@ test('E2E Magazine - Collection Pages', async t => {
         !allLinkTexts.includes(facet)
       )
 
-      t.ok(
+      t.true(
         noUnusedFacetsRendered,
         `${collection.slug} /by page does not display unused facets`
       )
@@ -337,7 +404,7 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.facets
       )
 
-      if (usedFacets.size === 0) {
+      if (!usedFacets.size) {
         continue
       }
 
@@ -351,12 +418,20 @@ test('E2E Magazine - Collection Pages', async t => {
           'index.html'
         )
 
-        const facetNameHtml = await readFile(
-          facetNamePath,
-          { encoding: 'utf-8' }
-        )
+        let $
+        try {
+          const facetNameHtml = await readFile(
+            facetNamePath,
+            { encoding: 'utf-8' }
+          )
+          $ = load(facetNameHtml)
+        } catch (err) {
+          t.fail(
+            `${collection.slug} /by/${facetName} page: ${err.message}`
+          )
+          continue
+        }
 
-        const $ = load(facetNameHtml)
         const allLinks = $('a').toArray()
 
         const expectedFacetValues = getExpectedFacetValues(
@@ -375,37 +450,7 @@ test('E2E Magazine - Collection Pages', async t => {
           }
         )
 
-        if (!allValuesPresent) {
-          console.log(`
-
-          * * * *
-
-           - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-          | All expected facet values not found in facet name page. |
-           - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-          `)
-          console.log(`
-          Expected values:
-          `)
-          console.log(Array.from(expectedFacetValues))
-          console.log(`
-
-
-          All links found:
-          `)
-          console.log(allLinks.map(link => ({
-            title: $(link).text(),
-            href: $(link).attr('href')
-          })))
-          console.log(`
-
-          * * * *
-
-          `)
-        }
-
-        t.ok(
+        t.true(
           allValuesPresent,
           `${collection.slug} /by/${facetName} lists all expected facet values`
         )
@@ -417,35 +462,11 @@ test('E2E Magazine - Collection Pages', async t => {
               const linkHref = $(link).attr('href')
               return linkHref === facetValueSlug
             })
-            if (matchingFacetValueLinks.length !== 1) {
-              console.log(`
-
-              * * *
-
-              matchingFacetValueLinks
-
-              * * *
-              `)
-              console.log(matchingFacetValueLinks)
-              console.log(`
-
-              * * *
-
-              allLinks
-
-              `)
-              console.log(allLinks.map(link => $(link).text()))
-              console.log(`
-
-              * * * *
-
-              `)
-            }
             return matchingFacetValueLinks.length === 1
           }
         )
 
-        t.ok(
+        t.true(
           facetValuesAreUnique,
           `${collection.slug} /by/${facetName} lists each facet value exactly once`
         )
@@ -476,7 +497,7 @@ test('E2E Magazine - Collection Pages', async t => {
           })
         })
 
-        t.ok(
+        t.true(
           allPostsHaveValidLinks,
           `${collection.slug} /by/${facetName} posts have correct links`
         )
@@ -492,7 +513,7 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.facets
       )
 
-      if (usedFacets.size === 0) {
+      if (!usedFacets.size) {
         continue
       }
 
@@ -522,12 +543,20 @@ test('E2E Magazine - Collection Pages', async t => {
             'index.html'
           )
 
-          const facetValueHtml = await readFile(
-            facetValuePath,
-            { encoding: 'utf-8' }
-          )
+          let $
+          try {
+            const facetValueHtml = await readFile(
+              facetValuePath,
+              { encoding: 'utf-8' }
+            )
+            $ = load(facetValueHtml)
+          } catch (err) {
+            t.fail(
+              `${collection.slug} /by/${facetName}/${facetValueSlug} page: ${err.message}`
+            )
+            continue
+          }
 
-          const $ = load(facetValueHtml)
           const allLinks = $('a').toArray()
 
           const postsWithFacetValue = allCollectionPosts.filter(post => {
@@ -555,82 +584,9 @@ test('E2E Magazine - Collection Pages', async t => {
             })
           })
 
-          if (!allPostsPresent) {
-            console.log(`
-
-            * * * *
-
-             - - - - - - - - - - - - - - - - - - - - - - - - - -
-            | All expected posts not found in facet value page. |
-             - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-            `)
-            console.log(`
-            Expected values:
-            `)
-            console.log(postsWithFacetValue.map(({ title, permalink }) => ({ title, permalink })))
-            console.log(`
-
-
-            All links found:
-            `)
-            console.log(allLinks.map(link => ({
-              title: $(link).text(),
-              href: $(link).attr('href')
-            })))
-            console.log(`
-
-            * * * *
-
-            `)
-          }
-
-          t.ok(
+          t.true(
             allPostsPresent,
             `${collection.slug} /by/${facetName}/${facetValueSlug} lists all posts with this facet value`
-          )
-
-          const allPostsHaveValidLinks = postsWithFacetValue.every(post => {
-            return allLinks.some(link => {
-              const linkText = $(link).text()
-              const linkHref = $(link).attr('href')
-              return linkText === post.title && linkHref === post.permalink
-            })
-          })
-
-          if (!allPostsHaveValidLinks) {
-            console.log(`
-
-            * * * *
-
-             - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            | All posts don't have valid links in facet value page. |
-             - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-            `)
-            console.log(`
-            Expected posts:
-            `)
-            console.log(postsWithFacetValue.map(({ title, permalink }) => ({ title, permalink })))
-            console.log(`
-
-
-            All links found:
-            `)
-            console.log(allLinks.map(link => ({
-              title: $(link).text(),
-              href: $(link).attr('href')
-            })))
-            console.log(`
-
-            * * * *
-
-            `)
-          }
-
-          t.ok(
-            allPostsHaveValidLinks,
-            `${collection.slug} /by/${facetName}/${facetValueSlug} posts have correct links`
           )
         }
       }
@@ -645,7 +601,7 @@ test('E2E Magazine - Collection Pages', async t => {
         collection.facets
       )
 
-      if (usedFacets.size !== 0) {
+      if (usedFacets.size) {
         continue
       }
 
@@ -663,8 +619,7 @@ test('E2E Magazine - Collection Pages', async t => {
         )
       } catch (err) {
         if (err.code === 'ENOENT') {
-          t.ok(
-            true,
+          t.pass(
             `${collection.slug} /by directory does not exist when no facets are used`
           )
         } else {

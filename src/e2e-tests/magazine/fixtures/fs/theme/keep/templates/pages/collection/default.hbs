@@ -1,0 +1,54 @@
+{{#>base page="collection"}}
+
+  <style>
+    .collection-header {
+      display: flex;
+      gap: .8em;
+      align-items: center;
+    }
+
+    .collection-facets {
+      font-size: .8em;
+      font-variant: small-caps;
+    }
+  </style>
+
+  <h1 data-site-title>{{settings.site.title}}</h1>
+
+  <header class="collection-header">
+    <h2><a data-title href="{{collection.permalink}}">{{collection.title}}</a></h2>
+
+    {{#if collection.facets.length}}
+    <div class="collection-facets">
+      {{#if (is collection.permalink '/')}}
+      <a data-facet-browse-link href="by">by</a>:
+      {{else}}
+      <a data-facet-browse-link href="{{collection.permalink}}/by">by</a>:
+      {{/if}}
+      {{#each collection.facets as |facet|}}
+      <a data-facet-name-link href="{{facet.permalink}}">{{facet.title}}</a>
+      {{/each}}
+    </div>
+    {{/if}}
+  </header>
+
+  <div data-content>{{> @partial-block }}</div>
+
+  <h3>Posts by categories</h3>
+  {{#each collection.categories as |category| }}
+    <h4><a data-category-link href="{{category.permalink}}">{{category.title}}</a></h4>
+    <ul>
+      {{#each category.posts as |post|}}
+      <li><a data-post-link href="{{post.permalink}}">{{post.title}}</a></li>
+      {{/each}}
+    </ul>
+  {{/each}}
+
+  <h3>All posts</h3>
+  <ul>
+    {{#each collection.posts as |post|}}
+    <li><a data-post-link href="{{post.permalink}}">{{post.title}}</a></li>
+    {{/each}}
+  </ul>
+
+{{/base}}

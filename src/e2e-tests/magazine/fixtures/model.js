@@ -88,83 +88,92 @@ const FIXTURE_CONTENT_MODEL = {
               }
             }
           ]
+        },
+        {
+          title: '',
+          isDefaultCategory: true,
+          date: '2025-11-02',
+          contentType: 'BlogTopic',
+          content: '',
+          categories: [],
+          posts: [
+            {
+              title: 'Pure JS very good',
+              author: { title: 'Sir Tim Berners Lee', slug: 'tim' },
+              date: '2025-11-02',
+              permalink: '/articles/pure-js-very-good.html',
+              contentType: 'Article',
+              tags: ['javascript', 'performance', 'accessibility', 'devx'],
+              content: 'pure js very good',
+              context: {
+                collection: {
+                  title: 'articles',
+                  permalink: '/articles'
+                },
+                categories: []
+              },
+              links: {
+                previousPost: null,
+                nextPost: {
+                  title: 'React bad',
+                  permalink: '/articles/react-bad.html'
+                }
+              }
+            },
+            {
+              title: 'React bad',
+              author: { title: 'Mustafa Enes', slug: 'enes' },
+              date: '2025-11-03',
+              permalink: '/articles/react-bad.html',
+              contentType: 'Article',
+              template: 'ReactBadMKay',
+              tags: ['javascript', 'react', 'performance', 'accessibility', 'devx'],
+              content: 'react not good',
+              context: {
+                collection: {
+                  title: 'articles',
+                  permalink: '/articles'
+                },
+                categories: []
+              },
+              links: {
+                previousPost: {
+                  title: 'Pure JS very good',
+                  permalink: '/articles/pure-js-very-good.html'
+                },
+                nextPost: {
+                  title: 'Vue good',
+                  permalink: '/articles/vue-good.html'
+                }
+              }
+            },
+            {
+              title: 'Vue good',
+              author: { title: 'Mustafa Enes', slug: 'enes' },
+              date: '2025-11-04',
+              permalink: '/articles/vue-good.html',
+              contentType: 'Article',
+              tags: ['javascript', 'vue', 'performance', 'accessibility', 'devx'],
+              content: 'vue good',
+              context: {
+                collection: {
+                  title: 'articles',
+                  permalink: '/articles'
+                },
+                categories: []
+              },
+              links: {
+                previousPost: {
+                  title: 'React bad',
+                  permalink: '/articles/react-bad.html'
+                },
+                nextPost: null
+              }
+            }
+          ]
         }
       ],
-      posts: [
-        {
-          title: 'Pure JS very good',
-          author: { title: 'Sir Tim Berners Lee', slug: 'tim' },
-          date: '2025-11-02',
-          permalink: '/articles/pure-js-very-good.html',
-          contentType: 'Article',
-          tags: ['javascript', 'performance', 'accessibility', 'devx'],
-          content: 'pure js very good',
-          context: {
-            collection: {
-              title: 'articles',
-              permalink: '/articles'
-            },
-            categories: []
-          },
-          links: {
-            previousPost: null,
-            nextPost: {
-              title: 'React bad',
-              permalink: '/articles/react-bad.html'
-            }
-          }
-        },
-        {
-          title: 'React bad',
-          author: { title: 'Mustafa Enes', slug: 'enes' },
-          date: '2025-11-03',
-          permalink: '/articles/react-bad.html',
-          contentType: 'Article',
-          template: 'ReactBadMKay',
-          tags: ['javascript', 'react', 'performance', 'accessibility', 'devx'],
-          content: 'react not good',
-          context: {
-            collection: {
-              title: 'articles',
-              permalink: '/articles'
-            },
-            categories: []
-          },
-          links: {
-            previousPost: {
-              title: 'Pure JS very good',
-              permalink: '/articles/pure-js-very-good.html'
-            },
-            nextPost: {
-              title: 'Vue good',
-              permalink: '/articles/vue-good.html'
-            }
-          }
-        },
-        {
-          title: 'Vue good',
-          author: { title: 'Mustafa Enes', slug: 'enes' },
-          date: '2025-11-04',
-          permalink: '/articles/vue-good.html',
-          contentType: 'Article',
-          tags: ['javascript', 'vue', 'performance', 'accessibility', 'devx'],
-          content: 'vue good',
-          context: {
-            collection: {
-              title: 'articles',
-              permalink: '/articles'
-            },
-            categories: []
-          },
-          links: {
-            previousPost: {
-              title: 'React bad',
-              permalink: '/articles/react-bad.html'
-            },
-            nextPost: null
-          }
-        }
-      ]
+      posts: []
     },
     {
       slug: 'books',

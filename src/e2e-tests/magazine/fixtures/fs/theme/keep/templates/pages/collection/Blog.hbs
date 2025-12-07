@@ -1,0 +1,72 @@
+{{#>base page="collection"}}
+
+  <style>
+    .collection-header {
+      display: flex;
+      gap: .8em;
+      align-items: center;
+    }
+
+    .collection-facets {
+      font-size: .8em;
+      font-variant: small-caps;
+    }
+  </style>
+
+  <h1 data-site-title>{{settings.site.title}}</h1>
+
+  <header class="collection-header">
+    <h2><a data-title href="{{collection.permalink}}">{{collection.title}}</a></h2>
+
+    {{#if blog.facets.length}}
+    <div class="collection-facets">
+      {{#if (is collection.permalink '/')}}
+      <a data-facet-browse-link href="by">by</a>:
+      {{else}}
+      <a data-facet-browse-link href="{{collection.permalink}}/by">by</a>:
+      {{/if}}
+      {{#each collection.facets as |facet|}}
+      <a data-facet-name-link href="{{facet.permalink}}">{{facet.title}}</a>
+      {{/each}}
+    </div>
+    {{/if}}
+  </header>
+
+  <div data-content>{{> @partial-block }}</div>
+
+  <p data-template-text>Welcome to the blog template!</p>
+
+  <div>
+    <div data-blog-title>{{blog.title}}</div>
+    <div data-blog-categories-length>{{blog.categories.length}}</div>
+    <div data-blog-topics-length>{{blog.topics.length}}</div>
+    <div data-blog-posts-length>{{blog.posts.length}}</div>
+    <div data-blog-articles-length>{{blog.articles.length}}</div>
+  </div>
+
+  <div>
+    <div data-collection-title>{{collection.title}}</div>
+    <div data-collection-categories-length>{{collection.categories.length}}</div>
+    <div data-collection-topics-length>{{collection.topics.length}}</div>
+    <div data-collection-posts-length>{{collection.posts.length}}</div>
+    <div data-collection-articles-length>{{collection.articles.length}}</div>
+  </div>
+
+  <h3>Articles by topics</h3>
+  {{#each blog.topics as |topic| }}
+    <h4><a data-category-link href="{{topic.permalink}}">{{topic.title}}</a></h4>
+    <ul>
+      {{#each topic.articles as |article|}}
+      <li><a data-post-link href="{{article.permalink}}">{{article.title}}</a></li>
+      {{/each}}
+    </ul>
+  {{/each}}
+
+  <h3>All articles</h3>
+  <ul>
+    {{#each blog.articles as |article|}}
+    <li><a data-post-link href="{{article.permalink}}">{{article.title}}</a></li>
+    {{/each}}
+  </ul>
+
+{{/base}}
