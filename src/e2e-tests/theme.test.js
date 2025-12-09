@@ -2,7 +2,7 @@ const { tmpdir } = require('os')
 const { join } = require('path')
 const test = require('tape')
 const writ = require('..')
-const { atomicFS } = require('./helpers')
+const { atomicFS } = require('../lib/fileSystemHelpers')
 
 test('Theme', t => {
 
