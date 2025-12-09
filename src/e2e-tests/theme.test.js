@@ -1,10 +1,61 @@
-const { tmpdir } = require('os')
+const { tmpdir, platform } = require('os')
 const { join } = require('path')
 const { readdir, mkdir, rm, writeFile, readFile } = require('fs/promises')
 const test = require('tape')
 const writ = require('..')
 
 const sleep = (duration) => new Promise(resolve => setTimeout(resolve, duration))
+
+/*
+ * Retry an operation when Windows file handles prevent immediate access.
+ * On Windows, fs operations may fail with EBUSY if file handles aren't
+ * released yet. This retries the operation with backoff until it succeeds,
+ * mimicking the atomic pattern of building in isolation before swap.
+ */
+const atomic = async (fn, maxRetries = 10, delayMS = 50) => {
+  if (platform() !== 'win32') {
+    return await fn()
+  }
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn()
+    } catch (error) {
+      if (error.code === 'EBUSY' && i < maxRetries - 1) {
+        await sleep(delayMS)
+        continue
+      }
+      throw error
+    }
+  }
+}
+
+const readdirRecursive = (path) => readdir(
+  path,
+  { recursive: true, withFileTypes: true }
+)
+
+const atomicReaddir = (path) => atomic(() => readdir(path))
+
+const atomicReaddirRecursive = (path) => atomic(
+  () => readdirRecursive(path)
+)
+
+const atomicReadFile = (path, encoding = 'utf-8') => atomic(
+  () => readFile(path, encoding)
+)
+
+const atomicRm = (path, options = { recursive: true, force: true }) => atomic(
+  () => rm(path, options)
+)
+
+const atomicMkdir = (path, options = { recursive: true }) => atomic(
+  () => mkdir(path, options)
+)
+
+const atomicWriteFile = (path, data, options = 'utf-8') => atomic(
+  () => writeFile(path, data, options)
+)
 
 test('Theme', t => {
 
@@ -17,14 +68,13 @@ test('Theme', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory
       })
 
-      await rm(join(testDir, themeDirectory), { recursive: true })
-      await sleep(50)
+      await atomicRm(join(testDir, themeDirectory))
 
       await writ.build({
         rootDirectory
@@ -35,9 +85,9 @@ test('Theme', t => {
         exportDirectoryContents,
         themeDirectoryContents
       ] = await Promise.all([
-        readdir(rootDirectory),
-        readdir(join(rootDirectory, exportDirectory)),
-        readdir(join(rootDirectory, themeDirectory))
+        atomicReaddir(rootDirectory),
+        atomicReaddir(join(rootDirectory, exportDirectory)),
+        atomicReaddir(join(rootDirectory, themeDirectory))
       ])
 
       t.ok(
@@ -80,7 +130,7 @@ test('Theme', t => {
         'Theme directory has script.js'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -94,14 +144,14 @@ test('Theme', t => {
     const themeAssetsDirectory = 'assets'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory
       })
 
-      await rm(join(testDir, themeDirectory, themeAssetsDirectory), { recursive: true })
-      await sleep(50)
+      const themeAssetsPath = join(testDir, themeDirectory, themeAssetsDirectory)
+      await atomicRm(themeAssetsPath)
 
       await writ.build({
         rootDirectory
@@ -112,9 +162,9 @@ test('Theme', t => {
         exportDirectoryContents,
         themeDirectoryContents
       ] = await Promise.all([
-        readdir(rootDirectory),
-        readdir(join(rootDirectory, exportDirectory)),
-        readdir(join(rootDirectory, themeDirectory))
+        atomicReaddir(rootDirectory),
+        atomicReaddir(join(rootDirectory, exportDirectory)),
+        atomicReaddir(join(rootDirectory, themeDirectory))
       ])
 
       t.ok(
@@ -157,7 +207,7 @@ test('Theme', t => {
         'Theme directory has script.js'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -171,15 +221,15 @@ test('Theme', t => {
     const themeTemplatesDirectory = 'templates'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory: testDir
       })
 
       const { themeDirectory } = writ.getDefaultSettings()
-      await rm(join(testDir, themeDirectory, themeTemplatesDirectory), { recursive: true })
-      await sleep(50)
+      const themeTemplatesPath = join(testDir, themeDirectory, themeTemplatesDirectory)
+      await atomicRm(themeTemplatesPath)
 
       await writ.build({
         rootDirectory: testDir
@@ -190,9 +240,9 @@ test('Theme', t => {
         exportDirectoryContents,
         themeDirectoryContents
       ] = await Promise.all([
-        readdir(rootDirectory),
-        readdir(join(rootDirectory, exportDirectory)),
-        readdir(join(rootDirectory, themeDirectory))
+        atomicReaddir(rootDirectory),
+        atomicReaddir(join(rootDirectory, exportDirectory)),
+        atomicReaddir(join(rootDirectory, themeDirectory))
       ])
 
       t.ok(
@@ -235,7 +285,7 @@ test('Theme', t => {
         'Theme directory has script.js'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -248,28 +298,28 @@ test('Theme', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory: testDir
       })
 
       const myFile = 'my-file.js'
-      await writeFile(join(testDir, themeDirectory, myFile), '')
+      await atomicWriteFile(join(testDir, themeDirectory, myFile), '')
 
       await writ.build({
         rootDirectory: testDir,
         refreshTheme: true
       })
 
-      const themeDirectoryContents = await readdir(join(rootDirectory, themeDirectory))
+      const themeDirectoryContents = await atomicReaddir(join(rootDirectory, themeDirectory))
 
       t.false(
         themeDirectoryContents.includes(myFile),
         'theme directory is refreshed and myFile is deleted like everything else'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -282,26 +332,30 @@ test('Theme', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory: testDir
       })
 
       const deletedFileName = 'deleted.css'
-      await writeFile(join(testDir, themeDirectory, deletedFileName), '')
+      await atomicWriteFile(join(testDir, themeDirectory, deletedFileName), '')
 
       const keptFileName = 'kept.css'
-      await mkdir(join(testDir, themeDirectory, 'keep'))
-      await writeFile(join(testDir, themeDirectory, 'keep', keptFileName), '')
+      await atomicMkdir(join(testDir, themeDirectory, 'keep'))
+      await atomicWriteFile(join(testDir, themeDirectory, 'keep', keptFileName), '')
 
       await writ.build({
         rootDirectory: testDir,
         refreshTheme: true
       })
 
-      const themeDirectoryContents = await readdir(join(rootDirectory, themeDirectory))
-      const themeKeepDirectoryContents = await readdir(join(rootDirectory, themeDirectory, 'keep'))
+      const themeDirectoryContents = await atomicReaddir(
+        join(rootDirectory, themeDirectory)
+      )
+      const themeKeepDirectoryContents = await atomicReaddir(
+        join(rootDirectory, themeDirectory, 'keep')
+      )
 
       t.false(
         themeDirectoryContents.includes(deletedFileName),
@@ -318,7 +372,7 @@ test('Theme', t => {
         'theme/keep/file is preserved'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -330,7 +384,7 @@ test('Theme', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory: testDir
@@ -341,17 +395,12 @@ test('Theme', t => {
       const assetsPath = join(themePath, 'assets')
 
       // Count files in assets before override
-      const assetsContentsBefore = await readdir(
-        assetsPath,
-        { recursive: true, withFileTypes: true }
-      )
-      const fileCountBefore = assetsContentsBefore.filter(
-        e => !e.isDirectory()
-      ).length
+      const assetsContentsBefore = await atomicReaddirRecursive(assetsPath)
+      const fileCountBefore = assetsContentsBefore.filter(e => !e.isDirectory()).length
 
       // Create one customized file in keep
-      await mkdir(join(keepPath, 'assets'), { recursive: true })
-      await writeFile(
+      await atomicMkdir(join(keepPath, 'assets'), { recursive: true })
+      await atomicWriteFile(
         join(keepPath, 'assets', 'custom.css'),
         'customized styles'
       )
@@ -361,18 +410,10 @@ test('Theme', t => {
         refreshTheme: true
       })
 
-      const assetsContentsAfter = await readdir(
-        assetsPath,
-        { recursive: true, withFileTypes: true }
-      )
-      const fileCountAfter = assetsContentsAfter.filter(
-        e => !e.isDirectory()
-      ).length
+      const assetsContentsAfter = await atomicReaddirRecursive(assetsPath)
+      const fileCountAfter = assetsContentsAfter.filter(e => !e.isDirectory()).length
 
-      const customCssContent = await readFile(
-        join(assetsPath, 'custom.css'),
-        'utf-8'
-      )
+      const customCssContent = await atomicReadFile(join(assetsPath, 'custom.css'))
 
       t.equal(
         customCssContent,
@@ -391,7 +432,7 @@ test('Theme', t => {
         'assets folder has original files plus the new one (not replaced)'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -403,7 +444,7 @@ test('Theme', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory: testDir
@@ -414,8 +455,8 @@ test('Theme', t => {
 
       // Create deeply nested file in keep
       const deepPath = join(keepPath, 'deep', 'nested', 'folder', 'structure')
-      await mkdir(deepPath, { recursive: true })
-      await writeFile(
+      await atomicMkdir(deepPath)
+      await atomicWriteFile(
         join(deepPath, 'custom.txt'),
         'deeply nested content'
       )
@@ -432,9 +473,8 @@ test('Theme', t => {
         'folder',
         'structure'
       )
-      const deepContent = await readFile(
-        join(deepThemePath, 'custom.txt'),
-        'utf-8'
+      const deepContent = await atomicReadFile(
+        join(deepThemePath, 'custom.txt')
       )
 
       t.equal(
@@ -443,14 +483,14 @@ test('Theme', t => {
         'deeply nested file from keep is applied'
       )
 
-      const deepFolderContents = await readdir(deepThemePath)
+      const deepFolderContents = await atomicReaddir(deepThemePath)
       t.equal(
         deepFolderContents.length,
         1,
         'deep folder only contains the custom file (no existing files to preserve)'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
@@ -462,7 +502,7 @@ test('Theme', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicMkdir(testDir)
 
       await writ.build({
         rootDirectory: testDir
@@ -473,8 +513,8 @@ test('Theme', t => {
 
       // Create a file in keep where theme likely has a directory
       // (assets exists in theme and has subdirectories)
-      await mkdir(keepPath, { recursive: true })
-      await writeFile(
+      await atomicMkdir(keepPath)
+      await atomicWriteFile(
         join(keepPath, 'assets'),
         'file content'
       )
@@ -492,7 +532,7 @@ test('Theme', t => {
         )
       }
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicRm(testDir)
     }
   })
 
