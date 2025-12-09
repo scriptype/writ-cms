@@ -22,6 +22,11 @@ const atomic = async (fn, maxRetries = 10, delayMS = 50) => {
       return await fn()
     } catch (error) {
       if (error.code === 'EBUSY' && i < maxRetries - 1) {
+        console.log(`
+        * * * *
+        Caught EBUSY and retrying
+        * * * *
+        `)
         await sleep(delayMS)
         continue
       }
