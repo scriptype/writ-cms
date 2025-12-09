@@ -41,13 +41,13 @@ const ensureDirectory = async (path) => {
  * before the final swap.
  */
 const atomicReplace = async (targetPath, buildFn) => {
-  const tempPath = await fs.mkdtemp(join(tmpdir(), 'atomic-replace-'))
+  const tempPath = await atomicFS.mkdtemp(join(tmpdir(), 'atomic-replace-'))
   try {
     await buildFn(tempPath)
-    await fs.rm(targetPath, { recursive: true, force: true })
-    await fs.cp(tempPath, targetPath, { recursive: true })
+    await atomicFS.rm(targetPath)
+    await atomicFS.cp(tempPath, targetPath)
   } catch (error) {
-    await fs.rm(tempPath, { recursive: true, force: true })
+    await atomicFS.rm(tempPath)
     throw error
   }
 }
@@ -63,7 +63,7 @@ const atomicFS = (() => {
 
   const retryUntilSuccess = async (fn, maxRetries = 10, delayMS = 50) => {
     if (platform() !== 'win32') {
-      return await fn()
+      return fn()
     }
 
     for (let i = 0; i < maxRetries; i++) {
