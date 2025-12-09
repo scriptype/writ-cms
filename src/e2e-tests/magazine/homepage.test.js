@@ -45,27 +45,19 @@ test('E2E Magazine - Homepage', async t => {
     return
   }
 
-  t.plan(7)
-
-  const SECTION_HEADINGS_HOMEPAGE = {
-    pages: 'Pages'
-  }
-
-  const expectedPageTitle = FIXTURE_CONTENT_MODEL.homepage.title
-  const expectedSiteTitle = FIXTURE_SETTINGS.title
-
   const $ = load(indexHtmlContent)
+
   const pageTitle = $('title').text()
 
   t.ok(
-    pageTitle.includes(expectedPageTitle) &&
-    pageTitle.includes(expectedSiteTitle),
-    'index.html title contains both homepage title and site title'
+    pageTitle.includes(FIXTURE_CONTENT_MODEL.homepage.title) &&
+    pageTitle.includes(FIXTURE_SETTINGS.title),
+    'page title contains both homepage title and site title'
   )
 
   t.ok(
     indexHtmlContent.includes(FIXTURE_CONTENT_MODEL.homepage.content),
-    'homepage index.html contains homepage content'
+    'index.html contains homepage content'
   )
 
   const outputDirContents = await readdir(join(rootDirectory, exportDirectory))
@@ -76,73 +68,89 @@ test('E2E Magazine - Homepage', async t => {
 
   t.ok(
     hasIndexHtml && hasCollectionDirectories,
-    'output directory contains index.html and all collection directories'
+    'output directory has index.html and all collections'
   )
 
-  const allCollections = FIXTURE_CONTENT_MODEL.collections
+  const collectionLinks = $('[data-collection-link]').toArray()
 
-  const collectionsHaveTitleLinks = allCollections.every(collection => {
-    const allLinks = $('a').toArray()
-    return allLinks.some(link => {
-      const linkText = $(link).text()
-      const linkHref = $(link).attr('href')
-      return (
-        linkText === collection.title &&
-        linkHref === `/${collection.slug}`
-      )
+  t.equal(
+    collectionLinks.length,
+    FIXTURE_CONTENT_MODEL.collections.length,
+    'collection link count is correct'
+  )
+
+  const allCollectionsLinked =
+    FIXTURE_CONTENT_MODEL.collections.every(collection => {
+      return collectionLinks.some(link => {
+        const linkText = $(link).text()
+        const linkHref = $(link).attr('href')
+        return (
+          linkText === collection.title &&
+          linkHref === `/${collection.slug}`
+        )
+      })
     })
-  })
 
-  t.ok(
-    collectionsHaveTitleLinks,
-    'all collections are listed with links to their pages'
-  )
+  t.true(allCollectionsLinked, 'all collections have title links')
 
-  const facetsListed = allCollections.every(collection => {
+  const allFacetNameLinks = $('[data-facet-name-link]').toArray()
+
+  const facetsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
     const usedFacets = getUsedFacets(
       collection.categories,
       collection.posts,
       collection.facets
     )
 
-    if (usedFacets.size === 0) {
+    if (!usedFacets.size) {
       return true
     }
 
-    const facetLinks = $('a').toArray().map(link => ({
-      href: $(link).attr('href'),
-      text: $(link).text().toLowerCase()
-    }))
+    const facetNameLinks = allFacetNameLinks.filter(link => {
+      const linkHref = $(link).attr('href')
+      return linkHref.includes(`/${collection.slug}/`)
+    })
+
+    t.equal(
+      facetNameLinks.length,
+      usedFacets.size,
+      `${collection.slug} facet link count is correct`
+    )
 
     const allUsedFacetsFound = Array.from(usedFacets).every(facet => {
       const facetPageHref = `/${collection.slug}/${FACET_BROWSE_PATH}/${facet}`
-      return facetLinks.some(link =>
-        link.text === facet.toLowerCase() && link.href === facetPageHref
-      )
+      return facetNameLinks.some(link => {
+        const linkText = $(link).text()
+        const linkHref = $(link).attr('href')
+        return linkText === facet && linkHref === facetPageHref
+      })
     })
 
-    const browsePathExists = facetLinks.some(link =>
-      link.href === `/${collection.slug}/${FACET_BROWSE_PATH}`
-    )
+    const facetBrowseLink = $('[data-facet-browse-link]').toArray().find(link => {
+      const linkHref = $(link).attr('href')
+      return linkHref === `/${collection.slug}/${FACET_BROWSE_PATH}`
+    })
 
-    return allUsedFacetsFound && browsePathExists
+    return allUsedFacetsFound && !!facetBrowseLink
   })
 
-  t.ok(
-    facetsListed,
-    'each collection with facets has all facets and browse link listed'
+  t.true(facetsListed, 'collections with facets have all facets and browse link')
+
+  const postLinks = $('[data-post-link]').toArray()
+  const allPosts = FIXTURE_CONTENT_MODEL.collections.flatMap(collection =>
+    flattenPostsFromCategories(collection.categories, collection.posts)
   )
 
-  const allPostsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
-    const allLinks = $('a').toArray()
+  t.equal(postLinks.length, allPosts.length, 'post link count is correct')
 
+  const allPostsListed = FIXTURE_CONTENT_MODEL.collections.every(collection => {
     const allCollectionPosts = flattenPostsFromCategories(
       collection.categories,
       collection.posts
     )
 
     return allCollectionPosts.every(post => {
-      return allLinks.some(link => {
+      return postLinks.some(link => {
         const linkText = $(link).text()
         const linkHref = $(link).attr('href')
         return linkText === post.title && linkHref === post.permalink
@@ -150,25 +158,25 @@ test('E2E Magazine - Homepage', async t => {
     })
   })
 
-  t.ok(
-    allPostsListed,
-    'all collection posts from fixture are listed'
+  t.true(allPostsListed, 'all posts are listed')
+
+  const subpageLinks = $('[data-subpage-link]').toArray()
+
+  t.equal(
+    subpageLinks.length,
+    FIXTURE_CONTENT_MODEL.subpages.length,
+    'subpage link count is correct'
   )
 
-  const allLinks = $('a').toArray()
-
   const allSubpagesListed = FIXTURE_CONTENT_MODEL.subpages.every(subpage => {
-    return allLinks.some(link => {
+    return subpageLinks.some(link => {
       const linkText = $(link).text()
       const linkHref = $(link).attr('href')
       return linkText === subpage.title && linkHref === subpage.permalink
     })
   })
 
-  t.ok(
-    allSubpagesListed,
-    'all subpages are listed in the homepage'
-  )
+  t.true(allSubpagesListed, 'all subpages are listed')
 
   t.teardown(async () => {
     if (testDir) {
