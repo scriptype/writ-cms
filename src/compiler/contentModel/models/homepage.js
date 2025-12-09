@@ -19,6 +19,7 @@ class Homepage extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
+    this.subtree = this.parseSubtree()
   }
 
   getPermalink() {

@@ -7,6 +7,7 @@ class Attachment extends ContentModelResourceNode {
 
   constructor(fsNode, context, settings) {
     super(fsNode, context, settings)
+    this.subtree = this.parseSubtree()
   }
 
   render(renderer) {

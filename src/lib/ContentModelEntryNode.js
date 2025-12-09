@@ -25,8 +25,6 @@ class ContentModelEntryNode extends ContentModelNode {
     this.slug = this.getSlug()
     this.permalink = this.getPermalink()
     this.outputPath = this.getOutputPath()
-
-    this.subtree = this.parseSubtree()
   }
 
   getIndexFile() {

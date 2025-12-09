@@ -26,6 +26,8 @@ class Post extends ContentModelEntryNode {
 
     this.contentType = this.settings.entryContentType
     this.schema = this.settings.contentTypes.find(ct => ct.name === this.contentType)
+
+    this.subtree = this.parseSubtree()
   }
 
   getSubtreeMatchers() {
