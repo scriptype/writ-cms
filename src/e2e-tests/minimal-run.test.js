@@ -1,6 +1,6 @@
 const { tmpdir } = require('os')
 const { join } = require('path')
-const { readdir, mkdir, rm, writeFile, readFile } = require('fs/promises')
+const { atomicFS } = require('../lib/fileSystemHelpers')
 const test = require('tape')
 const writ = require('..')
 
@@ -15,7 +15,7 @@ test('Minimal run', t => {
     const themeDirectory = 'theme'
 
     try {
-      await mkdir(testDir, { recursive: true })
+      await atomicFS.mkdir(testDir)
 
       await writ.build({
         rootDirectory
@@ -26,9 +26,9 @@ test('Minimal run', t => {
         exportDirectoryContents,
         themeDirectoryContents
       ] = await Promise.all([
-        readdir(rootDirectory),
-        readdir(join(rootDirectory, exportDirectory)),
-        readdir(join(rootDirectory, themeDirectory))
+        atomicFS.readdir(rootDirectory),
+        atomicFS.readdir(join(rootDirectory, exportDirectory)),
+        atomicFS.readdir(join(rootDirectory, themeDirectory))
       ])
 
       t.ok(
@@ -71,7 +71,7 @@ test('Minimal run', t => {
         'Theme directory has script.js'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicFS.rm(testDir)
     }
   })
 
@@ -83,8 +83,11 @@ test('Minimal run', t => {
     const exportDirectory = 'docs'
 
     try {
-      await mkdir(testDir, { recursive: true })
-      await writeFile(join(testDir, 'hello.txt'), '# Title\n\nContent here')
+      await atomicFS.mkdir(testDir)
+      await atomicFS.writeFile(
+        join(testDir, 'hello.txt'),
+        '# Title\n\nContent here'
+      )
 
       await writ.build({
         rootDirectory: testDir
@@ -94,8 +97,11 @@ test('Minimal run', t => {
         exportDirectoryContents,
         testFileContent
       ] = await Promise.all([
-        readdir(join(rootDirectory, exportDirectory)),
-        readFile(join(rootDirectory, exportDirectory, 'hello.html'), { encoding: 'utf-8' })
+        atomicFS.readdir(join(rootDirectory, exportDirectory)),
+        atomicFS.readFile(
+          join(rootDirectory, exportDirectory, 'hello.html'),
+          { encoding: 'utf-8' }
+        )
       ])
 
       t.ok(
@@ -109,7 +115,7 @@ test('Minimal run', t => {
         'Text file is parsed as markdown'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicFS.rm(testDir)
     }
   })
 
@@ -121,27 +127,30 @@ test('Minimal run', t => {
     const exportDirectory = 'docs'
 
     try {
-      await mkdir(testDir, { recursive: true })
-      await writeFile(join(testDir, 'hello.txt'), '# Title\n\nContent here')
+      await atomicFS.mkdir(testDir)
+      await atomicFS.writeFile(
+        join(testDir, 'hello.txt'),
+        '# Title\n\nContent here'
+      )
 
       await writ.build({
         rootDirectory: testDir
       })
 
-      await rm(join(testDir, 'hello.txt'))
+      await atomicFS.rm(join(testDir, 'hello.txt'))
 
       await writ.build({
         rootDirectory: testDir
       })
 
-      const exportDirectoryContents = await readdir(join(rootDirectory, exportDirectory))
+      const exportDirectoryContents = await atomicFS.readdir(join(rootDirectory, exportDirectory))
 
       t.false(
         exportDirectoryContents.includes('hello.html'),
         'Deleted file wasnt rendered anymore'
       )
     } finally {
-      await rm(testDir, { recursive: true, force: true })
+      await atomicFS.rm(testDir, { recursive: true, force: true })
     }
   })
 
