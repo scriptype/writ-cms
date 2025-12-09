@@ -32,7 +32,9 @@ const Methods = (() => {
       }
     } else {
       Debug.debugLog(`${customThemePath} not found`)
-      await makeCustomThemeDirectory(customThemePath)
+      await atomicReplace(customThemePath, async (tempPath) => {
+        await makeCustomThemeDirectory(tempPath, { skipContainer: true })
+      })
     }
     Debug.timeEnd('theme')
   }
