@@ -1,9 +1,10 @@
 const { tmpdir } = require('os')
+const { stat, rm, mkdir, mkdtemp, cp, readdir } = require('fs/promises')
 const { join } = require('path')
 const Debug = require('../debug')
 const Settings = require('../settings')
 const createDecorator = require('./decorator')
-const { atomicReplace, atomicFS } = require('../lib/fileSystemHelpers')
+const { atomicReplace } = require('../lib/fileSystemHelpers')
 const {
   ASSETS,
   PARTIALS,
@@ -41,7 +42,7 @@ const Methods = (() => {
 
   const customThemeExists = async (customThemePath) => {
     try {
-      return await atomicFS.stat(customThemePath)
+      return await stat(customThemePath)
     } catch {
       return false
     }
@@ -50,12 +51,10 @@ const Methods = (() => {
   const refreshCustomTheme = async (customThemePath) => {
     const backupKeepDir = async (keepPath) => {
       try {
-        if (await atomicFS.stat(keepPath)) {
-          const tempPath = await atomicFS.mkdtemp(
-            join(tmpdir(), 'writ-theme-keep')
-          )
+        if (await stat(keepPath)) {
+          const tempPath = await mkdtemp(join(tmpdir(), 'writ-theme-keep'))
           Debug.debugLog('refresh theme temp dir', tempPath)
-          await atomicFS.cp(keepPath, tempPath)
+          await cp(keepPath, tempPath, { recursive: true })
           return tempPath
         }
       } catch {
@@ -65,7 +64,10 @@ const Methods = (() => {
     }
 
     const applyKeepOverrides = async (keepBackupPath, themePath) => {
-      const entries = await atomicFS.readdirRecursive(keepBackupPath)
+      const entries = await readdir(keepBackupPath, {
+        recursive: true,
+        withFileTypes: true
+      })
 
       await Promise.all(
         entries
@@ -75,7 +77,7 @@ const Methods = (() => {
               entry.parentPath.replace(keepBackupPath, ''),
               entry.name
             )
-            return atomicFS.cp(
+            return cp(
               join(keepBackupPath, relativePath),
               join(themePath, relativePath)
             )
@@ -96,8 +98,10 @@ const Methods = (() => {
         })
 
         if (keepBackupPath) {
-          await atomicFS.mkdir(join(tempPath, KEEP_PATH))
-          await atomicFS.cp(keepBackupPath, join(tempPath, KEEP_PATH))
+          await mkdir(join(tempPath, KEEP_PATH), { recursive: true })
+          await cp(keepBackupPath, join(tempPath, KEEP_PATH), {
+            recursive: true
+          })
           await applyKeepOverrides(keepBackupPath, tempPath)
         }
       })
@@ -106,13 +110,13 @@ const Methods = (() => {
       throw e
     } finally {
       if (keepBackupPath) {
-        await atomicFS.rm(keepBackupPath)
+        await rm(keepBackupPath, { recursive: true, force: true })
       }
     }
   }
 
   const collectCustomizerPaths = async (customThemePath) => {
-    const paths = await atomicFS.readdir(customThemePath)
+    const paths = await readdir(customThemePath)
     const customizerPaths = paths.filter(p => {
       return p.endsWith('.css') || p.endsWith('.js')
     })
@@ -121,11 +125,12 @@ const Methods = (() => {
 
   const copyCommonResources = (targetPath) => {
     return Promise.all([
-      atomicFS.cp(
+      cp(
         join(__dirname, 'common', PARTIALS.from),
-        join(targetPath, PARTIALS.to)
+        join(targetPath, PARTIALS.to),
+        { recursive: true }
       ),
-      atomicFS.cp(
+      cp(
         join(__dirname, 'common', TEMPLATE_HELPERS.from),
         join(targetPath, PARTIALS.to, TEMPLATE_HELPERS.to)
       )
@@ -136,15 +141,17 @@ const Methods = (() => {
     const { theme } = Settings.getSettings()
     const themeSrcPath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
     return Promise.all([
-      atomicFS.cp(
+      cp(
         join(themeSrcPath, ASSETS),
-        join(customThemePath, ASSETS, theme)
+        join(customThemePath, ASSETS, theme),
+        { recursive: true }
       ),
-      atomicFS.cp(
+      cp(
         join(themeSrcPath, PARTIALS.from),
-        join(customThemePath, PARTIALS.to)
+        join(customThemePath, PARTIALS.to),
+        { recursive: true }
       ),
-      atomicFS.cp(
+      cp(
         join(themeSrcPath, THEME_SETTINGS),
         join(customThemePath, THEME_SETTINGS)
       )
@@ -156,14 +163,14 @@ const Methods = (() => {
   }
 
   const copyCustomizers = async (customThemePath) => {
-    const paths = await atomicFS.readdir(join(__dirname, 'customizers'))
+    const paths = await readdir(join(__dirname, 'customizers'))
     const customizers = paths.filter(p => {
       return p.endsWith('.css') || p.endsWith('.js')
     })
     State.customizers.push(...customizers)
     return Promise.all(
       paths.map(path => {
-        return atomicFS.cp(
+        return cp(
           join(__dirname, 'customizers', path),
           join(customThemePath, path)
         )
@@ -173,12 +180,12 @@ const Methods = (() => {
 
   const makeCustomThemeDirectory = async (customThemePath, options = {}) => {
     if (!options.skipContainer) {
-      await atomicFS.mkdir(customThemePath)
+      await mkdir(customThemePath)
     }
 
     await Promise.all([
-      atomicFS.mkdir(join(customThemePath, ASSETS)),
-      atomicFS.mkdir(join(customThemePath, PARTIALS.to))
+      mkdir(join(customThemePath, ASSETS)),
+      mkdir(join(customThemePath, PARTIALS.to))
     ])
 
     await copyCommonResources(customThemePath)
