@@ -33,7 +33,7 @@ class Post extends ContentModelEntryNode {
 
   getSubtreeMatchers() {
     return {
-      indexFile: matcha.indexFile({
+      indexFile: matcha.templateFile({
         nameOptions: [this.settings.entryAlias, 'post', 'index']
       }),
 

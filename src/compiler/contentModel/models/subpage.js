@@ -25,7 +25,7 @@ class Subpage extends ContentModelEntryNode {
 
   getSubtreeMatchers() {
     return {
-      indexFile: matcha.indexFile({
+      indexFile: matcha.templateFile({
         nameOptions: ['page', 'index']
       }),
 

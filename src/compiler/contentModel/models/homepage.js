@@ -33,7 +33,7 @@ class Homepage extends ContentModelEntryNode {
 
   getSubtreeMatchers() {
     return {
-      indexFile: matcha.indexFile({
+      indexFile: matcha.templateFile({
         nameOptions: ['homepage', 'home', 'index']
       }),
 

@@ -1,10 +1,5 @@
 const { isDataFile, isTemplateFile } = require('./contentModelHelpers')
 
-const logicFnMap = {
-  'or': 'some',
-  'and': 'every'
-}
-
 const matcha = {
   helpers: {}
 }
@@ -12,10 +7,10 @@ const matcha = {
 matcha.helpers.computeOptions = (options, fsNode) => {
   const result = {}
   if (options.nameOptions) {
+    result.nameOptions = options.nameOptions
     if (typeof options.nameOptions === 'function') {
       result.nameOptions = options.nameOptions(fsNode)
     }
-    result.nameOptions = options.nameOptions
   }
   return result
 }
@@ -23,18 +18,18 @@ matcha.helpers.computeOptions = (options, fsNode) => {
 matcha.true = () => fsNode => true
 matcha.false = () => fsNode => false
 
-matcha.either = (...matchers) => {
-  return {
-    logic: 'or',
-    matchers
+matcha.either = (...matchers) => (fsNode) => {
+  if (Array.isArray(fsNode)) {
+    return matchers.some(matcher => fsNode.some(matcher))
   }
+  return matchers.some(matcher => matcher(fsNode))
 }
 
-matcha.and = (...matchers) => {
-  return {
-    logic: 'and',
-    matchers
+matcha.and = (...matchers) => (fsNode) => {
+  if (Array.isArray(fsNode)) {
+    return matchers.every(matcher => fsNode.some(matcher))
   }
+  return matchers.every(matcher => matcher(fsNode))
 }
 
 matcha.directory = (options = {}) => {
@@ -56,12 +51,15 @@ matcha.directory = (options = {}) => {
 
     let childrenMatch = true
     if (options.children) {
-      const logicFn = logicFnMap[options.children.logic || 'and']
-      const matchers = options.children.matchers || options.children
-      childrenMatch = matchers[logicFn](childMatcher => {
-        return fsNode.children.some(childMatcher)
-      })
+      if (typeof options.children === 'function') {
+        childrenMatch = options.children(fsNode.children)
+      } else {
+        childrenMatch = options.children.every(childMatcher => {
+          return fsNode.children.some(childMatcher)
+        })
+      }
     }
+
     if (childrenMatch) {
       return true
     }
@@ -78,25 +76,28 @@ matcha.directory = (options = {}) => {
     return recursionMatch
   }
 }
+
 matcha.dataFile = (options = {}) => {
   return (fsNode) => {
     const { nameOptions } = matcha.helpers.computeOptions(options, fsNode)
     return (
-      isDataFile(fsNode) &&
-      fsNode.name.match(
-        new RegExp(`^(${nameOptions.join('|')})\\..+$`)
+      isDataFile(fsNode) && (
+        !nameOptions || fsNode.name.match(
+          new RegExp(`^(${nameOptions.join('|')})\\..+$`)
+        )
       )
     )
   }
 }
 
-matcha.indexFile = (options = {}) => {
+matcha.templateFile = (options = {}) => {
   return (fsNode) => {
     const { nameOptions } = matcha.helpers.computeOptions(options, fsNode)
     return (
-      isTemplateFile(fsNode) &&
-      fsNode.name.match(
-        new RegExp(`^(${nameOptions.join('|')})\\..+$`)
+      isTemplateFile(fsNode) && (
+        !nameOptions || fsNode.name.match(
+          new RegExp(`^(${nameOptions.join('|')})\\..+$`)
+        )
       )
     )
   }
@@ -104,25 +105,19 @@ matcha.indexFile = (options = {}) => {
 
 matcha.folderable = (options = {}) => {
   return (fsNode) => {
-    const { nameOptions } = matcha.helpers.computeOptions(options, fsNode)
-    return isTemplateFile(fsNode) || fsNode.children?.find(
-      matcha.indexFile({
-        nameOptions: nameOptions.index
-      })
-    )
-  }
-}
-
-matcha.namedFolderable = (options = {}) => {
-  return fsNode => {
-    const { nameOptions } = matcha.helpers.computeOptions(options, fsNode)
-    const namedFile = matcha.indexFile({
-      nameOptions: nameOptions.index
-    })(fsNode)
-    return namedFile || matcha.directory({
+    const { nameOptions = {} } = matcha.helpers.computeOptions(options, fsNode)
+    const standaloneFileMatcher = matcha.templateFile({
+      nameOptions: nameOptions.standalone
+    })
+    const indexedDirectoryMatcher = matcha.directory({
       nameOptions: nameOptions.folder,
-      children: [namedFile]
-    })(fsNode)
+      children: [
+        matcha.templateFile({
+          nameOptions: nameOptions.index
+        })
+      ]
+    })
+    return standaloneFileMatcher(fsNode) || indexedDirectoryMatcher(fsNode)
   }
 }
 

@@ -161,13 +161,13 @@ class ContentModel {
 
   getSubtreeMatchers() {
     return {
-      collectionIndexFile: matcha.indexFile({
+      collectionIndexFile: matcha.templateFile({
         nameOptions: this.collectionAliases.concat('collection').filter(Boolean)
       }),
 
       collection: matcha.directory({
         children: matcha.either(
-          matcha.indexFile({
+          matcha.templateFile({
             nameOptions: this.collectionAliases.concat('collection')
           }),
           matcha.dataFile({
@@ -176,10 +176,11 @@ class ContentModel {
         )
       }),
 
-      homepage: matcha.namedFolderable({
+      homepage: matcha.folderable({
         nameOptions: {
           folder: [this.settings.homepageDirectory, 'homepage', 'home'],
-          index: ['homepage', 'home', 'index']
+          index: ['index'],
+          standalone: ['homepage', 'home', 'index']
         }
       }),
 

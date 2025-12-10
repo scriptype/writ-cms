@@ -105,28 +105,23 @@ class Category extends ContentModelEntryNode {
   }
 
   getSubtreeMatchers() {
-    // copy-pasted from matchers.js
+    const postMatcher = matcha.folderable({
+      nameOptions: {
+        index: [this.settings.entryAlias, 'post', 'index']
+      }
+    })
+
     return {
-      indexFile: matcha.indexFile({
+      indexFile: matcha.templateFile({
         nameOptions: [this.settings.categoryAlias, 'category']
       }),
 
       category: matcha.directory({
         childSearchDepth: 3,
-        children: [
-          matcha.folderable({
-            nameOptions: {
-              index: [this.settings.entryAlias, 'post', 'index']
-            }
-          })
-        ]
+        children: [ postMatcher ]
       }),
 
-      post: matcha.folderable({
-        nameOptions: {
-          index: [this.settings.entryAlias, 'post', 'index']
-        }
-      }),
+      post: postMatcher,
 
       attachment: matcha.true()
     }
