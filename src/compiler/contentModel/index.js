@@ -3,7 +3,7 @@ const _ = require('lodash')
 const frontMatter = require('front-matter')
 const ImmutableStack = require('../../lib/ImmutableStack')
 const { removeExtension, isTemplateFile } = require('../../lib/contentModelHelpers')
-const createMatchers = require('./matchers')
+const matcha = require('../../lib/matcha')
 
 const models = {
   Homepage: require('./models/homepage'),
@@ -157,7 +157,48 @@ class ContentModel {
       ...contentModelSettings
     }
     this.contentTypes = contentTypes
-    this.matchers = createMatchers(this.settings)
+  }
+
+  getSubtreeMatchers() {
+    return {
+      collectionIndexFile: matcha.indexFile({
+        nameOptions: this.collectionAliases.concat('collection').filter(Boolean)
+      }),
+
+      collection: matcha.directory({
+        children: matcha.either(
+          matcha.indexFile({
+            nameOptions: this.collectionAliases.concat('collection')
+          }),
+          matcha.dataFile({
+            nameOptions: (fsNode) => ([fsNode.name])
+          }),
+        )
+      }),
+
+      homepage: matcha.namedFolderable({
+        nameOptions: {
+          folder: [this.settings.homepageDirectory, 'homepage', 'home'],
+          index: ['homepage', 'home', 'index']
+        }
+      }),
+
+      subpage: matcha.folderable({
+        nameOptions: {
+          index: ['page', 'index']
+        }
+      }),
+
+      pagesDirectory: matcha.directory({
+        nameOptions: [this.settings.pagesDirectory, 'subpages', 'pages']
+      }),
+
+      asset: matcha.true(),
+
+      assetsDirectory: matcha.directory({
+        nameOptions: [this.settings.assetsDirectory, 'assets']
+      })
+    }
   }
 
   draftCheck(node) {
@@ -200,7 +241,13 @@ class ContentModel {
       ...(indexProps.attributes?.collectionAliases || [])
     ]
 
+    this.matchers = this.getSubtreeMatchers()
+
     fileSystemTree.forEach(node => {
+      if (isRootIndexFile(node)) {
+        return
+      }
+
       if (this.matchers.homepage(node)) {
         this.contentModel.homepage = new models.Homepage(node, context, {
           homepageDirectory: this.settings.homepageDirectory
@@ -234,10 +281,8 @@ class ContentModel {
         })
       }
 
-      if (this.matchers.collection(node, this.collectionAliases)) {
-        const indexFile = node.children.find(
-          this.matchers.collectionIndexFile(this.collectionAliases)
-        )
+      if (this.matchers.collection(node)) {
+        const indexFile = node.children.find(this.matchers.collectionIndexFile)
 
         const contentType = this.contentTypes
           .filter(ct => ct.model === 'collection')

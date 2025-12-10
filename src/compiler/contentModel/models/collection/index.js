@@ -10,6 +10,8 @@ const {
   sort
 } = require('../../../../lib/contentModelHelpers')
 
+const matcha = require('../../../../lib/matcha')
+
 const models = {
   Attachment: require('../attachment'),
   Category: require('./category'),
@@ -96,47 +98,32 @@ class Collection extends ContentModelEntryNode {
   getSubtreeMatchers() {
     // copy-pasted from matchers.js
     return {
-      indexFile: (node) => {
-        const indexFileNameOptions = [
-          ...this.settings.collectionAliases,
-          'collection'
-        ].filter(Boolean)
+      indexFile: matcha.indexFile({
+        nameOptions: (this.settings.collectionAliases || []).concat('collection').filter(Boolean)
+      }),
 
-        return isTemplateFile(node) && node.name.match(
-          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-        )
-      },
+      dataFile: matcha.dataFile({
+        nameOptions: [this.fsNode.name]
+      }),
 
-      dataFile: (node, parentNode) => {
-        return node.name.match(new RegExp(`^${parentNode.name}\\.json$`, 'i'))
-      },
+      category: matcha.directory({
+        childSearchDepth: 3,
+        children: [
+          matcha.folderable({
+            nameOptions: {
+              index: [this.settings.entryAlias, 'post', 'index']
+            }
+          })
+        ]
+      }),
 
-      category: (fsNode, level) => {
-        return fsNode.children?.find(childNode => {
-          const containsPosts = this.matchers.post(childNode)
-          if (level > 3) {
-            return containsPosts
-          }
-          const containsSubCategories = this.matchers.category(childNode, level)
-          return containsSubCategories || containsPosts
-        })
-      },
+      post: matcha.folderable({
+        nameOptions: {
+          index: [this.entryAlias, this.settings.contentType?.entryAlias, 'post', 'index']
+        }
+      }),
 
-      postIndexFile: fsNode => {
-        const indexFileNameOptions = [this.entryAlias, this.settings.contentType?.entryAlias, 'post', 'index'].filter(Boolean)
-        return (
-          isTemplateFile(fsNode) &&
-          fsNode.name.match(
-            new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-          )
-        )
-      },
-
-      post: fsNode => {
-        return isTemplateFile(fsNode) || fsNode.children?.find(this.matchers.postIndexFile)
-      },
-
-      attachment: fsNode => true
+      attachment: matcha.true()
     }
   }
 
@@ -176,7 +163,7 @@ class Collection extends ContentModelEntryNode {
         return this.addUncategorizedPost(childNode, null, tree)
       }
 
-      if (this.matchers.category(childNode, 1)) {
+      if (this.matchers.category(childNode)) {
         const categorySettings = {
           defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
           contentTypes: this.settings.contentTypes,

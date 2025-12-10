@@ -1,6 +1,7 @@
 const { join } = require('path')
 const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
 const { templateExtensions } = require('../../../../lib/contentModelHelpers')
+const matcha = require('../../../../lib/matcha')
 
 const models = {
   facet: require('./facet'),
@@ -32,18 +33,11 @@ class Post extends ContentModelEntryNode {
 
   getSubtreeMatchers() {
     return {
-      indexFile: (fsNode) => {
-        if (fsNode.children) {
-          return false
-        }
-        const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
-        const names = indexFileNameOptions.join('|')
-        const extensions = templateExtensions.join('|')
-        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
-        return fsNode.name.match(namePattern)
-      },
+      indexFile: matcha.indexFile({
+        nameOptions: [this.settings.entryAlias, 'post', 'index']
+      }),
 
-      attachment: (fsNode) => true
+      attachment: matcha.true()
     }
   }
 

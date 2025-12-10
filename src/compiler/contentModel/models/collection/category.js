@@ -2,6 +2,7 @@ const makeSlug = require('slug')
 const _ = require('lodash')
 const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
 const { makePermalink, isTemplateFile, sort } = require('../../../../lib/contentModelHelpers')
+const matcha = require('../../../../lib/matcha')
 
 const models = {
   Post: require('./post'),
@@ -106,39 +107,28 @@ class Category extends ContentModelEntryNode {
   getSubtreeMatchers() {
     // copy-pasted from matchers.js
     return {
-      indexFile: fsNode => {
-        const indexFileNameOptions = [this.settings.categoryAlias, 'category'].filter(Boolean)
-        return isTemplateFile(fsNode) && fsNode.name.match(
-          new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-        )
-      },
+      indexFile: matcha.indexFile({
+        nameOptions: [this.settings.categoryAlias, 'category']
+      }),
 
-      category: (fsNode, level) => {
-        return fsNode.children?.find(childNode => {
-          const containsPosts = this.matchers.post(childNode)
-          if (level > 3) {
-            return containsPosts
-          }
-          const containsSubCategories = this.matchers.category(childNode, level)
-          return containsSubCategories || containsPosts
-        })
-      },
+      category: matcha.directory({
+        childSearchDepth: 3,
+        children: [
+          matcha.folderable({
+            nameOptions: {
+              index: [this.settings.entryAlias, 'post', 'index']
+            }
+          })
+        ]
+      }),
 
-      postIndexFile: fsNode => {
-        const indexFileNameOptions = [this.settings.entryAlias, 'post', 'index'].filter(Boolean)
-        return (
-          isTemplateFile(fsNode) &&
-          fsNode.name.match(
-            new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-          )
-        )
-      },
+      post: matcha.folderable({
+        nameOptions: {
+          index: [this.settings.entryAlias, 'post', 'index']
+        }
+      }),
 
-      post: fsNode => {
-        return isTemplateFile(fsNode) || fsNode.children?.find(this.matchers.postIndexFile)
-      },
-
-      attachment: fsNode => true
+      attachment: matcha.true()
     }
   }
 
@@ -187,7 +177,7 @@ class Category extends ContentModelEntryNode {
         return
       }
 
-      if (this.matchers.category(childNode, this.settings.level)) {
+      if (this.matchers.category(childNode)) {
         const subCategorySettings = {
           contentTypes: this.settings.contentTypes,
           entryContentType: this.entryContentType || this.settings.entryContentType,

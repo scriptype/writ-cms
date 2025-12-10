@@ -1,6 +1,7 @@
 const { join } = require('path')
 const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
 const { templateExtensions } = require('../../../lib/contentModelHelpers')
+const matcha = require('../../../lib/matcha')
 
 const models = {
   Attachment: require('./attachment')
@@ -32,18 +33,11 @@ class Homepage extends ContentModelEntryNode {
 
   getSubtreeMatchers() {
     return {
-      indexFile: (fsNode) => {
-        const indexFileNameOptions = ['index']
-        if (fsNode.children) {
-          return false
-        }
-        const names = indexFileNameOptions.join('|')
-        const extensions = templateExtensions.join('|')
-        const namePattern = new RegExp(`^(${names})(${extensions})$`, 'i')
-        return fsNode.name.match(namePattern)
-      },
+      indexFile: matcha.indexFile({
+        nameOptions: ['homepage', 'home', 'index']
+      }),
 
-      attachment: (fsNode) => true
+      attachment: matcha.true()
     }
   }
 

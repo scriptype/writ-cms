@@ -17,6 +17,10 @@ const isTemplateFile = (node) => {
   return new RegExp(templateExtensions.join('|'), 'i').test(node.extension)
 }
 
+const isDataFile = (node) => {
+  return new RegExp('.json', 'i').test(node.extension)
+}
+
 const makePermalink = (...parts) => {
   if (parts[0] === '/') {
     return parts[0] + parts.slice(1).join('/')
@@ -95,6 +99,7 @@ const safeStringify = ({ data, omit = [], stub = [] }) => {
 module.exports = {
   templateExtensions,
   isTemplateFile,
+  isDataFile,
   makePermalink,
   removeExtension,
   Markdown,
