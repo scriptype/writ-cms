@@ -71,6 +71,7 @@ class Category extends ContentModelEntryNode {
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
 
+    this.facets = []
     this.subtree = this.parseSubtree()
 
     if (fsNode.isDefaultCategory) {
