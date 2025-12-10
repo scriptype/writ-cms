@@ -1,6 +1,6 @@
 const { join } = require('path')
 const makeSlug = require('slug')
-const { makePermalink, makeDateSlug } = require('../../helpers')
+const { makePermalink, makeDateSlug } = require('../../../../lib/contentModelHelpers')
 
 function serializeLinkedFacet(facetValue) {
   return facetValue.slug ?

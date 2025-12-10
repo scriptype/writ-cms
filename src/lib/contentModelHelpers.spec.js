@@ -8,7 +8,7 @@ const {
   sort,
   Markdown,
   safeStringify
-} = require('./helpers')
+} = require('./contentModelHelpers')
 
 test('templateExtensions', t => {
   t.ok(
