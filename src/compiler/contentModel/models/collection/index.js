@@ -81,6 +81,14 @@ class Collection extends ContentModelEntryNode {
     this.subtree = this.parseSubtree()
   }
 
+  getIndexFile() {
+    return this.fsNode.children.find(
+      matcha.templateFile({
+        nameOptions: this.settings.collectionAliases.concat('collection')
+      })
+    )
+  }
+
   getSlug() {
     return this.__originalAttributes__.slug === null ?
       '' :
@@ -103,10 +111,6 @@ class Collection extends ContentModelEntryNode {
     })
 
     return {
-      indexFile: matcha.templateFile({
-        nameOptions: (this.settings.collectionAliases || []).concat('collection').filter(Boolean)
-      }),
-
       dataFile: matcha.dataFile({
         nameOptions: [this.fsNode.name]
       }),
@@ -124,7 +128,6 @@ class Collection extends ContentModelEntryNode {
 
   parseSubtree() {
     const tree = {
-      indexFile: this.indexFile,
       categories: [],
       posts: [],
       levelPosts: [],
@@ -140,7 +143,7 @@ class Collection extends ContentModelEntryNode {
     })
 
     this.fsNode.children.forEach(childNode => {
-      if (this.matchers.indexFile(childNode)) {
+      if (childNode === this.indexFile) {
         return
       }
 

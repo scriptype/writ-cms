@@ -23,6 +23,14 @@ class Homepage extends ContentModelEntryNode {
     this.subtree = this.parseSubtree()
   }
 
+  getIndexFile() {
+    return this.fsNode.children?.find(
+      matcha.templateFile({
+        nameOptions: ['homepage', 'home', 'index']
+      })
+    ) || this.fsNode
+  }
+
   getPermalink() {
     return this.context.peek().permalink
   }
@@ -33,17 +41,12 @@ class Homepage extends ContentModelEntryNode {
 
   getSubtreeMatchers() {
     return {
-      indexFile: matcha.templateFile({
-        nameOptions: ['homepage', 'home', 'index']
-      }),
-
       attachment: matcha.true()
     }
   }
 
   parseSubtree() {
     const tree = {
-      indexFile: this.fsNode,
       attachments: []
     }
 
@@ -61,7 +64,7 @@ class Homepage extends ContentModelEntryNode {
     }
 
     this.fsNode.children.forEach(childNode => {
-      if (this.matchers.indexFile(childNode)) {
+      if (childNode === this.indexFile) {
         return
       }
       if (this.matchers.attachment(childNode)) {

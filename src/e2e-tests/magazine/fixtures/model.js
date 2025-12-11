@@ -296,7 +296,8 @@ const FIXTURE_CONTENT_MODEL = {
               slug: 'intelligent-drum-n-bass',
               permalink: '/demos/threejs/intelligent-drum-n-bass'
             },
-            { title: 'Hello World', slug: 'hello-world', permalink: '/demos/hello-world' }
+            { title: 'Hello World', slug: 'hello-world', permalink: '/demos/hello-world' },
+            { title: 'Hey World', slug: 'hey-world', permalink: '/demos/hey-world' }
           ],
           articles: [
             {
@@ -907,6 +908,29 @@ const FIXTURE_CONTENT_MODEL = {
           }
         },
         {
+          title: 'Hey World',
+          maker: { title: 'Mustafa Enes', slug: 'enes' },
+          date: '2025-12-06',
+          permalink: '/demos/hey-world',
+          contentType: 'Demo',
+          tags: ['html', 'hey world'],
+          content: '<h1>Hey world</h1>\n\n<p>Adipisicing nesciunt ab quos eos nesciunt Nemo ab aliquid quod magnam eaque voluptatem. Possimus tenetur veniam nostrum magnam in? Ipsa atque cupiditate illum hic mollitia Soluta excepturi vel consequatur exercitationem.</p>',
+          context: {
+            collection: {
+              title: 'demos',
+              permalink: '/demos'
+            },
+            categories: []
+          },
+          links: {
+            nextPost: null,
+            previousPost: {
+              title: 'good-morning-world',
+              permalink: '/demos/good-morning-world.html'
+            }
+          }
+        },
+        {
           title: 'good-morning-world',
           maker: { title: 'Sir Tim Berners Lee', slug: 'tim' },
           date: '2025-11-07',
@@ -926,7 +950,10 @@ const FIXTURE_CONTENT_MODEL = {
               title: 'Hello World',
               permalink: '/demos/hello-world'
             },
-            nextPost: null
+            nextPost: {
+              title: 'Hey World',
+              permalink: '/demos/hey-world'
+            }
           }
         }
       ]

@@ -93,6 +93,13 @@ class Category extends ContentModelEntryNode {
     })
   }
 
+  getIndexFile() {
+    return this.fsNode.children?.find(
+      matcha.templateFile({
+        nameOptions: [this.settings.categoryAlias, 'category']
+      })
+    ) || this.fsNode
+  }
 
   getPermalink() {
     if (this.fsNode.isDefaultCategory) {
@@ -112,10 +119,6 @@ class Category extends ContentModelEntryNode {
     })
 
     return {
-      indexFile: matcha.templateFile({
-        nameOptions: [this.settings.categoryAlias, 'category']
-      }),
-
       category: matcha.directory({
         childSearchDepth: 3,
         children: [ postMatcher ]
@@ -129,7 +132,6 @@ class Category extends ContentModelEntryNode {
 
   parseSubtree() {
     const tree = {
-      indexFile: this.indexFile,
       categories: [],
       posts: [],
       levelPosts: [],
@@ -153,7 +155,7 @@ class Category extends ContentModelEntryNode {
     })
 
     this.fsNode.children.forEach(childNode => {
-      if (this.matchers.indexFile(childNode)) {
+      if (childNode === this.indexFile) {
         return
       }
 

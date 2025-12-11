@@ -8,15 +8,12 @@ class ContentModelEntryNode extends ContentModelNode {
   constructor(fsNode, context, settings = {}) {
     super(fsNode, context, settings)
 
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = {
-      indexFile: this.getIndexFile()
-    }
+    this.indexFile = this.getIndexFile()
 
     const isFlatData = !fsNode.stats?.birthtime
     const entryProperties = parseTextEntry(
       this.fsNode,
-      this.subtree.indexFile || this.fsNode,
+      this.indexFile || this.fsNode,
       isFlatData
     )
 
@@ -25,10 +22,12 @@ class ContentModelEntryNode extends ContentModelNode {
     this.slug = this.getSlug()
     this.permalink = this.getPermalink()
     this.outputPath = this.getOutputPath()
+    this.matchers = this.getSubtreeMatchers()
+    this.subtree = {}
   }
 
   getIndexFile() {
-    return this.fsNode.children?.find(this.matchers.indexFile) || this.fsNode
+    return this.fsNode
   }
 
   getSlug() {
