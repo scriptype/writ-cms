@@ -1,23 +1,49 @@
-const Debug = require('../debug')
+const ContentTypes = require('../content-types')
 
 module.exports = class Compiler {
-  constructor({ fileSystemParser, contentModel, renderer }) {
-    this.fileSystemParser = fileSystemParser
-    this.contentModel = contentModel
-    this.renderer = renderer
+  constructor({ FileSystemParser, ContentModel, Renderer, settings, debug }) {
+    this.FileSystemParser = FileSystemParser
+    this.ContentModel = ContentModel
+    this.Renderer = Renderer
+    this.settings = settings
+    this.debug = debug
+    this.logger = {
+      debug: debug.debugLog
+    }
   }
 
   async compile() {
-    Debug.timeStart('compiler')
-    const fileSystemTree = await this.fileSystemParser.parse()
-    const contentModel = this.contentModel.create(fileSystemTree)
-    if (this.contentModel.render) {
-      await this.renderer.init()
-      await this.contentModel.render(this.renderer)
-    } else {
-      await this.renderer.render(contentModel)
+    if (typeof this.debug === 'object' && this.debug.timeStart) {
+      this.debug.timeStart('compiler')
     }
-    Debug.timeEnd('compiler')
+
+    const fileSystemParser = new this.FileSystemParser(
+      this.settings.fileSystemParser,
+      this.logger
+    )
+
+    const fileSystemTree = await fileSystemParser.parse()
+
+    const contentTypes = await ContentTypes.init(
+      this.settings.contentTypes,
+      this.logger
+    )
+
+    const contentModel = new this.ContentModel(
+      fileSystemTree,
+      this.settings.contentModel,
+      contentTypes
+    )
+
+    if (contentModel.render) {
+      await this.Renderer.init()
+      await contentModel.render(this.Renderer)
+    } else {
+      await this.Renderer.render(contentModel)
+    }
+
+    this.debug.timeEnd('compiler')
+
     return {
       fileSystemTree,
       contentModel

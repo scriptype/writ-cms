@@ -7,7 +7,6 @@ const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
 const CNAME = require('./cname')
-const ContentTypes = require('./content-types')
 const FileSystemParser = require('./lib/FileSystemParser')
 const ContentModel = require('./compiler/contentModel')
 const Renderer = require('./compiler/renderer')
@@ -63,43 +62,35 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await SiteDirectory.create()
   await CNAME.create()
 
-  const logger = {
-    debug: Debug.debugLog
-  }
-
-  const contentTypes = await ContentTypes.init(
-    _.pick(settings, [
-      'rootDirectory',
-      'contentTypesDirectory'
-    ]),
-    logger
-  )
-
   const { fileSystemTree, contentModel } = await new Compiler({
-    fileSystemParser: new FileSystemParser(
-      _.pick(settings, [
+    FileSystemParser,
+    ContentModel,
+    Renderer,
+    debug: Debug,
+    settings: {
+      contentTypes: _.pick(settings, [
+        'rootDirectory',
+        'contentTypesDirectory'
+      ]),
+      fileSystemParser: _.pick(settings, [
         'rootDirectory',
         'contentDirectory',
         'IGNORE_PATHS_REG_EXP'
       ]),
-      logger
-    ),
-
-    contentModel: new ContentModel({
-      ..._.pick(settings, [
-        'permalinkPrefix',
-        'out',
-        'defaultCategoryName',
-        'assetsDirectory',
-        'pagesDirectory',
-        'homepageDirectory',
-        'site',
-        'mode'
-      ]),
-      debug: Debug.getDebug()
-    }, contentTypes),
-
-    renderer: Renderer
+      contentModel: {
+        ..._.pick(settings, [
+          'permalinkPrefix',
+          'out',
+          'defaultCategoryName',
+          'assetsDirectory',
+          'pagesDirectory',
+          'homepageDirectory',
+          'site',
+          'mode'
+        ]),
+        debug: Debug.getDebug()
+      }
+    }
   }).compile()
 
   await Assets.copyAssets()
@@ -107,8 +98,7 @@ const run = async ({ mode, rootDirectory, refreshTheme, finishCallback }) => {
   await finishCallback({
     settings,
     fileSystemTree,
-    contentModel,
-    contentTypes
+    contentModel
   })
 }
 

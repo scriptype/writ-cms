@@ -3,6 +3,7 @@ const _ = require('lodash')
 const frontMatter = require('front-matter')
 const ImmutableStack = require('../../lib/ImmutableStack')
 const { removeExtension, isTemplateFile } = require('../../lib/contentModelHelpers')
+const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
 const matcha = require('../../lib/matcha')
 
 const models = {
@@ -27,7 +28,7 @@ const parseLink = (value) => {
 
 const findLinkedEntry = (contentModel, link) => {
   const collectionSlugRe = new RegExp(link.collectionSlug, 'i')
-  const collection = contentModel.collections.find(c => c.slug.match(collectionSlugRe))
+  const collection = contentModel.subtree.collections.find(c => c.slug.match(collectionSlugRe))
   let container = collection
 
   for (const categorySlug of link.categorySlugs) {
@@ -88,7 +89,7 @@ const linkBack = (post, entry, key) => {
 }
 
 const linkEntries = (contentModel) => {
-  contentModel.collections.forEach(collection => {
+  contentModel.subtree.collections.forEach(collection => {
     collection.subtree.posts.forEach(post => {
       const fields = Object.keys(post)
       Object.keys(post).forEach(key => {
@@ -127,7 +128,7 @@ const linkEntries = (contentModel) => {
   })
 }
 
-const defaultContentModelSettings = {
+const defaultSettings = {
   permalinkPrefix: '/',
   out: resolve('.'),
   defaultCategoryName: 'Unclassified',
@@ -141,28 +142,64 @@ const defaultContentModelSettings = {
   },
   mode: 'start'
 }
-class ContentModel {
+class ContentModel extends ContentModelEntryNode {
   static serialize(contentModel) {
     return {
-      homepage: models.Homepage.serialize(contentModel.homepage),
-      subpages: contentModel.subpages.map(models.Subpage.serialize),
-      collections: contentModel.collections.map(models.Collection.serialize),
-      assets: contentModel.assets.map(models.Asset.serialize)
+      homepage: models.Homepage.serialize(contentModel.subtree.homepage),
+      subpages: contentModel.subtree.subpages.map(models.Subpage.serialize),
+      collections: contentModel.subtree.collections.map(models.Collection.serialize),
+      assets: contentModel.subtree.assets.map(models.Asset.serialize)
     }
   }
 
-  constructor(contentModelSettings = defaultContentModelSettings, contentTypes = []) {
-    this.settings = {
-      ...defaultContentModelSettings,
+  static draftCheck(mode, node) {
+    return mode === 'start' || !node.draft
+  }
+
+  constructor(fsNode, contentModelSettings = defaultSettings, contentTypes) {
+    const settings = {
+      ...defaultSettings,
       ...contentModelSettings
     }
+
+    const context = new ImmutableStack([{
+      key: 'root',
+      outputPath: settings.out,
+      permalink: settings.permalinkPrefix
+    }])
+
+    super(fsNode, context, settings)
+
     this.contentTypes = contentTypes
+
+    const collectionAliasesFromContentTypes = contentTypes
+      .filter(ct => ct.model === 'collection')
+      .map(ct => ct.collectionAlias)
+
+    const collectionAliasesFromFrontMatter = this.collectionAliases || []
+
+    this.collectionAliases = [
+      ...collectionAliasesFromContentTypes,
+      ...collectionAliasesFromFrontMatter
+    ]
+
+    this.matchers = this.getSubtreeMatchers()
+    this.subtree = this.parseSubtree()
+    this.afterEffects()
+  }
+
+  getIndexFile() {
+    return this.fsNode.find(
+      matcha.templateFile({
+        nameOptions: ['root']
+      })
+    )
   }
 
   getSubtreeMatchers() {
     return {
       collectionIndexFile: matcha.templateFile({
-        nameOptions: this.collectionAliases.concat('collection').filter(Boolean)
+        nameOptions: this.collectionAliases.concat('collection')
       }),
 
       collection: matcha.directory({
@@ -202,32 +239,11 @@ class ContentModel {
     }
   }
 
-  draftCheck(node) {
-    return this.settings.mode === 'start' || !node.draft
-  }
-
-  create(fileSystemTree) {
-    const indexFileNameOptions = ['root']
-
-    const isRootIndexFile = (node) => {
-      return isTemplateFile(node) && node.name.match(
-        new RegExp(`^(${indexFileNameOptions.join('|')})\\..+$`)
-      )
-    }
-
-    const indexFile = fileSystemTree.find(isRootIndexFile)
-    const indexProps = indexFile ? frontMatter(indexFile.content) : {}
-
-    const context = new ImmutableStack([{
-      key: 'root',
-      outputPath: this.settings.out,
-      permalink: this.settings.permalinkPrefix
-    }])
-
-    this.contentModel = {
+  parseSubtree() {
+    const tree = {
       homepage: new models.Homepage(
         { name: 'index', extension: 'md', content: '' },
-        context,
+        this.context,
         { homepageDirectory: this.settings.homepageDirectory }
       ),
       subpages: [],
@@ -235,30 +251,21 @@ class ContentModel {
       assets: []
     }
 
-    this.collectionAliases = [
-      ...this.contentTypes
-      .filter(ct => ct.model === 'collection')
-      .map(ct => ct.collectionAlias),
-      ...(indexProps.attributes?.collectionAliases || [])
-    ]
-
-    this.matchers = this.getSubtreeMatchers()
-
-    fileSystemTree.forEach(node => {
-      if (isRootIndexFile(node)) {
+    this.fsNode.forEach(node => {
+      if (node === this.indexFile) {
         return
       }
 
       if (this.matchers.homepage(node)) {
-        this.contentModel.homepage = new models.Homepage(node, context, {
+        tree.homepage = new models.Homepage(node, this.context, {
           homepageDirectory: this.settings.homepageDirectory
         })
         return
       }
 
       if (this.matchers.subpage(node)) {
-        return this.contentModel.subpages.push(
-          new models.Subpage(node, context, {
+        return tree.subpages.push(
+          new models.Subpage(node, this.context, {
             pagesDirectory: this.settings.pagesDirectory
           })
         )
@@ -267,14 +274,14 @@ class ContentModel {
       if (this.matchers.pagesDirectory(node)) {
         return node.children.forEach(childNode => {
           if (this.matchers.subpage(childNode)) {
-            this.contentModel.subpages.push(
-              new models.Subpage(childNode, context, {
+            tree.subpages.push(
+              new models.Subpage(childNode, this.context, {
                 pagesDirectory: this.settings.pagesDirectory
               })
             )
           } else if (this.matchers.asset(childNode)) {
-            this.contentModel.assets.push(
-              new models.Asset(childNode, context, {
+            tree.assets.push(
+              new models.Asset(childNode, this.context, {
                 assetsDirectory: this.settings.assetsDirectory
               })
             )
@@ -291,7 +298,7 @@ class ContentModel {
             return ct.collectionAlias === (indexFile ? removeExtension(indexFile.name) : node.name)
           })
 
-        const collection = new models.Collection(node, context, {
+        const collection = new models.Collection(node, this.context, {
           defaultCategoryName: this.settings.defaultCategoryName,
           collectionAliases: this.collectionAliases,
           mode: this.settings.mode,
@@ -301,16 +308,16 @@ class ContentModel {
           contentType
         })
 
-        if (this.draftCheck(collection)) {
-          this.contentModel.collections.push(collection)
+        if (ContentModel.draftCheck(this.settings.mode, collection)) {
+          tree.collections.push(collection)
         }
         return
       }
 
       if (this.matchers.assetsDirectory(node)) {
-        return this.contentModel.assets.push(
+        return tree.assets.push(
           ...node.children.map(childNode => {
-            return new models.Asset(childNode, context, {
+            return new models.Asset(childNode, this.context, {
               assetsDirectory: this.settings.assetsDirectory
             })
           })
@@ -318,40 +325,38 @@ class ContentModel {
       }
 
       if (this.matchers.asset(node)) {
-        return this.contentModel.assets.push(
-          new models.Asset(node, context, {
+        return tree.assets.push(
+          new models.Asset(node, this.context, {
             assetsDirectory: this.settings.assetsDirectory
           })
         )
       }
     })
-
-    this.afterEffects()
-    return this.contentModel
+    return tree
   }
 
   afterEffects() {
-    linkEntries(this.contentModel)
+    linkEntries(this)
 
-    this.contentModel.collections.forEach(collection => {
-      collection.afterEffects(this.contentModel)
+    this.subtree.collections.forEach(collection => {
+      collection.afterEffects(this.subtree)
     })
 
-    this.contentModel.subpages.forEach(subpage => {
-      subpage.afterEffects(this.contentModel)
+    this.subtree.subpages.forEach(subpage => {
+      subpage.afterEffects(this.subtree)
     })
 
-    this.contentModel.homepage.afterEffects(this.contentModel)
+    this.subtree.homepage.afterEffects(this.subtree)
 
-    this.contentModel.assets.forEach(asset => {
-      asset.afterEffects(this.contentModel)
+    this.subtree.assets.forEach(asset => {
+      asset.afterEffects(this.subtree)
     })
   }
 
   render(renderer) {
     const renderHomepage = () => {
-      return this.contentModel.homepage.render(renderer, {
-        contentModel: ContentModel.serialize(this.contentModel),
+      return this.subtree.homepage.render(renderer, {
+        contentModel: ContentModel.serialize(this),
         settings: this.settings,
         debug: this.settings.debug
       })
@@ -359,9 +364,9 @@ class ContentModel {
 
     const renderCollections = () => {
       return Promise.all(
-        this.contentModel.collections.map(collection => {
+        this.subtree.collections.map(collection => {
           return collection.render(renderer, {
-            contentModel: ContentModel.serialize(this.contentModel),
+            contentModel: ContentModel.serialize(this),
             settings: this.settings,
             debug: this.settings.debug
           })
@@ -371,9 +376,9 @@ class ContentModel {
 
     const renderSubpages = () => {
       return Promise.all(
-        this.contentModel.subpages.map(subpage => {
+        this.subtree.subpages.map(subpage => {
           return subpage.render(renderer, {
-            contentModel: ContentModel.serialize(this.contentModel),
+            contentModel: ContentModel.serialize(this),
             settings: this.settings,
             debug: this.settings.debug
           })
@@ -383,7 +388,7 @@ class ContentModel {
 
     const renderAssets = () => {
       return Promise.all(
-        this.contentModel.assets.map(asset => {
+        this.subtree.assets.map(asset => {
           return asset.render(renderer)
         })
       )
