@@ -2,6 +2,7 @@ const test = require('tape')
 const {
   templateExtensions,
   isTemplateFile,
+  isDataFile,
   removeExtension,
   makePermalink,
   makeDateSlug,
@@ -92,6 +93,45 @@ test('isTemplateFile', t => {
 
   t.notOk(
     isTemplateFile({ extension: '' }),
+    'does not recognize empty extension'
+  )
+
+  t.end()
+})
+
+test('isDataFile', t => {
+  t.ok(
+    isDataFile({ extension: '.json' }),
+    'recognizes .json as data file'
+  )
+
+  t.ok(
+    isDataFile({ extension: '.JSON' }),
+    'case-insensitive: recognizes .JSON'
+  )
+
+  t.ok(
+    isDataFile({ extension: '.Json' }),
+    'case-insensitive: recognizes .Json'
+  )
+
+  t.notOk(
+    isDataFile({ extension: '.csv' }),
+    'does not recognize .csv as data file'
+  )
+
+  t.notOk(
+    isDataFile({ extension: '.xml' }),
+    'does not recognize .xml as data file'
+  )
+
+  t.notOk(
+    isDataFile({ extension: '.txt' }),
+    'does not recognize .txt as data file'
+  )
+
+  t.notOk(
+    isDataFile({ extension: '' }),
     'does not recognize empty extension'
   )
 
@@ -407,6 +447,60 @@ test('sort case-insensitive descending', t => {
     items[2].name,
     'alice',
     'maintains correct last order regardless of case'
+  )
+
+  t.end()
+})
+
+test('sort with empty array', t => {
+  const items = []
+
+  sort(items, 'name', 1)
+
+  t.equal(
+    items.length,
+    0,
+    'handles empty array without error'
+  )
+
+  t.end()
+})
+
+test('sort with single item', t => {
+  const items = [
+    { name: 'Alice' }
+  ]
+
+  sort(items, 'name', 1)
+
+  t.equal(
+    items[0].name,
+    'Alice',
+    'single item remains unchanged'
+  )
+
+  t.equal(
+    items.length,
+    1,
+    'maintains single item array length'
+  )
+
+  t.end()
+})
+
+test('sort with identical values', t => {
+  const items = [
+    { name: 'Alice', id: 1 },
+    { name: 'Alice', id: 2 },
+    { name: 'Alice', id: 3 }
+  ]
+
+  sort(items, 'name', 1)
+
+  t.deepEqual(
+    items.map(i => i.id),
+    [1, 2, 3],
+    'preserves original order when all sort keys are identical'
   )
 
   t.end()
