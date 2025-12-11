@@ -156,7 +156,7 @@ class ContentModel extends ContentModelEntryNode {
     return mode === 'start' || !node.draft
   }
 
-  constructor(fsNode, contentModelSettings = defaultSettings, contentTypes) {
+  constructor(fsNode, contentModelSettings, contentTypes) {
     const settings = {
       ...defaultSettings,
       ...contentModelSettings
