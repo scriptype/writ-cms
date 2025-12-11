@@ -78,6 +78,7 @@ class Collection extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
+    this.matchers = this.getSubtreeMatchers()
     this.subtree = this.parseSubtree()
   }
 
