@@ -21,7 +21,7 @@ const defaultSettings = {
   facetKeys: []
 }
 class Category extends ContentModelEntryNode {
-  static linkPosts(post, postIndex, posts) {
+  static linkNextPrevPosts(post, postIndex, posts) {
     post.links = post.links || {}
 
     const nextPost = posts[postIndex - 1]
@@ -65,20 +65,25 @@ class Category extends ContentModelEntryNode {
     return data
   }
 
-  static draftCheck (mode, node) {
-    return mode === 'start' || !node.draft
-  }
-
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
 
     this.facets = []
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
+    this.contextKey = this.settings.level === 1 ?
+      'category' :
+      `subCategory${this.settings.level - 1}`
 
     if (fsNode.isDefaultCategory) {
       return this.makeDefaultCategory()
     }
+
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
+      categories: [],
+      posts: [],
+      levelPosts: [],
+      attachments: []
+    })
   }
 
   makeDefaultCategory() {
@@ -90,7 +95,13 @@ class Category extends ContentModelEntryNode {
       slug: makeSlug(title),
       content: '',
       contentRaw: '',
-      isDefaultCategory: true
+      isDefaultCategory: true,
+      subtree: {
+        levelPosts: [],
+        posts: [],
+        categories: [],
+        attachments: []
+      }
     })
   }
 
@@ -112,112 +123,68 @@ class Category extends ContentModelEntryNode {
     )
   }
 
-  getSubtreeMatchers() {
+  getSubtreeConfig() {
+    const settings = {
+      post: {
+        entryAlias: this.entryAlias || this.settings.entryAlias,
+        entryContentType: this.entryContentType || this.settings.entryContentType,
+        contentTypes: this.settings.contentTypes,
+        facetKeys: this.settings.facetKeys
+      },
+      subCategory: {
+        contentTypes: this.settings.contentTypes,
+        entryContentType: this.entryContentType || this.settings.entryContentType,
+        categoryContentType: this.categoryContentType || this.settings.categoryContentType,
+        entryAlias: this.entryAlias || this.settings.entryAlias,
+        categoryAlias: this.categoryAlias || this.settings.categoryAlias,
+        entriesAlias: this.entriesAlias || this.settings.entriesAlias,
+        categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
+        sortBy: this.sortBy || this.settings.sortBy,
+        sortOrder: this.sortOrder || this.settings.sortOrder,
+        facetKeys: this.settings.facetKeys,
+        mode: this.settings.mode,
+        level: this.settings.level + 1
+      },
+      attachment: {}
+    }
+
     const postMatcher = matcha.folderable({
       nameOptions: {
         index: [this.settings.entryAlias, 'post', 'index']
       }
     })
 
-    return {
-      category: matcha.directory({
+    return [{
+      key: 'posts',
+      model: models.Post,
+      matcher: postMatcher,
+      sideEffect: (tree, entry) => tree.levelPosts.push(entry),
+      settings: settings.post
+    }, {
+      key: 'categories',
+      model: Category,
+      matcher: matcha.directory({
         childSearchDepth: 3,
         children: [ postMatcher ]
       }),
-
-      post: postMatcher,
-
-      attachment: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
-      categories: [],
-      posts: [],
-      levelPosts: [],
-      attachments: []
-    }
-
-    if (this.isDefaultCategory) {
-      return tree
-    }
-
-    const contextKey = this.settings.level === 1 ?
-      'category' :
-      `subCategory${this.settings.level - 1}`
-
-    const childContext = this.context.push({
-      title: this.title,
-      slug: this.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath,
-      key: contextKey
-    })
-
-    const childNodes = this.fsNode.children.filter(node => node !== this.indexFile)
-
-    childNodes.forEach(childNode => {
-      if (this.matchers.post(childNode)) {
-        const postSettings = {
-          entryAlias: this.entryAlias || this.settings.entryAlias,
-          entryContentType: this.entryContentType || this.settings.entryContentType,
-          contentTypes: this.settings.contentTypes,
-          facetKeys: this.settings.facetKeys
-        }
-        const post = new models.Post(childNode, childContext, postSettings)
-        if (Category.draftCheck(this.settings.mode, post)) {
-          tree.levelPosts.push(post)
-          tree.posts.push(post)
-        }
-        return
-      }
-
-      if (this.matchers.category(childNode)) {
-        const subCategorySettings = {
-          contentTypes: this.settings.contentTypes,
-          entryContentType: this.entryContentType || this.settings.entryContentType,
-          categoryContentType: this.categoryContentType || this.settings.categoryContentType,
-          entryAlias: this.entryAlias || this.settings.entryAlias,
-          categoryAlias: this.categoryAlias || this.settings.categoryAlias,
-          entriesAlias: this.entriesAlias || this.settings.entriesAlias,
-          categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
-          sortBy: this.sortBy || this.settings.sortBy,
-          sortOrder: this.sortOrder || this.settings.sortOrder,
-          facetKeys: this.settings.facetKeys,
-          mode: this.settings.mode,
-          level: this.settings.level + 1
-        }
-        const subCategory = new Category(childNode, childContext, subCategorySettings)
-        if (Category.draftCheck(this.settings.mode, subCategory)) {
-          tree.categories.push(subCategory)
-          tree.posts.push(...subCategory.subtree.posts)
-        }
-        return
-      }
-
-      if (this.matchers.attachment(childNode)) {
-        const attachmentSettings = {}
-        const attachment = new models.Attachment(childNode, childContext, attachmentSettings)
-        return tree.attachments.push(attachment)
-      }
-    })
-
-    return tree
+      sideEffect: (tree, entry) => tree.posts.push(...entry.subtree.posts),
+      settings: settings.subCategory
+    }, {
+      key: 'attachments',
+      model: models.Attachment,
+      matcher: matcha.true(),
+      settings: settings.attachment
+    }]
   }
 
   afterEffects(contentModel, collectionFacets) {
     if (this.settings.facetKeys.length) {
-      const contextKey = this.settings.level === 1 ?
-        'category' :
-        `subCategory${this.settings.level - 1}`
-
       const childContext = this.context.push({
         title: this.title,
         slug: this.slug,
         permalink: this.permalink,
         outputPath: this.outputPath,
-        key: contextKey
+        key: this.contextKey
       })
 
       this.facets = models.facet().collectFacets(
@@ -234,7 +201,7 @@ class Category extends ContentModelEntryNode {
     const sortBy = this.sortBy || this.settings.sortBy
     const sortOrder = this.sortOrder || this.settings.sortOrder
     sort(this.subtree.posts, sortBy, sortOrder)
-    this.subtree.posts.forEach(Category.linkPosts)
+    this.subtree.posts.forEach(Category.linkNextPrevPosts)
 
     this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)

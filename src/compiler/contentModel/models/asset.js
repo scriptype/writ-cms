@@ -12,7 +12,6 @@ class Asset extends ContentModelResourceNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-    this.subtree = this.parseSubtree()
   }
 
   getPermalink() {

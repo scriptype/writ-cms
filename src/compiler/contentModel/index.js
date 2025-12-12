@@ -172,75 +172,9 @@ class ContentModel extends ContentModelEntryNode {
 
     this.contentTypes = contentTypes
 
-    const collectionAliasesFromContentTypes = contentTypes
-      .filter(ct => ct.model === 'collection')
-      .map(ct => ct.collectionAlias)
+    this.subtreeConfig = this.getSubtreeConfig()
 
-    const collectionAliasesFromFrontMatter = this.collectionAliases || []
-
-    this.collectionAliases = [
-      ...collectionAliasesFromContentTypes,
-      ...collectionAliasesFromFrontMatter
-    ]
-
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
-    this.afterEffects()
-  }
-
-  getIndexFile() {
-    return this.fsNode.find(
-      matcha.templateFile({
-        nameOptions: ['root']
-      })
-    )
-  }
-
-  getSubtreeMatchers() {
-    return {
-      collectionIndexFile: matcha.templateFile({
-        nameOptions: this.collectionAliases.concat('collection')
-      }),
-
-      collection: matcha.directory({
-        children: matcha.either(
-          matcha.templateFile({
-            nameOptions: this.collectionAliases.concat('collection')
-          }),
-          matcha.dataFile({
-            nameOptions: (fsNode) => ([fsNode.name])
-          }),
-        )
-      }),
-
-      homepage: matcha.folderable({
-        nameOptions: {
-          folder: [this.settings.homepageDirectory, 'homepage', 'home'],
-          index: ['index'],
-          standalone: ['homepage', 'home', 'index']
-        }
-      }),
-
-      subpage: matcha.folderable({
-        nameOptions: {
-          index: ['page', 'index']
-        }
-      }),
-
-      pagesDirectory: matcha.directory({
-        nameOptions: [this.settings.pagesDirectory, 'subpages', 'pages']
-      }),
-
-      assetsDirectory: matcha.directory({
-        nameOptions: [this.settings.assetsDirectory, 'assets']
-      }),
-
-      asset: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
+    this.subtree = this.parseSubtree({
       homepage: new models.Homepage(
         { name: 'index', extension: 'md', content: '' },
         this.context,
@@ -250,81 +184,122 @@ class ContentModel extends ContentModelEntryNode {
       subpages: [],
       collections: [],
       assets: []
-    }
-
-    this.fsNode.forEach(node => {
-      if (node === this.indexFile) {
-        return
-      }
-
-      if (this.matchers.homepage(node)) {
-        tree.homepage = new models.Homepage(node, this.context, {
-          homepageDirectory: this.settings.homepageDirectory
-        })
-        return
-      }
-
-      if (this.matchers.subpage(node)) {
-        return tree.subpages.push(
-          new models.Subpage(node, this.context, {
-            pagesDirectory: this.settings.pagesDirectory
-          })
-        )
-      }
-
-      if (this.matchers.pagesDirectory(node)) {
-        tree.pagesDirectory = new models.PagesDirectory(node, this.context, {
-          pagesDirectory: this.settings.pagesDirectory,
-          assetsDirectory: this.settings.assetsDirectory,
-          debug: this.settings.debug
-        })
-        tree.subpages.push(...tree.pagesDirectory.subtree.subpages)
-        tree.assets.push(...tree.pagesDirectory.subtree.assets)
-        return
-      }
-
-      if (this.matchers.collection(node)) {
-        const indexFile = node.children.find(this.matchers.collectionIndexFile)
-
-        const contentType = this.contentTypes
-          .filter(ct => ct.model === 'collection')
-          .find(ct => {
-            return ct.collectionAlias === (indexFile ? removeExtension(indexFile.name) : node.name)
-          })
-
-        const collection = new models.Collection(node, this.context, {
-          defaultCategoryName: this.settings.defaultCategoryName,
-          collectionAliases: this.collectionAliases,
-          mode: this.settings.mode,
-          contentTypes: this.contentTypes,
-          sortBy: 'date',
-          sortOrder: -1,
-          contentType
-        })
-
-        if (ContentModel.draftCheck(this.settings.mode, collection)) {
-          tree.collections.push(collection)
-        }
-        return
-      }
-
-      if (this.matchers.assetsDirectory(node)) {
-        tree.assetsDirectory = new models.AssetsDirectory(node, this.context, {
-          assetsDirectory: this.settings.assetsDirectory
-        })
-        tree.assets.push(...tree.assetsDirectory.subtree.assets)
-        return
-      }
-
-      if (this.matchers.asset(node)) {
-        return tree.assets.push(
-          new models.Asset(node, this.context, {
-            assetsDirectory: this.settings.assetsDirectory
-          })
-        )
-      }
     })
-    return tree
+
+    this.afterEffects()
+  }
+
+  getIndexFile() {
+    return this.fsNode.children.find(
+      matcha.templateFile({
+        nameOptions: ['root']
+      })
+    )
+  }
+
+  getCollectionAliases() {
+    const collectionAliasesFromContentTypes = this.contentTypes
+      .filter(ct => ct.model === 'collection')
+      .map(ct => ct.collectionAlias)
+
+    const collectionAliasesFromFrontMatter = this.collectionAliases || []
+
+    return [
+      ...collectionAliasesFromContentTypes,
+      ...collectionAliasesFromFrontMatter
+    ]
+  }
+
+  getChildContext() {
+    return this.context
+  }
+
+  getSubtreeConfig() {
+    const collectionAliases = this.getCollectionAliases()
+
+    return [{
+      key: 'homepage',
+      singular: true,
+      model: models.Homepage,
+      matcher: matcha.folderable({
+        nameOptions: {
+          folder: [this.settings.homepageDirectory, 'homepage', 'home'],
+          index: ['index'],
+          standalone: ['homepage', 'home', 'index']
+        }
+      }),
+      settings: {
+        homepageDirectory: this.settings.homepageDirectory
+      }
+    }, {
+      key: 'subpages',
+      model: models.Subpage,
+      matcher: matcha.folderable({
+        nameOptions: {
+          index: ['page', 'index']
+        }
+      }),
+      settings: {
+        pagesDirectory: this.settings.pagesDirectory
+      }
+    }, {
+      key: 'pagesDirectory',
+      singular: true,
+      model: models.PagesDirectory,
+      matcher: matcha.directory({
+        nameOptions: [this.settings.pagesDirectory, 'subpages', 'pages']
+      }),
+      settings: {
+        pagesDirectory: this.settings.pagesDirectory,
+        assetsDirectory: this.settings.assetsDirectory,
+        debug: this.settings.debug
+      },
+      sideEffect: (tree, entry) => {
+        tree.subpages.push(...entry.subtree.subpages)
+        tree.assets.push(...entry.subtree.assets)
+      }
+    }, {
+      key: 'collections',
+      model: models.Collection,
+      matcher: matcha.directory({
+        children: matcha.either(
+          matcha.templateFile({
+            nameOptions: collectionAliases.concat('collection')
+          }),
+          matcha.dataFile({
+            nameOptions: (fsNode) => ([fsNode.name])
+          }),
+        )
+      }),
+      settings: {
+        defaultCategoryName: this.settings.defaultCategoryName,
+        collectionAliases,
+        mode: this.settings.mode,
+        contentTypes: this.contentTypes,
+        sortBy: 'date',
+        sortOrder: -1
+      }
+    }, {
+      key: 'assetsDirectory',
+      singular: true,
+      model: models.AssetsDirectory,
+      matcher: matcha.directory({
+        nameOptions: [this.settings.assetsDirectory, 'assets']
+      }),
+      settings: {
+        assetsDirectory: this.settings.assetsDirectory
+      },
+      sideEffect: (tree, entry) => {
+        tree.assets.push(...entry.subtree.assets)
+      }
+    }, {
+      key: 'assets',
+      model: models.Asset,
+      matcher: matcha.true(),
+      settings: {
+        assetsDirectory: this.settings.assetsDirectory
+      }
+    }]
   }
 
   afterEffects() {

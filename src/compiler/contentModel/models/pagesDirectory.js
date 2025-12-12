@@ -22,46 +22,37 @@ class PagesDirectory extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings) {
     super(fsNode, context, settings)
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
-    this.afterEffects()
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
+      subpages: [],
+      assets: []
+    })
   }
 
-  getSubtreeMatchers() {
-    return {
-      subpage: matcha.folderable({
+  getChildContext() {
+    return this.context
+  }
+
+  getSubtreeConfig() {
+    return [{
+      key: 'subpages',
+      model: models.Subpage,
+      settings: {
+        pagesDirectory: this.settings.pagesDirectory
+      },
+      matcher: matcha.folderable({
         nameOptions: {
           index: ['page', 'index']
         }
-      }),
-
-      asset: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
-      subpages: [],
-      assets: []
-    }
-
-    this.fsNode.children.forEach(childNode => {
-      if (this.matchers.subpage(childNode)) {
-        return tree.subpages.push(
-          new models.Subpage(childNode, this.context, {
-            pagesDirectory: this.settings.pagesDirectory
-          })
-        )
-      }
-      if (this.matchers.asset(childNode)) {
-        return tree.assets.push(
-          new models.Asset(childNode, this.context, {
-            assetsDirectory: this.settings.assetsDirectory
-          })
-        )
-      }
-    })
-    return tree
+      })
+    }, {
+      key: 'assets',
+      model: models.Asset,
+      settings: {
+        assetsDirectory: this.settings.assetsDirectory
+      },
+      matcher: matcha.true()
+    }]
   }
 }
 

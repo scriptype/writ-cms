@@ -20,16 +20,11 @@ class Homepage extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
-  }
-
-  getIndexFile() {
-    return this.fsNode.children?.find(
-      matcha.templateFile({
-        nameOptions: ['homepage', 'home', 'index']
-      })
-    ) || this.fsNode
+    this.contextKey = 'homepage'
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
+      attachments: []
+    })
   }
 
   getPermalink() {
@@ -40,37 +35,20 @@ class Homepage extends ContentModelEntryNode {
     return this.context.peek().outputPath
   }
 
-  getSubtreeMatchers() {
-    return {
-      attachment: matcha.true()
-    }
+  getIndexFile() {
+    return this.fsNode.children?.find(
+      matcha.templateFile({
+        nameOptions: ['homepage', 'home', 'index']
+      })
+    ) || this.fsNode
   }
 
-  parseSubtree() {
-    const tree = {
-      attachments: []
-    }
-
-    const childContext = {
-      homepage: {
-        title: this.title,
-        slug: this.slug,
-        permalink: this.permalink,
-        outputPath: this.outputPath
-      }
-    }
-
-    const childNodes = (this.fsNode.children || []).filter(node => node !== this.indexFile)
-
-    childNodes.forEach(childNode => {
-      if (this.matchers.attachment(childNode)) {
-        tree.attachments.push(
-          new models.Attachment(childNode, childContext)
-        )
-      }
-    })
-
-    return tree
+  getSubtreeConfig() {
+    return [{
+      key: 'attachments',
+      model: models.Attachment,
+      matcher: matcha.true()
+    }]
   }
 
   afterEffects(contentModel) {

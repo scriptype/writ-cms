@@ -17,32 +17,25 @@ class AssetsDirectory extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings) {
     super(fsNode, context, settings)
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
-    this.afterEffects()
-  }
-
-  getSubtreeMatchers() {
-    return {
-      asset: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
       assets: []
-    }
-
-    this.fsNode.children.forEach(childNode => {
-      if (this.matchers.asset(childNode)) {
-        return tree.assets.push(
-          new models.Asset(childNode, this.context, {
-            assetsDirectory: this.settings.assetsDirectory
-          })
-        )
-      }
     })
-    return tree
+  }
+
+  getChildContext() {
+    return this.context
+  }
+
+  getSubtreeConfig() {
+    return [{
+      key: 'assets',
+      model: models.Asset,
+      matcher: matcha.true(),
+      settings: {
+        assetsDirectory: this.settings.assetsDirectory
+      }
+    }]
   }
 }
 

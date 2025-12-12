@@ -58,13 +58,13 @@ class Collection extends ContentModelEntryNode {
     }
 
     // Alias for posts key in collection
-    const entriesAlias = collection.entriesAlias || collection.settings.contentType?.entriesAlias
+    const entriesAlias = collection.entriesAlias || collection.schema?.entriesAlias
     if (entriesAlias) {
       data[entriesAlias] = data.posts
     }
 
     // Alias for categories key in collection
-    const categoriesAlias = collection.categoriesAlias || collection.settings.contentType?.categoriesAlias
+    const categoriesAlias = collection.categoriesAlias || collection.schema?.categoriesAlias
     if (categoriesAlias) {
       data[categoriesAlias] = data.categories
     }
@@ -72,14 +72,17 @@ class Collection extends ContentModelEntryNode {
     return data
   }
 
-  static draftCheck (mode, node) {
-    return mode === 'start' || !node.draft
-  }
-
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
+    this.schema = this.getSchema()
+    this.contextKey = 'collection'
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
+      categories: [],
+      posts: [],
+      levelPosts: [],
+      attachments: []
+    })
   }
 
   getIndexFile() {
@@ -104,94 +107,64 @@ class Collection extends ContentModelEntryNode {
     )
   }
 
-  getSubtreeMatchers() {
+  getSchema() {
+    const collectionFSName = this.indexFile ?
+      removeExtension(this.indexFile.name) :
+      this.fsNode.name
+    return this.settings.contentTypes
+      .filter(ct => ct.model === 'collection')
+      .find(ct => ct.collectionAlias === collectionFSName)
+  }
+
+  getSubtreeConfig() {
+    const settings = {
+      category: {
+        defaultCategoryName: this.defaultCategoryName || this.schema?.defaultCategoryName || this.settings.defaultCategoryName,
+        contentTypes: this.settings.contentTypes,
+        entryContentType: this.entryContentType || this.schema?.entryContentType,
+        categoryContentType: this.categoryContentType || this.schema?.categoryContentType,
+        entryAlias: this.entryAlias || this.schema?.entryAlias,
+        categoryAlias: this.categoryAlias || this.schema?.categoryAlias,
+        entriesAlias: this.entriesAlias || this.schema?.entriesAlias,
+        categoriesAlias: this.categoriesAlias || this.schema?.categoriesAlias,
+        facetKeys: this.facets || this.schema?.facets || [],
+        sortBy: this.sortBy || this.settings.sortBy,
+        sortOrder: this.sortOrder || this.settings.sortOrder,
+        mode: this.settings.mode,
+        level: 1,
+      },
+      attachment: {}
+    }
+
     const postMatcher = matcha.folderable({
       nameOptions: {
-        index: [this.entryAlias, this.settings.contentType?.entryAlias, 'post', 'index']
+        index: [this.entryAlias, this.schema?.entryAlias, 'post', 'index']
       }
     })
 
-    return {
-      dataFile: matcha.dataFile({
+    return [{
+      matcher: matcha.dataFile({
         nameOptions: [this.fsNode.name]
       }),
-
-      category: matcha.directory({
+      sideEffect: (tree, fsNode) => this.processDataFile(fsNode, tree)
+    }, {
+      matcher: postMatcher,
+      sideEffect: (tree, fsNode) => this.addUncategorizedPost(fsNode, null, tree)
+    }, {
+      key: 'categories',
+      model: models.Category,
+      settings: settings.category,
+      matcher: matcha.directory({
         childSearchDepth: 3,
         children: [ postMatcher ]
       }),
-
-      post: postMatcher,
-
-      attachment: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
-      categories: [],
-      posts: [],
-      levelPosts: [],
-      attachments: []
-    }
-
-    const childContext = this.context.push({
-      title: this.title,
-      slug: this.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath,
-      key: 'collection'
-    })
-
-    const childNodes = this.fsNode.children.filter(node => node !== this.indexFile)
-
-    childNodes.forEach(childNode => {
-      if (this.matchers.dataFile(childNode, this.fsNode)) {
-        const data = JSON.parse(childNode.content || '[]')
-        if (!Array.isArray(data)) {
-          return console.log('Collection data should be an array of objects', childNode.name)
-        }
-        return data.forEach(entry => {
-          this.addUncategorizedPost(null, entry, tree)
-        })
-      }
-
-      if (this.matchers.post(childNode)) {
-        return this.addUncategorizedPost(childNode, null, tree)
-      }
-
-      if (this.matchers.category(childNode)) {
-        const categorySettings = {
-          defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
-          contentTypes: this.settings.contentTypes,
-          entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
-          categoryContentType: this.categoryContentType || this.settings.contentType?.categoryContentType,
-          entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-          categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
-          entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
-          categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-          facetKeys: this.facets || this.settings.contentType?.facets || [],
-          sortBy: this.sortBy || this.settings.sortBy,
-          sortOrder: this.sortOrder || this.settings.sortOrder,
-          mode: this.settings.mode,
-          level: 1,
-        }
-        const newCategory = new models.Category(childNode, childContext, categorySettings)
-        if (Collection.draftCheck(this.settings.mode, newCategory)) {
-          tree.categories.push(newCategory)
-          tree.posts.push(...newCategory.subtree.posts)
-        }
-        return
-      }
-
-      if (this.matchers.attachment(childNode)) {
-        tree.attachments.push(
-          new models.Attachment(childNode, childContext)
-        )
-      }
-    })
-
-    return tree
+      sideEffect: (tree, entry) => tree.posts.push(...entry.subtree.posts)
+    }, {
+      key: 'attachments',
+      model: models.Attachment,
+      settings: settings.attachment,
+      matcher: matcha.true()
+    }]
   }
 
   addUncategorizedPost(childNode, postData, tree) {
@@ -206,14 +179,14 @@ class Collection extends ContentModelEntryNode {
     let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
     if (!defaultCategory) {
       const defaultCategorySettings = {
-        defaultCategoryName: this.defaultCategoryName || this.settings.contentType?.defaultCategoryName || this.settings.defaultCategoryName,
-        categoryAlias: this.categoryAlias || this.settings.contentType?.categoryAlias,
-        entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-        entriesAlias: this.entriesAlias || this.settings.contentType?.entriesAlias,
-        categoriesAlias: this.categoriesAlias || this.settings.contentType?.categoriesAlias,
-        entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
-        categoryContentType: this.categoryContentType || this.settings.contentType?.categoryContentType,
-        facetKeys: this.facets || this.settings.contentType?.facets || [],
+        defaultCategoryName: this.defaultCategoryName || this.schema?.defaultCategoryName || this.settings.defaultCategoryName,
+        categoryAlias: this.categoryAlias || this.schema?.categoryAlias,
+        entryAlias: this.entryAlias || this.schema?.entryAlias,
+        entriesAlias: this.entriesAlias || this.schema?.entriesAlias,
+        categoriesAlias: this.categoriesAlias || this.schema?.categoriesAlias,
+        entryContentType: this.entryContentType || this.schema?.entryContentType,
+        categoryContentType: this.categoryContentType || this.schema?.categoryContentType,
+        facetKeys: this.facets || this.schema?.facets || [],
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
         mode: this.settings.mode,
@@ -235,22 +208,32 @@ class Collection extends ContentModelEntryNode {
       key: 'category'
     })
     const uncategorizedPostSettings = {
-      entryAlias: this.entryAlias || this.settings.contentType?.entryAlias,
-      entryContentType: this.entryContentType || this.settings.contentType?.entryContentType,
+      entryAlias: this.entryAlias || this.schema?.entryAlias,
+      entryContentType: this.entryContentType || this.schema?.entryContentType,
       contentTypes: this.settings.contentTypes,
-      facetKeys: this.facets || this.settings.contentType?.facets || [],
+      facetKeys: this.facets || this.schema?.facets || [],
     }
     const uncategorizedPost = new models.Post(
       childNode || postData,
       defaultCategoryChildContext,
       uncategorizedPostSettings
     )
-    if (models.Category.draftCheck(this.settings.mode, uncategorizedPost)) {
+    if (this.draftCheck(uncategorizedPost)) {
       defaultCategory.subtree.levelPosts.push(uncategorizedPost)
       defaultCategory.subtree.posts.push(uncategorizedPost)
       tree.levelPosts.push(uncategorizedPost)
       tree.posts.push(uncategorizedPost)
     }
+  }
+
+  processDataFile(fsNode, tree) {
+    const data = JSON.parse(fsNode.content || '[]')
+    if (!Array.isArray(data)) {
+      return console.log('Collection data should be an array of objects', fsNode.name)
+    }
+    return data.forEach(entry => {
+      this.addUncategorizedPost(null, entry, tree)
+    })
   }
 
   afterEffects(contentModel) {
@@ -260,7 +243,7 @@ class Collection extends ContentModelEntryNode {
     Collection.locatePinnedEntries(this.subtree.posts)
 
     // this.facets was front-matter property. store it as facetKeys
-    const facetKeys = this.facets || this.settings.contentType?.facets || []
+    const facetKeys = this.facets || this.schema?.facets || []
 
     // this.facets now becomes instances of facet model
     this.facets = []
@@ -316,17 +299,17 @@ class Collection extends ContentModelEntryNode {
           }
 
           // Alias for the current collection
-          if (this.settings.contentType?.collectionAlias) {
-            data[this.settings.contentType.collectionAlias] = data.collection
+          if (this.schema?.collectionAlias) {
+            data[this.schema.collectionAlias] = data.collection
           }
 
           // Alias for the paginated 'posts'
-          const entriesAlias = this.entriesAlias || this.settings.contentType?.entriesAlias
+          const entriesAlias = this.entriesAlias || this.schema?.entriesAlias
           if (entriesAlias) {
             data[entriesAlias] = data.posts
           }
 
-          const contentType = this.contentType || this.settings.contentType?.name
+          const contentType = this.contentType || this.schema?.name
 
           return renderer.render({
             templates: [

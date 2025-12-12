@@ -28,8 +28,11 @@ class Post extends ContentModelEntryNode {
     this.contentType = this.settings.entryContentType
     this.schema = this.settings.contentTypes.find(ct => ct.name === this.contentType)
 
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
+    this.contextKey = 'post'
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
+      attachments: []
+    })
   }
 
   getIndexFile() {
@@ -40,36 +43,12 @@ class Post extends ContentModelEntryNode {
     ) || this.fsNode
   }
 
-  getSubtreeMatchers() {
-    return {
-      attachment: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
-      attachments: []
-    }
-
-    const childContext = this.context.push({
-      title: this.title,
-      slug: this.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath,
-      key: 'post'
-    })
-
-    const childNodes = (this.fsNode.children || []).filter(node => node !== this.indexFile)
-
-    childNodes.forEach(childNode => {
-      if (this.matchers.attachment(childNode)) {
-        tree.attachments.push(
-          new models.Attachment(childNode, childContext)
-        )
-      }
-    })
-
-    return tree
+  getSubtreeConfig() {
+    return [{
+      key: 'attachments',
+      model: models.Attachment,
+      matcher: matcha.true()
+    }]
   }
 
   afterEffects(contentModel, collectionFacets) {

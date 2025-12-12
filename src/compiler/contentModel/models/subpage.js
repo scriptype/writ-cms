@@ -20,8 +20,11 @@ class Subpage extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-    this.matchers = this.getSubtreeMatchers()
-    this.subtree = this.parseSubtree()
+    this.contextKey = 'page'
+    this.subtreeConfig = this.getSubtreeConfig()
+    this.subtree = this.parseSubtree({
+      attachments: []
+    })
   }
 
   getIndexFile() {
@@ -32,36 +35,12 @@ class Subpage extends ContentModelEntryNode {
     ) || this.fsNode
   }
 
-  getSubtreeMatchers() {
-    return {
-      attachment: matcha.true()
-    }
-  }
-
-  parseSubtree() {
-    const tree = {
-      attachments: []
-    }
-
-    const childContext = this.context.push({
-      title: this.title,
-      slug: this.slug,
-      permalink: this.permalink,
-      outputPath: this.outputPath,
-      key: 'page'
-    })
-
-    const childNodes = (this.fsNode.children || []).filter(node => node !== this.indexFile)
-
-    childNodes.forEach(childNode => {
-      if (this.matchers.attachment(childNode)) {
-        tree.attachments.push(
-          new models.Attachment(childNode, childContext)
-        )
-      }
-    })
-
-    return tree
+  getSubtreeConfig() {
+    return [{
+      key: 'attachments',
+      model: models.Attachment,
+      matcher: matcha.true()
+    }]
   }
 
   afterEffects(contentModel) {
