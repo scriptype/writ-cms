@@ -1,13 +1,12 @@
 const { resolve } = require('path')
-const _ = require('lodash')
-const frontMatter = require('front-matter')
 const ImmutableStack = require('../../lib/ImmutableStack')
-const { removeExtension, isTemplateFile } = require('../../lib/contentModelHelpers')
+const { removeExtension } = require('../../lib/contentModelHelpers')
 const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
 const matcha = require('../../lib/matcha')
 
 const models = {
   Homepage: require('./models/homepage'),
+  PagesDirectory: require('./models/pagesDirectory'),
   Subpage: require('./models/subpage'),
   Collection: require('./models/collection'),
   Asset: require('./models/asset')
@@ -231,11 +230,11 @@ class ContentModel extends ContentModelEntryNode {
         nameOptions: [this.settings.pagesDirectory, 'subpages', 'pages']
       }),
 
-      asset: matcha.true(),
-
       assetsDirectory: matcha.directory({
         nameOptions: [this.settings.assetsDirectory, 'assets']
-      })
+      }),
+
+      asset: matcha.true()
     }
   }
 
@@ -246,6 +245,7 @@ class ContentModel extends ContentModelEntryNode {
         this.context,
         { homepageDirectory: this.settings.homepageDirectory }
       ),
+      pagesDirectory: [],
       subpages: [],
       collections: [],
       assets: []
@@ -272,21 +272,14 @@ class ContentModel extends ContentModelEntryNode {
       }
 
       if (this.matchers.pagesDirectory(node)) {
-        return node.children.forEach(childNode => {
-          if (this.matchers.subpage(childNode)) {
-            tree.subpages.push(
-              new models.Subpage(childNode, this.context, {
-                pagesDirectory: this.settings.pagesDirectory
-              })
-            )
-          } else if (this.matchers.asset(childNode)) {
-            tree.assets.push(
-              new models.Asset(childNode, this.context, {
-                assetsDirectory: this.settings.assetsDirectory
-              })
-            )
-          }
+        tree.pagesDirectory = new models.PagesDirectory(node, this.context, {
+          pagesDirectory: this.settings.pagesDirectory,
+          assetsDirectory: this.settings.assetsDirectory,
+          debug: this.settings.debug
         })
+        tree.subpages.push(...tree.pagesDirectory.subtree.subpages)
+        tree.assets.push(...tree.pagesDirectory.subtree.assets)
+        return
       }
 
       if (this.matchers.collection(node)) {

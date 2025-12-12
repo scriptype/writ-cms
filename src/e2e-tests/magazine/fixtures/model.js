@@ -1080,6 +1080,24 @@ const FIXTURE_CONTENT_MODEL = {
       permalink: '/newsletter.html',
       date: '2025-11-16',
       content: 'Sign up now'
+    },
+    {
+      title: 'A page here',
+      permalink: '/a-page-here.html',
+      date: '2025-11-18',
+      content: 'This is a page'
+    },
+    {
+      title: 'A page there',
+      permalink: '/a-page-there.html',
+      date: '2025-11-20',
+      content: 'A page there'
+    },
+    {
+      title: 'And this one',
+      permalink: '/and-this-one',
+      date: '2025-11-22',
+      content: 'This is another subpage in the pages directory'
     }
   ]
 }

@@ -1,0 +1,4 @@
+---
+template: CustomPage
+---
+A page there
