@@ -139,7 +139,7 @@ class Category extends ContentModelEntryNode {
       attachments: []
     }
 
-    if (!this.fsNode.children || !this.fsNode.children.length) {
+    if (this.isDefaultCategory) {
       return tree
     }
 
@@ -155,11 +155,9 @@ class Category extends ContentModelEntryNode {
       key: contextKey
     })
 
-    this.fsNode.children.forEach(childNode => {
-      if (childNode === this.indexFile) {
-        return
-      }
+    const childNodes = this.fsNode.children.filter(node => node !== this.indexFile)
 
+    childNodes.forEach(childNode => {
       if (this.matchers.post(childNode)) {
         const postSettings = {
           entryAlias: this.entryAlias || this.settings.entryAlias,
@@ -319,10 +317,9 @@ class Category extends ContentModelEntryNode {
       )
     }
 
-    /*
-     * Collection doesn't render uncategorized posts, so it must be done here.
-     * An unnamed default category shouldn't render anything else. This way, we
-     * avoid race conditions with collection's rendering in the same paths. */
+    /* Uncategorized posts are rendered by the default category.
+     * If default category is untitled, it should render only the posts.
+     * Otherwise it'll race with collection to render at same outputPaths. */
     const isUntitledDefaultCategory = this.isDefaultCategory && !this.slug
     if (isUntitledDefaultCategory) {
       return renderPosts()

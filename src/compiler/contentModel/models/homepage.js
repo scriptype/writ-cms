@@ -51,11 +51,7 @@ class Homepage extends ContentModelEntryNode {
       attachments: []
     }
 
-    if (!this.fsNode.children || !this.fsNode.children.length) {
-      return tree
-    }
-
-    const context = {
+    const childContext = {
       homepage: {
         title: this.title,
         slug: this.slug,
@@ -64,13 +60,12 @@ class Homepage extends ContentModelEntryNode {
       }
     }
 
-    this.fsNode.children.forEach(childNode => {
-      if (childNode === this.indexFile) {
-        return
-      }
+    const childNodes = (this.fsNode.children || []).filter(node => node !== this.indexFile)
+
+    childNodes.forEach(childNode => {
       if (this.matchers.attachment(childNode)) {
         tree.attachments.push(
-          new models.Attachment(childNode, context)
+          new models.Attachment(childNode, childContext)
         )
       }
     })

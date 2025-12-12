@@ -143,11 +143,9 @@ class Collection extends ContentModelEntryNode {
       key: 'collection'
     })
 
-    this.fsNode.children.forEach(childNode => {
-      if (childNode === this.indexFile) {
-        return
-      }
+    const childNodes = this.fsNode.children.filter(node => node !== this.indexFile)
 
+    childNodes.forEach(childNode => {
       if (this.matchers.dataFile(childNode, this.fsNode)) {
         const data = JSON.parse(childNode.content || '[]')
         if (!Array.isArray(data)) {

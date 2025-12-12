@@ -51,10 +51,6 @@ class Post extends ContentModelEntryNode {
       attachments: []
     }
 
-    if (!this.fsNode.children || !this.fsNode.children.length) {
-      return tree
-    }
-
     const childContext = this.context.push({
       title: this.title,
       slug: this.slug,
@@ -63,10 +59,9 @@ class Post extends ContentModelEntryNode {
       key: 'post'
     })
 
-    this.fsNode.children.forEach(childNode => {
-      if (childNode === this.indexFile) {
-        return
-      }
+    const childNodes = (this.fsNode.children || []).filter(node => node !== this.indexFile)
+
+    childNodes.forEach(childNode => {
       if (this.matchers.attachment(childNode)) {
         tree.attachments.push(
           new models.Attachment(childNode, childContext)
