@@ -178,6 +178,24 @@ test('E2E Magazine - Homepage', async t => {
 
   t.true(allSubpagesListed, 'all subpages are listed')
 
+  const assetLinks = $('[data-asset-link]').toArray()
+
+  t.equal(
+    assetLinks.length,
+    FIXTURE_CONTENT_MODEL.assets.length,
+    'asset link count is correct'
+  )
+
+  const allAssetsListed = FIXTURE_CONTENT_MODEL.assets.every(asset => {
+    return assetLinks.some(link => {
+      const linkText = $(link).text()
+      const linkHref = $(link).attr('href')
+      return linkText === asset.title && linkHref === asset.permalink
+    })
+  })
+
+  t.true(allAssetsListed, 'all assets are listed')
+
   t.teardown(async () => {
     if (testDir) {
       await rm(testDir, { recursive: true, force: true })

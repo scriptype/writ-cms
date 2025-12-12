@@ -1099,6 +1099,32 @@ const FIXTURE_CONTENT_MODEL = {
       date: '2025-11-22',
       content: 'This is another subpage in the pages directory'
     }
+  ],
+  assets: [
+    {
+      title: 'an asset',
+      permalink: '/assets/an asset'
+    },
+    {
+      title: 'some.jpeg',
+      permalink: '/assets/some.jpeg'
+    },
+    {
+      title: 'here.mp4',
+      permalink: '/assets/here.mp4'
+    },
+    {
+      title: 'are',
+      permalink: '/assets/are'
+    },
+    {
+      title: 'a foldered asset in pages directory',
+      permalink: '/assets/a foldered asset in pages directory'
+    },
+    {
+      title: 'an asset in pages directory.png',
+      permalink: '/assets/an asset in pages directory.png'
+    }
   ]
 }
 

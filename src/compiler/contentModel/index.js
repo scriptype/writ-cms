@@ -9,6 +9,7 @@ const models = {
   PagesDirectory: require('./models/pagesDirectory'),
   Subpage: require('./models/subpage'),
   Collection: require('./models/collection'),
+  AssetsDirectory: require('./models/assetsDirectory'),
   Asset: require('./models/asset')
 }
 
@@ -308,13 +309,11 @@ class ContentModel extends ContentModelEntryNode {
       }
 
       if (this.matchers.assetsDirectory(node)) {
-        return tree.assets.push(
-          ...node.children.map(childNode => {
-            return new models.Asset(childNode, this.context, {
-              assetsDirectory: this.settings.assetsDirectory
-            })
-          })
-        )
+        tree.assetsDirectory = new models.AssetsDirectory(node, this.context, {
+          assetsDirectory: this.settings.assetsDirectory
+        })
+        tree.assets.push(...tree.assetsDirectory.subtree.assets)
+        return
       }
 
       if (this.matchers.asset(node)) {
