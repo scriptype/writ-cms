@@ -61,7 +61,7 @@ const atomicReplace = async (targetPath, buildFn) => {
 const atomicFS = (() => {
   const sleep = (duration) => new Promise(resolve => setTimeout(resolve, duration))
 
-  const retryUntilSuccess = async (fn, maxRetries = 10, delayMS = 50) => {
+  const retryUntilSuccess = async (fn, maxRetries = 10, delayMS = 1000) => {
     if (platform() !== 'win32') {
       return fn()
     }
