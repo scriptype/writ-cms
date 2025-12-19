@@ -1,5 +1,5 @@
-const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
-const matcha = require('../../../lib/matcha')
+const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
+const matcha = require('../../lib/matcha')
 
 const models = {
   Asset: require('./asset')

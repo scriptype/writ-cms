@@ -1,6 +1,6 @@
 const { join } = require('path')
-const { makePermalink } = require('../../../lib/contentModelHelpers')
-const ContentModelResourceNode = require('../../../lib/ContentModelResourceNode')
+const { makePermalink } = require('../../lib/contentModelHelpers')
+const ContentModelResourceNode = require('../../lib/ContentModelResourceNode')
 
 const defaultSettings = {
   assetsDirectory: 'assets'

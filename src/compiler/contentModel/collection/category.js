@@ -1,8 +1,8 @@
 const makeSlug = require('slug')
 const _ = require('lodash')
-const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
-const { makePermalink, isTemplateFile, sort } = require('../../../../lib/contentModelHelpers')
-const matcha = require('../../../../lib/matcha')
+const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
+const { makePermalink, isTemplateFile, sort } = require('../../../lib/contentModelHelpers')
+const matcha = require('../../../lib/matcha')
 
 const models = {
   Post: require('./post'),

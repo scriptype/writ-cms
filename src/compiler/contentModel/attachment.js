@@ -1,4 +1,4 @@
-const ContentModelResourceNode = require('../../../lib/ContentModelResourceNode')
+const ContentModelResourceNode = require('../../lib/ContentModelResourceNode')
 
 class Attachment extends ContentModelResourceNode {
   static serialize(attachment) {

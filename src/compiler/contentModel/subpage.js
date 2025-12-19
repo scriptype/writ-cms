@@ -1,44 +1,36 @@
 const { join } = require('path')
-const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
-const { templateExtensions } = require('../../../lib/contentModelHelpers')
-const matcha = require('../../../lib/matcha')
+const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
+const { templateExtensions } = require('../../lib/contentModelHelpers')
+const matcha = require('../../lib/matcha')
 
 const models = {
-  Attachment: require('./attachment')
+  Attachment: require('./attachment'),
 }
 
 const defaultSettings = {
-  homepageDirectory: 'homepage'
+  pagesDirectory: 'pages'
 }
-class Homepage extends ContentModelEntryNode {
-  static serialize(homepage) {
+class Subpage extends ContentModelEntryNode {
+  static serialize(subpage) {
     return {
-      ...homepage,
-      attachments: homepage.subtree.attachments.map(models.Attachment.serialize)
+      ...subpage,
+      attachments: subpage.subtree.attachments.map(models.Attachment.serialize)
     }
   }
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-    this.contextKey = 'homepage'
+    this.contextKey = 'page'
     this.subtreeConfig = this.getSubtreeConfig()
     this.subtree = this.parseSubtree({
       attachments: []
     })
   }
 
-  getPermalink() {
-    return this.context.peek().permalink
-  }
-
-  getOutputPath() {
-    return this.context.peek().outputPath
-  }
-
   getIndexFile() {
     return this.fsNode.children?.find(
       matcha.templateFile({
-        nameOptions: ['homepage', 'home', 'index']
+        nameOptions: ['page', 'index']
       })
     ) || this.fsNode
   }
@@ -58,17 +50,21 @@ class Homepage extends ContentModelEntryNode {
   }
 
   render(renderer, { contentModel, settings, debug }) {
-    const renderHomepage = () => {
+    const renderSubpage = () => {
       return renderer.render({
         templates: [
           `pages/${this.template}`,
-          `pages/homepage/${this.contentType}`,
-          `pages/homepage/default`
+          `pages/subpage/${this.contentType}`,
+          `pages/subpage/default`
         ],
-        outputPath: join(this.outputPath, 'index.html'),
+        outputPath: join(...[
+          this.outputPath,
+          this.hasIndex ? 'index' : ''
+        ]) + '.html',
         content: this.content,
         data: {
           ...contentModel,
+          subpage: Subpage.serialize(this),
           settings,
           debug
         }
@@ -84,10 +80,10 @@ class Homepage extends ContentModelEntryNode {
     }
 
     return Promise.all([
-      renderHomepage(),
+      renderSubpage(),
       renderAttachments()
     ])
   }
 }
 
-module.exports = Homepage
+module.exports = Subpage

@@ -1,16 +1,16 @@
 const { join, resolve } = require('path')
 const makeSlug = require('slug')
 const _ = require('lodash')
-const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
+const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
 const {
   removeExtension,
   isTemplateFile,
   makePermalink,
   safeStringify,
   sort
-} = require('../../../../lib/contentModelHelpers')
+} = require('../../../lib/contentModelHelpers')
 
-const matcha = require('../../../../lib/matcha')
+const matcha = require('../../../lib/matcha')
 
 const models = {
   Attachment: require('../attachment'),

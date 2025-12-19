@@ -5,12 +5,12 @@ const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
 const matcha = require('../../lib/matcha')
 
 const models = {
-  Homepage: require('./models/homepage'),
-  PagesDirectory: require('./models/pagesDirectory'),
-  Subpage: require('./models/subpage'),
-  Collection: require('./models/collection'),
-  AssetsDirectory: require('./models/assetsDirectory'),
-  Asset: require('./models/asset')
+  Homepage: require('./homepage'),
+  PagesDirectory: require('./pagesDirectory'),
+  Subpage: require('./subpage'),
+  Collection: require('./collection'),
+  AssetsDirectory: require('./assetsDirectory'),
+  Asset: require('./asset')
 }
 
 const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/

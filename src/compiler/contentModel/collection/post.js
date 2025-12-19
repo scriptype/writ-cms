@@ -1,7 +1,7 @@
 const { join } = require('path')
-const ContentModelEntryNode = require('../../../../lib/ContentModelEntryNode')
-const { templateExtensions } = require('../../../../lib/contentModelHelpers')
-const matcha = require('../../../../lib/matcha')
+const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
+const { templateExtensions } = require('../../../lib/contentModelHelpers')
+const matcha = require('../../../lib/matcha')
 
 const models = {
   facet: require('./facet'),
