@@ -207,6 +207,18 @@ test('E2E Magazine - Post Pages', async t => {
             `${post.permalink} displays all events with correct links`
           )
         }
+
+        if (post.twin) {
+          const twinLink = $('[data-twin-link]')
+          const linkText = $(twinLink).text()
+          const linkHref = $(twinLink).attr('href')
+          const twinLinked = linkText === post.twin.title && linkHref === post.twin.permalink
+
+          t.ok(
+            twinLinked,
+            `${post.permalink} displays twin with correct link`
+          )
+        }
       } catch (err) {
         t.fail(
           `${post.permalink} Person content links: ${err.message}`

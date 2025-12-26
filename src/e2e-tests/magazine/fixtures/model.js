@@ -317,6 +317,11 @@ const FIXTURE_CONTENT_MODEL = {
             },
             { title: 'Vue good', slug: 'vue-good', permalink: '/articles/vue-good.html' }
           ],
+          twin: {
+            title: 'Sir Tim Berners Lee',
+            slug: 'tim',
+            permalink: '/authors/tim.html'
+          },
           content: "Hey, it's me.",
           context: {
             collection: {
@@ -423,6 +428,11 @@ const FIXTURE_CONTENT_MODEL = {
               permalink: '/articles/pure-js-very-good.html'
             }
           ],
+          twin: {
+            title: 'Mustafa Enes',
+            slug: 'enes',
+            permalink: '/authors/enes.html'
+          },
           content: '',
           context: {
             collection: {

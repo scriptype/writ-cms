@@ -66,6 +66,12 @@
     </div>
 
     <div>
+      {{#if twin}}
+        Twin: <a data-twin-link href="{{twin.permalink}}">{{twin.title}}</a>
+      {{/if}}
+    </div>
+
+    <div>
     {{#if links.relations}}
       Relations:
       <ul>

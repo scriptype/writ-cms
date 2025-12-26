@@ -1,7 +1,8 @@
 ---
 name: Person
-articles: +Article:author
-demos: +Demo:maker
+articles: [+Article:author]
+demos: [+Demo:maker]
 events: [+Event:organizers, +Event:participants]
-books: +Book:author
+books: [+Book:author]
+twin: +Person:twin
 ---

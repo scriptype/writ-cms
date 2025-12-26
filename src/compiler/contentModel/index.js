@@ -63,14 +63,19 @@ const linkBack = (post, entry, key) => {
   if (entry.schema) {
     Object.keys(entry.schema).forEach(schemaKey => {
       const schemaValue = entry.schema[schemaKey]
+      const isSchemaValueArray = Array.isArray(schemaValue)
       const re = new RegExp(`^\\+(${post.contentType}|):${key}$`)
-      const match = Array.isArray(schemaValue) ?
+      const match = isSchemaValueArray ?
         schemaValue.find(v => re.test(v)) :
         re.test(schemaValue)
       if (match) {
-        // console.log('linking', post.title, 'to', schemaKey, 'field of', entry.title)
-        entry[schemaKey] = entry[schemaKey] || []
-        entry[schemaKey].push(post)
+        if (isSchemaValueArray) {
+          // console.log('linking', post.title, 'to', schemaKey, 'field of', entry.title)
+          entry[schemaKey] = entry[schemaKey] || []
+          entry[schemaKey].push(post)
+        } else {
+          entry[schemaKey] = post
+        }
       }
     })
     return
