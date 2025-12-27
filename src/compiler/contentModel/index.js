@@ -14,12 +14,6 @@ const models = {
   Asset: require('./asset')
 }
 
-const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
-
-const parseLink = (value) => {
-  return value.replace(/^\+/g, '').split('/').filter(Boolean)
-}
-
 const findLinkedNode = (allNodes, linkPath) => {
   const leafSlug = linkPath.pop()
   const leafRe = new RegExp(`^${leafSlug}$`, 'i')
@@ -51,17 +45,15 @@ const findLinkedNode = (allNodes, linkPath) => {
 
 const linkNodes = (nodes) => {
   nodes.forEach(node => {
-    const fields = Object.keys(node)
     Object.keys(node).forEach(key => {
       const value = node[key]
       if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           let valueItem = value[i]
-          if (!LINKED_FIELD_SYNTAX.test(valueItem)) {
+          if (!valueItem.linkPath) {
             break
           }
-          const link = parseLink(valueItem)
-          const linkedNode = findLinkedNode(nodes, link)
+          const linkedNode = findLinkedNode(nodes, valueItem.linkPath)
           if (linkedNode) {
             node[key][i] = Object.assign({}, linkedNode)
             linkBack(node, linkedNode, key)
@@ -71,11 +63,10 @@ const linkNodes = (nodes) => {
           }
         }
       } else {
-        if (!LINKED_FIELD_SYNTAX.test(value)) {
+        if (!value?.linkPath) {
           return
         }
-        const link = parseLink(value)
-        const linkedNode = findLinkedNode(nodes, link)
+        const linkedNode = findLinkedNode(nodes, value.linkPath)
         if (linkedNode) {
           node[key] = Object.assign({}, linkedNode)
           linkBack(node, linkedNode, key)

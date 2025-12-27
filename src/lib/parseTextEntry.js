@@ -3,6 +3,38 @@ const frontMatter = require('front-matter')
 const slug = require('slug')
 const { removeExtension, Markdown } = require('./contentModelHelpers')
 
+const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
+
+const parseLinkValue = (value) => {
+  return value.replace(/^\+/g, '').split('/').filter(Boolean)
+}
+
+const parseLinkedFields = (fields) => {
+  Object.keys(fields).forEach(key => {
+    const value = fields[key]
+    if (Array.isArray(value)) {
+      for (let i = 0; i < value.length; i++) {
+        if (!LINKED_FIELD_SYNTAX.test(value[i])) {
+          continue
+        }
+        fields[key][i] = {
+          key,
+          linkPath: parseLinkValue(value[i])
+        }
+      }
+    } else {
+      if (!LINKED_FIELD_SYNTAX.test(value)) {
+        return
+      }
+      fields[key] = {
+        key,
+        linkPath: parseLinkValue(value)
+      }
+    }
+  })
+  return fields
+}
+
 const parseContent = (node, content) => {
   if (node.extension.match(/(html|htm|hbs|handlebars)/i)) {
     return content
@@ -46,6 +78,7 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
   return {
     ..._.omit(fsNode, 'children'),
     ...attributes,
+    ...parseLinkedFields(_.cloneDeep(attributes)),
     __originalAttributes__: attributes,
     hasIndex,
     title: attributes.title || entryName,
@@ -56,6 +89,8 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
 }
 
 module.exports = {
+  parseLinkValue,
+  parseLinkedFields,
   parseContent,
   normalizeEntryName,
   parseFlatData,

@@ -1,10 +1,205 @@
 const test = require('tape')
 const {
-  parseFlatData,
+  parseLinkValue,
+  parseLinkedFields,
   parseContent,
   normalizeEntryName,
+  parseFlatData,
   parseTextEntry
 } = require('./parseTextEntry')
+
+test('parseLinkValue removes leading plus and splits by slash', (t) => {
+  const value = '+folder/subfolder/item'
+
+  const result = parseLinkValue(value)
+
+  t.deepEqual(
+    result,
+    ['folder', 'subfolder', 'item'],
+    'removes plus and splits by slash'
+  )
+
+  t.end()
+})
+
+test('parseLinkValue handles single segment path', (t) => {
+  const value = '+folder'
+
+  const result = parseLinkValue(value)
+
+  t.deepEqual(
+    result,
+    ['folder'],
+    'returns array with single segment'
+  )
+
+  t.end()
+})
+
+test('parseLinkValue filters out empty segments', (t) => {
+  const value = '+folder//item'
+
+  const result = parseLinkValue(value)
+
+  t.deepEqual(
+    result,
+    ['folder', 'item'],
+    'removes empty segments from consecutive slashes'
+  )
+
+  t.end()
+})
+
+test('parseLinkValue preserves case sensitivity', (t) => {
+  const value = '+PEOPLE/users/ADMINS/john/PROFILE'
+
+  const result = parseLinkValue(value)
+
+  t.deepEqual(
+    result,
+    ['PEOPLE', 'users', 'ADMINS', 'john', 'PROFILE'],
+    'preserves mixed case with uppercase and lowercase segments'
+  )
+
+  t.end()
+})
+
+test('parseLinkValue ignores trailing slash', (t) => {
+  const value = '+folder/subfolder/'
+
+  const result = parseLinkValue(value)
+
+  t.deepEqual(
+    result,
+    ['folder', 'subfolder'],
+    'filters out empty segment from trailing slash'
+  )
+
+  t.end()
+})
+
+test('parseLinkedFields converts single string linked field', (t) => {
+  const fields = { author: '+people/users/admins/john' }
+
+  const result = parseLinkedFields(fields)
+
+  t.deepEqual(
+    result.author,
+    { key: 'author', linkPath: ['people', 'users', 'admins', 'john'] },
+    'converts linked field with multiple path segments'
+  )
+
+  t.end()
+})
+
+test('parseLinkedFields converts array of linked fields', (t) => {
+  const fields = { tags: ['+categories/tech/frontend/react', '+categories/js/backend/node'] }
+
+  const result = parseLinkedFields(fields)
+
+  t.deepEqual(
+    result.tags[0],
+    { key: 'tags', linkPath: ['categories', 'tech', 'frontend', 'react'] },
+    'converts first array element with deep path'
+  )
+
+  t.deepEqual(
+    result.tags[1],
+    { key: 'tags', linkPath: ['categories', 'js', 'backend', 'node'] },
+    'converts second array element with deep path'
+  )
+
+  t.end()
+})
+
+test('parseLinkedFields preserves non-linked string fields', (t) => {
+  const fields = { title: 'My Title', description: 'Plain text' }
+
+  const result = parseLinkedFields(fields)
+
+  t.equal(
+    result.title,
+    'My Title',
+    'preserves non-linked string field'
+  )
+
+  t.equal(
+    result.description,
+    'Plain text',
+    'preserves other non-linked fields'
+  )
+
+  t.end()
+})
+
+test('parseLinkedFields converts only the linked items in mixed arrays', (t) => {
+  const fields = { mixed: ['+category/tech', 'plain-text', '+category/other'] }
+
+  const result = parseLinkedFields(fields)
+
+  t.deepEqual(
+    result.mixed[0],
+    { key: 'mixed', linkPath: ['category', 'tech'] },
+    'converts first linked field'
+  )
+
+  t.equal(
+    result.mixed[1],
+    'plain-text',
+    'preserves non-linked item'
+  )
+
+  t.deepEqual(
+    result.mixed[2],
+    { key: 'mixed', linkPath: ['category', 'other'] },
+    'converts linked field that comes after non-linked item'
+  )
+
+  t.end()
+})
+
+test('parseLinkedFields handles mix of linked and non-linked fields', (t) => {
+  const fields = {
+    author: '+users/john',
+    title: 'Article Title',
+    tags: ['+tags/featured', '+tags/new'],
+    description: 'An article'
+  }
+
+  const result = parseLinkedFields(fields)
+
+  t.deepEqual(
+    result.author,
+    { key: 'author', linkPath: ['users', 'john'] },
+    'converts linked field'
+  )
+
+  t.equal(
+    result.title,
+    'Article Title',
+    'preserves non-linked string'
+  )
+
+  t.deepEqual(
+    result.tags[0],
+    { key: 'tags', linkPath: ['tags', 'featured'] },
+    'converts first array element'
+  )
+
+  t.deepEqual(
+    result.tags[1],
+    { key: 'tags', linkPath: ['tags', 'new'] },
+    'converts second array element'
+  )
+
+  t.equal(
+    result.description,
+    'An article',
+    'preserves non-linked fields among linked ones'
+  )
+
+  t.end()
+})
 
 test('parseContent returns content as-is for HTML files', (t) => {
   const node = { extension: '.html' }
