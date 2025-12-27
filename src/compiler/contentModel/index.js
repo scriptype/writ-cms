@@ -1,4 +1,5 @@
 const { resolve } = require('path')
+const _ = require('lodash')
 const ImmutableStack = require('../../lib/ImmutableStack')
 const { removeExtension } = require('../../lib/contentModelHelpers')
 const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
@@ -16,47 +17,74 @@ const models = {
 const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
 
 const parseLink = (value) => {
-  const [collectionSlug, ...restPath] = value.replace(/^\+/g, '').split('/')
-  const entrySlug = restPath.pop()
-  const categorySlugs = restPath
-  return {
-    collectionSlug,
-    categorySlugs,
-    entrySlug
-  }
+  return value.replace(/^\+/g, '').split('/').filter(Boolean)
 }
 
-const findLinkedEntry = (contentModel, link) => {
-  const collectionSlugRe = new RegExp(link.collectionSlug, 'i')
-  const collection = contentModel.subtree.collections.find(c => c.slug.match(collectionSlugRe))
-  let container = collection
+const findLinkedNode = (allNodes, linkPath) => {
+  const leafSlug = linkPath.pop()
+  const leafRe = new RegExp(`^${leafSlug}$`, 'i')
+  const leafMatches = allNodes.filter(p => p.slug.match(leafRe))
 
-  for (const categorySlug of link.categorySlugs) {
-    const categorySlugRe = new RegExp(categorySlug, 'i')
-    const category = container.subtree.categories?.find(c => c.slug.match(categorySlugRe))
-    if (!category) {
-      break
-    }
-    container = category
+  if (!leafMatches.length) {
+    return undefined
   }
 
-  const entrySlugRe = new RegExp(link.entrySlug, 'i')
-  const queue = [container]
-  while (queue.length > 0) {
-    const node = queue.shift()
-    if (node.slug?.match(entrySlugRe)) {
-      return node
-    }
-    const match = node.subtree.levelPosts?.find(p => p.slug.match(entrySlugRe))
-    if (match) {
-      return match
-    }
-    if (node.subtree.categories) {
-      queue.push(...node.subtree.categories)
-    }
+  if (leafMatches.length === 1) {
+    return leafMatches[0]
   }
 
-  return undefined
+  if (!linkPath.length) {
+    return undefined
+  }
+
+  const paths = linkPath.reverse()
+  return leafMatches.find(node => {
+    let ctx = node.context
+    for (const path of paths) {
+      ctx = ctx.throwUntil(item => {
+        return item.slug?.match(new RegExp(`^${path}$`, 'i'))
+      })
+    }
+    return !!ctx.items.length
+  })
+}
+
+const linkNodes = (nodes) => {
+  nodes.forEach(node => {
+    const fields = Object.keys(node)
+    Object.keys(node).forEach(key => {
+      const value = node[key]
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          let valueItem = value[i]
+          if (!LINKED_FIELD_SYNTAX.test(valueItem)) {
+            break
+          }
+          const link = parseLink(valueItem)
+          const linkedNode = findLinkedNode(nodes, link)
+          if (linkedNode) {
+            node[key][i] = Object.assign({}, linkedNode)
+            linkBack(node, linkedNode, key)
+          } else {
+            node[key].splice(i, 1)
+            i--
+          }
+        }
+      } else {
+        if (!LINKED_FIELD_SYNTAX.test(value)) {
+          return
+        }
+        const link = parseLink(value)
+        const linkedNode = findLinkedNode(nodes, link)
+        if (linkedNode) {
+          node[key] = Object.assign({}, linkedNode)
+          linkBack(node, linkedNode, key)
+        } else {
+          node[key] = undefined
+        }
+      }
+    })
+  })
 }
 
 const linkBack = (post, entry, key) => {
@@ -91,46 +119,6 @@ const linkBack = (post, entry, key) => {
       entries: [post]
     })
   }
-}
-
-const linkEntries = (contentModel) => {
-  contentModel.subtree.collections.forEach(collection => {
-    collection.subtree.posts.forEach(post => {
-      const fields = Object.keys(post)
-      Object.keys(post).forEach(key => {
-        const value = post[key]
-        if (Array.isArray(value)) {
-          for (let i = 0; i < value.length; i++) {
-            let valueItem = value[i]
-            if (!LINKED_FIELD_SYNTAX.test(valueItem)) {
-              break
-            }
-            const link = parseLink(valueItem)
-            const entry = findLinkedEntry(contentModel, link)
-            if (entry) {
-              post[key][i] = Object.assign({}, entry)
-              linkBack(post, entry, key)
-            } else {
-              post[key].splice(i, 1)
-              i--
-            }
-          }
-        } else {
-          if (!LINKED_FIELD_SYNTAX.test(value)) {
-            return
-          }
-          const link = parseLink(value)
-          const entry = findLinkedEntry(contentModel, link)
-          if (entry) {
-            post[key] = Object.assign({}, entry)
-            linkBack(post, entry, key)
-          } else {
-            post[key] = undefined
-          }
-        }
-      })
-    })
-  })
 }
 
 const defaultSettings = {
@@ -308,7 +296,24 @@ class ContentModel extends ContentModelEntryNode {
   }
 
   afterEffects() {
-    linkEntries(this)
+    const flatMapDeepCategories = (container) => {
+      return _.flatMapDeep(container, ({ subtree }) => {
+        if (subtree.categories.length) {
+          return [
+            subtree.categories,
+            flatMapDeepCategories(subtree.categories)
+          ]
+        }
+        return []
+      })
+    }
+
+    linkNodes([
+      ...this.subtree.subpages,
+      ...this.subtree.collections,
+      ...flatMapDeepCategories(this.subtree.collections),
+      ..._.flatMap(this.subtree.collections, ({ subtree }) => subtree.posts)
+    ])
 
     this.subtree.collections.forEach(collection => {
       collection.afterEffects(this.subtree)
