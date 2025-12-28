@@ -9,15 +9,15 @@ const parseLinkValue = (value) => {
   return value.replace(/^\+/g, '').split('/').filter(Boolean)
 }
 
-const parseLinkedFields = (fields) => {
-  Object.keys(fields).forEach(key => {
-    const value = fields[key]
+const parseLinkedFields = (object) => {
+  Object.keys(_.cloneDeep(object)).forEach(key => {
+    const value = object[key]
     if (Array.isArray(value)) {
       for (let i = 0; i < value.length; i++) {
         if (!LINKED_FIELD_SYNTAX.test(value[i])) {
           continue
         }
-        fields[key][i] = {
+        object[key][i] = {
           key,
           linkPath: parseLinkValue(value[i])
         }
@@ -26,13 +26,13 @@ const parseLinkedFields = (fields) => {
       if (!LINKED_FIELD_SYNTAX.test(value)) {
         return
       }
-      fields[key] = {
+      object[key] = {
         key,
         linkPath: parseLinkValue(value)
       }
     }
   })
-  return fields
+  return object
 }
 
 const parseContent = (node, content) => {
@@ -78,7 +78,7 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
   return {
     ..._.omit(fsNode, 'children'),
     ...attributes,
-    ...parseLinkedFields(_.cloneDeep(attributes)),
+    ...parseLinkedFields(attributes),
     __originalAttributes__: attributes,
     hasIndex,
     title: attributes.title || entryName,
