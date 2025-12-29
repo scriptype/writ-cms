@@ -16,8 +16,19 @@ const defaultSettings = {
 }
 class Post extends ContentModelEntryNode {
   static serialize(post) {
-    return {
+    const postWithSerializedLinks = {
       ...post,
+      ...post.serializeLinks()
+    }
+    // TODO: feels like collection should handle this
+    models.facet().linkWithEntryFields(
+      postWithSerializedLinks,
+      post.collectionFacets,
+      post.settings.facetKeys
+    )
+
+    return {
+      ...postWithSerializedLinks,
       attachments: post.subtree.attachments.map(models.Attachment.serialize)
     }
   }
@@ -52,9 +63,7 @@ class Post extends ContentModelEntryNode {
   }
 
   afterEffects(contentModel, collectionFacets) {
-    // TODO: feels like collection should handle this
-    models.facet().linkWithEntryFields(this, collectionFacets, this.settings.facetKeys)
-
+    this.collectionFacets = collectionFacets
     this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)
     })

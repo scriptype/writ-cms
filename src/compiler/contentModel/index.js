@@ -14,104 +14,6 @@ const models = {
   Asset: require('./asset')
 }
 
-const findLinkedNode = (allNodes, linkPath) => {
-  const leafSlug = linkPath.pop()
-  const leafRe = new RegExp(`^${leafSlug}$`, 'i')
-  const leafMatches = allNodes.filter(p => p.slug.match(leafRe))
-
-  if (!leafMatches.length) {
-    return undefined
-  }
-
-  if (leafMatches.length === 1) {
-    return leafMatches[0]
-  }
-
-  if (!linkPath.length) {
-    return undefined
-  }
-
-  const paths = linkPath.reverse()
-  return leafMatches.find(node => {
-    let ctx = node.context
-    for (const path of paths) {
-      ctx = ctx.throwUntil(item => {
-        return item.slug?.match(new RegExp(`^${path}$`, 'i'))
-      })
-    }
-    return !!ctx.items.length
-  })
-}
-
-const linkNodes = (nodes) => {
-  nodes.forEach(node => {
-    Object.keys(node).forEach(key => {
-      const value = node[key]
-      if (Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-          let valueItem = value[i]
-          if (!valueItem.linkPath) {
-            break
-          }
-          const linkedNode = findLinkedNode(nodes, valueItem.linkPath)
-          if (linkedNode) {
-            node[key][i] = Object.assign({}, linkedNode)
-            linkBack(node, linkedNode, key)
-          } else {
-            node[key].splice(i, 1)
-            i--
-          }
-        }
-      } else {
-        if (!value?.linkPath) {
-          return
-        }
-        const linkedNode = findLinkedNode(nodes, value.linkPath)
-        if (linkedNode) {
-          node[key] = Object.assign({}, linkedNode)
-          linkBack(node, linkedNode, key)
-        } else {
-          node[key] = undefined
-        }
-      }
-    })
-  })
-}
-
-const linkBack = (post, entry, key) => {
-  if (entry.schema) {
-    Object.keys(entry.schema).forEach(schemaKey => {
-      const schemaValue = entry.schema[schemaKey]
-      const isSchemaValueArray = Array.isArray(schemaValue)
-      const re = new RegExp(`^\\+(${post.contentType}|):${key}$`)
-      const match = isSchemaValueArray ?
-        schemaValue.find(v => re.test(v)) :
-        re.test(schemaValue)
-      if (match) {
-        if (isSchemaValueArray) {
-          // console.log('linking', post.title, 'to', schemaKey, 'field of', entry.title)
-          entry[schemaKey] = entry[schemaKey] || []
-          entry[schemaKey].push(post)
-        } else {
-          entry[schemaKey] = post
-        }
-      }
-    })
-    return
-  }
-  entry.links = entry.links || {}
-  entry.links.relations = entry.links.relations || []
-  const relation = entry.links.relations.find(r => r.key === key)
-  if (relation) {
-    relation.entries.push(post)
-  } else {
-    entry.links.relations.push({
-      key,
-      entries: [post]
-    })
-  }
-}
-
 const defaultSettings = {
   permalinkPrefix: '/',
   out: resolve('.'),
@@ -129,6 +31,8 @@ const defaultSettings = {
 class ContentModel extends ContentModelEntryNode {
   static serialize(contentModel) {
     return {
+      ...contentModel,
+      ...contentModel.serializeLinks(),
       homepage: models.Homepage.serialize(contentModel.subtree.homepage),
       subpages: contentModel.subtree.subpages.map(models.Subpage.serialize),
       collections: contentModel.subtree.collections.map(models.Collection.serialize),
@@ -286,7 +190,7 @@ class ContentModel extends ContentModelEntryNode {
     }]
   }
 
-  afterEffects() {
+  linkNodes() {
     const flatMapDeepCategories = (container) => {
       return _.flatMapDeep(container, ({ subtree }) => {
         if (subtree.categories.length) {
@@ -299,12 +203,18 @@ class ContentModel extends ContentModelEntryNode {
       })
     }
 
-    linkNodes([
+    const nodes = [
       ...this.subtree.subpages,
       ...this.subtree.collections,
       ...flatMapDeepCategories(this.subtree.collections),
       ..._.flatMap(this.subtree.collections, ({ subtree }) => subtree.posts)
-    ])
+    ]
+
+    nodes.forEach(node => node.resolveLinks(nodes))
+  }
+
+  afterEffects() {
+    this.linkNodes()
 
     this.subtree.collections.forEach(collection => {
       collection.afterEffects(this.subtree)

@@ -1,13 +1,21 @@
 const { join } = require('path')
 const makeSlug = require('slug')
+const _ = require('lodash')
 const { makePermalink } = require('./contentModelHelpers')
 const { parseTextEntry } = require('./parseTextEntry')
+const {
+  findLinkedNode,
+  addLinkBack,
+  serializeLinks,
+  resolveLinks
+} = require('./linking')
 const ContentModelNode = require('./ContentModelNode')
 
 class ContentModelEntryNode extends ContentModelNode {
   constructor(fsNode, context, settings = {}) {
     super(fsNode, context, settings)
 
+    this.__links = []
     this.indexFile = this.getIndexFile()
 
     const isFlatData = !fsNode.stats?.birthtime
@@ -105,6 +113,26 @@ class ContentModelEntryNode extends ContentModelNode {
 
   draftCheck(entry) {
     return this.settings.mode === 'start' || !entry.draft
+  }
+
+  getLinks() {
+    return this.__links
+  }
+
+  addLink(keyPath, node) {
+    this.__links.push({ keyPath, node })
+  }
+
+  addLinkBack(post, key) {
+    addLinkBack(this, post, key)
+  }
+
+  resolveLinks(nodes) {
+    resolveLinks(this, nodes)
+  }
+
+  serializeLinks() {
+    return serializeLinks(this)
   }
 
   afterEffects(contentModel) {}

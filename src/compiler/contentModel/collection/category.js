@@ -43,6 +43,7 @@ class Category extends ContentModelEntryNode {
   static serialize(category) {
     const data = {
       ...category,
+      ...category.serializeLinks(),
       facets: category.facets.map(models.facet().serialize),
       posts: category.subtree.posts.map(models.Post.serialize),
       levelPosts: category.subtree.levelPosts.map(models.Post.serialize),
@@ -188,7 +189,10 @@ class Category extends ContentModelEntryNode {
       })
 
       this.facets = models.facet().collectFacets(
-        this.subtree.posts,
+        this.subtree.posts.map(post => ({
+          ...post,
+          ...post.serializeLinks()
+        })),
         this.settings.facetKeys,
         childContext
       )

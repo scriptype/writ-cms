@@ -14,6 +14,7 @@ class Subpage extends ContentModelEntryNode {
   static serialize(subpage) {
     return {
       ...subpage,
+      ...subpage.serializeLinks(),
       attachments: subpage.subtree.attachments.map(models.Attachment.serialize)
     }
   }

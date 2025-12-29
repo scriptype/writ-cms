@@ -14,6 +14,7 @@ class Homepage extends ContentModelEntryNode {
   static serialize(homepage) {
     return {
       ...homepage,
+      ...homepage.serializeLinks(),
       attachments: homepage.subtree.attachments.map(models.Attachment.serialize)
     }
   }
