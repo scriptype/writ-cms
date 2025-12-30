@@ -1,6 +1,8 @@
+const { omitResolvedLinks } = require('../helpers')
+
 const createSubpagesModel = ({ getContentModel }) => {
   const getSubpages = () => {
-    return getContentModel().subpages
+    return omitResolvedLinks(getContentModel().subtree.subpages)
   }
 
   return {

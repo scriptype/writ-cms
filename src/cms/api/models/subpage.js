@@ -1,7 +1,7 @@
 const { writeFile, mkdir } = require('fs/promises')
 const { join } = require('path')
 const frontMatter = require('front-matter')
-const { contentRootPath } = require('../helpers')
+const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const helpers = {
   buildFrontMatter(metadata) {
@@ -42,7 +42,8 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
   }
 
   const getSubpage = (title) => {
-    return getContentModel().subpages.find(p => p.title === title)
+    const subpages = omitResolvedLinks(getContentModel().subtree.subpages)
+    return subpages.find(p => p.title === title)
   }
 
   return {

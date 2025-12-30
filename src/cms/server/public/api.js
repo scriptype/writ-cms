@@ -33,6 +33,18 @@ const api = {
     }
   },
 
+  collections: {
+    get: async () => {
+      const response = await fetch('/api/collections', {
+        method: 'get',
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+      return response.json()
+    }
+  },
+
   categories: {
     get: async () => {
       const response = await fetch('/api/categories', {
@@ -88,7 +100,7 @@ const api = {
         },
         body: JSON.stringify(options)
       })
-      return response.json()
+      return response.text()
     }
   },
 
@@ -173,7 +185,7 @@ const api = {
         },
         body: JSON.stringify(options)
       })
-      return response.json()
+      return response.text()
     }
   },
 

@@ -2,6 +2,7 @@ import getSettings from './app/getSettings.js'
 import updateSettings from './app/updateSettings.js'
 import getFileSystemTree from './app/getFileSystemTree.js'
 import getContentModel from './app/getContentModel.js'
+import getCollections from './app/getCollections.js'
 import getCategories from './app/getCategories.js'
 import getCategory from './app/getCategory.js'
 import createCategory from './app/createCategory.js'
@@ -23,6 +24,7 @@ const makeButtonsWork = () => {
   query('#update-settings-btn').addEventListener('click', updateSettings)
   query('#get-file-system-tree-btn').addEventListener('click', getFileSystemTree)
   query('#get-content-model-btn').addEventListener('click', getContentModel)
+  query('#get-collections-btn').addEventListener('click', getCollections)
   query('#get-categories-btn').addEventListener('click', getCategories)
   query('#get-category-btn').addEventListener('click', getCategory)
   query('#create-category-btn').addEventListener('click', createCategory)
