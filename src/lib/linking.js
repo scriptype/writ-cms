@@ -40,7 +40,7 @@ function addLinkBack(sourceNode, targetNode, key) {
         re.test(schemaValue)
       if (match) {
         if (isSchemaValueArray) {
-          // console.log('linking', targetNode.title, 'to', schemaKey, 'field of', entry.title)
+          // console.log('linking', targetNode.title, 'to', schemaKey, 'field of', sourceNode.title)
           const existingCount = sourceNode.getLinks().filter(link => {
             return link.keyPath.length === 2 && link.keyPath[0] === schemaKey
           }).length

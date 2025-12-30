@@ -1,14 +1,7 @@
 const { join } = require('path')
-const makeSlug = require('slug')
-const _ = require('lodash')
 const { makePermalink } = require('./contentModelHelpers')
 const { parseTextEntry } = require('./parseTextEntry')
-const {
-  findLinkedNode,
-  addLinkBack,
-  serializeLinks,
-  resolveLinks
-} = require('./linking')
+const { addLinkBack, serializeLinks, resolveLinks } = require('./linking')
 const ContentModelNode = require('./ContentModelNode')
 
 class ContentModelEntryNode extends ContentModelNode {
