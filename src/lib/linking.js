@@ -82,7 +82,7 @@ function resolveLinks(node, nodes) {
         if (!valueItem.linkPath) {
           continue
         }
-        const linkedNode = findLinkedNode(nodes, valueItem.linkPath)
+        const linkedNode = findLinkedNode(nodes, [...valueItem.linkPath])
         if (linkedNode) {
           node.addLink([key, i], Object.assign({}, linkedNode))
           linkedNode.addLinkBack(node, key)
@@ -92,7 +92,7 @@ function resolveLinks(node, nodes) {
       if (!value?.linkPath) {
         return
       }
-      const linkedNode = findLinkedNode(nodes, value.linkPath)
+      const linkedNode = findLinkedNode(nodes, [...value.linkPath])
       if (linkedNode) {
         node.addLink([key], Object.assign({}, linkedNode))
         linkedNode.addLinkBack(node, key)
