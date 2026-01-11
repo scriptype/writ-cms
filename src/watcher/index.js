@@ -1,13 +1,12 @@
 const { resolve } = require('path')
 const _ = require('lodash')
 const bs = require('browser-sync').create()
-const Settings = require('../settings')
 const Debug = require('../debug')
 const api = require('./api')
 
 module.exports = {
-  async init({ onChange, silent }) {
-    const { rootDirectory, exportDirectory, previewPort } = Settings.getSettings()
+  async init({ onChange, silent, settings }) {
+    const { rootDirectory, exportDirectory, previewPort } = settings
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
     const watchOptions = {

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-const writ = require('../')
+const ssg = require('../')
+const createCMS = require('../cms')
 const manual = require('./manual')
 const Flag = require('./flag')
 
@@ -12,7 +13,7 @@ if (!cli.length) {
 
 let [ mode, ...opts ] = cli
 
-const modes = ['start', 'build']
+const modes = ['start', 'build', 'create']
 const flags = {
   refreshTheme: new Flag('refresh-theme', 'r'),
   debug: new Flag('debug', 'd')
@@ -34,4 +35,23 @@ if (options.debug) {
   console.log('cli', { mode, opts, options })
 }
 
-writ[mode](options)
+if (mode === 'start') {
+  const cms = createCMS({
+    ssgOptions: {
+      rootDirectory: options.rootDirectory,
+      refreshTheme: options.refreshTheme,
+      debug: options.debug,
+      cli: true
+    }
+  })
+  cms.server.start({
+    silent: false
+  })
+} else if (mode === 'create') {
+  const cms = createCMS()
+  cms.server.start({
+    silent: false
+  })
+} else {
+  ssg.build(options)
+}

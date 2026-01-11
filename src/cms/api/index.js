@@ -13,6 +13,8 @@ const createAPI = (providers) => {
     homepage: require('./models/homepage')(providers),
     tags: require('./models/tags')(providers),
     tag: require('./models/tag')(providers),
+    ssg: require('./models/ssg')(providers),
+    ssgOptions: require('./models/ssgOptions')(providers),
   }
 }
 

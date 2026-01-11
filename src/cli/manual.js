@@ -13,6 +13,7 @@ Commands
 --------
 build: Run once to produce build output
 start: Start livereloading preview and rerun on changes
+create: Create from scratch
 
 
 Options
@@ -54,4 +55,7 @@ $ writ start ../the-other-directory --debug
 
 Refresh theme directory and start development
 $ writ start --refresh-theme
+
+Create a project from scratch
+$ writ create
 `

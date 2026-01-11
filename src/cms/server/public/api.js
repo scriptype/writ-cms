@@ -9,6 +9,43 @@ const makeQueryString = (params) => {
 }
 
 const api = {
+  ssg: {
+    build: async (options) => {
+      const response = await fetch('/api/ssg/build', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.text()
+    },
+
+    watch: async (options) => {
+      const response = await fetch('/api/ssg/watch', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.text()
+    }
+
+  },
+
+  ssgOptions: {
+    get: async () => {
+      const response = await fetch('/api/ssgOptions', {
+        method: 'get',
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+      return response.json()
+    }
+  },
+
   category: {
     get: async (options) => {
       const { name } = options

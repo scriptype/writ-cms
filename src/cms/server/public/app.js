@@ -1,3 +1,6 @@
+import ssgBuild from './app/ssgBuild.js'
+import ssgWatch from './app/ssgWatch.js'
+import getSSGOptions from './app/getSSGOptions.js'
 import getSettings from './app/getSettings.js'
 import updateSettings from './app/updateSettings.js'
 import getFileSystemTree from './app/getFileSystemTree.js'
@@ -20,6 +23,15 @@ import getTag from './app/getTag.js'
 const query = document.querySelector.bind(document)
 
 const makeButtonsWork = () => {
+  query('#ssg-build-btn').addEventListener('click', async () => {
+    await ssgBuild()
+    setIframeSrc()
+  })
+  query('#ssg-watch-btn').addEventListener('click', async () => {
+    await ssgWatch()
+    setIframeSrc()
+  })
+  query('#get-ssg-options-btn').addEventListener('click', getSSGOptions)
   query('#get-settings-btn').addEventListener('click', getSettings)
   query('#update-settings-btn').addEventListener('click', updateSettings)
   query('#get-file-system-tree-btn').addEventListener('click', getFileSystemTree)
@@ -45,7 +57,31 @@ const setIframeSrc = () => {
   query('#preview').src = `http://${hostname}:3000`
 }
 
+const makeDraggable = (element) => {
+  let offsetX = 0
+  let offsetY = 0
+
+  element.addEventListener('mousedown', (e) => {
+    offsetX = e.clientX - element.offsetLeft
+    offsetY = e.clientY - element.offsetTop
+
+    const move = (e) => {
+      element.style.left = (e.clientX - offsetX) + 'px'
+      element.style.top = (e.clientY - offsetY) + 'px'
+    }
+
+    const stop = () => {
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('mouseup', stop)
+    }
+
+    document.addEventListener('mousemove', move)
+    document.addEventListener('mouseup', stop)
+  })
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   setIframeSrc()
   makeButtonsWork()
+  makeDraggable(document.querySelector('.explore-panel'))
 })

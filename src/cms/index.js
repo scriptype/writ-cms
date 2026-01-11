@@ -1,18 +1,28 @@
 const createAPI = require('./api')
 const createServer = require('./server')
 
-const createCMS = () => {
-  const state = {
-    settings: {},
-    fileSystemTree: [],
-    contentModel: {}
-  }
+const createCMS = (initialState = {}) => {
+  const store = (() => {
+    const state = Object.assign({
+      ssgOptions: {},
+      settings: {},
+      fileSystemTree: [],
+      contentModel: {}
+    }, initialState)
 
-  const api = createAPI({
-    getSettings: () => state.settings,
-    getFileSystemTree: () => state.fileSystemTree,
-    getContentModel: () => state.contentModel
-  })
+    return {
+      getSettings: () => state.settings,
+      getFileSystemTree: () => state.fileSystemTree,
+      getContentModel: () => state.contentModel,
+      getSSGOptions: () => state.ssgOptions,
+
+      setState: (newState) => {
+        Object.assign(state, newState)
+      }
+    }
+  })()
+
+  const api = createAPI(store)
 
   const server = createServer({
     api
@@ -21,11 +31,7 @@ const createCMS = () => {
   return {
     api,
     server,
-    setState(newState) {
-      state.settings = newState.settings
-      state.fileSystemTree = newState.fileSystemTree
-      state.contentModel = newState.contentModel
-    }
+    ...store
   }
 }
 
