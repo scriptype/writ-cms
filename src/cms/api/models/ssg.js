@@ -1,4 +1,4 @@
-const ssg = require('../../../')
+const ssg = require('../../../ssg')
 
 const createSSGModel = (state) => {
   return {

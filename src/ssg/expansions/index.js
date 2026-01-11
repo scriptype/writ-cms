@@ -12,7 +12,7 @@ const Methods = (() => {
     Debug.timeStart('expansions')
     const { expansions } = Settings.getSettings()
     State.expansions = expansions.map(exp => {
-      const pkgPath = join(__dirname, '..', '..', 'packages', `expansion-${exp}`)
+      const pkgPath = join(__dirname, '..', '..', '..', 'packages', `expansion-${exp}`)
       return require(pkgPath)
     })
     Debug.debugLog('expansions', State.expansions)

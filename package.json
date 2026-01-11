@@ -2,15 +2,15 @@
   "name": "writ-cms",
   "version": "0.30.0",
   "description": "Simple static site generator",
-  "main": "src/index.js",
+  "main": "src/ssg/index.js",
   "bin": {
     "writ": "src/cli/bin"
   },
   "scripts": {
-    "start": "node src",
+    "start": "node src/ssg",
     "hookup": "husky install",
-    "tape":    "tape \"src/**/*.spec.js\" \"src/e2e-tests/**/*.test.js\" | tap-nyan",
-    "tape:ci": "tape \"src/**/*.spec.js\" \"src/e2e-tests/**/*.test.js\" | tap-spec",
+    "tape":    "tape \"src/**/*.spec.js\" \"src/ssg/e2e-tests/**/*.test.js\" | tap-nyan",
+    "tape:ci": "tape \"src/**/*.spec.js\" \"src/ssg/e2e-tests/**/*.test.js\" | tap-spec",
     "test": "nyc --reporter=text-summary npm run tape",
     "test:ci": "nyc --reporter=lcov npm run tape:ci",
     "test:watch": "nodemon --watch src --ext js,hbs --exec npm run tape"

@@ -10,7 +10,7 @@ const {
 const createThemeDecorator = new DecoratorFactory((state, methods) => {
   const { rootDirectory, themeDirectory, theme } = Settings.getSettings()
   const customThemePath = join(rootDirectory, themeDirectory)
-  const baseThemePath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
+  const baseThemePath = join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)
 
   return {
     templateHelpers: (value) => {

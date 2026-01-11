@@ -134,7 +134,7 @@ const Methods = (() => {
 
   const copyBaseThemeResources = (customThemePath) => {
     const { theme } = Settings.getSettings()
-    const themeSrcPath = join(__dirname, '..', '..', 'packages', `theme-${theme}`)
+    const themeSrcPath = join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)
     return Promise.all([
       atomicFS.cp(
         join(themeSrcPath, ASSETS),

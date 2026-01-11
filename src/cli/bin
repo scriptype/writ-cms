@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const ssg = require('../')
+const ssg = require('../ssg')
 const createCMS = require('../cms')
 const manual = require('./manual')
 const Flag = require('./flag')
