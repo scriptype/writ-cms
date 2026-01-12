@@ -40,7 +40,7 @@ const ensureDirectory = async (path) => {
  * Building in a separate temp location releases all file handles
  * before the final swap.
  */
-const atomicReplace = async (targetPath, buildFn, sleepTime = 1000) => {
+const atomicReplace = async (targetPath, buildFn, sleepTime = 100) => {
   const sleep = (duration) => new Promise(resolve => setTimeout(resolve, duration))
   const tempPath = await atomicFS.mkdtemp(join(tmpdir(), 'atomic-replace-'))
   try {
