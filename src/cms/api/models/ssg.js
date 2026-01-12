@@ -14,15 +14,27 @@ const createSSGModel = (state) => {
     },
 
     async watch({ rootDirectory, refreshTheme, debug, cli }) {
-      return state.setState(
-        await ssg.watch({
-          rootDirectory,
-          refreshTheme,
-          debug,
-          cli,
-          onChange: state.setState
-        })
-      )
+      if (state.isWatching()) {
+        return false
+      }
+      const { result, watcher } = await ssg.watch({
+        rootDirectory,
+        refreshTheme,
+        debug,
+        cli,
+        onChange: state.setState
+      })
+      state.startWatcher(watcher.stop)
+      state.setState(result)
+      return true
+    },
+
+    async stopWatcher() {
+      if (!state.isWatching()) {
+        return false
+      }
+      await state.stopWatcher()
+      return true
     }
   }
 }

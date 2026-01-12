@@ -1,5 +1,6 @@
 import ssgBuild from './app/ssgBuild.js'
 import ssgWatch from './app/ssgWatch.js'
+import ssgStopWatcher from './app/ssgStopWatcher.js'
 import getSSGOptions from './app/getSSGOptions.js'
 import getSettings from './app/getSettings.js'
 import updateSettings from './app/updateSettings.js'
@@ -29,6 +30,10 @@ const makeButtonsWork = () => {
   })
   query('#ssg-watch-btn').addEventListener('click', async () => {
     await ssgWatch()
+    setIframeSrc()
+  })
+  query('#ssg-stop-watcher-btn').addEventListener('click', async () => {
+    await ssgStopWatcher()
     setIframeSrc()
   })
   query('#get-ssg-options-btn').addEventListener('click', getSSGOptions)

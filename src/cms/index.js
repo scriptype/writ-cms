@@ -7,7 +7,11 @@ const createCMS = (initialState = {}) => {
       ssgOptions: {},
       settings: {},
       fileSystemTree: [],
-      contentModel: {}
+      contentModel: {},
+      watcher: {
+        isRunning: false,
+        stop: _=>_
+      }
     }, initialState)
 
     return {
@@ -15,6 +19,15 @@ const createCMS = (initialState = {}) => {
       getFileSystemTree: () => state.fileSystemTree,
       getContentModel: () => state.contentModel,
       getSSGOptions: () => state.ssgOptions,
+      isWatching: () => state.watcher.isRunning,
+      stopWatcher: () => {
+        state.watcher.stop()
+        state.watcher.isRunning = false
+      },
+      startWatcher: (stopFn) => {
+        state.watcher.isRunning = true
+        state.watcher.stop = stopFn
+      },
 
       setState: (newState) => {
         Object.assign(state, newState)

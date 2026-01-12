@@ -103,9 +103,13 @@ const watch = async ({ rootDirectory, refreshTheme, debug, cli, onChange = _=>_ 
     }
   }
 
-  Watcher.init(watcherOptions)
+  const watcher = await Watcher.init(watcherOptions)
+  const result = await build(buildOptions)
 
-  return build(buildOptions)
+  return {
+    result,
+    watcher
+  }
 }
 
 module.exports = {

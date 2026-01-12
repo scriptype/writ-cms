@@ -30,6 +30,13 @@ const api = {
         body: JSON.stringify(options)
       })
       return response.text()
+    },
+
+    stopWatcher: async () => {
+      const response = await fetch('/api/ssg/stop-watcher', {
+        method: 'post'
+      })
+      return response.text()
     }
 
   },

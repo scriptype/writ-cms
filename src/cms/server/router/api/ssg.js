@@ -29,3 +29,12 @@ module.exports = express.Router()
       res.status(500).send(e)
     }
   })
+  .post('/stop-watcher', async (req, res, next) => {
+    try {
+      await req.api.ssg.stopWatcher()
+      res.sendStatus(200)
+    } catch (e) {
+      console.log('Error running ssg.stopWatcher', e)
+      res.status(500).send(e)
+    }
+  })
