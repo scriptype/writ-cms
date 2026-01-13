@@ -1,4 +1,4 @@
-import { query, setIframeSrc } from './common.js'
+import { setIframeSrc } from './common.js'
 
 window.addEventListener('DOMContentLoaded', () => {
   setIframeSrc()

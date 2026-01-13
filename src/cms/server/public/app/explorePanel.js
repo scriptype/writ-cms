@@ -77,23 +77,59 @@ const makeButtonsWork = (panel) => {
 const makeDraggable = (element) => {
   let offsetX = 0
   let offsetY = 0
+  let targetX = 0
+  let targetY = 0
+  let currentX = 0
+  let currentY = 0
+  let animationId = null
+  let isDragging = false
+  const easing = 0.125
 
-  element.addEventListener('mousedown', (e) => {
-    offsetX = e.clientX - element.offsetLeft
-    offsetY = e.clientY - element.offsetTop
+  const animate = () => {
+    currentX += (targetX - currentX) * easing
+    currentY += (targetY - currentY) * easing
+    element.style.left = currentX + 'px'
+    element.style.top = currentY + 'px'
+
+    if (!isDragging) {
+      const distance = Math.abs(targetX - currentX) + Math.abs(targetY - currentY)
+      if (distance < 0.1) {
+        animationId = null
+        return
+      }
+    }
+
+    animationId = requestAnimationFrame(animate)
+  }
+
+  element.addEventListener('pointerdown', (e) => {
+    if (e.target !== element && e.target.closest('button, input, a')) {
+      return
+    }
+
+    isDragging = true
+
+    if (!animationId) {
+      animationId = requestAnimationFrame(animate)
+    }
+
+    offsetX = e.clientX - currentX
+    offsetY = e.clientY - currentY
+    element.setPointerCapture(e.pointerId)
 
     const move = (e) => {
-      element.style.left = (e.clientX - offsetX) + 'px'
-      element.style.top = (e.clientY - offsetY) + 'px'
+      targetX = e.clientX - offsetX
+      targetY = e.clientY - offsetY
     }
 
     const stop = () => {
-      document.removeEventListener('mousemove', move)
-      document.removeEventListener('mouseup', stop)
+      element.removeEventListener('pointermove', move)
+      element.removeEventListener('pointerup', stop)
+      isDragging = false
     }
 
-    document.addEventListener('mousemove', move)
-    document.addEventListener('mouseup', stop)
+    element.addEventListener('pointermove', move)
+    element.addEventListener('pointerup', stop)
   })
 }
 
