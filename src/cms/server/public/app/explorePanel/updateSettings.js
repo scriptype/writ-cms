@@ -1,4 +1,4 @@
-import api from '../api.js'
+import api from '../../api.js'
 
 const updateSettings = () => {
   const values = ['a', 'b', 'c', 'd']

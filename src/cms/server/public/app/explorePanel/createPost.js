@@ -1,4 +1,4 @@
-import api from '../api.js'
+import api from '../../api.js'
 
 const createPost = () => {
   return api.post.create({

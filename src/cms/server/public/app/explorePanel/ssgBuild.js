@@ -1,4 +1,4 @@
-import api from '../api.js'
+import api from '../../api.js'
 
 const ssgBuild = async () => {
   const ssgOptions = await api.ssgOptions.get()

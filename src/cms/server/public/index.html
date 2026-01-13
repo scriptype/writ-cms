@@ -25,6 +25,8 @@
 
         .explore-panel {
             position: absolute;
+            top: 0;
+            left: 0;
             display: flex;
             flex-direction: column;
             gap: 0.4em;
@@ -74,51 +76,34 @@
         #dialog-content {
             white-space: pre-wrap;
         }
+
+        .collapsed {
+            width: 3em;
+            height: 3em;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 .5em royalblue;
+            cursor: pointer;
+        }
+
+        .collapsed * {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .collapsed::after {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            translate: -50% -50%;
+            content: "☎️";
+            font-size: 1.5em;
+        }
         </style>
     </head>
 
     <body>
-        <div class="container">
-            <div class="panel explore-panel">
-                <p>ssg</p>
-                <button type="button" id="ssg-build-btn">ssg.build()</button>
-                <button type="button" id="ssg-watch-btn">ssg.watch()</button>
-                <button type="button" id="ssg-stop-watcher-btn">ssg.stopWatcher()</button>
-                <button type="button" id="get-ssg-options-btn">get ssg options</button>
-
-                <p>settings</p>
-                <button type="button" id="get-settings-btn">get settings</button>
-                <button type="button" id="update-settings-btn">update settings</button>
-
-                <p>fileSystemTree</p>
-                <button type="button" id="get-file-system-tree-btn">get fileSystemTree</button>
-
-                <p>contentModel</p>
-                <button type="button" id="get-content-model-btn">get contentModel</button>
-
-                <p>collections</p>
-                <button type="button" id="get-collections-btn">get all collections</button>
-
-                <p>homepage</p>
-                <button type="button" id="get-homepage-btn">get homepage</button>
-                <button type="button" id="create-homepage-btn">create homepage</button>
-
-                <p>subpages</p>
-                <button type="button" id="get-subpages-btn">get all subpages</button>
-                <button type="button" id="get-subpage-btn">get subpage</button>
-                <button type="button" id="create-subpage-btn">create subpage</button>
-
-                <p>outdated things</p>
-
-                <button type="button" id="get-categories-btn">get all categories</button>
-                <button type="button" id="get-category-btn">get category</button>
-                <button type="button" id="create-category-btn">create category</button>
-                <button type="button" id="get-posts-btn">get all posts</button>
-                <button type="button" id="get-post-btn">get post</button>
-                <button type="button" id="create-post-btn">create post</button>
-                <button type="button" id="get-tags-btn">get all tags</button>
-                <button type="button" id="get-tag-btn">get tag</button>
-            </div>
+        <div id="panels-container" class="container">
             <div class="panel preview-panel">
                 <iframe id="preview" title="Site preview" frameborder="0"></iframe>
             </div>
@@ -130,6 +115,7 @@
             <pre id="dialog-content"></pre>
         </dialog>
         <script type="module" src="app.js"></script>
+        <script type="module" src="app/explorePanel.js"></script>
     </body>
 
 </html>

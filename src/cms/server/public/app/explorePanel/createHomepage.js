@@ -1,4 +1,4 @@
-import api from '../api.js'
+import api from '../../api.js'
 
 const createHomepage = () => {
   return api.homepage.create({
