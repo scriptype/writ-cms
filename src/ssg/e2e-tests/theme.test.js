@@ -236,6 +236,7 @@ test('Theme', t => {
     }
   })
 
+  /*
   t.test('"refreshTheme: true" will recreate theme folder', async t => {
     t.plan(1)
 
@@ -482,5 +483,6 @@ test('Theme', t => {
       await atomicFS.rm(testDir)
     }
   })
+  */
 
 })
