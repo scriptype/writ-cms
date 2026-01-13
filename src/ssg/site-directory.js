@@ -1,4 +1,4 @@
-const { rm, mkdir } = require('fs/promises')
+const { atomicReplace, atomicFS } = require('./lib/fileSystemHelpers')
 const Settings = require('./settings')
 const Debug = require('./debug')
 
@@ -10,11 +10,11 @@ const create = async () => {
     throw new Error(`Dangerous export directory: "${exportDirectory}". Won't continue.`)
   }
   try {
-    await rm(out, { recursive: true })
+    await atomicFS.rm(out, { recursive: true })
   }
   catch (ENOENT) {}
   finally {
-    return mkdir(out).then(() => {
+    return atomicFS.mkdir(out).then(() => {
       Debug.timeEnd('site directory')
     })
   }
