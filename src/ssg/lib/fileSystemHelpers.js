@@ -85,6 +85,22 @@ const atomicFS = (() => {
           `)
           await sleep(delayMS)
           continue
+        } else {
+          console.log(`
+          + + + +
+          Caught other error or maxRetries is reached (${i}/${maxRetries})
+
+          function:
+          `)
+          console.log(fn.toString())
+          console.log(`
+
+          error:
+          `)
+          console.log(error)
+          console.log(`
+          + + + +
+          `)
         }
         throw error
       }
