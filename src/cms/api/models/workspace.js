@@ -25,10 +25,9 @@ const createWorkspaceModel = (state) => {
           directory
             .filter(isProject)
             .map(item => createProject(item.name))
-            .sort((a, b) => b.dateModified - a.dateModified)
         )
         return {
-          projects
+          projects: projects.sort((a, b) => b.dateModified - a.dateModified)
         }
       } catch (e) {
         return {}
