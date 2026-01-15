@@ -9,6 +9,7 @@ const createCMS = (initialState = {}) => {
       fileSystemTree: [],
       contentModel: {},
       watcher: {
+        directory: undefined,
         isRunning: false,
         stop: _=>_
       }
@@ -19,14 +20,21 @@ const createCMS = (initialState = {}) => {
       getFileSystemTree: () => state.fileSystemTree,
       getContentModel: () => state.contentModel,
       getSSGOptions: () => state.ssgOptions,
-      isWatching: () => state.watcher.isRunning,
+      isWatching: (directory) => {
+        if (directory) {
+          return state.watcher.isRunning && state.watcher.directory === directory
+        }
+        return state.watcher.isRunning
+      },
       stopWatcher: () => {
         state.watcher.stop()
         state.watcher.isRunning = false
+        state.watcher.directory = undefined
       },
-      startWatcher: (stopFn) => {
+      startWatcher: ({ directory, stop }) => {
+        state.watcher.directory = directory
         state.watcher.isRunning = true
-        state.watcher.stop = stopFn
+        state.watcher.stop = stop
       },
 
       setState: (newState) => {

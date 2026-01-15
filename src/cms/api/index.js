@@ -1,21 +1,22 @@
 const createAPI = (providers) => {
-  return {
-    settings: require('./models/settings')(providers),
-    fileSystemTree: require('./models/fileSystemTree')(providers),
-    contentModel: require('./models/contentModel')(providers),
-    collections: require('./models/collections')(providers),
-    categories: require('./models/categories')(providers),
-    category: require('./models/category')(providers),
-    posts: require('./models/posts')(providers),
-    post: require('./models/post')(providers),
-    subpages: require('./models/subpages')(providers),
-    subpage: require('./models/subpage')(providers),
-    homepage: require('./models/homepage')(providers),
-    tags: require('./models/tags')(providers),
-    tag: require('./models/tag')(providers),
-    ssg: require('./models/ssg')(providers),
-    ssgOptions: require('./models/ssgOptions')(providers),
-  }
+  const api = {}
+  api.settings = require('./models/settings')(providers, api)
+  api.fileSystemTree = require('./models/fileSystemTree')(providers, api)
+  api.contentModel = require('./models/contentModel')(providers, api)
+  api.collections = require('./models/collections')(providers, api)
+  api.categories = require('./models/categories')(providers, api)
+  api.category = require('./models/category')(providers, api)
+  api.posts = require('./models/posts')(providers, api)
+  api.post = require('./models/post')(providers, api)
+  api.subpages = require('./models/subpages')(providers, api)
+  api.subpage = require('./models/subpage')(providers, api)
+  api.homepage = require('./models/homepage')(providers, api)
+  api.tags = require('./models/tags')(providers, api)
+  api.tag = require('./models/tag')(providers, api)
+  api.ssg = require('./models/ssg')(providers, api)
+  api.ssgOptions = require('./models/ssgOptions')(providers, api)
+  api.workspace = require('./models/workspace')(providers, api)
+  return api
 }
 
 module.exports = createAPI

@@ -15,7 +15,12 @@ const createSSGModel = (state) => {
 
     async watch({ rootDirectory, refreshTheme, debug, cli }) {
       if (state.isWatching()) {
-        return false
+        if (state.isWatching(rootDirectory)) {
+          console.log(`is already watching, not gonna do a thing (watching: ${rootDirectory})`)
+          return false
+        }
+        console.log(`was watching another. stopping it so now watch: ${rootDirectory}`)
+        await this.stopWatcher()
       }
       const { result, watcher } = await ssg.watch({
         rootDirectory,
@@ -24,7 +29,10 @@ const createSSGModel = (state) => {
         cli,
         onChange: state.setState
       })
-      state.startWatcher(watcher.stop)
+      state.startWatcher({
+        directory: rootDirectory,
+        stop: watcher.stop
+      })
       state.setState(result)
       return true
     },

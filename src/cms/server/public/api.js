@@ -53,6 +53,39 @@ const api = {
     }
   },
 
+  workspace: {
+    get: async () => {
+      const response = await fetch('/api/workspace', {
+        method: 'get',
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+      return response.json()
+    },
+
+    create: async () => {
+      const response = await fetch('/api/workspace', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+      return response.json()
+    },
+
+    createProject: async (options) => {
+      const response = await fetch('/api/workspace/project', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.json()
+    }
+  },
+
   category: {
     get: async (options) => {
       const { name } = options
