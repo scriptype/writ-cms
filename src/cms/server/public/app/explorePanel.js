@@ -16,7 +16,7 @@ import createHomepage from './explorePanel/createHomepage.js'
 
 const template = () => {
   return `
-    <div class="panel explore-panel">
+    <div class="panel explore-panel collapsed">
       <p>ssg</p>
       <button type="button" id="ssg-build-btn">ssg.build()</button>
       <button type="button" id="ssg-watch-btn">ssg.watch()</button>
@@ -134,16 +134,8 @@ const makeDraggable = (element) => {
 }
 
 const makeCollapsible = (element) => {
-  element.classList.toggle(
-    'collapsed',
-    JSON.parse((localStorage.getItem('ui') || '{}')).explorePanelCollapsed
-  )
   element.addEventListener('dblclick', () => {
     element.classList.toggle('collapsed')
-    localStorage.setItem('ui', JSON.stringify({
-      ...JSON.parse(localStorage.getItem('ui') || '{}'),
-      explorePanelCollapsed: element.classList.contains('collapsed')
-    }))
   })
 }
 
