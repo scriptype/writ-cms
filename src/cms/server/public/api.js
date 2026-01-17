@@ -86,10 +86,9 @@ const api = {
     }
   },
 
-  category: {
-    get: async (options) => {
-      const { name } = options
-      const response = await fetch(`/api/category/${encodeURI(name)}`, {
+  settings: {
+    get: async () => {
+      const response = await fetch('/api/settings', {
         method: 'get',
         headers: {
           'content-type': 'application/json'
@@ -98,9 +97,9 @@ const api = {
       return response.json()
     },
 
-    create: async (options) => {
-      const response = await fetch('/api/category', {
-        method: 'put',
+    update: async (options) => {
+      const response = await fetch('/api/settings', {
+        method: 'post',
         headers: {
           'content-type': 'application/json'
         },
@@ -110,21 +109,9 @@ const api = {
     }
   },
 
-  collections: {
+  contentTypes: {
     get: async () => {
-      const response = await fetch('/api/collections', {
-        method: 'get',
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-      return response.json()
-    }
-  },
-
-  categories: {
-    get: async () => {
-      const response = await fetch('/api/categories', {
+      const response = await fetch('/api/contentTypes', {
         method: 'get',
         headers: {
           'content-type': 'application/json'
@@ -146,9 +133,9 @@ const api = {
     }
   },
 
-  contentTypes: {
+  fileSystemTree: {
     get: async () => {
-      const response = await fetch('/api/contentTypes', {
+      const response = await fetch('/api/fileSystemTree', {
         method: 'get',
         headers: {
           'content-type': 'application/json'
@@ -158,9 +145,9 @@ const api = {
     }
   },
 
-  fileSystemTree: {
+  collections: {
     get: async () => {
-      const response = await fetch('/api/fileSystemTree', {
+      const response = await fetch('/api/collections', {
         method: 'get',
         headers: {
           'content-type': 'application/json'
@@ -193,66 +180,6 @@ const api = {
     }
   },
 
-  post: {
-    get: async (options) => {
-      const query = makeQueryString(options)
-      const queryString = query ? `?${query}` : ''
-      const response = await fetch(`/api/post/${queryString}`, {
-        method: 'get',
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-      return response.json()
-    },
-
-    create: async (options) => {
-      const response = await fetch('/api/post', {
-        method: 'put',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
-      })
-      return response.json()
-    }
-  },
-
-  posts: {
-    get: async () => {
-      const response = await fetch('/api/posts', {
-        method: 'get',
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-      return response.json()
-    }
-  },
-
-  settings: {
-    get: async () => {
-      const response = await fetch('/api/settings', {
-        method: 'get',
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-      return response.json()
-    },
-
-    update: async (options) => {
-      const response = await fetch('/api/settings', {
-        method: 'post',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
-      })
-      return response.json()
-    }
-  },
-
   subpage: {
     get: async (options) => {
       const query = makeQueryString(options)
@@ -281,32 +208,6 @@ const api = {
   subpages: {
     get: async () => {
       const response = await fetch('/api/subpages', {
-        method: 'get',
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-      return response.json()
-    }
-  },
-
-  tag: {
-    get: async (options) => {
-      const query = makeQueryString(options)
-      const queryString = query ? `?${query}` : ''
-      const response = await fetch(`/api/tag/${queryString}`, {
-        method: 'get',
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-      return response.json()
-    }
-  },
-
-  tags: {
-    get: async () => {
-      const response = await fetch('/api/tags', {
         method: 'get',
         headers: {
           'content-type': 'application/json'
