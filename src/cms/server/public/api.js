@@ -146,6 +146,18 @@ const api = {
     }
   },
 
+  contentTypes: {
+    get: async () => {
+      const response = await fetch('/api/contentTypes', {
+        method: 'get',
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+      return response.json()
+    }
+  },
+
   fileSystemTree: {
     get: async () => {
       const response = await fetch('/api/fileSystemTree', {

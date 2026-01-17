@@ -46,7 +46,8 @@ module.exports = class Compiler {
 
     return {
       fileSystemTree,
-      contentModel
+      contentModel,
+      contentTypes
     }
   }
 }

@@ -5,8 +5,9 @@ import ssgStopWatcher from './explorePanel/ssgStopWatcher.js'
 import getSSGOptions from './explorePanel/getSSGOptions.js'
 import getSettings from './explorePanel/getSettings.js'
 import updateSettings from './explorePanel/updateSettings.js'
-import getFileSystemTree from './explorePanel/getFileSystemTree.js'
+import getContentTypes from './explorePanel/getContentTypes.js'
 import getContentModel from './explorePanel/getContentModel.js'
+import getFileSystemTree from './explorePanel/getFileSystemTree.js'
 import getCollections from './explorePanel/getCollections.js'
 import getSubpages from './explorePanel/getSubpages.js'
 import getSubpage from './explorePanel/getSubpage.js'
@@ -27,11 +28,14 @@ const template = () => {
       <button type="button" id="get-settings-btn">get settings</button>
       <button type="button" id="update-settings-btn">update settings</button>
 
-      <p>fileSystemTree</p>
-      <button type="button" id="get-file-system-tree-btn">get fileSystemTree</button>
+      <p>contentTypes</p>
+      <button type="button" id="get-content-types-btn">get contentTypes</button>
 
       <p>contentModel</p>
       <button type="button" id="get-content-model-btn">get contentModel</button>
+
+      <p>fileSystemTree</p>
+      <button type="button" id="get-file-system-tree-btn">get fileSystemTree</button>
 
       <p>collections</p>
       <button type="button" id="get-collections-btn">get all collections</button>
@@ -64,8 +68,9 @@ const makeButtonsWork = (panel) => {
   panel.querySelector('#get-ssg-options-btn').addEventListener('click', getSSGOptions)
   panel.querySelector('#get-settings-btn').addEventListener('click', getSettings)
   panel.querySelector('#update-settings-btn').addEventListener('click', updateSettings)
-  panel.querySelector('#get-file-system-tree-btn').addEventListener('click', getFileSystemTree)
+  panel.querySelector('#get-content-types-btn').addEventListener('click', getContentTypes)
   panel.querySelector('#get-content-model-btn').addEventListener('click', getContentModel)
+  panel.querySelector('#get-file-system-tree-btn').addEventListener('click', getFileSystemTree)
   panel.querySelector('#get-collections-btn').addEventListener('click', getCollections)
   panel.querySelector('#get-subpages-btn').addEventListener('click', getSubpages)
   panel.querySelector('#get-subpage-btn').addEventListener('click', getSubpage)

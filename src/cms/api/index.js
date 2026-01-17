@@ -3,6 +3,7 @@ const createAPI = (providers) => {
   api.settings = require('./models/settings')(providers, api)
   api.fileSystemTree = require('./models/fileSystemTree')(providers, api)
   api.contentModel = require('./models/contentModel')(providers, api)
+  api.contentTypes = require('./models/contentTypes')(providers, api)
   api.collections = require('./models/collections')(providers, api)
   api.categories = require('./models/categories')(providers, api)
   api.category = require('./models/category')(providers, api)

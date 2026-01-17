@@ -8,6 +8,7 @@ const createCMS = (initialState = {}) => {
       settings: {},
       fileSystemTree: [],
       contentModel: {},
+      contentTypes: [],
       watcher: {
         directory: undefined,
         isRunning: false,
@@ -19,6 +20,7 @@ const createCMS = (initialState = {}) => {
       getSettings: () => state.settings,
       getFileSystemTree: () => state.fileSystemTree,
       getContentModel: () => state.contentModel,
+      getContentTypes: () => state.contentTypes,
       getSSGOptions: () => state.ssgOptions,
       isWatching: (directory) => {
         if (directory) {

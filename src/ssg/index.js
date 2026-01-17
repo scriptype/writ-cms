@@ -37,7 +37,11 @@ const build = async ({ mode = 'build', rootDirectory, refreshTheme, debug, cli }
   await SiteDirectory.create()
   await CNAME.create()
 
-  const { fileSystemTree, contentModel } = await new Compiler({
+  const {
+    fileSystemTree,
+    contentModel,
+    contentTypes
+  } = await new Compiler({
     FileSystemParser,
     ContentModel,
     Renderer,
@@ -76,7 +80,8 @@ const build = async ({ mode = 'build', rootDirectory, refreshTheme, debug, cli }
   return {
     settings,
     fileSystemTree,
-    contentModel
+    contentModel,
+    contentTypes
   }
 }
 
