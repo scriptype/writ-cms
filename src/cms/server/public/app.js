@@ -32,6 +32,13 @@ const editProject = async ({ ssgOptions }) => {
   console.log('starting editor with ssgOptions', ssgOptions)
   await api.ssg.watch(ssgOptions)
   setIframeSrc()
+
+  const contentTypes = await api.contentTypes.get()
+  if (contentTypes.length) {
+    console.log('contentTypes', contentTypes)
+  } else {
+    console.log('no contentTypes')
+  }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {

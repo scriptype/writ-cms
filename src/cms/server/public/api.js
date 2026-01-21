@@ -118,6 +118,17 @@ const api = {
         }
       })
       return response.json()
+    },
+
+    create: async (options) => {
+      const response = await fetch('/api/contentTypes', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.json()
     }
   },
 

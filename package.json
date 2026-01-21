@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/ssg",
     "hookup": "husky install",
-    "tape":    "tape \"src/**/*.spec.js\" \"src/ssg/e2e-tests/**/*.test.js\" | tap-nyan",
+    "tape": "tape \"src/**/*.spec.js\" \"src/ssg/e2e-tests/**/*.test.js\" | tap-nyan",
     "tape:ci": "tape \"src/**/*.spec.js\" \"src/ssg/e2e-tests/**/*.test.js\" | tap-spec",
     "test": "nyc --reporter=text-summary npm run tape",
     "test:ci": "nyc --reporter=lcov npm run tape:ci",
@@ -42,7 +42,8 @@
     "posthtml": "^0.16.6",
     "posthtml-urls": "^1.0.0",
     "slug": "^8.2.3",
-    "turndown": "^7.1.1"
+    "turndown": "^7.1.1",
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
     "cheerio": "^1.1.2",
