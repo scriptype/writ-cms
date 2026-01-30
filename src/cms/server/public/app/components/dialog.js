@@ -26,6 +26,10 @@ const dialog = {
 
   show() {
     this.$el.showModal()
+  },
+
+  hide() {
+    this.$el.close()
   }
 }
 

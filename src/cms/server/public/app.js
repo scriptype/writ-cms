@@ -1,5 +1,6 @@
 import api from './api.js'
-import { setIframeSrc } from './common.js'
+import onboarding from './app/onboarding.js'
+import editProject from './app/editProject.js'
 
 const findMostRecentProject = async () => {
   console.log('checking workspace')
@@ -14,31 +15,6 @@ const findMostRecentProject = async () => {
   }
   console.log('workspace projects', workspace.projects)
   return workspace.projects[0]
-}
-
-const onboarding = async () => {
-  console.log('first time onboarding')
-  const newProject = await api.workspace.createProject({
-    name: prompt('Project name')
-  })
-  return editProject({
-    ssgOptions: {
-      rootDirectory: newProject.path
-    }
-  })
-}
-
-const editProject = async ({ ssgOptions }) => {
-  console.log('starting editor with ssgOptions', ssgOptions)
-  await api.ssg.watch(ssgOptions)
-  setIframeSrc()
-
-  const contentTypes = await api.contentTypes.get()
-  if (contentTypes.length) {
-    console.log('contentTypes', contentTypes)
-  } else {
-    console.log('no contentTypes')
-  }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
