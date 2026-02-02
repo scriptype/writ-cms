@@ -24,6 +24,11 @@ const dialog = {
     return this.$content.innerHTML
   },
 
+  appendChild(node) {
+    this.$content.appendChild(node)
+    return this
+  },
+
   show() {
     this.$el.showModal()
   },

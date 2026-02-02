@@ -1,4 +1,4 @@
-import { query, createDOMNodeFromHTML, setIframeSrc } from '../common.js'
+import { query, createDOMNodeFromHTML, setIframeSrc } from './common.js'
 import ssgBuild from './explorePanel/ssgBuild.js'
 import ssgWatch from './explorePanel/ssgWatch.js'
 import ssgStopWatcher from './explorePanel/ssgStopWatcher.js'

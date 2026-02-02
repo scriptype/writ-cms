@@ -1,6 +1,7 @@
 import api from '../api.js'
-import { setIframeSrc } from '../common.js'
+import { setIframeSrc } from './common.js'
 import dialog from './components/dialog.js'
+import selectContentTypesForm from './components/selectContentTypesForm.js'
 
 const defaultContentTypes = [{
   name: 'Homepage',
@@ -71,6 +72,7 @@ const defaultContentTypes = [{
   }
 }]
 
+
 const editProject = async ({ ssgOptions }) => {
   console.log('starting editor with ssgOptions', ssgOptions)
   await api.ssg.watch(ssgOptions)
@@ -81,34 +83,19 @@ const editProject = async ({ ssgOptions }) => {
     return console.log('contentTypes', contentTypes)
   }
   console.log('no contentTypes')
-
-  dialog.html(
-
-`<h1>content types</h1>
-
-<form>
-${defaultContentTypes.map(contentType => `
-<label><input type="checkbox" name="${contentType.name}">${contentType.name}</label>
-`
-).join('')}
-
-  <button>Ok</button>
-</form>`
-  ).show()
-
-  const form = dialog.find('form')
-  form.addEventListener('submit', e => {
-    const formData = new FormData(form)
-    const keyValues = Array.from(formData.entries())
-    const selectedKeys = keyValues.filter(([key, value]) => value === 'on').map(([key]) => key)
-    const selectedContentTypes = defaultContentTypes.filter(ct => selectedKeys.includes(ct.name))
-    console.log('selectedContentTypes', selectedContentTypes)
-    e.preventDefault()
-    selectedContentTypes.forEach(async contentType => {
-      await api.contentTypes.create(contentType)
-    })
-    dialog.hide()
+  const { $el: $contentTypeForm } = selectContentTypesForm({
+    defaultContentTypes,
+    onSubmit: (selectedContentTypes) => {
+      console.log('selectedContentTypes', selectedContentTypes)
+      selectedContentTypes.forEach(async contentType => {
+        await api.contentTypes.create(contentType)
+      })
+      dialog.hide()
+    }
   })
+  dialog
+    .appendChild($contentTypeForm)
+    .show()
 }
 
 export default editProject
