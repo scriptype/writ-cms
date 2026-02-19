@@ -6,5 +6,5 @@ export default async () => {
 
   const fileSystemTree = await api.fileSystemTree.get()
 
-  dialog.textContent(JSON.stringify(fileSystemTree, null, 2))
+  dialog.html(`<pre>${JSON.stringify(fileSystemTree, null, 2)}</pre>`)
 }

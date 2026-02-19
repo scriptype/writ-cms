@@ -26,6 +26,7 @@ const modelConfigs = {
 
 export default async () => {
   dialog.html(`
+<pre>
 <form>
   <label>
     Name:
@@ -97,7 +98,7 @@ export default async () => {
 
   <button type="submit">Create</button>
 </form>
-  `).show()
+</pre>`).show()
 
   const form = dialog.find('form')
 

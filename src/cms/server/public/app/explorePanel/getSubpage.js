@@ -8,5 +8,5 @@ export default async () => {
     title: prompt('Enter subpage title')
   })
 
-  dialog.textContent(JSON.stringify(subpage, null, 2))
+  dialog.html(`<pre>${JSON.stringify(subpage, null, 2)}</pre>`)
 }

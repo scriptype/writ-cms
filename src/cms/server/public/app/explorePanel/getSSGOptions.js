@@ -6,5 +6,5 @@ export default async () => {
 
   const ssgOptions = await api.ssgOptions.get()
 
-  dialog.textContent(JSON.stringify(ssgOptions, null, 2))
+  dialog.html(`<pre>${JSON.stringify(ssgOptions, null, 2)}</pre>`)
 }

@@ -6,5 +6,5 @@ export default async () => {
 
   const settings = await api.settings.get()
 
-  dialog.textContent(JSON.stringify(settings, null, 2))
+  dialog.html(`<pre>${JSON.stringify(settings, null, 2)}</pre>`)
 }

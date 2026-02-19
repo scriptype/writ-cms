@@ -6,5 +6,5 @@ export default async () => {
 
   const homepage = await api.homepage.get()
 
-  dialog.textContent(JSON.stringify(homepage, null, 2))
+  dialog.html(`<pre>${JSON.stringify(homepage, null, 2)}</pre>`)
 }

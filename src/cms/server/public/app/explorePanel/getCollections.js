@@ -6,5 +6,5 @@ export default async () => {
 
   const collections = await api.collections.get()
 
-  dialog.textContent(JSON.stringify(collections, null, 2))
+  dialog.html(`<pre>${JSON.stringify(collections, null, 2)}</pre>`)
 }

@@ -6,5 +6,5 @@ export default async () => {
 
   const contentTypes = await api.contentTypes.get()
 
-  dialog.textContent(JSON.stringify(contentTypes, null, 2))
+  dialog.html(`<pre>${JSON.stringify(contentTypes, null, 2)}</pre>`)
 }

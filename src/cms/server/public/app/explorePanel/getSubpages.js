@@ -6,5 +6,5 @@ export default async () => {
 
   const subpages = await api.subpages.get()
 
-  dialog.textContent(JSON.stringify(subpages, null, 2))
+  dialog.html(`<pre>${JSON.stringify(subpages, null, 2)}</pre>`)
 }

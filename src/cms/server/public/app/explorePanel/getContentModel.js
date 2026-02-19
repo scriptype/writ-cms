@@ -6,5 +6,5 @@ export default async () => {
 
   const contentModel = await api.contentModel.get()
 
-  dialog.textContent(JSON.stringify(contentModel, null, 2))
+  dialog.html(`<pre>${JSON.stringify(contentModel, null, 2)}</pre>`)
 }
