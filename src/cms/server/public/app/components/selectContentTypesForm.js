@@ -1,17 +1,89 @@
 import { createDOMNodeFromHTML } from '../common.js'
 
 const template = ({ defaultContentTypes }) => {
-  return (
-`<form>
-  <h1>content types</h1>
-${defaultContentTypes.map(contentType => `
-<label><input type="checkbox" name="${contentType.name}">${contentType.name}</label>
-`
-).join('')}
+  // parent selector shortcut
+  const __ = '#select-content-types'
 
-  <button>Ok</button>
-</form>`
-  )
+  return (`
+    <form id="select-content-types">
+      <style>
+        ${__} {
+          font: .9rem/1.4 helvetica, sans-serif;
+        }
+
+        ${__} .layout-container {
+          display: flex;
+          flex-direction: column;
+        }
+
+        ${__} .content-types-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1em;
+          width: 25dvw;
+          height: 50dvh;
+          padding: .5em 1em .5em .5em;
+          overflow: auto;
+        }
+
+        ${__} .content-types-list-item {
+          display: flex;
+          box-shadow: 0 0 2px #0006;
+          padding: .66em 0;
+          border-radius: 0.3em;
+          cursor: pointer;
+        }
+
+        ${__} .content-types-list-item-checkbox {
+        }
+
+        ${__} .content-types-list-item:hover {
+          background: aliceblue;
+          box-shadow: 0 0 3px #0afa;
+        }
+
+        ${__} .content-types-list-item-checkbox {
+          padding: 0 .66em 0 1em;
+          place-content: center;
+        }
+
+        ${__} .content-types-list-item-content {
+        }
+
+        ${__} .content-types-list-item-name {
+          margin: 0;
+        }
+
+        ${__} .content-types-list-item-description {
+          margin: 0;
+          font-size: .9em;
+          opacity: .7;
+        }
+      </style>
+
+      <h1>content types</h1>
+
+      <div class="layout-container">
+        <div class="content-types-list">
+          ${defaultContentTypes.map(contentType => `
+            <label class="content-types-list-item">
+              <div class="content-types-list-item-checkbox">
+                <input type="checkbox" name="${contentType.name}">
+              </div>
+              <div class="content-types-list-item-content">
+                <p class="content-types-list-item-name">${contentType.name}</p>
+                <p class="content-types-list-item-description">${contentType.description}</p>
+              </div>
+            </label>
+          `).join('')}
+        </div>
+
+        <div class="ontology-visualisation"></div>
+      </div>
+
+      <button>Ok</button>
+    </form>
+  `)
 }
 
 const selectContentTypesForm = ({ defaultContentTypes, onSubmit }) => {
