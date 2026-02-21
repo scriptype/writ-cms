@@ -29,7 +29,7 @@ const template = ({ defaultContentTypes }) => {
         ${__} .content-types-list-item {
           display: flex;
           box-shadow: 0 0 2px #0006;
-          padding: .66em 0;
+          padding: .7em 0;
           border-radius: 0.3em;
           cursor: pointer;
         }
@@ -37,14 +37,26 @@ const template = ({ defaultContentTypes }) => {
         ${__} .content-types-list-item-checkbox {
         }
 
-        ${__} .content-types-list-item:hover {
+        ${__} .content-types-list-item:hover,
+        ${__} .content-types-list-item:has(:focus-visible) {
           background: aliceblue;
-          box-shadow: 0 0 3px #0afa;
+          box-shadow: 0 0 0 .07em #007aff;
+        }
+
+        ${__} .content-types-list-item:has(:checked) {
+          background: aliceblue;
+          box-shadow: 0 0 0 .13em #007aff;
         }
 
         ${__} .content-types-list-item-checkbox {
           padding: 0 .66em 0 1em;
           place-content: center;
+        }
+
+        ${__} .content-types-list-item-checkbox input {
+          --size: 1.2em;
+          width: var(--size);
+          height: var(--size);
         }
 
         ${__} .content-types-list-item-content {
