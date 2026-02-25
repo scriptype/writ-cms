@@ -86,12 +86,17 @@ const makeButtonsWork = (panel) => {
 }
 
 const makeDraggable = (element) => {
+  const rect = element.getBoundingClientRect()
+  const parentRect = element.parentElement.getBoundingClientRect()
+  const initialX = rect.left - parentRect.left
+  const initialY = rect.top - parentRect.top
+
   let offsetX = 0
   let offsetY = 0
-  let targetX = 0
-  let targetY = 0
-  let currentX = 0
-  let currentY = 0
+  let targetX = initialX
+  let targetY = initialY
+  let currentX = initialX
+  let currentY = initialY
   let animationId = null
   let isDragging = false
   const easing = 0.125
@@ -153,9 +158,9 @@ const makeCollapsible = (element) => {
 window.addEventListener('DOMContentLoaded', () => {
   const explorePanel = createDOMNodeFromHTML(template())
   makeButtonsWork(explorePanel)
-  makeDraggable(explorePanel)
   makeCollapsible(explorePanel)
 
   const container = query('#panels-container')
   container.appendChild(explorePanel)
+  makeDraggable(explorePanel)
 })
