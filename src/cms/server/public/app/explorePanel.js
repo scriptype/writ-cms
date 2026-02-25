@@ -6,6 +6,7 @@ import getSSGOptions from './explorePanel/getSSGOptions.js'
 import getSettings from './explorePanel/getSettings.js'
 import updateSettings from './explorePanel/updateSettings.js'
 import getContentTypes from './explorePanel/getContentTypes.js'
+import selectContentTypes from './explorePanel/selectContentTypes.js'
 import createContentType from './explorePanel/createContentType.js'
 import getContentModel from './explorePanel/getContentModel.js'
 import getFileSystemTree from './explorePanel/getFileSystemTree.js'
@@ -31,6 +32,7 @@ const template = () => {
 
       <p>contentTypes</p>
       <button type="button" id="get-content-types-btn">get contentTypes</button>
+      <button type="button" id="select-content-types-btn">select contentTypes</button>
       <button type="button" id="create-content-type-btn">create contentType</button>
 
       <p>contentModel</p>
@@ -71,6 +73,7 @@ const makeButtonsWork = (panel) => {
   panel.querySelector('#get-settings-btn').addEventListener('click', getSettings)
   panel.querySelector('#update-settings-btn').addEventListener('click', updateSettings)
   panel.querySelector('#get-content-types-btn').addEventListener('click', getContentTypes)
+  panel.querySelector('#select-content-types-btn').addEventListener('click', selectContentTypes)
   panel.querySelector('#create-content-type-btn').addEventListener('click', createContentType)
   panel.querySelector('#get-content-model-btn').addEventListener('click', getContentModel)
   panel.querySelector('#get-file-system-tree-btn').addEventListener('click', getFileSystemTree)
