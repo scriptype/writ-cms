@@ -11,17 +11,24 @@
 <!-- e.g., "No TypeScript", "No bundlers", "Vanilla JS only" -->
 
 ## Coding Conventions
+- Respect existing indentation style in each file
+- Keep lines shorter than 80 columns (including comments), but don't break a line just to shave a few characters if it hurts readability
+- No trailing whitespace
+- In multiline comments, add blank lines between logical points
+
+### JS
 - Avoid semicolons unless absolutely necessary
 - Always use curly braces {} for control structures (if, for, while, etc.), even for single statements
 - For multiline arrow functions without explicit parentheses, always use curly braces with return (e.g., `=> { return ... }`, not `=> expr` spanning lines). Implicit return with parentheses is OK (e.g., `=> ({...})`)
-- Keep lines shorter than 80 columns (including comments), but don't break a line just to shave a few characters if it hurts readability
-- Break logical operator chains (&&, ||) across lines only when significantly long
-- No trailing whitespace
-- In multiline comments, add blank lines between logical points
-- Respect existing indentation style in each file
-- Keep ternary `?` at end of line, not start of next
 - Respect default JSHint rules
+- Break logical operator chains (&&, ||) across lines only when significantly long
 - Keep short destructured imports on one line; break across lines only when exceeding 80 columns
+- Keep ternary `?` at end of line, not start of next
+- Always check for unused imports after finishing work on a module
+
+### CSS
+- Order CSS properties from layout-affecting to cosmetic: positioning → display/layout → box model (padding, border) → typography → background/color → decoration (shadow, opacity) → animation → z-index
+- Never use arbitrarily high z-index values; use the lowest value that works
 
 ## Testing
 ### Conventions
