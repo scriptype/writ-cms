@@ -17,7 +17,7 @@ const dialog = {
   },
 
   html(html) {
-    if (html) {
+    if (typeof html === 'string') {
       this.$content.innerHTML = html
       return this
     }

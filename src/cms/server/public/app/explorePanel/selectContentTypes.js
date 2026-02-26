@@ -15,6 +15,7 @@ export default async () => {
     }
   })
   dialog
+    .html('')
     .appendChild($contentTypeForm)
     .show()
 }
