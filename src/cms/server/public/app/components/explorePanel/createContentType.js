@@ -1,5 +1,5 @@
-import api from '../../api.js'
-import dialog from '../components/dialog.js'
+import api from '../../../api.js'
+import dialog from '../dialog.js'
 
 const modelConfigs = {
   homepage: [],

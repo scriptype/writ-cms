@@ -1,7 +1,7 @@
-import api from '../../api.js'
-import dialog from '../components/dialog.js'
-import selectContentTypesForm from '../components/selectContentTypesForm.js'
-import defaultContentTypes from '../defaultContentTypes.js'
+import api from '../../../api.js'
+import dialog from '../dialog.js'
+import selectContentTypesForm from '../selectContentTypesForm.js'
+import defaultContentTypes from '../../defaultContentTypes.js'
 
 export default async () => {
   const { $el: $contentTypeForm } = selectContentTypesForm({
