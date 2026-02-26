@@ -1,43 +1,47 @@
-## Coding Conventions
-- Avoid semicolons unless it's absolutely necessary
-- Always use block statements even if it could be a one-liner
-- Always use curly braces {} for control structures (if, for, while, etc.), even if the body is a single statement
-- For multiline arrow functions without explicit parentheses, always use curly braces with return (e.g., `=> { return ... }`, not `=> expr` spanning lines). Implicit return with parentheses is OK (e.g., `=> ({...})`)
-- Keep lines shorter than 80 columns (including comments)
-- Don't break a line just because it slightly exceeds 80 columns; keep it on one line if adding a few extra characters is necessary for clarity or to avoid awkward continuation
-- For multiple expressions with logical operators (&&, ||), break lines after each operator only when the combined expression is significantly long
-- No trailing whitespace at the end of lines
-- In multiline comments, add blank lines between logical points for readability
-- Respect existing indentation style when editing files (maintain consistency with surrounding code)
-- Keep ternary operator `?` at the end of the line, not at the start of the next line (avoid JSHint misleading line break warning)
-- Respect default JSHint rules and do not change coding style in ways that cause JSHint to report warnings
-- Keep short destructured imports on a single line (e.g., `const { foo, bar } = require('./module')`)
-- Break destructured imports across multiple lines only when they exceed 80 columns or contain many items
+## Meta
+- When the user states a strong preference or asserts that something should always/never be done a certain way, ask if they'd like it added to this file for future threads
 
-## Test Assertions Formatting
-- Assertion function call on one line (e.g., `t.ok(`, `t.equal(`, `t.notOk(`)
+## Project
+<!-- Fill in over time -->
+
+## Architecture
+<!-- Fill in over time -->
+
+## Preferences
+<!-- e.g., "No TypeScript", "No bundlers", "Vanilla JS only" -->
+
+## Coding Conventions
+- Avoid semicolons unless absolutely necessary
+- Always use curly braces {} for control structures (if, for, while, etc.), even for single statements
+- For multiline arrow functions without explicit parentheses, always use curly braces with return (e.g., `=> { return ... }`, not `=> expr` spanning lines). Implicit return with parentheses is OK (e.g., `=> ({...})`)
+- Keep lines shorter than 80 columns (including comments), but don't break a line just to shave a few characters if it hurts readability
+- Break logical operator chains (&&, ||) across lines only when significantly long
+- No trailing whitespace
+- In multiline comments, add blank lines between logical points
+- Respect existing indentation style in each file
+- Keep ternary `?` at end of line, not start of next
+- Respect default JSHint rules
+- Keep short destructured imports on one line; break across lines only when exceeding 80 columns
+
+## Testing
+### Conventions
+- File naming: `ModuleName.spec.js` (matching source file casing)
+- Glob pattern: `src/**/*.spec.js`
+- Use `Promise.all()` for independent async file ops in setup/teardown
+- Only use `t.plan()` for async or non-deterministic tests
+
+### Assertion Formatting
+- Assertion call on one line (e.g., `t.ok(`)
 - Actual/expected value on separate line
 - Message on its own line
-- Add blank line between consecutive assertions
-- Only use `t.plan()` for async or non-deterministic tests where assertions might be skipped; omit for sync tests
+- Blank line between consecutive assertions
 
-## Test File Naming
-- Create test files with the same name and casing as the module being tested, with `.spec.js` appended
-- Example: `FileSystemParser.js` → `FileSystemParser.spec.js`
-- Test files use the glob pattern `src/**/*.spec.js`
+### DOM Assertions
+- `.length === 1` — element rendered exactly once
+- `.length !== 0` — elements exist, multiple allowed
+- Never `.length > 0` (ambiguous)
 
-## Test File Operations
-- Use `Promise.all()` to parallelize independent async file operations (mkdir, writeFile, etc.) instead of awaiting them serially
-
-## Test Suite Design
-- Write lean tests that avoid redundancy while covering optimal paths and edge cases
-- Each test should demonstrate one distinct behavior or scenario, not repeat what other tests already cover
-- Focus on meaningful differences: testing the same logic with different data types (strings vs numbers) is redundant; test different behavior patterns instead
-- Include edge cases and boundary conditions (empty inputs, zero values, falsy values, etc.)
-- Remove tests that are functionally identical to existing ones, even if they test the same function in different scenarios
-- Prioritize tests that demonstrate unexpected or complex behaviors over tests that verify basic functionality with different data types
-
-## DOM Element Assertions
-- Use `.length === 1` to assert an element is rendered exactly once (strict, single element expectation)
-- Use `.length !== 0` to assert elements exist but allow multiple (when multiple are expected)
-- Never use `.length > 0` as it's ambiguous about whether one or multiple elements are expected
+### Design Principles
+- One distinct behavior per test, no redundancy
+- Prioritize edge cases and unexpected behaviors over basic type variations
+- Remove functionally identical tests even across different scenarios
