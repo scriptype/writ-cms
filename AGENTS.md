@@ -2,13 +2,13 @@
 - When the user states a strong preference or asserts that something should always/never be done a certain way, ask if they'd like it added to this file for future threads
 
 ## Project
-<!-- Fill in over time -->
+- An SSG with a built-in CMS studio — not a headless CMS or bolt-on editor
 
 ## Architecture
 <!-- Fill in over time -->
 
 ## Preferences
-<!-- e.g., "No TypeScript", "No bundlers", "Vanilla JS only" -->
+- Keep notes in `notes/` as markdown files named `dd-mm-yy-topic.md`
 
 ## Coding Conventions
 - Respect existing indentation style in each file
