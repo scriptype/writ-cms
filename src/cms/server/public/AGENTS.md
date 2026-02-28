@@ -9,5 +9,18 @@
 - `app/components/` holds reusable components
 - Feature-specific modules live in their own folders under `app/components/` (e.g., `app/components/explorePanel/`)
 
+## Coding Conventions
+
+### HTML Templates
+- Extracted sub-template functions should own their
+  wrapper element, not just return inner content
+- Extracted sub-template functions should co-locate
+  their relevant `<style>` block
+
+### CSS
+- Prefix all CSS classes within a component with the
+  component name (e.g. `content-panel-divider`, not
+  `content-divider`)
+
 ## Verification
 - After moving/renaming files or changing imports, check the browser console for errors (server runs on port 8080)
