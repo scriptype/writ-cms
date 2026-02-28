@@ -1,20 +1,16 @@
 import api from '../api.js'
 import { query, setIframeSrc } from './common.js'
-import dialog from './components/dialog.js'
 import toolbarPanel from './components/toolbarPanel.js'
+import contentPanel from './components/contentPanel/index.js'
 
 const initToolbar = () => {
   const { $el: $toolbar } = toolbarPanel({
     tools: [
       {
-        name: 'hello',
-        icon: '👋',
-        label: 'Hello',
-        action: () => {
-          dialog
-            .html('<p>Hello from the toolbar!</p>')
-            .show()
-        }
+        name: 'content',
+        icon: '📋',
+        label: 'Content',
+        action: contentPanel.render
       }
     ]
   })
