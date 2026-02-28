@@ -1,16 +1,16 @@
 import api from '../api.js'
 import { query, setIframeSrc } from './common.js'
-import toolbarPanel from './components/toolbarPanel.js'
-import contentPanel from './components/contentPanel/index.js'
+import Toolbar from './components/Toolbar.js'
+import Content from './components/Content/index.js'
 
 const initToolbar = () => {
-  const { $el: $toolbar } = toolbarPanel({
+  const { $el: $toolbar } = Toolbar({
     tools: [
       {
         name: 'content',
         icon: '📋',
         label: 'Content',
-        action: contentPanel.render
+        action: Content.render
       }
     ]
   })

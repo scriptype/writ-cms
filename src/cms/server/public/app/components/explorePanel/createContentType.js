@@ -1,5 +1,5 @@
 import api from '../../../api.js'
-import dialog from '../dialog.js'
+import Dialog from '../Dialog.js'
 
 const modelConfigs = {
   homepage: [],
@@ -25,7 +25,7 @@ const modelConfigs = {
 }
 
 export default async () => {
-  dialog.html(`
+  Dialog.html(`
 <pre>
 <form>
   <label>
@@ -100,12 +100,12 @@ export default async () => {
 </form>
 </pre>`).show()
 
-  const form = dialog.find('form')
+  const form = Dialog.find('form')
 
-  const nameInput = dialog.find('input[name=name]')
-  const modelSelect = dialog.find('select[name=model]')
-  const modelConfigContainer = dialog.find('#model-config')
-  const submitButton = dialog.find('button[type=submit]')
+  const nameInput = Dialog.find('input[name=name]')
+  const modelSelect = Dialog.find('select[name=model]')
+  const modelConfigContainer = Dialog.find('#model-config')
+  const submitButton = Dialog.find('button[type=submit]')
 
   const validate = () => {
     if (!modelSelect.value) {

@@ -1,10 +1,10 @@
 import api from '../../../api.js'
-import dialog from '../dialog.js'
+import Dialog from '../Dialog.js'
 
 export default async () => {
-  dialog.textContent('Loading').show()
+  Dialog.textContent('Loading').show()
 
   const subpages = await api.subpages.get()
 
-  dialog.html(`<pre>${JSON.stringify(subpages, null, 2)}</pre>`)
+  Dialog.html(`<pre>${JSON.stringify(subpages, null, 2)}</pre>`)
 }

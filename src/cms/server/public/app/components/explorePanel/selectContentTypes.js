@@ -1,20 +1,20 @@
 import api from '../../../api.js'
-import dialog from '../dialog.js'
-import selectContentTypesForm from '../selectContentTypesForm.js'
+import Dialog from '../Dialog.js'
+import SelectContentTypesForm from '../SelectContentTypesForm.js'
 import defaultContentTypes from '../../defaultContentTypes.js'
 
 export default async () => {
-  const { $el: $contentTypeForm } = selectContentTypesForm({
+  const { $el: $contentTypeForm } = SelectContentTypesForm({
     defaultContentTypes,
     onSubmit: (selectedContentTypes) => {
       console.log('selectedContentTypes', selectedContentTypes)
       selectedContentTypes.forEach(async contentType => {
         await api.contentTypes.create(contentType)
       })
-      dialog.hide()
+      Dialog.hide()
     }
   })
-  dialog
+  Dialog
     .html('')
     .appendChild($contentTypeForm)
     .show()

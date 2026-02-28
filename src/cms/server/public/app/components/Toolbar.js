@@ -75,7 +75,7 @@ const template = ({ tools }) => {
   `)
 }
 
-const toolbarPanel = ({ tools }) => {
+const Toolbar = ({ tools }) => {
   const html = template({ tools })
   const $el = createDOMNodeFromHTML(html)
 
@@ -93,4 +93,4 @@ const toolbarPanel = ({ tools }) => {
   }
 }
 
-export default toolbarPanel
+export default Toolbar

@@ -1,6 +1,6 @@
 import { createDOMNodeFromHTML } from '../../common.js'
 import api from '../../../api.js'
-import dialog from '../dialog.js'
+import Dialog from '../Dialog.js'
 import defaultContentTypes from '../../defaultContentTypes.js'
 import { flattenSubtree } from './contentTree.js'
 import { template } from './template.js'
@@ -95,7 +95,7 @@ const addListeners = ($panel, nodes) => {
 }
 
 const render = async () => {
-  dialog.textContent('Loading…').show()
+  Dialog.textContent('Loading…').show()
 
   const contentModel = await api.contentModel.get()
   state.tree = flattenSubtree(contentModel)
@@ -118,8 +118,8 @@ const update = () => {
   })
   const $panel = createDOMNodeFromHTML(html)
   addListeners($panel, nodes)
-  dialog.html('')
-  dialog.appendChild($panel)
+  Dialog.html('')
+  Dialog.appendChild($panel)
 }
 
 export default { render }
