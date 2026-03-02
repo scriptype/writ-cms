@@ -204,10 +204,13 @@ class ContentModel extends ContentModelEntryNode {
     }
 
     const nodes = [
+      ...this.subtree.assets,
       ...this.subtree.subpages,
       ...this.subtree.collections,
       ...flatMapDeepCategories(this.subtree.collections),
-      ..._.flatMap(this.subtree.collections, ({ subtree }) => subtree.posts)
+      ..._.flatMapDeep(this.subtree.collections, ({ subtree }) => {
+        return subtree.posts.map(post => [post, post.subtree.attachments])
+      })
     ]
 
     nodes.forEach(node => node.resolveLinks(nodes))
