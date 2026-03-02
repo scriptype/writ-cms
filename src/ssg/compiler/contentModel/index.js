@@ -191,6 +191,10 @@ class ContentModel extends ContentModelEntryNode {
   }
 
   linkNodes() {
+    const withAttachments = (node) => {
+      return [node, ...node.subtree.attachments]
+    }
+
     const flatMapDeepCategories = (container) => {
       return _.flatMapDeep(container, ({ subtree }) => {
         if (subtree.categories.length) {
@@ -205,11 +209,14 @@ class ContentModel extends ContentModelEntryNode {
 
     const nodes = [
       ...this.subtree.assets,
-      ...this.subtree.subpages,
-      ...this.subtree.collections,
-      ...flatMapDeepCategories(this.subtree.collections),
+      ..._.flatMap(this.subtree.subpages.map(withAttachments)),
+      ..._.flatMap(this.subtree.collections.map(withAttachments)),
+      ..._.flatMap(
+        flatMapDeepCategories(this.subtree.collections),
+        withAttachments
+      ),
       ..._.flatMapDeep(this.subtree.collections, ({ subtree }) => {
-        return subtree.posts.map(post => [post, post.subtree.attachments])
+        return subtree.posts.map(withAttachments)
       })
     ]
 
