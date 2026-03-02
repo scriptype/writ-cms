@@ -259,6 +259,46 @@ test('E2E Magazine - Post Pages', async t => {
     }
   })
 
+  t.test('Verify Demo post code link', async t => {
+    for (const post of allPosts) {
+      if (post.contentType !== 'Demo') {
+        continue
+      }
+
+      if (!post.code) {
+        continue
+      }
+
+      const postPath = await resolvePostPath(rootDirectory, exportDirectory, post.permalink)
+
+      try {
+        const postHtml = await readFile(postPath, { encoding: 'utf-8' })
+        const $ = load(postHtml)
+        const codeLink = $('[data-code-link]')
+
+        t.ok(
+          codeLink.text().includes(post.code.title),
+          `${post.permalink} code link has correct title`
+        )
+
+        t.equal(
+          codeLink.attr('href'),
+          post.code.permalink,
+          `${post.permalink} code link has correct href`
+        )
+
+        t.ok(
+          codeLink.text().includes(post.code.content),
+          `${post.permalink} code link has correct content`
+        )
+      } catch (err) {
+        t.fail(
+          `${post.permalink} Demo code link: ${err.message}`
+        )
+      }
+    }
+  })
+
   t.test('Verify Book/Article post author link', async t => {
     for (const post of allPosts) {
       if (post.contentType !== 'Book' && post.contentType !== 'Article') {

@@ -36,6 +36,12 @@
     </div>
 
     <div>
+    {{#if code}}
+    Maker: <a data-code-link href="{{code.permalink}}">{{code.title}} ({{code.content}})</a>
+    {{/if}}
+    </div>
+
+    <div>
     {{#if links.relations}}
       Relations:
       <ul>

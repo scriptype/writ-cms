@@ -563,6 +563,7 @@ const FIXTURE_CONTENT_MODEL = {
                 {
                   title: 'Grid vs Flexbox',
                   maker: { title: 'Mustafa Enes', slug: 'enes' },
+                  code: { title: 'code.htm', slug: 'code.htm', permalink: '/demos/css/grid/grid-vs-flexbox/code.htm', content: 'code in grid vs flexbox' },
                   date: '2025-11-10',
                   permalink: '/demos/css/grid/grid-vs-flexbox',
                   contentType: 'Demo',
@@ -1112,12 +1113,20 @@ const FIXTURE_CONTENT_MODEL = {
   ],
   assets: [
     {
+      title: 'code.htm',
+      permalink: '/assets/code.htm'
+    },
+    {
       title: 'an asset',
       permalink: '/assets/an asset'
     },
     {
       title: 'some.jpeg',
       permalink: '/assets/some.jpeg'
+    },
+    {
+      title: 'code.htm',
+      permalink: '/assets/code.htm'
     },
     {
       title: 'here.mp4',
