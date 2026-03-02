@@ -8,6 +8,7 @@ class ContentModelResourceNode extends ContentModelNode {
   constructor(fsNode, context, settings = {}) {
     super(fsNode, context, settings)
     this.slug = this.title
+    this.content = this.fsNode.content
     this.permalink = this.getPermalink()
     this.outputPath = this.getOutputPath()
     this.subtreeMatchers = this.getSubtreeMatchers()
