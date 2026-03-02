@@ -1,9 +1,9 @@
 const _ = require('lodash')
 
-function findLinkedNode(nodes, linkPath) {
+function findLinkedNode(sourceNode, allNodes, linkPath) {
   const leafSlug = linkPath.pop()
   const leafRe = new RegExp(`^${leafSlug}$`, 'i')
-  const leafMatches = nodes.filter(p => p.slug.match(leafRe))
+  const leafMatches = allNodes.filter(p => p.slug.match(leafRe))
 
   if (!leafMatches.length) {
     return undefined
@@ -14,7 +14,7 @@ function findLinkedNode(nodes, linkPath) {
   }
 
   if (!linkPath.length) {
-    return undefined
+    return findClosestNode(sourceNode, leafMatches)
   }
 
   const paths = linkPath.reverse()
@@ -27,6 +27,31 @@ function findLinkedNode(nodes, linkPath) {
     }
     return !!ctx.items.length
   })
+}
+
+function findClosestNode(sourceNode, candidates) {
+  const sourceContext = [...sourceNode.context.items, sourceNode]
+  let bestMatch = candidates[0]
+  let bestScore = -1
+  for (const candidate of candidates) {
+    const candidateContext = candidate.context.items
+    const maxDepth = Math.min(
+      sourceContext.length, candidateContext.length
+    )
+    let score = 0
+    for (let i = 0; i < maxDepth; i++) {
+      if (sourceContext[i].slug === candidateContext[i].slug) {
+        score++
+      } else {
+        break
+      }
+    }
+    if (score > bestScore) {
+      bestScore = score
+      bestMatch = candidate
+    }
+  }
+  return bestMatch
 }
 
 function addLinkBack(sourceNode, targetNode, key) {
@@ -82,7 +107,7 @@ function resolveLinks(node, nodes) {
         if (!valueItem.linkPath) {
           continue
         }
-        const linkedNode = findLinkedNode(nodes, [...valueItem.linkPath])
+        const linkedNode = findLinkedNode(node, nodes, [...valueItem.linkPath])
         if (linkedNode) {
           node.addLink([key, i], Object.assign({}, linkedNode))
           linkedNode.addLinkBack(node, key)
@@ -92,7 +117,7 @@ function resolveLinks(node, nodes) {
       if (!value?.linkPath) {
         return
       }
-      const linkedNode = findLinkedNode(nodes, [...value.linkPath])
+      const linkedNode = findLinkedNode(node, nodes, [...value.linkPath])
       if (linkedNode) {
         node.addLink([key], Object.assign({}, linkedNode))
         linkedNode.addLinkBack(node, key)
