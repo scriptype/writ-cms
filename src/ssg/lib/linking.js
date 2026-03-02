@@ -31,8 +31,8 @@ function findLinkedNode(nodes, linkPath) {
 
 function addLinkBack(sourceNode, targetNode, key) {
   if (sourceNode.schema) {
-    Object.keys(sourceNode.schema).forEach(schemaKey => {
-      const schemaValue = sourceNode.schema[schemaKey]
+    Object.keys(sourceNode.schema.attributes || []).forEach(schemaKey => {
+      const schemaValue = sourceNode.schema.attributes[schemaKey]
       const isSchemaValueArray = Array.isArray(schemaValue)
       const re = new RegExp(`^\\+(${targetNode.contentType}|):${key}$`)
       const match = isSchemaValueArray ?
