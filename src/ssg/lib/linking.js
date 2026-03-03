@@ -1,9 +1,11 @@
 const _ = require('lodash')
 
 function findLinkedNode(sourceNode, allNodes, linkPath) {
-  const leafSlug = linkPath.pop()
-  const leafRe = new RegExp(`^${leafSlug}$`, 'i')
-  const leafMatches = allNodes.filter(p => p.slug.match(leafRe))
+  const leafSlug = linkPath[linkPath.length - 1]
+  const leafLower = leafSlug.toLowerCase()
+  const leafMatches = allNodes.filter(p => {
+    return p.slug.toLowerCase() === leafLower
+  })
 
   if (!leafMatches.length) {
     return undefined
@@ -13,16 +15,17 @@ function findLinkedNode(sourceNode, allNodes, linkPath) {
     return leafMatches[0]
   }
 
-  if (!linkPath.length) {
+  if (linkPath.length === 1) {
     return findClosestNode(sourceNode, leafMatches)
   }
 
-  const paths = linkPath.reverse()
+  const ancestorSlugs = linkPath.slice(0, -1).reverse()
   return leafMatches.find(node => {
     let ctx = node.context
-    for (const path of paths) {
+    for (const ancestor of ancestorSlugs) {
+      const pathLower = ancestor.toLowerCase()
       ctx = ctx.throwUntil(item => {
-        return item.slug?.match(new RegExp(`^${path}$`, 'i'))
+        return item.slug?.toLowerCase() === pathLower
       })
     }
     return !!ctx.items.length
@@ -31,8 +34,9 @@ function findLinkedNode(sourceNode, allNodes, linkPath) {
 
 function findClosestNode(sourceNode, candidates) {
   const sourceContext = [...sourceNode.context.items, sourceNode]
-  let bestMatch = candidates[0]
-  let bestScore = -1
+  let bestMatch
+  let bestScore = 0
+  let tied = false
   for (const candidate of candidates) {
     const candidateContext = candidate.context.items
     const maxDepth = Math.min(
@@ -49,14 +53,17 @@ function findClosestNode(sourceNode, candidates) {
     if (score > bestScore) {
       bestScore = score
       bestMatch = candidate
+      tied = false
+    } else if (score === bestScore) {
+      tied = true
     }
   }
-  return bestMatch
+  return tied ? undefined : bestMatch
 }
 
 function addLinkBack(sourceNode, targetNode, key) {
   if (sourceNode.schema) {
-    Object.keys(sourceNode.schema.attributes || []).forEach(schemaKey => {
+    Object.keys(sourceNode.schema.attributes || {}).forEach(schemaKey => {
       const schemaValue = sourceNode.schema.attributes[schemaKey]
       const isSchemaValueArray = Array.isArray(schemaValue)
       const re = new RegExp(`^\\+(${targetNode.contentType}|):${key}$`)
@@ -69,9 +76,9 @@ function addLinkBack(sourceNode, targetNode, key) {
           const existingCount = sourceNode.getLinks().filter(link => {
             return link.keyPath.length === 2 && link.keyPath[0] === schemaKey
           }).length
-          sourceNode.addLink([schemaKey, existingCount], Object.assign({}, targetNode))
+          sourceNode.addLink([schemaKey, existingCount], targetNode.clone())
         } else {
-          sourceNode.addLink([schemaKey], Object.assign({}, targetNode))
+          sourceNode.addLink([schemaKey], targetNode.clone())
         }
       }
     })
@@ -107,9 +114,9 @@ function resolveLinks(node, nodes) {
         if (!valueItem.linkPath) {
           continue
         }
-        const linkedNode = findLinkedNode(node, nodes, [...valueItem.linkPath])
+        const linkedNode = findLinkedNode(node, nodes, valueItem.linkPath)
         if (linkedNode) {
-          node.addLink([key, i], Object.assign({}, linkedNode))
+          node.addLink([key, i], linkedNode.clone())
           linkedNode.addLinkBack(node, key)
         }
       }
@@ -117,9 +124,9 @@ function resolveLinks(node, nodes) {
       if (!value?.linkPath) {
         return
       }
-      const linkedNode = findLinkedNode(node, nodes, [...value.linkPath])
+      const linkedNode = findLinkedNode(node, nodes, value.linkPath)
       if (linkedNode) {
-        node.addLink([key], Object.assign({}, linkedNode))
+        node.addLink([key], linkedNode.clone())
         linkedNode.addLinkBack(node, key)
       }
     }
@@ -128,6 +135,7 @@ function resolveLinks(node, nodes) {
 
 module.exports = {
   findLinkedNode,
+  findClosestNode,
   addLinkBack,
   serializeLinks,
   resolveLinks
