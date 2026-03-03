@@ -9,6 +9,7 @@
 
 ## Preferences
 - Keep notes in `notes/` as markdown files named `dd-mm-yy-topic.md`
+- After generating an image file, reveal it in Finder (`open -R <path>`)
 
 ## Coding Conventions
 
@@ -59,6 +60,7 @@
 - Keep logical operator chains (&&, ||) on one line unless they exceed 80 columns
 - Keep short destructured imports on one line; break across lines only when exceeding 80 columns
 - Keep ternary `?` at end of line, not start of next
+- Always spread function arguments across multiple lines when the call exceeds 80 columns
 - Always check for unused imports after finishing work on a module
 
 ### CSS
@@ -73,9 +75,8 @@
 - Only use `t.plan()` for async or non-deterministic tests
 
 ### Assertion Formatting
-- Assertion call on one line (e.g., `t.ok(`)
-- Actual/expected value on separate line
-- Message on its own line
+- When arguments are short enough (1–2 words each), keep the entire assertion on one line
+- Otherwise: assertion call on one line (e.g., `t.ok(`), actual/expected value on separate line, message on its own line
 - Blank line between consecutive assertions
 
 ### DOM Assertions
