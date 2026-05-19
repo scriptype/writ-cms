@@ -1,7 +1,7 @@
 import api from '../api.js'
 import { query, setIframeSrc } from './common.js'
 import Toolbar from './components/Toolbar.js'
-import Content from './components/Content/index.js'
+import Content from './components/Content2/index.js'
 
 const initToolbar = () => {
   const { $el: $toolbar } = Toolbar({
