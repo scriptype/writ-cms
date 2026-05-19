@@ -84,6 +84,10 @@ function addLinkBack(sourceNode, targetNode, key) {
     })
     return
   }
+  /*
+   * TODO: Clarify the purpose of keeping this legacy logic and remove it safely.
+   * Currently CMS has to omit 'links' because of this.
+   */
   sourceNode.links = sourceNode.links || {}
   sourceNode.links.relations = sourceNode.links.relations || []
   const relation = sourceNode.links.relations.find(r => r.key === key)
