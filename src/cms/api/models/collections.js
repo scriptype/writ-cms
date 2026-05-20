@@ -1,12 +1,32 @@
-const { omitResolvedLinks } = require('../helpers')
+const { writeFile, mkdir } = require('fs/promises')
+const { join } = require('path')
+const { contentRootPath, omitResolvedLinks, buildFrontMatter } = require('../helpers')
 
-const createCollectionsModel = ({ getContentModel }) => {
+const createCollectionsModel = ({ getSettings, getContentModel }) => {
   const getCollections = () => {
     return omitResolvedLinks(getContentModel().subtree.collections)
   }
 
+  const createCollection = async ({
+    title,
+    content = '',
+    extension = 'md',
+    metadata = {}
+  }) => {
+    const { rootDirectory, contentDirectory } = getSettings()
+    const root = await contentRootPath(rootDirectory, contentDirectory)
+    const path = join(root, title)
+    const frontMatter = buildFrontMatter(metadata)
+    const fileContent = [frontMatter, content].join('\n').trim()
+    try {
+      await mkdir(path, { recursive: true })
+    } catch {}
+    return writeFile(`${join(path, 'collection')}.${extension}`, fileContent)
+  }
+
   return {
-    get: getCollections
+    get: getCollections,
+    create: createCollection
   }
 }
 
