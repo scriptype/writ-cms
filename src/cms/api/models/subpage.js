@@ -1,25 +1,7 @@
 const { writeFile, mkdir } = require('fs/promises')
 const { join } = require('path')
 const frontMatter = require('front-matter')
-const { contentRootPath, omitResolvedLinks } = require('../helpers')
-
-const helpers = {
-  buildFrontMatter(metadata) {
-    if (!metadata) {
-      return ''
-    }
-    const keyValues = Object.keys(metadata)
-      .map(key => {
-        const actualValue = metadata[key]
-        const value = Array.isArray(actualValue) ?
-          actualValue.join(', ') :
-          actualValue
-        return `${key}: ${value}`
-      })
-      .join('\n')
-    return ['---', keyValues, '---'].join('\n')
-  }
-}
+const { contentRootPath, omitResolvedLinks, buildFrontMatter } = require('../helpers')
 
 const createSubpageModel = ({ getSettings, getContentModel }) => {
   const createSubpage = async ({
@@ -33,8 +15,8 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     const { rootDirectory, pagesDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
     const path = join(root, pagesDirectory, title)
-    const frontMatter = helpers.buildFrontMatter(metadata)
-    const fileContent = [frontMatter, content].join('\n')
+    const frontMatter = buildFrontMatter(metadata)
+    const fileContent = [frontMatter, content].join('\n').trim()
     try {
       await mkdir(path, { recursive: true })
     } catch {}

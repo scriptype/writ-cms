@@ -27,8 +27,25 @@ const omitResolvedLinks = (data) => {
   }))
 }
 
+const buildFrontMatter = (metadata) => {
+  if (!metadata || Object.keys(metadata).length === 0) {
+    return ''
+  }
+  const keyValues = Object.keys(metadata)
+    .map(key => {
+      const actualValue = metadata[key]
+      const value = Array.isArray(actualValue) ?
+        actualValue.join(', ') :
+        actualValue
+      return `${key}: ${value}`
+    })
+    .join('\n')
+  return ['---', keyValues, '---'].join('\n')
+}
+
 module.exports = {
   contentRootPath,
   readFileContent,
-  omitResolvedLinks
+  omitResolvedLinks,
+  buildFrontMatter
 }
