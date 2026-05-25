@@ -1,6 +1,8 @@
 const { writeFile, mkdir } = require('fs/promises')
 const { join } = require('path')
 const frontMatter = require('front-matter')
+const { ['default']: filenamify } = require('filenamify')
+const { unusedFilename } = require('unused-filename')
 const { contentRootPath, omitResolvedLinks, buildFrontMatter } = require('../helpers')
 
 const createPostModel = ({ getSettings, getContentModel }) => {
@@ -20,13 +22,25 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     }
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
-    const path = join(...[root].concat(opts.taxonomyPath.concat(opts.title)))
-    const frontMatter = buildFrontMatter(opts.metadata)
+
+    const sanitizedTitle = filenamify(opts.title)
+
+    const path = join(...[root].concat(opts.taxonomyPath).concat(sanitizedTitle))
+    const unusedPath = await unusedFilename(path)
+
+    const shouldOverrideTitle = (sanitizedTitle !== opts.title) || (unusedPath !== path)
+    const metadataWithTitle = shouldOverrideTitle ?
+      {
+        ...opts.metadata,
+        title: `"${opts.title}"`
+      } : opts.metadata
+
+    const frontMatter = buildFrontMatter(metadataWithTitle)
     const fileContent = [frontMatter, opts.content].join('\n').trim()
     try {
-      await mkdir(path, { recursive: true })
+      await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return writeFile(`${join(path, 'post')}.${opts.extension}`, fileContent)
+    return writeFile(`${join(unusedPath, 'post')}.${opts.extension}`, fileContent)
   }
 
   return {
