@@ -1,7 +1,7 @@
+const matter = require('gray-matter')
 const { writeFile, mkdir } = require('fs/promises')
 const { join } = require('path')
-const frontMatter = require('front-matter')
-const { contentRootPath, omitResolvedLinks, buildFrontMatter } = require('../helpers')
+const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const createSubpageModel = ({ getSettings, getContentModel }) => {
   const createSubpage = async ({
@@ -15,8 +15,10 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     const { rootDirectory, pagesDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
     const path = join(root, pagesDirectory, title)
-    const frontMatter = buildFrontMatter(metadata)
-    const fileContent = [frontMatter, content].join('\n').trim()
+    const fileContent = matter.stringify({
+      data: metadata,
+      content: content
+    })
     try {
       await mkdir(path, { recursive: true })
     } catch {}

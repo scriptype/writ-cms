@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const marked = require('marked')
-const frontMatter = require('front-matter')
 const slug = require('slug')
 
 const templateExtensions = [

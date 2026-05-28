@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const frontMatter = require('front-matter')
+const matter = require('gray-matter')
 const slug = require('slug')
 const { removeExtension, Markdown } = require('./contentModelHelpers')
 
@@ -66,14 +66,19 @@ const parseFlatData = (data) => {
   }
 }
 
+/* TODO: ContentModelEntryNode L:17 passes fsNode as the 2nd parameter if no indexNode is found.
+ * That causes logic branching here that is hard to justify
+ * Probably for nodes without an indexFile, parseTextEntry should be skipped altogether.
+ */
 const parseTextEntry = (fsNode, indexNode, isFlatData) => {
   if (isFlatData) {
     return parseFlatData(fsNode)
   }
-  const { attributes, body } = frontMatter(indexNode.content)
+
   const { hasIndex, entryName } = normalizeEntryName(fsNode, indexNode)
-  const contentRaw = body || ''
-  const content = indexNode.children ? '' : parseContent(indexNode, contentRaw)
+
+  const { data: attributes, content: contentRaw } = matter(indexNode.content || '')
+  const content = indexNode.children ? '' : parseContent(indexNode, contentRaw.replace(/^\n/, ''))
 
   return {
     ..._.omit(fsNode, 'children'),

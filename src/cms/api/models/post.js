@@ -1,9 +1,9 @@
-const { writeFile, mkdir } = require('fs/promises')
-const { join } = require('path')
-const frontMatter = require('front-matter')
+const matter = require('gray-matter')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
-const { contentRootPath, omitResolvedLinks, buildFrontMatter } = require('../helpers')
+const { writeFile, mkdir } = require('fs/promises')
+const { join } = require('path')
+const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const createPostModel = ({ getSettings, getContentModel }) => {
   const createPost = async ({
@@ -32,11 +32,13 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     const metadataWithTitle = shouldOverrideTitle ?
       {
         ...opts.metadata,
-        title: `"${opts.title}"`
+        title: `${opts.title}`
       } : opts.metadata
 
-    const frontMatter = buildFrontMatter(metadataWithTitle)
-    const fileContent = [frontMatter, opts.content].join('\n').trim()
+    const fileContent = matter.stringify({
+      data: metadataWithTitle,
+      content: opts.content
+    })
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}

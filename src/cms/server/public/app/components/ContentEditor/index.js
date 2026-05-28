@@ -76,7 +76,7 @@ const Actions = {
     }
 
     const collections = await api.collections.get()
-    if (!collections.includes('notes')) {
+    if (!collections.find(c => c.title === 'notes')) {
       console.log('creating notes collection')
       await api.collections.create({
         title: 'notes'

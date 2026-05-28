@@ -1,5 +1,5 @@
-const { readdir, readFile, lstat } = require('fs/promises')
-const { join, resolve } = require('path')
+const { readdir, readFile } = require('fs/promises')
+const { join } = require('path')
 
 const contentRootPath = async (rootDirectory, contentDirectory) => {
   if (!rootDirectory) {
@@ -27,25 +27,8 @@ const omitResolvedLinks = (data) => {
   }))
 }
 
-const buildFrontMatter = (metadata) => {
-  if (!metadata || Object.keys(metadata).length === 0) {
-    return ''
-  }
-  const keyValues = Object.keys(metadata)
-    .map(key => {
-      const actualValue = metadata[key]
-      const value = Array.isArray(actualValue) ?
-        actualValue.join(', ') :
-        actualValue
-      return `${key}: ${value}`
-    })
-    .join('\n')
-  return ['---', keyValues, '---'].join('\n')
-}
-
 module.exports = {
   contentRootPath,
   readFileContent,
-  omitResolvedLinks,
-  buildFrontMatter
+  omitResolvedLinks
 }

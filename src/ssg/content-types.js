@@ -1,6 +1,6 @@
 const { readdir } = require('fs/promises')
 const { join } = require('path')
-const frontMatter = require('front-matter')
+const matter = require('gray-matter')
 const marked = require('marked')
 const { readFileContent } = require('./lib/fileSystemHelpers')
 
@@ -37,7 +37,7 @@ const readContentTypesDirectory = async (dir) => {
 
 const readFile = async (path) => {
   const rawContent = await readFileContent(path)
-  const { attributes, body } = frontMatter(rawContent)
+  const { data: attributes, content: body } = matter(rawContent)
   const content = marked.parse(
     body.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')
   )
