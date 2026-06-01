@@ -610,12 +610,12 @@ test('parseTextEntry delegates to parseFlatData when isFlatData is true', (t) =>
   t.end()
 })
 
-test('parseTextEntry extracts front-matter from content', (t) => {
+test('parseTextEntry extracts front-matter, excerpt and content', (t) => {
   const fsNode = { name: 'post.md', custom: 'value' }
   const indexNode = {
     name: 'post.md',
     extension: '.md',
-    content: '---\ntitle: My Post\nauthor: John\n---\n\nBody text'
+    content: '---\ntitle: My Post\nauthor: John\n---\nUseful text\n---\nBody text'
   }
 
   const result = parseTextEntry(fsNode, indexNode, false)
@@ -630,6 +630,18 @@ test('parseTextEntry extracts front-matter from content', (t) => {
     result.author,
     'John',
     'includes custom attributes from front-matter'
+  )
+
+  t.equal(
+    result.excerpt.trim(),
+    '<p>Useful text</p>',
+    'extracts excerpt from content using --- delimiters'
+  )
+
+  t.equal(
+    result.content.trim(),
+    '<p>Body text</p>',
+    'extracts content'
   )
 
   t.end()

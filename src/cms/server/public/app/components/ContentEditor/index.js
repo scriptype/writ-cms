@@ -19,6 +19,11 @@ function createDOM(events) {
           </div>
 
           <div class="content-editor-field">
+            <label for="excerpt-field">Excerpt</label>
+            <textarea id="excerpt-field" name="excerpt"></textarea>
+          </div>
+
+          <div class="content-editor-field">
             <label for="type-field">Type</label>
             <input type="text" id="type-field" name="type">
           </div>
@@ -53,7 +58,7 @@ const Actions = {
     )
     formData.draft = formData.draft === 'on' ? true : false
 
-    const keysToExcludeFromMetadata = ['title', 'content']
+    const keysToExcludeFromMetadata = ['title', 'content', 'excerpt']
     const metadata = Object.keys(formData)
       .filter(key => {
         if (key === 'draft') {
@@ -71,6 +76,7 @@ const Actions = {
     const payload = {
       title: formData.title,
       content: formData.content,
+      excerpt: formData.excerpt,
       taxonomyPath: ['notes'],
       metadata
     }

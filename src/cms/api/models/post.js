@@ -10,6 +10,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     taxonomyPath,
     title,
     content,
+    excerpt,
     extension,
     metadata
   }) => {
@@ -17,6 +18,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       taxonomyPath: taxonomyPath || [],
       title: title || 'Untitled',
       content: content || '',
+      excerpt: excerpt || '',
       extension: extension || 'md',
       metadata: metadata || {}
     }
@@ -37,7 +39,8 @@ const createPostModel = ({ getSettings, getContentModel }) => {
 
     const fileContent = matter.stringify({
       data: metadataWithTitle,
-      content: opts.content
+      content: opts.content,
+      excerpt: opts.excerpt
     })
     try {
       await mkdir(unusedPath, { recursive: true })

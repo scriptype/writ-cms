@@ -77,8 +77,21 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
 
   const { hasIndex, entryName } = normalizeEntryName(fsNode, indexNode)
 
-  const { data: attributes, content: contentRaw } = matter(indexNode.content || '')
-  const content = indexNode.children ? '' : parseContent(indexNode, contentRaw.replace(/^\n/, ''))
+  const {
+    data: attributes,
+    content: contentRaw,
+    excerpt: excerptRaw
+  } = matter(indexNode.content || '', { excerpt: true })
+
+  let content, excerpt
+  if (indexNode.children) {
+    content = ''
+    excerpt = ''
+  } else {
+    const contentWithoutExcerpt = contentRaw.replace(`${excerptRaw}---\n`, '')
+    content = parseContent(indexNode, contentWithoutExcerpt.replace(/^\n/, ''))
+    excerpt = parseContent(indexNode, excerptRaw.replace(/\n$/, ''))
+  }
 
   return {
     ..._.omit(fsNode, 'children'),
@@ -89,7 +102,9 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
     title: attributes.title || entryName,
     slug: attributes.slug || slug(entryName),
     contentRaw,
-    content
+    content,
+    excerptRaw,
+    excerpt
   }
 }
 
