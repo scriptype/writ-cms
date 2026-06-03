@@ -67,6 +67,7 @@ const FIXTURE_CONTENT_MODEL = {
               contentType: 'Article',
               tags: ['css', 'grid', 'art direction', 'design'],
               content: 'All about grid',
+              excerpt: "Let's say <strong>hello</strong> to CSS Grid",
               context: {
                 collection: {
                   title: 'articles',

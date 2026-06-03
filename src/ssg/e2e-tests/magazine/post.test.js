@@ -97,6 +97,22 @@ test('E2E Magazine - Post Pages', async t => {
           )
         }
 
+        const excerptElement = $('[data-excerpt]')
+
+        if (post.excerpt) {
+          t.match(
+            excerptElement.html(),
+            new RegExp(post.excerpt),
+            `${post.permalink} renders post excerpt`
+          )
+        } else {
+          t.equal(
+            excerptElement.length,
+            0,
+            `${post.permalink} does not render excerpt element when no excerpt`
+          )
+        }
+
         const breadcrumbLinks = $('[data-breadcrumb-link]').toArray()
         const collectionLink = breadcrumbLinks.find(link => {
           const linkText = $(link).text()
