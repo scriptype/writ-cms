@@ -29,6 +29,11 @@ function createDOM(events) {
           </div>
 
           <div class="content-editor-field">
+            <label for="layout-field">Layout</label>
+            <input type="text" id="layout-field" name="layout">
+          </div>
+
+          <div class="content-editor-field">
             <label for="slug-field">Slug</label>
             <input type="text" id="slug-field" name="slug">
           </div>
