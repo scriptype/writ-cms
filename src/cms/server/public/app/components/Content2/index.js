@@ -16,7 +16,7 @@ function createDOM(contentTree, events) {
     contentActions: () => `
       <div id="content-actions">
         <button id="create-text-document-btn" type="button">Create text document</button>
-        <button id="create-folder-btn" type="button">Create folder</button>
+        <button id="create-page-btn" type="button">Create page</button>
       </div>
     `,
 
@@ -37,7 +37,7 @@ function createDOM(contentTree, events) {
 
   const DOM = createDOMNodeFromHTML(components.container())
   DOM.querySelector('#create-text-document-btn').addEventListener('click', events.onCreateTextDocument)
-  DOM.querySelector('#create-folder-btn').addEventListener('click', events.onCreateFolder)
+  DOM.querySelector('#create-page-btn').addEventListener('click', events.onCreatePage)
   return DOM
 }
 
@@ -68,8 +68,14 @@ const Actions = {
     })
   },
 
-  createFolder: () => {
-    console.log('create folder')
+  createPage: () => {
+    console.log('create page')
+    ContentEditor.render({
+      onSubmit: (payload) => {
+        console.log('creating page', payload)
+        api.subpage.create(payload)
+      }
+    })
   }
 }
 
@@ -87,7 +93,7 @@ const update = () => {
   console.log('update')
   const $DOM = createDOM(State.contentTree, {
     onCreateTextDocument: Actions.createTextDocument,
-    onCreateFolder: Actions.createFolder
+    onCreatePage: Actions.createPage
   })
   Dialog.html('')
   Dialog.appendChild($DOM)
