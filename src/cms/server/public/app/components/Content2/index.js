@@ -42,9 +42,30 @@ function createDOM(contentTree, events) {
 }
 
 const Actions = {
+  createAutoCollectedEntry: async (payload) => {
+    const collectionName = 'notes'
+    const collections = await api.collections.get()
+    if (!collections.find(c => c.title === collectionName)) {
+      console.log(`creating ${collectionName} collection`)
+      await api.collections.create({
+        title: collectionName
+      })
+    }
+
+    const fullPayload = {
+      ...payload,
+      taxonomyPath: [collectionName]
+    }
+
+    console.log('creating post', fullPayload)
+    api.post.create(fullPayload)
+  },
+
   createTextDocument: () => {
     console.log('create text document')
-    ContentEditor.render()
+    ContentEditor.render({
+      onSubmit: Actions.createAutoCollectedEntry
+    })
   },
 
   createFolder: () => {
