@@ -5,11 +5,11 @@ import ContentEditor from '../ContentEditor/index.js'
 import { flattenSubtree } from './contentTree.js'
 
 function createDOM(contentTree, events) {
-  const components = {
+  const $ = {
     container: () => `
       <div>
-        ${components.contentActions()}
-        ${components.contentTreeWrapper()}
+        ${$.contentActions()}
+        ${$.contentTreeWrapper()}
       </div>
     `,
 
@@ -22,7 +22,7 @@ function createDOM(contentTree, events) {
 
     contentTreeWrapper: () => `
       <div id="content-tree">
-        ${!contentTree.length ?  'Loading…' : components.contentTree()}
+        ${!contentTree.length ?  'Loading…' : $.contentTree()}
       </div>
     `,
 
@@ -35,7 +35,7 @@ function createDOM(contentTree, events) {
     `
   }
 
-  const DOM = createDOMNodeFromHTML(components.container())
+  const DOM = createDOMNodeFromHTML($.container())
   DOM.querySelector('#create-text-document-btn').addEventListener('click', events.onCreateTextDocument)
   DOM.querySelector('#create-page-btn').addEventListener('click', events.onCreatePage)
   return DOM
