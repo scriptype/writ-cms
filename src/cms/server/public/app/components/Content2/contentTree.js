@@ -13,15 +13,15 @@ const flattenSubtree = (contentModel) => {
 
   if (subtree.homepage) {
     nodes.push({
-      type: 'homepage',
-      name: subtree.homepage.title || 'Homepage',
+      type: 'home',
+      name: subtree.homepage.title || 'Home',
       data: subtree.homepage
     })
   }
 
   for (const subpage of (subtree.subpages || [])) {
     nodes.push({
-      type: 'subpage',
+      type: 'page',
       name: subpage.title,
       data: subpage
     })

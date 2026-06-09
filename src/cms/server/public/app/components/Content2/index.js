@@ -4,10 +4,12 @@ import Dialog from '../Dialog.js'
 import ContentEditor from '../ContentEditor/index.js'
 import { flattenSubtree } from './contentTree.js'
 
-function createDOM(contentTree, events) {
+const __ = '#content-panel'
+
+function createDOM({ contentTree, path, nodes }, events) {
   const $ = {
     container: () => `
-      <div>
+      <div id="content-panel">
         ${$.contentActions()}
         ${$.contentTreeWrapper()}
       </div>
@@ -18,28 +20,69 @@ function createDOM(contentTree, events) {
         <button id="create-text-document-btn" type="button">Create text document</button>
         <button id="create-page-btn" type="button">Create page</button>
         <button id="create-collection-btn" type="button">Create collection</button>
+        ${path.length ? '<button id="back-btn" type="button">Back</button>' : ''}
       </div>
     `,
 
     contentTreeWrapper: () => `
-      <div id="content-tree">
-        ${!contentTree.length ?  'Loading…' : $.contentTree()}
+      <style>
+        ${__} .content-tree  {
+          padding: 0 1em;
+        }
+
+        ${__} .content-tree-node  {
+          padding: 0.2em 0;
+        }
+
+        ${__} .content-tree-node:hover  {
+          background: #eee;
+        }
+
+        ${__} .content-tree-node[data-drill] {
+          cursor: pointer;
+        }
+      </style>
+      <div class="content-tree-wrapper">
+        ${!contentTree.length ?  'Loading…' : $.contentTree(nodes)}
       </div>
     `,
 
     contentTree: () => `
-      <ul>
-        ${contentTree.map(node => `
-          <li>${node.name} (${node.type})</li>
-        `).join('')}
+      <ul class="content-tree">
+        ${nodes.map($.node).join('')}
       </ul>
-    `
+    `,
+
+    node: (node, index) => {
+      const isDrillable = !!node.children
+      const drillAttr = isDrillable ? `data-drill="${index}"` : ''
+      return `
+        <li ${drillAttr} class="content-tree-node">
+          ${node.name} (${node.type})
+        </li>
+      `
+    }
   }
+
+  console.log('nodes', nodes)
 
   const DOM = createDOMNodeFromHTML($.container())
   DOM.querySelector('#create-text-document-btn').addEventListener('click', events.onCreateTextDocument)
   DOM.querySelector('#create-page-btn').addEventListener('click', events.onCreatePage)
   DOM.querySelector('#create-collection-btn').addEventListener('click', events.onCreateCollection)
+  DOM.querySelectorAll('[data-drill]').forEach($el => {
+    $el.addEventListener('click', () => {
+      const nodeIndex = parseInt($el.dataset.drill, 10)
+      const node = nodes[nodeIndex]
+      events.onDrill(nodeIndex, node)
+    })
+  })
+
+  const $backBtn = DOM.querySelector('#back-btn')
+  if ($backBtn) {
+    $backBtn.addEventListener('click', events.onBack)
+  }
+
   return DOM
 }
 
@@ -70,6 +113,17 @@ const Actions = {
     })
   },
 
+  drill: (nodeIndex, node) => {
+    console.log('clicked', node)
+    state.path.push({ index: nodeIndex, name: node.name })
+    update()
+  },
+
+  back: () => {
+    state.path.pop()
+    update()
+  },
+
   createPage: () => {
     console.log('create page')
     ContentEditor.render({
@@ -91,22 +145,36 @@ const Actions = {
   }
 }
 
-const State = {
-  contentTree: []
+const state = {
+  contentTree: [],
+  path: []
+}
+
+const resolveNodes = () => {
+  let nodes = state.contentTree
+  for (const step of state.path) {
+    nodes = nodes[step.index].children || []
+  }
+  return nodes
 }
 
 const render = async () => {
   update()
-  State.contentTree = flattenSubtree(await api.contentModel.get())
+  state.contentTree = flattenSubtree(await api.contentModel.get())
   update()
 }
 
 const update = () => {
   console.log('update')
-  const $DOM = createDOM(State.contentTree, {
+  const $DOM = createDOM({
+    ...state,
+    nodes: resolveNodes()
+  }, {
     onCreateTextDocument: Actions.createTextDocument,
     onCreatePage: Actions.createPage,
-    onCreateCollection: Actions.createCollection
+    onCreateCollection: Actions.createCollection,
+    onDrill: Actions.drill,
+    onBack: Actions.back
   })
   Dialog.html('')
   Dialog.appendChild($DOM)
