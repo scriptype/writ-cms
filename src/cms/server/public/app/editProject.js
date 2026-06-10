@@ -1,7 +1,7 @@
 import api from '../api.js'
 import { query, setIframeSrc } from './common.js'
 import Toolbar from './components/Toolbar.js'
-import './components/Content2/index.js'
+import './components/ContentPanel/index.js'
 import Dialog from './components/Dialog.js'
 
 const initToolbar = () => {

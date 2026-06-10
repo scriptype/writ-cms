@@ -61,15 +61,8 @@ class ContentPanel extends LitElement {
       taxonomyPath: [collectionName]
     }
 
-    console.log('creating post', fullPayload)
+    console.log('creating entry', fullPayload)
     api.post.create(fullPayload)
-  }
-
-  createTextDocument() {
-    console.log('create text document')
-    ContentEditor.render({
-      onSubmit: this.createAutoCollectedEntry
-    })
   }
 
   drill = (nodeIndex, node) => {
@@ -80,7 +73,14 @@ class ContentPanel extends LitElement {
     this.path = this.path.slice(0, -1)
   }
 
-  createPage() {
+  createTextDocument = () => {
+    console.log('create text document')
+    ContentEditor.render({
+      onSubmit: this.createAutoCollectedEntry
+    })
+  }
+
+  createPage = () => {
     console.log('create page')
     ContentEditor.render({
       onSubmit: (payload) => {
@@ -90,7 +90,7 @@ class ContentPanel extends LitElement {
     })
   }
 
-  createCollection() {
+  createCollection = () => {
     console.log('create collection')
     ContentEditor.render({
       onSubmit: (payload) => {
@@ -100,19 +100,61 @@ class ContentPanel extends LitElement {
     })
   }
 
+  createCategory = () => {
+    console.log('create category')
+  }
+
+  createEntry = () => {
+    console.log('create entry')
+  }
+
   resolveNodes() {
+    let currentNode = { type: 'root', children: this.contentTree }
     let nodes = this.contentTree
     for (const step of this.path) {
-      nodes = nodes[step.index].children || []
+      currentNode = nodes[step.index]
+      nodes = currentNode.children || []
     }
-    return nodes
+    return currentNode
+  }
+
+  getNodeActions(node) {
+    switch (node.type) {
+      case 'root':
+        return [{
+          label: 'Create page',
+          handler: this.createPage
+        }, {
+          label: 'Create collection',
+          handler: this.createCollection
+        }]
+
+      case 'collection':
+        return [{
+          label: 'Create category',
+          handler: this.createCategory
+        }, {
+          label: 'Create entry',
+          handler: this.createEntry
+        }]
+
+      case 'category':
+        return [{
+          label: 'Create sub-category',
+          handler: this.createCategory
+        }, {
+          label: 'Create entry',
+          handler: this.createEntry
+        }]
+    }
   }
 
   render() {
-    const actions = []
-    const nodes = this.resolveNodes()
-    console.log('nodes', nodes)
+    const currentNode = this.resolveNodes()
+    const actions = this.getNodeActions(currentNode)
     console.log('path', this.path)
+    console.log('currentNode', currentNode)
+    console.log('actions', actions)
     return html`
       <div id="content-panel">
         <content-actions
@@ -122,7 +164,7 @@ class ContentPanel extends LitElement {
         ></content-actions>
         <content-drill
           .contentTree=${this.contentTree}
-          .nodes=${nodes}
+          .nodes=${currentNode.children}
           .onDrill=${this.drill}
         ></content-actions>
       </div>
