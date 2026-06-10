@@ -42,12 +42,12 @@ class ContentDrill extends LitElement {
             ${this.nodes.map((node, index) => {
               return node.children ?
                 html`
-                  <li class="node drillable-node" @click="${() => this.onDrill(index, node)}">
+                  <li class="node drillable-node" tabindex="0" @click="${() => this.onDrill(index, node)}" @keydown="${(e) => (e.code === 'Enter' || e.code === 'Space') && this.onDrill(index, node)}">
                     ${node.name} (${node.type})
                   </li>
                 ` :
                 html`
-                  <li class="node">${node.name} (${node.type})</li>
+                  <li class="node" tabindex="0">${node.name} (${node.type})</li>
                 `
             })}
           </ul>
