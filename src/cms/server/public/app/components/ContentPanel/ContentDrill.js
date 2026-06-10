@@ -34,6 +34,12 @@ class ContentDrill extends LitElement {
     this.onDrill = _=>_
   }
 
+  onKeydown = (index, node, e) => {
+    if (e.code === 'Enter' || e.code === 'Space') {
+      this.onDrill(index, node)
+    }
+  }
+
   render() {
     return html`
       <div class="content-tree-wrapper">
@@ -42,7 +48,11 @@ class ContentDrill extends LitElement {
             ${this.nodes.map((node, index) => {
               return node.children ?
                 html`
-                  <li class="node drillable-node" tabindex="0" @click="${() => this.onDrill(index, node)}" @keydown="${(e) => (e.code === 'Enter' || e.code === 'Space') && this.onDrill(index, node)}">
+                  <li
+                    class="node drillable-node" tabindex="0"
+                    @click="${() => this.onDrill(index, node)}"
+                    @keydown="${this.onKeydown.bind(this, index, node)}"
+                  >
                     ${node.name} (${node.type})
                   </li>
                 ` :
