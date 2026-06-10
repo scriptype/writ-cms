@@ -165,7 +165,7 @@ class ContentPanel extends LitElement {
           .contentTree=${this.contentTree}
           .nodes=${this.currentNode.children}
           .onDrill=${this.drill}
-        ></content-actions>
+        ></content-drill>
       </div>
     `
   }
