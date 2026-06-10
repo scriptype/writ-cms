@@ -23,7 +23,8 @@
     "exclude": [
       "src/**/*.spec.js",
       "src/old-tests/**/*",
-      "src/e2e-tests/**/*"
+      "src/e2e-tests/**/*",
+      "src/**/vendor/**/*"
     ]
   },
   "repository": {

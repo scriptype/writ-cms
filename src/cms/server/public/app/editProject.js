@@ -1,16 +1,22 @@
 import api from '../api.js'
 import { query, setIframeSrc } from './common.js'
 import Toolbar from './components/Toolbar.js'
-import Content from './components/Content2/index.js'
+import './components/Content2/index.js'
+import Dialog from './components/Dialog.js'
 
 const initToolbar = () => {
+  const renderContent = () => {
+    Dialog.html('<content-panel></content-panel>')
+    Dialog.show()
+  }
+
   const { $el: $toolbar } = Toolbar({
     tools: [
       {
         name: 'content',
         icon: '📋',
         label: 'Content',
-        action: Content.render
+        action: renderContent
       }
     ]
   })
