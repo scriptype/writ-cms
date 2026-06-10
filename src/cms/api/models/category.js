@@ -5,8 +5,8 @@ const { writeFile, mkdir } = require('fs/promises')
 const { join } = require('path')
 const { contentRootPath } = require('../helpers')
 
-const createPostModel = ({ getSettings }) => {
-  const createPost = async ({
+const createCategoryModel = ({ getSettings }) => {
+  const createCategory = async ({
     taxonomyPath,
     title,
     content,
@@ -45,12 +45,12 @@ const createPostModel = ({ getSettings }) => {
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return writeFile(`${join(unusedPath, 'post')}.${opts.extension}`, fileContent)
+    return writeFile(`${join(unusedPath, 'category')}.${opts.extension}`, fileContent)
   }
 
   return {
-    create: createPost
+    create: createCategory
   }
 }
 
-module.exports = createPostModel
+module.exports = createCategoryModel

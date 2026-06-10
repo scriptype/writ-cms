@@ -112,6 +112,16 @@ class ContentPanel extends LitElement {
 
   createCategory = () => {
     console.log('create category')
+    ContentEditor.render({
+      onSubmit: (payload) => {
+        const fullPayload = {
+          ...payload,
+          taxonomyPath: this.currentNode.data.path.split('/')
+        }
+        console.log('creating category', fullPayload)
+        api.category.create(fullPayload)
+      }
+    })
   }
 
   createEntry = () => {

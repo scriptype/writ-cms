@@ -179,6 +179,19 @@ const api = {
     }
   },
 
+  category: {
+    create: async (options) => {
+      const response = await fetch('/api/category', {
+        method: 'put',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.text()
+    }
+  },
+
   post: {
     create: async (options) => {
       const response = await fetch('/api/post', {
