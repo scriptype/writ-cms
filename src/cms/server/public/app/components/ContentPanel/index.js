@@ -6,26 +6,6 @@ import './ContentDrill.js'
 import flattenSubtree from './flattenSubtree.js'
 
 class ContentPanel extends LitElement {
-  static styles = css`
-    ::host {}
-
-    .content-tree  {
-      padding: 0 1em;
-    }
-
-    .content-tree-node  {
-      padding: 0.2em 0;
-    }
-
-    .content-tree-node:hover  {
-      background: #eee;
-    }
-
-    .content-tree-node[data-drill] {
-      cursor: pointer;
-    }
-  `
-
   static properties = {
     contentTree: { type: Array },
     path: { type: Array }
