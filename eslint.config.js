@@ -20,6 +20,10 @@ module.exports = [
         customElements: true,
         HTMLElement: true
       }
+    },
+
+    rules: {
+      'no-empty': ['error', { 'allowEmptyCatch': true }]
     }
   },
   js.configs.recommended
