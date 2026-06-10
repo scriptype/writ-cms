@@ -31,6 +31,16 @@ class ContentPanel extends LitElement {
     path: { type: Array }
   }
 
+  get currentNode() {
+    let currentNode = { type: 'root', children: this.contentTree }
+    let nodes = this.contentTree
+    for (const step of this.path) {
+      currentNode = nodes[step.index]
+      nodes = currentNode.children || []
+    }
+    return currentNode
+  }
+
   constructor() {
     super()
     this.contentTree = []
@@ -106,16 +116,16 @@ class ContentPanel extends LitElement {
 
   createEntry = () => {
     console.log('create entry')
-  }
-
-  resolveNodes() {
-    let currentNode = { type: 'root', children: this.contentTree }
-    let nodes = this.contentTree
-    for (const step of this.path) {
-      currentNode = nodes[step.index]
-      nodes = currentNode.children || []
-    }
-    return currentNode
+    ContentEditor.render({
+      onSubmit: (payload) => {
+        const fullPayload = {
+          ...payload,
+          taxonomyPath: this.currentNode.data.path.split('/')
+        }
+        console.log('creating entry', fullPayload)
+        api.post.create(fullPayload)
+      }
+    })
   }
 
   getNodeActions(node) {
@@ -150,10 +160,9 @@ class ContentPanel extends LitElement {
   }
 
   render() {
-    const currentNode = this.resolveNodes()
-    const actions = this.getNodeActions(currentNode)
+    const actions = this.getNodeActions(this.currentNode)
     console.log('path', this.path)
-    console.log('currentNode', currentNode)
+    console.log('currentNode', this.currentNode)
     console.log('actions', actions)
     return html`
       <div id="content-panel">
@@ -164,7 +173,7 @@ class ContentPanel extends LitElement {
         ></content-actions>
         <content-drill
           .contentTree=${this.contentTree}
-          .nodes=${currentNode.children}
+          .nodes=${this.currentNode.children}
           .onDrill=${this.drill}
         ></content-actions>
       </div>
