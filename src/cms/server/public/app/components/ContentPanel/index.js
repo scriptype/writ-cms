@@ -130,6 +130,6 @@ class ContentPanel extends LitElement {
   }
 }
 
-window.customElements.define('content-panel', ContentPanel)
+customElements.define('content-panel', ContentPanel)
 
 export default ContentPanel

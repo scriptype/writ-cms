@@ -30,6 +30,6 @@ class ContentActions extends LitElement {
   }
 }
 
-window.customElements.define('content-actions', ContentActions)
+customElements.define('content-actions', ContentActions)
 
 export default ContentActions

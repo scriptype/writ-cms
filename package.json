@@ -49,7 +49,10 @@
     "unused-filename": "^4.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "cheerio": "^1.1.2",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
     "husky": "^8.0.0",
     "node-fetch": "^2.7.0",
     "nyc": "^15.1.0",

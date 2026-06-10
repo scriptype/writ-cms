@@ -40,7 +40,7 @@ class ContentDrill extends LitElement {
         ${!this.contentTree.length ? html`Loading…` : html`
           <ul class="content-tree">
             ${this.nodes.map((node, index) => {
-              return !!node.children ?
+              return node.children ?
                 html`
                   <li class="node drillable-node" @click="${() => this.onDrill(index, node)}">
                     ${node.name} (${node.type})
@@ -57,6 +57,6 @@ class ContentDrill extends LitElement {
   }
 }
 
-window.customElements.define('content-drill', ContentDrill)
+customElements.define('content-drill', ContentDrill)
 
 export default ContentDrill
