@@ -68,8 +68,8 @@ class ContentEditor extends LitElement {
         </content-editor-text-field>
 
         <content-editor-text-field
-          name="layout"
-          label="Layout">
+          name="template"
+          label="Template">
         </content-editor-text-field>
 
         <content-editor-text-field
