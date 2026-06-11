@@ -1,6 +1,7 @@
-import { LitElement, html, css } from 'lit'
+import { LitElement, html } from 'lit'
 import api from '../../../api.js'
-import ContentEditor from '../ContentEditor/index.js'
+import Dialog from '../Dialog.js'
+import '../ContentEditor/index.js'
 import './ContentActions.js'
 import './ContentDrill.js'
 import flattenSubtree from './flattenSubtree.js'
@@ -36,25 +37,6 @@ class ContentPanel extends LitElement {
     this.contentTree = flattenSubtree(await api.contentModel.get())
   }
 
-  async createAutoCollectedEntry(payload) {
-    const collectionName = 'notes'
-    const collections = await api.collections.get()
-    if (!collections.find(c => c.title === collectionName)) {
-      console.log(`creating ${collectionName} collection`)
-      await api.collections.create({
-        title: collectionName
-      })
-    }
-
-    const fullPayload = {
-      ...payload,
-      taxonomyPath: [collectionName]
-    }
-
-    console.log('creating entry', fullPayload)
-    api.post.create(fullPayload)
-  }
-
   drill = (nodeIndex, node) => {
     this.path = [...this.path, { index: nodeIndex, name: node.name }]
   }
@@ -63,59 +45,68 @@ class ContentPanel extends LitElement {
     this.path = this.path.slice(0, -1)
   }
 
-  createTextDocument = () => {
-    console.log('create text document')
-    ContentEditor.render({
-      onSubmit: this.createAutoCollectedEntry
-    })
+  onSubmitCreatePage = (payload) => {
+    console.log('creating page', payload)
+    api.subpage.create(payload)
   }
 
   createPage = () => {
     console.log('create page')
-    ContentEditor.render({
-      onSubmit: (payload) => {
-        console.log('creating page', payload)
-        api.subpage.create(payload)
-      }
+    Dialog.html(`<content-editor></content-editor>`)
+    Dialog.find('content-editor').addEventListener('submit', (e) => {
+      this.onSubmitCreatePage(e.detail)
     })
+    Dialog.show()
+  }
+
+  onSubmitCreateCollection = (payload) => {
+    console.log('creating collection', payload)
+    api.collections.create(payload)
   }
 
   createCollection = () => {
     console.log('create collection')
-    ContentEditor.render({
-      onSubmit: (payload) => {
-        console.log('creating collection', payload)
-        api.collections.create(payload)
-      }
+    Dialog.html(`<content-editor></content-editor>`)
+    Dialog.find('content-editor').addEventListener('submit', (e) => {
+      this.onSubmitCreateCollection(e.detail)
     })
+    Dialog.show()
+  }
+
+  onSubmitCreateCategory = (payload) => {
+    const fullPayload = {
+      ...payload,
+      taxonomyPath: this.currentNode.data.path.split('/')
+    }
+    console.log('creating category', fullPayload)
+    api.category.create(fullPayload)
   }
 
   createCategory = () => {
     console.log('create category')
-    ContentEditor.render({
-      onSubmit: (payload) => {
-        const fullPayload = {
-          ...payload,
-          taxonomyPath: this.currentNode.data.path.split('/')
-        }
-        console.log('creating category', fullPayload)
-        api.category.create(fullPayload)
-      }
+    Dialog.html(`<content-editor></content-editor>`)
+    Dialog.find('content-editor').addEventListener('submit', (e) => {
+      this.onSubmitCreateCategory(e.detail)
     })
+    Dialog.show()
+  }
+
+  onSubmitCreateEntry = (payload) => {
+    const fullPayload = {
+      ...payload,
+      taxonomyPath: this.currentNode.data.path.split('/')
+    }
+    console.log('creating entry', fullPayload)
+    api.post.create(fullPayload)
   }
 
   createEntry = () => {
     console.log('create entry')
-    ContentEditor.render({
-      onSubmit: (payload) => {
-        const fullPayload = {
-          ...payload,
-          taxonomyPath: this.currentNode.data.path.split('/')
-        }
-        console.log('creating entry', fullPayload)
-        api.post.create(fullPayload)
-      }
+    Dialog.html(`<content-editor></content-editor>`)
+    Dialog.find('content-editor').addEventListener('submit', (e) => {
+      this.onSubmitCreateEntry(e.detail)
     })
+    Dialog.show()
   }
 
   getNodeActions(node) {

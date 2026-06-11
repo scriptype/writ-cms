@@ -1,108 +1,106 @@
-import { createDOMNodeFromHTML } from '../../common.js'
-import Dialog from '../Dialog.js'
+import { LitElement, html } from 'lit'
+import './BasicTextEditorField.js'
+import './BooleanField.js'
+import './FullTextEditorField.js'
+import './TextField.js'
 
-const props = {
-  onSubmit: (payload) => payload
-}
+class ContentEditor extends LitElement {
+  constructor() {
+    super()
+  }
 
-const state = {}
+  processFormData(formData) {
+    formData.draft = formData.draft === 'true' ? true : false
 
-function createDOM(events) {
-  const $ = {
-    textField: ({ name, label }) => `
-      <div class="content-editor-field">
-        <label for="${name}-field">${label}</label>
-        <input type="text" id="${name}-field" name="${name}">
-      </div>
-    `,
+    const keysToExcludeFromMetadata = ['title', 'content', 'excerpt']
+    const metadata = Object.keys(formData)
+      .filter(key => {
+        if (key === 'draft') {
+          return formData.draft === true
+        }
+        const isIncluded = !keysToExcludeFromMetadata.includes(key)
+        const isNotEmpty = formData[key] !== ''
+        return isIncluded && isNotEmpty
+      })
+      .reduce((metadata, key) => ({
+        ...metadata,
+        [key]: formData[key]
+      }), {})
 
-    basicTextEditorField: ({ name, label }) => `
-      <div class="content-editor-field">
-        <label for="${name}-field">${label}</label>
-        <textarea id="${name}-field" name="${name}"></textarea>
-      </div>
-    `,
+    return {
+      title: formData.title,
+      content: formData.content,
+      excerpt: formData.excerpt,
+      metadata
+    }
+  }
 
-    fullTextEditorField: ({ name, label }) => `
-      <div class="content-editor-field">
-        <label for="${name}-field">${label}</label>
-        <textarea id="${name}-field" name="${name}"></textarea>
-      </div>
-    `,
+  onSubmitForm = (e) => {
+    e.preventDefault()
 
-    booleanField: ({ name, label }) => `
-      <div class="content-editor-field">
-        <label for="${name}-field">${label}</label>
-        <input type="checkbox" id="${name}-field" name="${name}">
-      </div>
-    `,
+    const rawFormData = Object.fromEntries(
+      Array.from( new FormData(e.target).entries() )
+    )
 
-    container: () => `
-      <form>
-        ${$.textField({ name: 'title', label: 'Title' })}
-        ${$.textField({ name: 'type', label: 'Type' })}
-        ${$.textField({ name: 'layout', label: 'Layout' })}
-        ${$.textField({ name: 'slug', label: 'Slug' })}
+    console.log('rawFormData', rawFormData)
 
-        ${$.basicTextEditorField({ name: 'excerpt', label: 'Excerpt' })}
-        ${$.fullTextEditorField({ name: 'content', label: 'Content' })}
+    const finalFormData = this.processFormData(rawFormData)
 
-        ${$.booleanField({ name: 'draft', label: 'Draft?' })}
+    this.dispatchEvent(new CustomEvent('submit', {
+      detail: finalFormData,
+      bubbles: true,
+      composed: true
+    }))
+  }
 
-        <button>Create</button>
+  render() {
+    return html`
+      <form @submit="${this.onSubmitForm}">
+
+        <content-editor-text-field
+          name="title"
+          label="Title">
+        </content-editor-text-field>
+
+        <content-editor-text-field
+          name="type"
+          label="Type">
+        </content-editor-text-field>
+
+        <content-editor-text-field
+          name="layout"
+          label="Layout">
+        </content-editor-text-field>
+
+        <content-editor-text-field
+          name="slug"
+          label="Slug">
+        </content-editor-text-field>
+
+        <content-editor-basic-text-editor-field
+          name="excerpt"
+          label="Excerpt">
+        </content-editor-basic-text-editor-field>
+
+        <content-editor-full-text-editor-field
+          name="content"
+          label="Content">
+        </content-editor-full-text-editor-field>
+
+        <content-editor-boolean-field
+          name="draft"
+          label="Draft?">
+        </content-editor-boolean-field>
+
+        <button>
+
+        Create</button>
+
       </form>
     `
   }
-
-  const DOM = createDOMNodeFromHTML($.container())
-  DOM.addEventListener('submit', events.onSubmitForm)
-  return DOM
 }
 
-const processFormData = (e) => {
-  e.preventDefault()
-  const $form = e.target
-  const formData = Object.fromEntries(
-    Array.from( new FormData($form).entries() )
-  )
-  formData.draft = formData.draft === 'on' ? true : false
+customElements.define('content-editor', ContentEditor)
 
-  const keysToExcludeFromMetadata = ['title', 'content', 'excerpt']
-  const metadata = Object.keys(formData)
-    .filter(key => {
-      if (key === 'draft') {
-        return formData.draft === true
-      }
-      const isIncluded = !keysToExcludeFromMetadata.includes(key)
-      const isNotEmpty = formData[key] !== ''
-      return isIncluded && isNotEmpty
-    })
-    .reduce((metadata, key) => ({
-      ...metadata,
-      [key]: formData[key]
-    }), {})
-
-  return {
-    title: formData.title,
-    content: formData.content,
-    excerpt: formData.excerpt,
-    metadata
-  }
-}
-
-const render = async ({ onSubmit }) => {
-  props.onSubmit = onSubmit
-  update()
-}
-
-const update = () => {
-  console.log('update')
-  const $DOM = createDOM({
-    onSubmitForm: (e) => props.onSubmit( processFormData(e) )
-  })
-  Dialog.html('')
-  Dialog.appendChild($DOM)
-  Dialog.show()
-}
-
-export default { render }
+export default ContentEditor
