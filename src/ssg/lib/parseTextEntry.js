@@ -79,17 +79,17 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
 
   const {
     data: attributes,
-    content: contentRaw,
+    content: bodyRaw,
     excerpt: excerptRaw
   } = matter(indexNode.content || '', { excerpt: true })
 
-  let content, excerpt
+  let content, contentRaw, excerpt
   if (indexNode.children) {
     content = ''
     excerpt = ''
   } else {
-    const contentWithoutExcerpt = contentRaw.replace(`${excerptRaw}---\n`, '')
-    content = parseContent(indexNode, contentWithoutExcerpt.replace(/^\n/, ''))
+    contentRaw = bodyRaw.replace(`${excerptRaw}---\n`, '')
+    content = parseContent(indexNode, contentRaw.replace(/^\n/, ''))
     excerpt = parseContent(indexNode, excerptRaw.replace(/\n$/, ''))
   }
 
