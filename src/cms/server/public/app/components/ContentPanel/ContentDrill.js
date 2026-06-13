@@ -10,14 +10,11 @@ class ContentDrill extends LitElement {
 
     .node  {
       padding: 0.2em 0;
+      cursor: pointer;
     }
 
     .node:hover  {
       background: #eee;
-    }
-
-    .drillable-node {
-      cursor: pointer;
     }
   `
 
@@ -45,21 +42,15 @@ class ContentDrill extends LitElement {
       <div class="content-tree-wrapper">
         ${!this.contentTree.length ? html`Loading…` : html`
           <ul class="content-tree">
-            ${this.nodes.map((node, index) => {
-              return node.children ?
-                html`
-                  <li
-                    class="node drillable-node" tabindex="0"
-                    @click="${() => this.onDrill(index, node)}"
-                    @keydown="${this.onKeydown.bind(this, index, node)}"
-                  >
-                    ${node.name} (${node.type})
-                  </li>
-                ` :
-                html`
-                  <li class="node" tabindex="0">${node.name} (${node.type})</li>
-                `
-            })}
+            ${this.nodes.map((node, index) => html`
+              <li
+                class="node drillable-node" tabindex="0"
+                @click="${() => this.onDrill(index, node)}"
+                @keydown="${this.onKeydown.bind(this, index, node)}"
+              >
+                ${node.name} (${node.type})
+              </li>
+            `)}
           </ul>
         `}
       </div>

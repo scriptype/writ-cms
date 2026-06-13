@@ -5,8 +5,13 @@ import './FullTextEditorField.js'
 import './TextField.js'
 
 class ContentEditor extends LitElement {
+  static properties = {
+    node: { type: Object }
+  }
+
   constructor() {
     super()
+    this.node = null
   }
 
   processFormData(formData) {
@@ -59,42 +64,47 @@ class ContentEditor extends LitElement {
 
         <content-editor-text-field
           name="title"
-          label="Title">
+          label="Title"
+          .value="${this.node?.data?.title || ''}">
         </content-editor-text-field>
 
         <content-editor-text-field
-          name="type"
-          label="Type">
+          name="contentType"
+          label="Content type"
+          .value="${this.node?.data?.contentType || ''}">
         </content-editor-text-field>
 
         <content-editor-text-field
           name="template"
-          label="Template">
+          label="Template"
+          .value="${this.node?.data?.template || ''}">
         </content-editor-text-field>
 
         <content-editor-text-field
           name="slug"
-          label="Slug">
+          label="Slug"
+          .value="${this.node?.data?.slug || ''}">
         </content-editor-text-field>
 
         <content-editor-basic-text-editor-field
           name="excerpt"
-          label="Excerpt">
+          label="Excerpt"
+          .value="${this.node?.data?.excerptRaw || ''}">
         </content-editor-basic-text-editor-field>
 
         <content-editor-full-text-editor-field
           name="content"
-          label="Content">
+          label="Content"
+          .value="${this.node?.data?.contentRaw || ''}">
         </content-editor-full-text-editor-field>
 
         <content-editor-boolean-field
           name="draft"
-          label="Draft?">
+          label="Draft?"
+          .checked="${!!this.node?.data?.draft}">
         </content-editor-boolean-field>
 
-        <button>
-
-        Create</button>
+        <button>${this.node ? 'Save' : 'Create'}</button>
 
       </form>
     `

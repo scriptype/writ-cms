@@ -1,11 +1,11 @@
+const { writeFile, mkdir } = require('fs/promises')
+const { join } = require('path')
 const matter = require('gray-matter')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
-const { writeFile, mkdir } = require('fs/promises')
-const { join } = require('path')
 const { contentRootPath } = require('../helpers')
 
-const createPostModel = ({ getSettings }) => {
+const createPostModel = ({ getSettings, getContentModel }) => {
   const createPost = async ({
     taxonomyPath,
     title,
@@ -48,8 +48,52 @@ const createPostModel = ({ getSettings }) => {
     return writeFile(`${join(unusedPath, 'post')}.${opts.extension}`, fileContent)
   }
 
+  const editPost = async ({
+    path,
+    title,
+    content,
+    excerpt,
+    extension,
+    metadata
+  }) => {
+    if (!path) {
+      throw new Error('path is required')
+    }
+
+    const opts = {
+      title: title || 'Untitled',
+      content: content || '',
+      excerpt: excerpt || '',
+      extension: extension || 'md',
+      metadata: metadata || {}
+    }
+
+    const collectionName = path.split('/')[0]
+    const collection = getContentModel().subtree.collections.find(c => c.name === collectionName)
+    const post = collection.subtree.posts.find(p => p.path === path)
+
+    const metadataWithTitle = {
+      ...opts.metadata,
+      title: `${opts.title}`
+    }
+
+    const fileContent = matter.stringify({
+      data: metadataWithTitle,
+      content: opts.content,
+      excerpt: opts.excerpt
+    })
+
+    const isFolder = !post.extension
+    const targetPath = isFolder ?
+      join(post.absolutePath, post.indexFile.name) :
+      post.absolutePath
+
+    return writeFile(targetPath, fileContent)
+  }
+
   return {
-    create: createPost
+    create: createPost,
+    edit: editPost
   }
 }
 

@@ -195,6 +195,17 @@ const api = {
   post: {
     create: async (options) => {
       const response = await fetch('/api/post', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.text()
+    },
+
+    edit: async (options) => {
+      const response = await fetch('/api/post', {
         method: 'put',
         headers: {
           'content-type': 'application/json'

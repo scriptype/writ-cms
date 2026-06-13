@@ -38,7 +38,20 @@ class ContentPanel extends LitElement {
   }
 
   drill = (nodeIndex, node) => {
-    this.path = [...this.path, { index: nodeIndex, name: node.name }]
+    console.log('drill', node)
+    if (node.type === 'collection' || node.type === 'category') {
+      this.path = [...this.path, { index: nodeIndex, name: node.name }]
+      return
+    }
+    Dialog.html(`<content-editor></content-editor>`)
+    const editor = Dialog.find('content-editor')
+    editor.node = node
+    editor.addEventListener('submit', (e) => {
+      if (node.type === 'entry') {
+        this.onSubmitEditEntry(e.detail, node)
+      }
+    })
+    Dialog.show()
   }
 
   traverseUp = () => {
@@ -89,6 +102,15 @@ class ContentPanel extends LitElement {
       this.onSubmitCreateCategory(e.detail)
     })
     Dialog.show()
+  }
+
+  onSubmitEditEntry = (payload, node) => {
+    const fullPayload = {
+      ...payload,
+      path: node.data.path
+    }
+    console.log('editing entry', fullPayload, node)
+    api.post.edit(fullPayload)
   }
 
   onSubmitCreateEntry = (payload) => {
