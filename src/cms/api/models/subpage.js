@@ -1,9 +1,16 @@
 const matter = require('gray-matter')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
-const { writeFile, mkdir } = require('fs/promises')
-const { join } = require('path')
+const { writeFile, mkdir, rename, rm } = require('fs/promises')
+const { join, dirname, basename } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
+
+const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
+  return join(
+    dirname(oldAbsolutePath),
+    basename(newAbsolutePath)
+  )
+}
 
 const createSubpageModel = ({ getSettings, getContentModel }) => {
   const createSubpage = async ({
@@ -49,6 +56,66 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     return writeFile(`${join(unusedPath, 'page')}.${opts.extension}`, fileContent)
   }
 
+  const updatePage = async ({
+    path,
+    title,
+    content,
+    excerpt,
+    extension,
+    metadata
+  }) => {
+    if (!path) {
+      throw new Error('path is required')
+    }
+
+    const opts = {
+      title: title || 'Untitled',
+      content: content || '',
+      excerpt: excerpt || '',
+      extension: extension || '',
+      metadata: metadata || {}
+    }
+
+    const page = getContentModel().subtree.subpages.find(p => p.path === path)
+
+    const isFoldered = !page.extension
+    const isTitleDifferent = opts.title !== page.title
+    let absolutePath = page.absolutePath
+    let isPathDifferentThanTitle
+
+    if (isTitleDifferent) {
+      const sanitizedTitle = filenamify(opts.title)
+      const sanitizedPath = replaceFilename(page.absolutePath, sanitizedTitle)
+      const unusedPath = await unusedFilename(sanitizedPath)
+
+      if (isFoldered) {
+        await rename(page.absolutePath, unusedPath)
+      } else {
+        await rm(page.absolutePath)
+      }
+
+      isPathDifferentThanTitle = (sanitizedTitle !== opts.title) || (unusedPath !== sanitizedPath)
+      absolutePath = isFoldered ? unusedPath : `${unusedPath}${opts.extension || page.extension}`
+    }
+
+    const metadataWithTitle = isPathDifferentThanTitle ? {
+      ...opts.metadata,
+      title: `${opts.title}`
+    } : metadata
+
+    const fileContent = matter.stringify({
+      data: metadataWithTitle,
+      content: opts.content,
+      excerpt: opts.excerpt
+    })
+
+    const targetPath = isFoldered ?
+      join(absolutePath, page.indexFile.name) :
+      absolutePath
+
+    return writeFile(targetPath, fileContent)
+  }
+
   const getSubpage = (title) => {
     const subpages = omitResolvedLinks(getContentModel().subtree.subpages)
     return subpages.find(p => p.title === title)
@@ -56,6 +123,7 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
 
   return {
     create: createSubpage,
+    update: updatePage,
     get: getSubpage
   }
 }

@@ -55,7 +55,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     return writeFile(`${join(unusedPath, 'post')}${opts.extension}`, fileContent)
   }
 
-  const editPost = async ({
+  const updatePost = async ({
     path,
     title,
     content,
@@ -120,7 +120,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
 
   return {
     create: createPost,
-    edit: editPost
+    update: updatePost
   }
 }
 

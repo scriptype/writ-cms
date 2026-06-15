@@ -12,7 +12,7 @@ module.exports = express.Router()
   })
   .put('/', async (req, res) => {
     try {
-      await req.api.post.edit(req.body)
+      await req.api.post.update(req.body)
       res.sendStatus(200)
     } catch (e) {
       console.log('Error updating post', e)

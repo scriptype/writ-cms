@@ -48,7 +48,9 @@ class ContentPanel extends LitElement {
     editor.node = node
     editor.addEventListener('submit', (e) => {
       if (node.type === 'entry') {
-        this.onSubmitEditEntry(e.detail, node)
+        this.onSubmitUpdateEntry(e.detail, node)
+      } else if (node.type === 'page') {
+        this.onSubmitUpdatePage(e.detail, node)
       }
     })
     Dialog.show()
@@ -56,6 +58,15 @@ class ContentPanel extends LitElement {
 
   traverseUp = () => {
     this.path = this.path.slice(0, -1)
+  }
+
+  onSubmitUpdatePage = (payload, node) => {
+    const fullPayload = {
+      ...payload,
+      path: node.data.path
+    }
+    console.log('updating page', fullPayload, node)
+    api.subpage.update(fullPayload)
   }
 
   onSubmitCreatePage = (payload) => {
@@ -104,13 +115,13 @@ class ContentPanel extends LitElement {
     Dialog.show()
   }
 
-  onSubmitEditEntry = (payload, node) => {
+  onSubmitUpdateEntry = (payload, node) => {
     const fullPayload = {
       ...payload,
       path: node.data.path
     }
-    console.log('editing entry', fullPayload, node)
-    api.post.edit(fullPayload)
+    console.log('updating entry', fullPayload, node)
+    api.post.update(fullPayload)
   }
 
   onSubmitCreateEntry = (payload) => {

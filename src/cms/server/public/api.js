@@ -204,7 +204,7 @@ const api = {
       return response.text()
     },
 
-    edit: async (options) => {
+    update: async (options) => {
       const response = await fetch('/api/post', {
         method: 'put',
         headers: {
@@ -253,6 +253,17 @@ const api = {
     },
 
     create: async (options) => {
+      const response = await fetch('/api/subpage', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.text()
+    },
+
+    update: async (options) => {
       const response = await fetch('/api/subpage', {
         method: 'put',
         headers: {
