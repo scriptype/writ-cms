@@ -20,12 +20,49 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
     return writeFile(`${path}.${extension}`, fileContent)
   }
 
-  const getHomepage = (handle) => {
+  const updateHomepage = async ({
+    title,
+    content,
+    excerpt,
+    extension,
+    metadata
+  }) => {
+    const opts = {
+      title: title || 'Untitled',
+      content: content || '',
+      excerpt: excerpt || '',
+      extension: extension || '',
+      metadata: metadata || {}
+    }
+
+    const homepage = getContentModel().subtree.homepage
+
+    const metadataWithTitle = {
+      ...opts.metadata,
+      title: `${opts.title}`
+    }
+
+    const fileContent = matter.stringify({
+      data: metadataWithTitle,
+      content: opts.content,
+      excerpt: opts.excerpt
+    })
+
+    const isFoldered = !homepage.extension
+    const targetPath = isFoldered ?
+      join(homepage.absolutePath, homepage.indexFile.name) :
+      homepage.absolutePath
+
+    return writeFile(targetPath, fileContent)
+  }
+
+  const getHomepage = () => {
     return omitResolvedLinks(getContentModel().subtree.homepage)
   }
 
   return {
     create: createHomepage,
+    update: updateHomepage,
     get: getHomepage
   }
 }

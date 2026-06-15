@@ -51,6 +51,8 @@ class ContentPanel extends LitElement {
         this.onSubmitUpdateEntry(e.detail, node)
       } else if (node.type === 'page') {
         this.onSubmitUpdatePage(e.detail, node)
+      } else if (node.type === 'home') {
+        this.onSubmitUpdateHome(e.detail)
       }
     })
     Dialog.show()
@@ -58,6 +60,11 @@ class ContentPanel extends LitElement {
 
   traverseUp = () => {
     this.path = this.path.slice(0, -1)
+  }
+
+  onSubmitUpdateHome = (payload) => {
+    console.log('updating home', payload)
+    api.homepage.update(payload)
   }
 
   onSubmitUpdatePage = (payload, node) => {

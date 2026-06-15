@@ -1,8 +1,7 @@
 const express = require('express')
 
 module.exports = express.Router()
-  .get('/', async (req, res, next) => {
-    const pageTitle = decodeURI(req.query.title)
+  .get('/', async (req, res) => {
     try {
       res.status(200).json(
         await req.api.homepage.get()
@@ -12,12 +11,21 @@ module.exports = express.Router()
       return res.status(500).send(e)
     }
   })
-  .put('/', async (req, res, next) => {
+  .post('/', async (req, res) => {
     try {
       await req.api.homepage.create(req.body)
       res.sendStatus(200)
     } catch (e) {
-      console.log('Error creating new homepage', e)
+      console.log('Error creating homepage', e)
+      res.status(500).send(e)
+    }
+  })
+  .put('/', async (req, res) => {
+    try {
+      await req.api.homepage.update(req.body)
+      res.sendStatus(200)
+    } catch (e) {
+      console.log('Error updating homepage', e)
       res.status(500).send(e)
     }
   })
