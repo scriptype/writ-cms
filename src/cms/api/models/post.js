@@ -1,5 +1,5 @@
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename } = require('path')
+const { join, dirname, basename, relative } = require('path')
 const matter = require('gray-matter')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
@@ -79,7 +79,6 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     const collection = getContentModel().subtree.collections.find(c => c.name === collectionName)
     const post = collection.subtree.posts.find(p => p.path === path)
 
-
     const isFoldered = !post.extension
     const isTitleDifferent = opts.title !== post.title
     let absolutePath = post.absolutePath
@@ -115,7 +114,14 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       join(absolutePath, post.indexFile.name) :
       absolutePath
 
-    return writeFile(targetPath, fileContent)
+    await writeFile(targetPath, fileContent)
+
+    const { rootDirectory, contentDirectory } = getSettings()
+    const root = await contentRootPath(rootDirectory, contentDirectory)
+
+    return {
+      path: relative(root, absolutePath)
+    }
   }
 
   return {

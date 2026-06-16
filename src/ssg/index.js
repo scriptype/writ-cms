@@ -85,7 +85,14 @@ const build = async ({ mode = 'build', rootDirectory, refreshTheme, debug, cli }
   }
 }
 
-const watch = async ({ rootDirectory, refreshTheme, debug, cli, onChange = _=>_ }) => {
+const watch = async ({
+  rootDirectory,
+  refreshTheme,
+  debug,
+  cli,
+  onChange = _=>_,
+  skipRun = () => false
+}) => {
   await Settings.init({
     mode: 'watch',
     rootDirectory
@@ -103,8 +110,14 @@ const watch = async ({ rootDirectory, refreshTheme, debug, cli, onChange = _=>_ 
   const watcherOptions = {
     settings,
     silent: !buildOptions.cli,
-    async onChange() {
-      return onChange(await build(buildOptions))
+    onChange() {
+      if (skipRun()) {
+        Debug.debugLog('skipping watcher build')
+        return Promise.resolve()
+      }
+      const promise = build(buildOptions)
+      onChange(promise)
+      return promise
     }
   }
 

@@ -11,10 +11,15 @@ const createCMS = (initialState = {}) => {
       contentTypes: [],
       watcher: {
         directory: undefined,
-        isRunning: false,
+        isWatching: false,
+        skipBuild: false,
         stop: _=>_
-      }
+      },
     }, initialState)
+
+    const setState = (newState) => {
+      Object.assign(state, newState)
+    }
 
     return {
       getSettings: () => state.settings,
@@ -22,33 +27,44 @@ const createCMS = (initialState = {}) => {
       getContentModel: () => state.contentModel,
       getContentTypes: () => state.contentTypes,
       getSSGOptions: () => state.ssgOptions,
+      shouldSkipWatcherBuild: () => state.watcher.skipBuild,
+
+      skipWatcherBuild: () => {
+        state.watcher.skipBuild = true
+      },
+
+      unskipWatcherBuild: () => {
+        state.watcher.skipBuild = false
+      },
+
       isWatching: (directory) => {
         if (directory) {
-          return state.watcher.isRunning && state.watcher.directory === directory
+          return state.watcher.isWatching && state.watcher.directory === directory
         }
-        return state.watcher.isRunning
+        return state.watcher.isWatching
       },
+
       stopWatcher: () => {
         state.watcher.stop()
-        state.watcher.isRunning = false
+        state.watcher.isWatching = false
         state.watcher.directory = undefined
       },
+
       startWatcher: ({ directory, stop }) => {
         state.watcher.directory = directory
-        state.watcher.isRunning = true
+        state.watcher.isWatching = true
         state.watcher.stop = stop
       },
 
-      setState: (newState) => {
-        Object.assign(state, newState)
-      }
+      setState
     }
   })()
 
   const api = createAPI(store)
 
   const server = createServer({
-    api
+    api,
+    state: store
   })
 
   return {

@@ -48,9 +48,9 @@ class ContentPanel extends LitElement {
     editor.node = node
     editor.addEventListener('submit', (e) => {
       if (node.type === 'entry') {
-        this.onSubmitUpdateEntry(e.detail, node)
+        this.onSubmitUpdateEntry(e.detail)
       } else if (node.type === 'page') {
-        this.onSubmitUpdatePage(e.detail, node)
+        this.onSubmitUpdatePage(e.detail)
       } else if (node.type === 'home') {
         this.onSubmitUpdateHome(e.detail)
       }
@@ -62,18 +62,24 @@ class ContentPanel extends LitElement {
     this.path = this.path.slice(0, -1)
   }
 
-  onSubmitUpdateHome = (payload) => {
+  onSubmitUpdateHome = async (payload) => {
     console.log('updating home', payload)
-    api.homepage.update(payload)
+    await api.homepage.update(payload)
+    await this.fetchContentTree()
+    const editor = Dialog.find('content-editor')
+    editor.node = {}
   }
 
-  onSubmitUpdatePage = (payload, node) => {
+  onSubmitUpdatePage = async (payload) => {
     const fullPayload = {
-      ...payload,
-      path: node.data.path
+      ...payload.formData,
+      path: payload.node.data.path
     }
-    console.log('updating page', fullPayload, node)
-    api.subpage.update(fullPayload)
+    console.log('updating page', fullPayload, payload.node)
+    await api.subpage.update(fullPayload)
+    await this.fetchContentTree()
+    const editor = Dialog.find('content-editor')
+    editor.node = {}
   }
 
   onSubmitCreatePage = (payload) => {
@@ -122,13 +128,19 @@ class ContentPanel extends LitElement {
     Dialog.show()
   }
 
-  onSubmitUpdateEntry = (payload, node) => {
+  onSubmitUpdateEntry = async (payload) => {
     const fullPayload = {
-      ...payload,
-      path: node.data.path
+      ...payload.formData,
+      path: payload.node.data.path
     }
-    console.log('updating entry', fullPayload, node)
-    api.post.update(fullPayload)
+    console.log('updating entry', fullPayload, payload.node)
+    const response = await api.post.update(fullPayload)
+    await this.fetchContentTree()
+    const editor = Dialog.find('content-editor')
+    const updatedNode = this.currentNode.data.subtree.levelPosts.find(entry => {
+      return entry.path === response.path
+    })
+    editor.node = { data: updatedNode }
   }
 
   onSubmitCreateEntry = (payload) => {

@@ -27,7 +27,8 @@ const createSSGModel = (state) => {
         refreshTheme,
         debug,
         cli,
-        onChange: state.setState
+        onChange: state.setState,
+        skipRun: state.shouldSkipWatcherBuild
       })
       state.startWatcher({
         directory: rootDirectory,

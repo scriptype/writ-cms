@@ -3,7 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const apiRouter = require('./router/api')
 
-const createServer = ({ api }) => {
+const createServer = ({ api, state }) => {
   return {
     start({ silent = false, port = 8080 }) {
       const app = express()
@@ -13,7 +13,7 @@ const createServer = ({ api }) => {
         req.api = api
         next()
       })
-      app.use('/api', apiRouter)
+      app.use('/api', apiRouter(state))
 
       return app.listen(port, () => {
         if (!silent) {
