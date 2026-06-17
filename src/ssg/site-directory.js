@@ -1,22 +1,31 @@
-const { atomicReplace, atomicFS } = require('./lib/fileSystemHelpers')
+const { rimraf } = require('rimraf')
+const { mkdir } = require('fs/promises')
+const { relative, isAbsolute } = require('path')
 const Settings = require('./settings')
 const Debug = require('./debug')
 
 const create = async () => {
   Debug.timeStart('site directory')
-  const { exportDirectory, out } = Settings.getSettings()
-  Debug.debugLog('create site directory', exportDirectory, out)
-  if (!exportDirectory || exportDirectory === '.' || exportDirectory === './' || exportDirectory === '..' || exportDirectory === '../' || exportDirectory === '/' || exportDirectory === '~') {
+  const { rootDirectory, exportDirectory, out } = Settings.getSettings()
+
+  const relativePath = relative(rootDirectory, out)
+  Debug.debugLog('create site directory', exportDirectory, relativePath, out)
+
+  const isOutsideRoot = (
+    relativePath.startsWith('..') ||
+    relativePath.startsWith('..\\') ||
+    isAbsolute(relativePath)
+  )
+  const isRootItself = relativePath === ''
+  if (isOutsideRoot || isRootItself) {
     throw new Error(`Dangerous export directory: "${exportDirectory}". Won't continue.`)
   }
   try {
-    await atomicFS.rm(out, { recursive: true })
+    await rimraf(out)
+    await mkdir(out)
   }
-  catch (ENOENT) {}
   finally {
-    return atomicFS.mkdir(out).then(() => {
-      Debug.timeEnd('site directory')
-    })
+    Debug.timeEnd('site directory')
   }
 }
 
