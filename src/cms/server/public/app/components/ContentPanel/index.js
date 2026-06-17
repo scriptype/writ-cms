@@ -76,10 +76,13 @@ class ContentPanel extends LitElement {
       path: payload.node.data.path
     }
     console.log('updating page', fullPayload, payload.node)
-    await api.subpage.update(fullPayload)
+    const response = await api.subpage.update(fullPayload)
     await this.fetchContentTree()
     const editor = Dialog.find('content-editor')
-    editor.node = {}
+    const updatedNode = this.currentNode.children.find(child => {
+      return child.type === 'page' && child.data.path === response.path
+    })
+    editor.node = updatedNode
   }
 
   onSubmitCreatePage = (payload) => {

@@ -282,7 +282,7 @@ const api = {
         },
         body: JSON.stringify(options)
       })
-      return response.text()
+      return response.json()
     }
   },
 

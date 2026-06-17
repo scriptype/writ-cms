@@ -2,7 +2,7 @@ const matter = require('gray-matter')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename } = require('path')
+const { join, dirname, basename, relative } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
@@ -113,7 +113,14 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
       join(absolutePath, page.indexFile.name) :
       absolutePath
 
-    return writeFile(targetPath, fileContent)
+    await writeFile(targetPath, fileContent)
+
+    const { rootDirectory, contentDirectory } = getSettings()
+    const root = await contentRootPath(rootDirectory, contentDirectory)
+
+    return {
+      path: relative(root, absolutePath)
+    }
   }
 
   const getSubpage = (title) => {
