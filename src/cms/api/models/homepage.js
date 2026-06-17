@@ -12,7 +12,7 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
   }) => {
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
-    const path = join(root, 'homepage')
+    const path = join(root, 'home')
     const fileContent = matter.stringify({
       data: { title, ...metadata },
       content: content
@@ -31,7 +31,7 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
       title: title || 'Untitled',
       content: content || '',
       excerpt: excerpt || '',
-      extension: extension || '',
+      extension: extension || '.md',
       metadata: metadata || {}
     }
 
@@ -47,6 +47,15 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
       content: opts.content,
       excerpt: opts.excerpt
     })
+
+    // system-generated home
+    if (!homepage.path) {
+      const { rootDirectory, contentDirectory } = getSettings()
+      const root = await contentRootPath(rootDirectory, contentDirectory)
+      const targetPath = join(root, `home${opts.extension}`)
+      await writeFile(targetPath, fileContent)
+      return {}
+    }
 
     const isFoldered = !homepage.extension
     const targetPath = isFoldered ?
