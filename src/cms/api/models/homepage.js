@@ -53,7 +53,9 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
       join(homepage.absolutePath, homepage.indexFile.name) :
       homepage.absolutePath
 
-    return writeFile(targetPath, fileContent)
+    await writeFile(targetPath, fileContent)
+
+    return {}
   }
 
   const getHomepage = () => {

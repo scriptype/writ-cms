@@ -64,10 +64,12 @@ class ContentPanel extends LitElement {
 
   onSubmitUpdateHome = async (payload) => {
     console.log('updating home', payload)
-    await api.homepage.update(payload)
+    await api.homepage.update(payload.formData)
     await this.fetchContentTree()
     const editor = Dialog.find('content-editor')
-    editor.node = {}
+    const updatedNode = this.currentNode.children.find(child => child.type === 'home')
+    console.log('updatedNode', updatedNode)
+    editor.node = updatedNode
   }
 
   onSubmitUpdatePage = async (payload) => {
