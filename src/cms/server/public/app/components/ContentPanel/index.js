@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit'
+import { LitElement, html, css } from 'lit'
 import api from '../../../api.js'
 import Dialog from '../Dialog.js'
 import '../ContentEditor/index.js'
@@ -11,6 +11,13 @@ class ContentPanel extends LitElement {
     contentTree: { type: Array },
     path: { type: Array }
   }
+
+  static styles = css`
+    .columns {
+      display: grid;
+      grid-template-columns: auto min-content;
+    }
+  `
 
   get currentNode() {
     let currentNode = { type: 'root', children: this.contentTree }
@@ -100,6 +107,27 @@ class ContentPanel extends LitElement {
       this.onSubmitCreatePage(e.detail)
     })
     Dialog.show()
+  }
+
+  onSubmitUpdateCollection = async (e) => {
+    const payload = e.detail
+    const fullPayload = {
+      ...payload.formData,
+      path: payload.node.data.path
+    }
+    console.log('updating collection', fullPayload)
+    const response = await api.collections.update(fullPayload)
+    await this.fetchContentTree()
+    const editor = this.shadowRoot.querySelector('content-editor')
+    const updatedNode = this.contentTree.find(node => {
+      return node.type === 'collection' && node.data.path === response.path
+    })
+    editor.node = updatedNode
+  }
+
+  onSubmitUpdateCategory = async (e) => {
+    const payload = e.detail
+    console.log('updating category', payload)
   }
 
   onSubmitCreateCollection = async (payload) => {
@@ -213,11 +241,25 @@ class ContentPanel extends LitElement {
           .isRoot=${!this.path.length}
           .onTraverseUp=${this.traverseUp}
         ></content-actions>
-        <content-drill
-          .contentTree=${this.contentTree}
-          .nodes=${this.currentNode.children}
-          .onDrill=${this.drill}
-        ></content-drill>
+        <div class="columns">
+          <content-drill
+            .contentTree=${this.contentTree}
+            .nodes=${this.currentNode.children}
+            .onDrill=${this.drill}
+          ></content-drill>
+          ${this.currentNode.type === 'collection' ? html`
+            <content-editor
+              .node="${this.currentNode}"
+              @submit="${this.onSubmitUpdateCollection}"
+            ></content-editor>
+          ` : ''}
+          ${this.currentNode.type === 'category' ? html`
+            <content-editor
+              .node="${this.currentNode}"
+              @submit="${this.onSubmitUpdateCategory}"
+            ></content-editor>
+          ` : ''}
+        </div>
       </div>
     `
   }
