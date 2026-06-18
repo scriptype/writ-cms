@@ -1,7 +1,8 @@
 const express = require('express')
+const skipWatcher = require('../../middleware/skipWatcher')
 
-module.exports = express.Router()
-  .get('/', async (req, res, next) => {
+module.exports = (state) => express.Router()
+  .get('/', async (req, res) => {
     try {
       res.status(200).json(
         await req.api.collections.get()
@@ -11,9 +12,12 @@ module.exports = express.Router()
       return res.status(500).send(e)
     }
   })
-  .put('/', async (req, res, next) => {
+  .post('/', skipWatcher(state), async (req, res) => {
     try {
       await req.api.collections.create(req.body)
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
       res.sendStatus(200)
     } catch (e) {
       console.log('Error creating new collection', e)

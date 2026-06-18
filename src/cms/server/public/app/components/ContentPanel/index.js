@@ -87,9 +87,10 @@ class ContentPanel extends LitElement {
     editor.node = updatedNode
   }
 
-  onSubmitCreatePage = (payload) => {
+  onSubmitCreatePage = async (payload) => {
     console.log('creating page', payload)
-    api.subpage.create(payload.formData)
+    await api.subpage.create(payload.formData)
+    await this.fetchContentTree()
   }
 
   createPage = () => {
@@ -101,9 +102,10 @@ class ContentPanel extends LitElement {
     Dialog.show()
   }
 
-  onSubmitCreateCollection = (payload) => {
+  onSubmitCreateCollection = async (payload) => {
     console.log('creating collection', payload)
-    api.collections.create(payload.formData)
+    await api.collections.create(payload.formData)
+    await this.fetchContentTree()
   }
 
   createCollection = () => {
@@ -115,13 +117,14 @@ class ContentPanel extends LitElement {
     Dialog.show()
   }
 
-  onSubmitCreateCategory = (payload) => {
+  onSubmitCreateCategory = async (payload) => {
     const fullPayload = {
       ...payload.formData,
       taxonomyPath: this.currentNode.data.path.split('/')
     }
     console.log('creating category', fullPayload)
-    api.category.create(fullPayload)
+    await api.category.create(fullPayload)
+    await this.fetchContentTree()
   }
 
   createCategory = () => {
@@ -148,13 +151,14 @@ class ContentPanel extends LitElement {
     editor.node = { data: updatedNode }
   }
 
-  onSubmitCreateEntry = (payload) => {
+  onSubmitCreateEntry = async (payload) => {
     const fullPayload = {
       ...payload.formData,
       taxonomyPath: this.currentNode.data.path.split('/')
     }
     console.log('creating entry', fullPayload)
-    api.post.create(fullPayload)
+    await api.post.create(fullPayload)
+    await this.fetchContentTree()
   }
 
   createEntry = () => {

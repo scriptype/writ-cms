@@ -1,8 +1,8 @@
 const express = require('express')
 
 module.exports = (state) => express.Router()
-  .use('/category', require('./category'))
-  .use('/collections', require('./collections'))
+  .use('/category', require('./category')(state))
+  .use('/collections', require('./collections')(state))
   .use('/contentModel', require('./contentModel'))
   .use('/contentTypes', require('./contentTypes'))
   .use('/fileSystemTree', require('./fileSystemTree'))

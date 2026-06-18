@@ -169,7 +169,7 @@ const api = {
 
     create: async (options) => {
       const response = await fetch('/api/collections', {
-        method: 'put',
+        method: 'post',
         headers: {
           'content-type': 'application/json'
         },
@@ -182,7 +182,7 @@ const api = {
   category: {
     create: async (options) => {
       const response = await fetch('/api/category', {
-        method: 'put',
+        method: 'post',
         headers: {
           'content-type': 'application/json'
         },
