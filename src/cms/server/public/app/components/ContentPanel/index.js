@@ -89,7 +89,7 @@ class ContentPanel extends LitElement {
 
   onSubmitCreatePage = (payload) => {
     console.log('creating page', payload)
-    api.subpage.create(payload)
+    api.subpage.create(payload.formData)
   }
 
   createPage = () => {
@@ -103,7 +103,7 @@ class ContentPanel extends LitElement {
 
   onSubmitCreateCollection = (payload) => {
     console.log('creating collection', payload)
-    api.collections.create(payload)
+    api.collections.create(payload.formData)
   }
 
   createCollection = () => {
@@ -117,7 +117,7 @@ class ContentPanel extends LitElement {
 
   onSubmitCreateCategory = (payload) => {
     const fullPayload = {
-      ...payload,
+      ...payload.formData,
       taxonomyPath: this.currentNode.data.path.split('/')
     }
     console.log('creating category', fullPayload)
@@ -150,7 +150,7 @@ class ContentPanel extends LitElement {
 
   onSubmitCreateEntry = (payload) => {
     const fullPayload = {
-      ...payload,
+      ...payload.formData,
       taxonomyPath: this.currentNode.data.path.split('/')
     }
     console.log('creating entry', fullPayload)
