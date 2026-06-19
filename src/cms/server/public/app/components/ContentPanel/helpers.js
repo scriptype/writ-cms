@@ -1,4 +1,25 @@
-const flattenSubtree = (contentModel) => {
+export const getDeepCategory = (contentTree, path) => {
+  const _recurse = (container, pathSegments) => {
+    const child = container.find(childNode => {
+      if (!childNode.path) {
+        return false
+      }
+      const childPathSegments = childNode.path.split('/')
+      return childPathSegments[childPathSegments.length - 1] === pathSegments[0]
+    })
+    if (pathSegments.length === 1) {
+      return child
+    }
+    return _recurse(child.subtree.categories, pathSegments.slice(1))
+  }
+
+  return _recurse(
+    contentTree.filter(n => n.type === 'collection').map(c => c.data),
+    path.split('/')
+  )
+}
+
+export const flattenSubtree = (contentModel) => {
   const nodes = []
   const subtree = contentModel.subtree || contentModel
 
@@ -83,5 +104,3 @@ const buildCategoryChildren = (category) => {
 
   return nodes
 }
-
-export default flattenSubtree

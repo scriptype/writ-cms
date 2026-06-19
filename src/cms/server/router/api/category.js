@@ -14,3 +14,15 @@ module.exports = (state) => express.Router()
       res.status(500).send(e)
     }
   })
+  .put('/', skipWatcher(state), async (req, res) => {
+    try {
+      const response = await req.api.category.update(req.body)
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.status(200).send(response)
+    } catch (e) {
+      console.log('Error updating category', e)
+      res.status(500).send(e)
+    }
+  })

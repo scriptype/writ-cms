@@ -4,7 +4,7 @@ import Dialog from '../Dialog.js'
 import '../ContentEditor/index.js'
 import './ContentActions.js'
 import './ContentDrill.js'
-import flattenSubtree from './flattenSubtree.js'
+import { getDeepCategory, flattenSubtree } from './helpers.js'
 
 class ContentPanel extends LitElement {
   static properties = {
@@ -127,7 +127,16 @@ class ContentPanel extends LitElement {
 
   onSubmitUpdateCategory = async (e) => {
     const payload = e.detail
-    console.log('updating category', payload)
+    const fullPayload = {
+      ...payload.formData,
+      path: payload.node.data.path
+    }
+    console.log('updating category', fullPayload)
+    const response = await api.category.update(fullPayload)
+    await this.fetchContentTree()
+    const editor = this.shadowRoot.querySelector('content-editor')
+    const updatedNode = getDeepCategory(this.contentTree, response.path)
+    editor.node = { data: updatedNode }
   }
 
   onSubmitCreateCollection = async (payload) => {
