@@ -17,6 +17,7 @@ class ContentEditorTextField extends LitElement {
     this.label = 'Text'
     this.name = `text-field-${Date.now()}`
     this.placeholder = ''
+    this.addEventListener('keydown', this.onKeyDown)
   }
 
   updated(changedProps) {
@@ -28,6 +29,12 @@ class ContentEditorTextField extends LitElement {
   onInput(e) {
     this.value = e.target.value
     this.internals.setFormValue(this.value)
+  }
+
+  onKeyDown(e) {
+    if (e.key === 'Enter') {
+      this.internals.form?.requestSubmit()
+    }
   }
 
   render() {
