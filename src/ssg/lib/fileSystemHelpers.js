@@ -19,18 +19,8 @@ const isDirectory = async (path) => {
   try {
     return (await fs.lstat(path)).isDirectory()
   }
-  catch (ENOENT) {
+  catch {
     return false
-  }
-}
-
-const ensureDirectory = async (path) => {
-  try {
-    await fs.mkdir(path, { recursive: true })
-  } catch (error) {
-    if (error.code !== 'EEXIST') {
-      throw error
-    }
   }
 }
 
@@ -128,7 +118,6 @@ module.exports = {
   readFileContent,
   loadJSON,
   isDirectory,
-  ensureDirectory,
   atomicReplace,
   atomicFS
 }

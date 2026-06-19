@@ -1,9 +1,9 @@
 const Handlebars = require('handlebars')
-const { stat, readdir, writeFile, cp } = require('fs/promises')
+const { stat, readdir, writeFile, cp, mkdir } = require('fs/promises')
 const { dirname, extname, join } = require('path')
 const { debugLog } = require('../../debug')
 const { decorate } = require('../../decorations')
-const { isDirectory, readFileContent, ensureDirectory } = require('../../lib/fileSystemHelpers')
+const { isDirectory, readFileContent } = require('../../lib/fileSystemHelpers')
 const { paginate } = require('./pagination')
 
 const isTemplateFile = (fileName) => {
@@ -46,7 +46,7 @@ const registerPartials = async (rootPath) => {
 
   try {
     await stat(rootPath)
-  } catch (e) {
+  } catch {
     return debugLog(`registerPartials: ${rootPath} not found`)
   }
 
@@ -61,7 +61,7 @@ const init = async () => {
   }, Promise.resolve())
 }
 
-const render = async ({ templates, outputPath, callback, content, data }) => {
+const render = async ({ templates, outputPath, content, data }) => {
   debugLog('rendering:', outputPath)
 
   const partial = templates.find(template => !!Handlebars.partials[template])
@@ -74,7 +74,7 @@ const render = async ({ templates, outputPath, callback, content, data }) => {
   })
 
   const output = template(data)
-  await ensureDirectory(dirname(outputPath))
+  await mkdir(dirname(outputPath), { recursive: true })
   return writeFile(outputPath, output)
 }
 

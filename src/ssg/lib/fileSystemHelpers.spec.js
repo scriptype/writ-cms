@@ -6,7 +6,6 @@ const {
   readFileContent,
   loadJSON,
   isDirectory,
-  ensureDirectory,
   atomicReplace
 } = require('./fileSystemHelpers')
 
@@ -193,77 +192,6 @@ test('isDirectory returns false for symlink (lstat does not follow links)', asyn
   )
 
   await fs.rm(tempDir, { recursive: true })
-})
-
-test('ensureDirectory creates nonexistent directory', async (t) => {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
-  const newDir = path.join(tempDir, 'newdir')
-
-  await ensureDirectory(newDir)
-
-  const stats = await fs.stat(newDir)
-
-  t.ok(
-    stats.isDirectory(),
-    'directory was created'
-  )
-
-  await fs.rm(tempDir, { recursive: true })
-})
-
-test('ensureDirectory ignores if directory already exists', async (t) => {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
-
-  await ensureDirectory(tempDir)
-
-  const stats = await fs.stat(tempDir)
-
-  t.ok(
-    stats.isDirectory(),
-    'does not throw and directory still exists'
-  )
-
-  await fs.rm(tempDir, { recursive: true })
-})
-
-test('ensureDirectory creates nested directories', async (t) => {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-'))
-  const nestedPath = path.join(tempDir, 'a', 'b', 'c')
-
-  await ensureDirectory(nestedPath)
-
-  const stats = await fs.stat(nestedPath)
-
-  t.ok(
-    stats.isDirectory(),
-    'creates all nested directories'
-  )
-
-  await fs.rm(tempDir, { recursive: true })
-})
-
-test('ensureDirectory throws on invalid path parameter', async (t) => {
-  try {
-    await ensureDirectory(null)
-    t.fail('should have thrown error')
-  } catch (error) {
-    t.ok(
-      error instanceof TypeError,
-      'throws TypeError for null path'
-    )
-  }
-})
-
-test('ensureDirectory throws on undefined path parameter', async (t) => {
-  try {
-    await ensureDirectory(undefined)
-    t.fail('should have thrown error')
-  } catch (error) {
-    t.ok(
-      error instanceof TypeError,
-      'throws TypeError for undefined path'
-    )
-  }
 })
 
 test('atomicReplace builds in temp location then swaps', async (t) => {
