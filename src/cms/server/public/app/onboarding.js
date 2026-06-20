@@ -26,11 +26,13 @@ const onboarding = async () => {
   const newProject = await api.workspace.createProject({
     name: randomFrom(randomProjectNames)
   })
+  const ssgOptions = {
+    mode: 'start',
+    rootDirectory: newProject.path
+  }
+  await api.ssgOptions.set(ssgOptions)
   return editProject({
-    ssgOptions: {
-      mode: 'start',
-      rootDirectory: newProject.path
-    }
+    ssgOptions
   })
 }
 

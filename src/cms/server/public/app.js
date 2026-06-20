@@ -27,10 +27,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   const mostRecentProject = await findMostRecentProject()
   if (mostRecentProject) {
     console.log('running most recent project', mostRecentProject)
+    const ssgOptions = {
+      mode: 'start',
+      rootDirectory: mostRecentProject.path
+    }
+    await api.ssgOptions.set(ssgOptions)
     return editProject({
-      ssgOptions: {
-        rootDirectory: mostRecentProject.path
-      }
+      ssgOptions
     })
   }
   onboarding()

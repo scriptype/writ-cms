@@ -50,6 +50,17 @@ const api = {
         }
       })
       return response.json()
+    },
+
+    set: async (options) => {
+      const response = await fetch('/api/ssgOptions', {
+        method: 'put',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      })
+      return response.json()
     }
   },
 
