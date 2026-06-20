@@ -29,7 +29,9 @@ const createSSGModel = (state) => {
         refreshTheme,
         debug,
         cli,
-        onChange: state.setState,
+        async onChange(buildPromise) {
+          state.setState(await buildPromise)
+        },
         skipRun: state.shouldSkipWatcherBuild
       })
       state.startWatcher({
