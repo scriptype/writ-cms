@@ -33,6 +33,7 @@ class AssetsDirectory extends ContentModelEntryNode {
       model: models.Asset,
       matcher: matcha.true(),
       settings: {
+        mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory
       }
     }]

@@ -127,12 +127,14 @@ class Category extends ContentModelEntryNode {
   getSubtreeConfig() {
     const settings = {
       post: {
+        mode: this.settings.mode,
         entryAlias: this.entryAlias || this.settings.entryAlias,
         entryContentType: this.entryContentType || this.settings.entryContentType,
         contentTypes: this.settings.contentTypes,
         facetKeys: this.settings.facetKeys
       },
       subCategory: {
+        mode: this.settings.mode,
         contentTypes: this.settings.contentTypes,
         entryContentType: this.entryContentType || this.settings.entryContentType,
         categoryContentType: this.categoryContentType || this.settings.categoryContentType,
@@ -143,10 +145,11 @@ class Category extends ContentModelEntryNode {
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
         facetKeys: this.settings.facetKeys,
-        mode: this.settings.mode,
         level: this.settings.level + 1
       },
-      attachment: {}
+      attachment: {
+        mode: this.settings.mode
+      }
     }
 
     const postMatcher = matcha.folderable({

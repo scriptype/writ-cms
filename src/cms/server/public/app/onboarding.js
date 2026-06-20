@@ -28,6 +28,7 @@ const onboarding = async () => {
   })
   return editProject({
     ssgOptions: {
+      mode: 'start',
       rootDirectory: newProject.path
     }
   })

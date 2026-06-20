@@ -38,6 +38,7 @@ class PagesDirectory extends ContentModelEntryNode {
       key: 'subpages',
       model: models.Subpage,
       settings: {
+        mode: this.settings.mode,
         pagesDirectory: this.settings.pagesDirectory
       },
       matcher: matcha.folderable({
@@ -49,6 +50,7 @@ class PagesDirectory extends ContentModelEntryNode {
       key: 'assets',
       model: models.Asset,
       settings: {
+        mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory
       },
       matcher: matcha.true()

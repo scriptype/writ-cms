@@ -117,6 +117,7 @@ class ContentModel extends ContentModelEntryNode {
         }
       }),
       settings: {
+        mode: this.settings.mode,
         homepageDirectory: this.settings.homepageDirectory
       }
     }, {
@@ -128,6 +129,7 @@ class ContentModel extends ContentModelEntryNode {
         }
       }),
       settings: {
+        mode: this.settings.mode,
         pagesDirectory: this.settings.pagesDirectory
       }
     }, {
@@ -138,6 +140,7 @@ class ContentModel extends ContentModelEntryNode {
         nameOptions: [this.settings.pagesDirectory, 'subpages', 'pages']
       }),
       settings: {
+        mode: this.settings.mode,
         pagesDirectory: this.settings.pagesDirectory,
         assetsDirectory: this.settings.assetsDirectory,
         debug: this.settings.debug
@@ -175,6 +178,7 @@ class ContentModel extends ContentModelEntryNode {
         nameOptions: [this.settings.assetsDirectory, 'assets']
       }),
       settings: {
+        mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory
       },
       sideEffect: (tree, entry) => {
@@ -185,6 +189,7 @@ class ContentModel extends ContentModelEntryNode {
       model: models.Asset,
       matcher: matcha.true(),
       settings: {
+        mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory
       }
     }]

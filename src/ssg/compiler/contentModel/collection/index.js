@@ -120,6 +120,7 @@ class Collection extends ContentModelEntryNode {
   getSubtreeConfig() {
     const settings = {
       category: {
+        mode: this.settings.mode,
         defaultCategoryName: this.defaultCategoryName || this.schema?.defaultCategoryName || this.settings.defaultCategoryName,
         contentTypes: this.settings.contentTypes,
         entryContentType: this.entryContentType || this.schema?.entryContentType,
@@ -131,10 +132,11 @@ class Collection extends ContentModelEntryNode {
         facetKeys: this.facets || this.schema?.facets || [],
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
-        mode: this.settings.mode,
         level: 1,
       },
-      attachment: {}
+      attachment: {
+        mode: this.settings.mode
+      }
     }
 
     const postMatcher = matcha.folderable({
@@ -180,6 +182,7 @@ class Collection extends ContentModelEntryNode {
     let defaultCategory = tree.categories.find(cat => cat.isDefaultCategory)
     if (!defaultCategory) {
       const defaultCategorySettings = {
+        mode: this.settings.mode,
         defaultCategoryName: this.defaultCategoryName || this.schema?.defaultCategoryName || this.settings.defaultCategoryName,
         categoryAlias: this.categoryAlias || this.schema?.categoryAlias,
         entryAlias: this.entryAlias || this.schema?.entryAlias,
@@ -190,7 +193,6 @@ class Collection extends ContentModelEntryNode {
         facetKeys: this.facets || this.schema?.facets || [],
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
-        mode: this.settings.mode,
         contentTypes: this.settings.contentTypes,
       }
       defaultCategory = new models.Category(
@@ -209,6 +211,7 @@ class Collection extends ContentModelEntryNode {
       key: 'category'
     })
     const uncategorizedPostSettings = {
+      mode: this.settings.mode,
       entryAlias: this.entryAlias || this.schema?.entryAlias,
       entryContentType: this.entryContentType || this.schema?.entryContentType,
       contentTypes: this.settings.contentTypes,

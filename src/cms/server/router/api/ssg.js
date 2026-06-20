@@ -4,6 +4,7 @@ module.exports = express.Router()
   .post('/build', async (req, res, next) => {
     try {
       await req.api.ssg.build({
+        mode: req.body.mode,
         rootDirectory: req.body.rootDirectory,
         refreshTheme: req.body.refreshTheme,
         debug: req.body.debug,
@@ -18,6 +19,7 @@ module.exports = express.Router()
   .post('/watch', async (req, res, next) => {
     try {
       await req.api.ssg.watch({
+        mode: req.body.mode,
         rootDirectory: req.body.rootDirectory,
         refreshTheme: req.body.refreshTheme,
         debug: req.body.debug,

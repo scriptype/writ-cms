@@ -2,9 +2,10 @@ const ssg = require('../../../ssg')
 
 const createSSGModel = (state) => {
   return {
-    async build({ rootDirectory, refreshTheme, debug, cli }) {
+    async build({ mode, rootDirectory, refreshTheme, debug, cli }) {
       return state.setState(
         await ssg.build({
+          mode,
           rootDirectory,
           refreshTheme,
           debug,
@@ -13,7 +14,7 @@ const createSSGModel = (state) => {
       )
     },
 
-    async watch({ rootDirectory, refreshTheme, debug, cli }) {
+    async watch({ mode, rootDirectory, refreshTheme, debug, cli }) {
       if (state.isWatching()) {
         if (state.isWatching(rootDirectory)) {
           console.log(`is already watching, not gonna do a thing (watching: ${rootDirectory})`)
@@ -23,6 +24,7 @@ const createSSGModel = (state) => {
         await this.stopWatcher()
       }
       const { result, watcher } = await ssg.watch({
+        mode,
         rootDirectory,
         refreshTheme,
         debug,

@@ -86,6 +86,7 @@ const build = async ({ mode = 'build', rootDirectory, refreshTheme, debug, cli }
 }
 
 const watch = async ({
+  mode = 'start',
   rootDirectory,
   refreshTheme,
   debug,
@@ -94,13 +95,13 @@ const watch = async ({
   skipRun = () => false
 }) => {
   await Settings.init({
-    mode: 'watch',
+    mode,
     rootDirectory
   })
   const settings = Settings.getSettings()
 
   const buildOptions = {
-    mode: 'watch',
+    mode,
     rootDirectory,
     refreshTheme,
     debug,
