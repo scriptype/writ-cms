@@ -7,7 +7,7 @@ const {
   TEMPLATE_HELPERS
 } = require('./constants')
 
-const createThemeDecorator = new DecoratorFactory((state, methods) => {
+const createThemeDecorator = new DecoratorFactory((state) => {
   const { rootDirectory, themeDirectory, theme } = Settings.getSettings()
   const customThemePath = join(rootDirectory, themeDirectory)
   const baseThemePath = join(__dirname, '..', '..', '..', 'packages', `theme-${theme}`)

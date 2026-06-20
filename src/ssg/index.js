@@ -3,7 +3,7 @@ const slug = require('slug')
 const Debug = require('./debug')
 const Settings = require('./settings')
 const Decorations = require('./decorations')
-const Theme = require('./theme')
+const createTheme = require('./theme')
 const Hooks = require('./hooks')
 const Expansions = require('./expansions')
 const SiteDirectory = require('./site-directory')
@@ -25,6 +25,7 @@ const build = async ({ mode = 'build', rootDirectory, refreshTheme, debug, cli }
   })
   const settings = Settings.getSettings()
   await Expansions.init()
+  const Theme = createTheme()
   Decorations.register(
     Theme.decorator(),
     Preview.decorator(),

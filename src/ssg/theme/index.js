@@ -12,11 +12,11 @@ const {
   KEEP_PATH
 } = require('./constants')
 
-const State = {
-  customizers: []
-}
+const createTheme = () => {
+  const State = {
+    customizers: []
+  }
 
-const Methods = (() => {
   const init = async ({ refresh }) => {
     Debug.timeStart('theme')
     const { rootDirectory, themeDirectory } = Settings.getSettings()
@@ -194,11 +194,9 @@ const Methods = (() => {
     copyCommonResources,
     copyBaseThemeResources,
     copyCustomizers,
-    makeCustomThemeDirectory
+    makeCustomThemeDirectory,
+    decorator: createDecorator(State)
   }
-})()
-
-module.exports = {
-  ...Methods,
-  decorator: createDecorator(State, Methods)
 }
+
+module.exports = createTheme

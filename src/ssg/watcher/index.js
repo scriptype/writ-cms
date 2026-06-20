@@ -6,7 +6,8 @@ const api = require('./api')
 
 module.exports = {
   async init({ onChange, silent, settings }) {
-    const { rootDirectory, exportDirectory, previewPort } = settings
+    const { rootDirectory, exportDirectory, themeDirectory, previewPort } = settings
+    const themeDir = resolve(rootDirectory, themeDirectory)
     const watchDir = resolve(rootDirectory)
     const serverDir = resolve(rootDirectory, exportDirectory)
     const watchOptions = {
@@ -29,9 +30,13 @@ module.exports = {
 
     let compilePromise = Promise.resolve()
 
-    const cb = _.debounce((e, file) => {
+    const cb = _.debounce((event, file) => {
       if (!silent) {
         console.log(new Date(), file)
+      }
+      if (event === 'addDir' && file === themeDir) {
+        Debug.debugLog('skipping build after create theme directory')
+        return
       }
       compilePromise = compilePromise
         .then(onChange)
@@ -42,7 +47,7 @@ module.exports = {
           }
           return Promise.resolve()
         })
-    }, 2000, { leading: true })
+    }, 50, { trailing: true })
 
     const watcher = bs.watch(watchDir, watchOptions, cb)
 
