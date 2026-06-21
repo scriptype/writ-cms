@@ -20,6 +20,7 @@ const findMostRecentProject = async () => {
 window.addEventListener('DOMContentLoaded', async () => {
   const ssgOptions = await api.ssgOptions.get()
   if (ssgOptions.rootDirectory) {
+    console.log('running project via ssgOptions', ssgOptions)
     return editProject({
       ssgOptions
     })

@@ -4,9 +4,10 @@ import Toolbar from './components/Toolbar.js'
 import './components/ContentPanel/index.js'
 import Dialog from './components/Dialog.js'
 
-const initToolbar = () => {
+const initToolbar = ({ settings }) => {
   const renderContent = () => {
     Dialog.html('<content-panel></content-panel>')
+    Dialog.find('content-panel').settings = settings
     Dialog.show()
   }
 
@@ -25,10 +26,12 @@ const initToolbar = () => {
 }
 
 const editProject = async ({ ssgOptions }) => {
-  console.log('starting editor with ssgOptions', ssgOptions)
+  console.log('starting watcher', ssgOptions)
   await api.ssg.watch(ssgOptions)
+  const settings = await api.settings.get()
+  console.log('editProject', { ssgOptions, settings })
   setIframeSrc()
-  initToolbar()
+  initToolbar({ settings })
 
   const contentTypes = await api.contentTypes.get()
   if (contentTypes.length) {

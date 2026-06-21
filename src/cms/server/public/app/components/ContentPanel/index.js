@@ -8,6 +8,7 @@ import { getDeepCategory, flattenSubtree } from './helpers.js'
 
 class ContentPanel extends LitElement {
   static properties = {
+    settings: { type: Object },
     contentTree: { type: Array },
     path: { type: Array }
   }
@@ -53,6 +54,7 @@ class ContentPanel extends LitElement {
     Dialog.html(`<content-editor></content-editor>`)
     const editor = Dialog.find('content-editor')
     editor.node = node
+    editor.settings = this.settings
     editor.addEventListener('submit', (e) => {
       if (node.type === 'entry') {
         this.onSubmitUpdateEntry(e.detail)
@@ -201,7 +203,9 @@ class ContentPanel extends LitElement {
   createEntry = () => {
     console.log('create entry')
     Dialog.html(`<content-editor></content-editor>`)
-    Dialog.find('content-editor').addEventListener('submit', (e) => {
+    const editor = Dialog.find('content-editor')
+    editor.settings = this.settings
+    editor.addEventListener('submit', (e) => {
       this.onSubmitCreateEntry(e.detail)
     })
     Dialog.show()
@@ -259,12 +263,14 @@ class ContentPanel extends LitElement {
           ${this.currentNode.type === 'collection' ? html`
             <content-editor
               .node="${this.currentNode}"
+              .settings="${this.settings}"
               @submit="${this.onSubmitUpdateCollection}"
             ></content-editor>
           ` : ''}
           ${this.currentNode.type === 'category' ? html`
             <content-editor
               .node="${this.currentNode}"
+              .settings="${this.settings}"
               @submit="${this.onSubmitUpdateCategory}"
             ></content-editor>
           ` : ''}

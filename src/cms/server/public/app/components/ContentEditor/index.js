@@ -1,12 +1,14 @@
 import { LitElement, html } from 'lit'
-import './BasicTextEditorField.js'
-import './BooleanField.js'
-import './FullTextEditorField.js'
 import './TextField.js'
+import './BasicTextEditorField.js'
+import './FullTextEditorField.js'
+import './BooleanField.js'
+import './AttachmentsField.js'
 
 class ContentEditor extends LitElement {
   static properties = {
-    node: { type: Object }
+    node: { type: Object },
+    settings: { type: Object }
   }
 
   constructor() {
@@ -106,6 +108,13 @@ class ContentEditor extends LitElement {
           label="Draft?"
           .checked="${!!this.node?.data?.draft}">
         </content-editor-boolean-field>
+
+        <content-editor-attachments-field
+          name="attachments"
+          label="Attachments"
+          .settings="${this.settings}"
+          .attachments="${this.node?.data?.subtree?.attachments || []}">
+        </content-editor-attachments-field>
 
         <button>${this.node ? 'Save' : 'Create'}</button>
 
