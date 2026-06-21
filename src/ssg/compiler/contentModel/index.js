@@ -40,10 +40,6 @@ class ContentModel extends ContentModelEntryNode {
     }
   }
 
-  static draftCheck(mode, node) {
-    return mode === 'start' || !node.draft
-  }
-
   constructor(fsNode, contentModelSettings, contentTypes) {
     const settings = {
       ...defaultSettings,
