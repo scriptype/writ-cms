@@ -226,24 +226,18 @@ const api = {
   },
 
   post: {
-    create: async (options) => {
+    create: async (formData) => {
       const response = await fetch('/api/post', {
         method: 'post',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.text()
     },
 
-    update: async (options) => {
-      const response = await fetch('/api/post', {
+    update: async (path, formData) => {
+      const response = await fetch(`/api/post?path=${path}`, {
         method: 'put',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.json()
     }

@@ -176,12 +176,9 @@ class ContentPanel extends LitElement {
   }
 
   onSubmitUpdateEntry = async (payload) => {
-    const fullPayload = {
-      ...payload.formData,
-      path: payload.node.data.path
-    }
-    console.log('updating entry', fullPayload, payload.node)
-    const response = await api.post.update(fullPayload)
+    const path = payload.node.data.path
+    console.log('updating entry', path, payload.formData)
+    const response = await api.post.update(path, payload.formData)
     await this.fetchContentTree()
     const editor = Dialog.find('content-editor')
     const updatedNode = this.currentNode.data.subtree.levelPosts.find(entry => {
@@ -191,12 +188,11 @@ class ContentPanel extends LitElement {
   }
 
   onSubmitCreateEntry = async (payload) => {
-    const fullPayload = {
-      ...payload.formData,
-      taxonomyPath: this.currentNode.data.path.split('/')
-    }
-    console.log('creating entry', fullPayload)
-    await api.post.create(fullPayload)
+    const nodeData = JSON.parse(payload.formData.get('data'))
+    nodeData.taxonomyPath = this.currentNode.data.path.split('/')
+    payload.formData.set('data', JSON.stringify(nodeData))
+    console.log('creating entry', payload.formData)
+    await api.post.create(payload.formData)
     await this.fetchContentTree()
   }
 

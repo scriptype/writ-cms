@@ -55,6 +55,15 @@ class ContentEditorAttachmentsField extends LitElement {
     this._selectedFiles = []
   }
 
+  clearFiles() {
+    this._selectedFiles.forEach(f => {
+      if (f.previewUrl) URL.revokeObjectURL(f.previewUrl)
+    })
+
+    this._selectedFiles = []
+    this.requestUpdate()
+  }
+
   onSelectFiles = (e) => {
     const input = e.originalTarget
 
@@ -68,6 +77,16 @@ class ContentEditorAttachmentsField extends LitElement {
     if (!input.files) {
       this._selectedFiles = []
       return
+    }
+
+    if (input.files.length > 0) {
+      const formData = new FormData()
+      for (const file of input.files) {
+        formData.append(this.name, file)
+      }
+      this.internals.setFormValue(formData)
+    } else {
+      this.internals.setFormValue(null)
     }
 
     this._selectedFiles = Array.from(input.files).map(file => ({
@@ -143,7 +162,7 @@ class ContentEditorAttachmentsField extends LitElement {
           <div class="selected-files">
             ${this._selectedFiles.map(this.renderPreview)}
           </div>
-          <input multiple type="file" @input="${this.onSelectFiles}">
+          <input name="${this.name}" multiple type="file" @input="${this.onSelectFiles}">
         </label>
       </div>
     `

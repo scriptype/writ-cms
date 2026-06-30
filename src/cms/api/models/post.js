@@ -13,21 +13,14 @@ const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
 }
 
 const createPostModel = ({ getSettings, getContentModel }) => {
-  const createPost = async ({
-    taxonomyPath,
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const createPost = async (data, attachments) => {
     const opts = {
-      taxonomyPath: taxonomyPath || [],
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || '.md',
-      metadata: metadata || {}
+      taxonomyPath: data.taxonomyPath || [],
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || '.md',
+      metadata: data.metadata || {}
     }
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
@@ -52,27 +45,26 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return writeFile(`${join(unusedPath, 'post')}${opts.extension}`, fileContent)
+    return Promise.all([
+      writeFile(`${join(unusedPath, 'post')}${opts.extension}`, fileContent),
+      ...attachments.map(file => {
+        const dest = join(unusedPath, file.originalname)
+        return writeFile(dest, file.buffer)
+      })
+    ])
   }
 
-  const updatePost = async ({
-    path,
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const updatePost = async (path, data, attachments = []) => {
     if (!path) {
       throw new Error('path is required')
     }
 
     const opts = {
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || '',
-      metadata: metadata || {}
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || '',
+      metadata: data.metadata || {}
     }
 
     const collectionName = path.split('/')[0]
@@ -102,7 +94,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     const metadataWithTitle = isPathDifferentThanTitle ? {
       ...opts.metadata,
       title: `${opts.title}`
-    } : metadata
+    } : opts.metadata
 
     const fileContent = matter.stringify({
       data: metadataWithTitle,
@@ -114,7 +106,13 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       join(absolutePath, post.indexFile.name) :
       absolutePath
 
-    await writeFile(targetPath, fileContent)
+    await Promise.all([
+      writeFile(targetPath, fileContent),
+      ...attachments.map(file => {
+        const dest = join(absolutePath, file.originalname)
+        return writeFile(dest, file.buffer)
+      })
+    ])
 
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)

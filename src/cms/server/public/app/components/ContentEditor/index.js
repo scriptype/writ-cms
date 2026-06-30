@@ -17,41 +17,42 @@ class ContentEditor extends LitElement {
   }
 
   processFormData(formData) {
-    formData.draft = formData.draft === 'true' ? true : false
-
-    const keysToExcludeFromMetadata = ['title', 'content', 'excerpt']
-    const metadata = Object.keys(formData)
-      .filter(key => {
+    const data = {}
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        continue
+      }
+      if (['title', 'content', 'excerpt'].includes(key)) {
+        data[key] = value
+      } else {
+        data.metadata = data.metadata || {}
         if (key === 'draft') {
-          return formData.draft === true
+          if (value === 'true') {
+            data.metadata[key] = true
+          }
+        } else if (value !== '') {
+          data.metadata[key] = value
         }
-        const isIncluded = !keysToExcludeFromMetadata.includes(key)
-        const isNotEmpty = formData[key] !== ''
-        return isIncluded && isNotEmpty
-      })
-      .reduce((metadata, key) => ({
-        ...metadata,
-        [key]: formData[key]
-      }), {})
-
-    return {
-      title: formData.title,
-      content: formData.content,
-      excerpt: formData.excerpt,
-      metadata
+      }
     }
+    return data
   }
 
   onSubmitForm = (e) => {
     e.preventDefault()
 
-    const rawFormData = Object.fromEntries(
-      Array.from( new FormData(e.target).entries() )
-    )
-
+    const rawFormData = new FormData(e.target)
     console.log('rawFormData', rawFormData)
 
-    const finalFormData = this.processFormData(rawFormData)
+    const data = this.processFormData(rawFormData)
+
+    const finalFormData = new FormData()
+    finalFormData.append("data", JSON.stringify(data))
+
+    const files = rawFormData.getAll('attachments')
+    files.forEach(file => {
+      finalFormData.append('attachments', file)
+    })
 
     this.dispatchEvent(new CustomEvent('submit', {
       detail: {
@@ -61,6 +62,11 @@ class ContentEditor extends LitElement {
       bubbles: true,
       composed: true
     }))
+
+    const attachmentsField = this.shadowRoot.querySelector('content-editor-attachments-field')
+    if (attachmentsField) {
+      attachmentsField.clearFiles()
+    }
   }
 
   render() {
