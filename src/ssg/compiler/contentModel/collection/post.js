@@ -36,7 +36,7 @@ class Post extends ContentModelEntryNode {
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
 
-    this.contentType = this.settings.entryContentType
+    this.contentType = this.contentType || this.settings.entryContentType
     this.schema = this.settings.contentTypes.find(ct => ct.name === this.contentType)
 
     this.contextKey = 'post'
