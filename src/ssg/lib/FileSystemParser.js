@@ -1,5 +1,6 @@
 const { stat, readdir } = require('fs/promises')
 const { join, relative, resolve, extname } = require('path')
+const mime = require('mime-types')
 const { readFileContent, isDirectory } = require('./fileSystemHelpers')
 
 module.exports = class FileSystemParser {
@@ -69,12 +70,13 @@ module.exports = class FileSystemParser {
       .map(async fileName => {
         const accumulatedPath = join(path, fileName)
         const rootPath = FileSystemParser.lookBack(accumulatedPath, depth + 1)
-        const { birthtime } = await stat(accumulatedPath)
+        const { birthtime, size } = await stat(accumulatedPath)
         const baseProperties = {
           name: fileName,
           path: relative(rootPath, accumulatedPath),
           absolutePath: accumulatedPath,
-          stats: { birthtime },
+          stats: { birthtime, size },
+          fileType: mime.lookup(accumulatedPath),
           depth,
         }
         if (await isDirectory(accumulatedPath)) {
