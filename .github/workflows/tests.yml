@@ -22,5 +22,8 @@ jobs:
     - name: run tests
       shell: bash
       run: for i in {1..4}; do npm run test:ci || exit 1; done
+    - name: Trust Coveralls Homebrew tap (Homebrew 6 requirement)
+      if: runner.os == 'macOS'
+      run: brew trust coverallsapp/coveralls
     - name: Coveralls
       uses: coverallsapp/github-action@v2
