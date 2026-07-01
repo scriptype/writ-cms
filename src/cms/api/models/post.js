@@ -21,8 +21,12 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       content: data.content || '',
       excerpt: data.excerpt || '',
       extension: data.extension || '.md',
-      metadata: _.omit(data, ['taxonomyPath', 'title', 'content', 'excerpt', 'extension'])
+      metadata: _(data)
+        .omit(['taxonomyPath', 'title', 'content', 'excerpt', 'extension'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
+
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
@@ -65,7 +69,10 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       content: data.content || '',
       excerpt: data.excerpt || '',
       extension: data.extension || '',
-      metadata: _.omit(data, ['title', 'content', 'excerpt', 'extension'])
+      metadata: _(data)
+        .omit(['title', 'content', 'excerpt', 'extension'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
 
     const collectionName = path.split('/')[0]

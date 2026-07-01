@@ -16,30 +16,18 @@ class ContentEditor extends LitElement {
     this.node = null
   }
 
-  processFormData(formData) {
+  processFormData(rawFormData) {
     const data = {}
-    for (let [key, value] of formData.entries()) {
+    for (let [key, value] of rawFormData.entries()) {
       if (value instanceof File) {
         continue
       }
-      if (key === 'draft') {
-        if (value === 'true') {
-          data[key] = true
-        }
-      } else if (value !== '') {
+      if (value === 'true' || value === 'false') {
+        data[key] = value === 'true'
+      } else {
         data[key] = value
       }
     }
-    return data
-  }
-
-  onSubmitForm = (e) => {
-    e.preventDefault()
-
-    const rawFormData = new FormData(e.target)
-    console.log('rawFormData', rawFormData)
-
-    const data = this.processFormData(rawFormData)
 
     const finalFormData = new FormData()
     finalFormData.append("data", JSON.stringify(data))
@@ -48,6 +36,18 @@ class ContentEditor extends LitElement {
     files.forEach(file => {
       finalFormData.append('attachments', file)
     })
+
+    return finalFormData
+  }
+
+  onSubmitForm = (e) => {
+    e.preventDefault()
+
+    const rawFormData = new FormData(e.target)
+    console.log('rawFormData', rawFormData)
+
+    const finalFormData = this.processFormData(rawFormData)
+    console.log('finalFormData', finalFormData)
 
     this.dispatchEvent(new CustomEvent('submit', {
       detail: {
