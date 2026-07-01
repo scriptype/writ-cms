@@ -22,17 +22,12 @@ class ContentEditor extends LitElement {
       if (value instanceof File) {
         continue
       }
-      if (['title', 'content', 'excerpt'].includes(key)) {
-        data[key] = value
-      } else {
-        data.metadata = data.metadata || {}
-        if (key === 'draft') {
-          if (value === 'true') {
-            data.metadata[key] = true
-          }
-        } else if (value !== '') {
-          data.metadata[key] = value
+      if (key === 'draft') {
+        if (value === 'true') {
+          data[key] = true
         }
+      } else if (value !== '') {
+        data[key] = value
       }
     }
     return data

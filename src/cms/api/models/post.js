@@ -1,6 +1,7 @@
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
 const { join, dirname, basename, relative } = require('path')
 const matter = require('gray-matter')
+const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { contentRootPath } = require('../helpers')
@@ -20,7 +21,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       content: data.content || '',
       excerpt: data.excerpt || '',
       extension: data.extension || '.md',
-      metadata: data.metadata || {}
+      metadata: _.omit(data, ['taxonomyPath', 'title', 'content', 'excerpt', 'extension'])
     }
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
@@ -64,7 +65,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       content: data.content || '',
       excerpt: data.excerpt || '',
       extension: data.extension || '',
-      metadata: data.metadata || {}
+      metadata: _.omit(data, ['title', 'content', 'excerpt', 'extension'])
     }
 
     const collectionName = path.split('/')[0]
