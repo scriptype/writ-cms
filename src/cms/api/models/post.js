@@ -21,8 +21,9 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       content: data.content || '',
       excerpt: data.excerpt || '',
       extension: data.extension || '.md',
+      deletedAttachments: data.deletedAttachments || [],
       metadata: _(data)
-        .omit(['taxonomyPath', 'title', 'content', 'excerpt', 'extension'])
+        .omit(['taxonomyPath', 'title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
         .pickBy(value => (!!value || value === 0))
         .value()
     }
@@ -69,8 +70,9 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       content: data.content || '',
       excerpt: data.excerpt || '',
       extension: data.extension || '',
+      deletedAttachments: data.deletedAttachments || [],
       metadata: _(data)
-        .omit(['title', 'content', 'excerpt', 'extension'])
+        .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
         .pickBy(value => (!!value || value === 0))
         .value()
     }
@@ -114,12 +116,26 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       join(absolutePath, post.indexFile.name) :
       absolutePath
 
-    await Promise.all([
-      writeFile(targetPath, fileContent),
-      ...attachments.map(file => {
+    const deleteAttachments = () => {
+      return opts.deletedAttachments.map(fileName => {
+        const filePath = join(absolutePath, fileName)
+        return rm(filePath)
+      })
+    }
+
+    const uploadAttachments = () => {
+      return attachments.map(file => {
         const dest = join(absolutePath, file.originalname)
         return writeFile(dest, file.buffer)
       })
+    }
+
+    await Promise.all([
+      writeFile(targetPath, fileContent),
+      (async () => {
+        await Promise.all(deleteAttachments())
+        await Promise.all(uploadAttachments())
+      })()
     ])
 
     const { rootDirectory, contentDirectory } = getSettings()

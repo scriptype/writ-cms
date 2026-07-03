@@ -16,6 +16,10 @@ class ContentEditorAttachmentsField extends LitElement {
       max-width: 100%;
     }
 
+    .attachment-wrapper .delete-attachment-btn {
+      font-size: 0.6em;
+    }
+
     .selected-files {
       display: flex;
       gap: .5em;
@@ -29,6 +33,10 @@ class ContentEditorAttachmentsField extends LitElement {
     .file-preview-wrapper .file {
       max-width: 100%;
     }
+
+    .file-preview-wrapper .cancel-file-btn {
+      font-size: 0.6em;
+    }
   `
 
   static formAssociated = true
@@ -38,7 +46,8 @@ class ContentEditorAttachmentsField extends LitElement {
     attachments: { type: Array },
     label: { type: String },
     name: { type: String },
-    _selectedFiles: { type: Array, state: true }
+    _selectedFiles: { type: Array, state: true },
+    _deletedAttachments: { type: Array, state: true }
   }
 
   get assetBaseURL() {
@@ -53,6 +62,7 @@ class ContentEditorAttachmentsField extends LitElement {
     this.label = 'Attachments'
     this.name = `attachments-${Date.now()}`
     this._selectedFiles = []
+    this._deletedAttachments = []
   }
 
   clearFiles() {
@@ -61,6 +71,12 @@ class ContentEditorAttachmentsField extends LitElement {
     })
 
     this._selectedFiles = []
+    this.internals.setFormValue(null)
+    this.updateInputElement()
+  }
+
+  clearDeletedAttachments() {
+    this._deletedAttachments = []
     this.requestUpdate()
   }
 
@@ -100,11 +116,57 @@ class ContentEditorAttachmentsField extends LitElement {
     }))
   }
 
+  onDeleteAttachment = (attachment) => () => {
+    if (confirm(`Delete ${attachment.title}?`)) {
+      this._deletedAttachments = [...this._deletedAttachments, attachment.title]
+      this.dispatchEvent(new CustomEvent('delete-attachment', {
+        detail: {
+          deletedAttachments: this._deletedAttachments
+        },
+        bubbles: true,
+        composed: true
+      }))
+    }
+  }
+
+  onCancelFile = (file) => () => {
+    if (file.previewUrl) {
+      URL.revokeObjectURL(file.previewUrl)
+    }
+
+    this._selectedFiles = this._selectedFiles.filter(f => {
+      return f.name !== file.name || f.size !== file.size
+    })
+
+    if (this._selectedFiles.length > 0) {
+      const formData = new FormData()
+      for (const file of this._selectedFiles) {
+        formData.append(this.name, file.rawFile)
+      }
+      this.internals.setFormValue(formData)
+    } else {
+      this.internals.setFormValue(null)
+    }
+
+    this.updateInputElement()
+  }
+
+  updateInputElement = () => {
+    const input = this.shadowRoot.querySelector('input[type="file"]')
+    const dataTransfer = new DataTransfer()
+    this._selectedFiles.forEach(file => {
+      dataTransfer.items.add(file.rawFile)
+    })
+    input.files = dataTransfer.files
+    this.requestUpdate()
+  }
+
   renderPreview = (file) => {
     if (file.type.startsWith('image/')) {
       return html`
         <div class="file-preview-wrapper">
           <img class="file" src="${file.previewUrl}" alt="${file.name}">
+          <button @click="${this.onCancelFile(file)}" type="button" class="cancel-file-btn">cancel</button>
         </div>
       `
     }
@@ -113,23 +175,30 @@ class ContentEditorAttachmentsField extends LitElement {
       return html`
         <div class="file-preview-wrapper">
           <video class="file" src="${file.previewUrl}"></video>
+          <button @click="${this.onCancelFile(file)}" type="button" class="cancel-file-btn">cancel</button>
         </div>
       `
     }
 
     return html`
       <div class="file-preview-icon">
-        ${file.name}<br>(${(file.size / 1024).toFixed(1)} KB)
+        ${file.name}<br>(${(file.size / 1024).toFixed(1)} KB)<br>
+        <button @click="${this.onCancelFile(file)}" type="button" class="cancel-file-btn">cancel</button>
       </div>
     `
   }
 
   renderAttachment = (attachment) => {
+    const isDeleted = this._deletedAttachments.includes(attachment.title)
+    if (isDeleted) {
+      return ''
+    }
     if (attachment.fileType.startsWith('image/')) {
       return html`
         <div class="attachment-wrapper">
           <p>${attachment.title}</p>
           <img class="attachment" src="${this.assetBaseURL}${attachment.permalink}" alt="">
+          <button @click="${this.onDeleteAttachment(attachment)}" class="delete-attachment-btn" type="button">delete</button>
         </div>
       `
     }
@@ -139,13 +208,15 @@ class ContentEditorAttachmentsField extends LitElement {
         <div class="attachment-wrapper">
           <p>${attachment.title}</p>
           <video class="attachment" src="${this.assetBaseURL}${attachment.permalink}"></video>
+          <button @click="${this.onDeleteAttachment(attachment)}" class="delete-attachment-btn" type="button">delete</button>
         </div>
       `
     }
 
     return html`
       <div class="attachment-wrapper">
-        ${attachment.title}<br>(${(attachment.fileSize / 1024).toFixed(1)} KB)
+        ${attachment.title}<br>(${(attachment.fileSize / 1024).toFixed(1)} KB)<br
+        <button @click="${this.onDeleteAttachment(attachment)}" class="delete-attachment-btn" type="button">delete</button>
       </div>
     `
   }
@@ -159,11 +230,11 @@ class ContentEditorAttachmentsField extends LitElement {
         </div>
         <label>
           <p>Upload attachments</p>
-          <div class="selected-files">
-            ${this._selectedFiles.map(this.renderPreview)}
-          </div>
           <input name="${this.name}" multiple type="file" @input="${this.onSelectFiles}">
         </label>
+        <div class="selected-files">
+          ${this._selectedFiles.map(this.renderPreview)}
+        </div>
       </div>
     `
   }

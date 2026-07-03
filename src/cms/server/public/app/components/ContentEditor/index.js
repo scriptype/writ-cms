@@ -8,12 +8,14 @@ import './AttachmentsField.js'
 class ContentEditor extends LitElement {
   static properties = {
     node: { type: Object },
-    settings: { type: Object }
+    settings: { type: Object },
+    _deletedAttachments: { type: Array, state: true }
   }
 
   constructor() {
     super()
     this.node = null
+    this._deletedAttachments = []
   }
 
   processFormData(rawFormData) {
@@ -28,6 +30,8 @@ class ContentEditor extends LitElement {
         data[key] = value
       }
     }
+
+    data.deletedAttachments = this._deletedAttachments
 
     const finalFormData = new FormData()
     finalFormData.append("data", JSON.stringify(data))
@@ -61,7 +65,13 @@ class ContentEditor extends LitElement {
     const attachmentsField = this.shadowRoot.querySelector('content-editor-attachments-field')
     if (attachmentsField) {
       attachmentsField.clearFiles()
+      attachmentsField.clearDeletedAttachments()
+      this._deletedAttachments = []
     }
+  }
+
+  onDeleteAttachment = (e) => {
+    this._deletedAttachments = e.detail.deletedAttachments
   }
 
   render() {
@@ -113,6 +123,7 @@ class ContentEditor extends LitElement {
         <content-editor-attachments-field
           name="attachments"
           label="Attachments"
+          @delete-attachment="${this.onDeleteAttachment}"
           .settings="${this.settings}"
           .attachments="${this.node?.data?.subtree?.attachments || []}">
         </content-editor-attachments-field>
