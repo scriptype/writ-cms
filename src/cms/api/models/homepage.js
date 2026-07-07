@@ -1,38 +1,46 @@
 const matter = require('gray-matter')
-const { writeFile } = require('fs/promises')
+const _ = require('lodash')
+const { writeFile, rm } = require('fs/promises')
 const { join } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const createHomepageModel = ({ getSettings, getContentModel }) => {
-  const createHomepage = async ({
-    title,
-    content,
-    extension,
-    metadata
-  }) => {
+  const createHomepage = async (data, attachments) => {
+    const opts = {
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || '.md',
+      deletedAttachments: data.deletedAttachments || [],
+      metadata: _(data)
+        .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
+    }
+
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
+
     const path = join(root, 'home')
     const fileContent = matter.stringify({
-      data: { title, ...metadata },
-      content: content
+      data: opts.metadata,
+      content: opts.content,
+      excerpt: opts.excerpt
     })
-    return writeFile(`${path}.${extension}`, fileContent)
+    return writeFile(`${path}.${opts.extension}`, fileContent)
   }
 
-  const updateHomepage = async ({
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const updateHomepage = async (data, attachments) => {
     const opts = {
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || '.md',
-      metadata: metadata || {}
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || '.md',
+      deletedAttachments: data.deletedAttachments || [],
+      metadata: _(data)
+        .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
 
     const homepage = getContentModel().subtree.homepage

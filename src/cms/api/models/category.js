@@ -1,7 +1,8 @@
 const matter = require('gray-matter')
+const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
-const { writeFile, mkdir, rename } = require('fs/promises')
+const { writeFile, mkdir, rename, rm } = require('fs/promises')
 const { join, dirname, basename, relative } = require('path')
 const { contentRootPath } = require('../helpers')
 
@@ -30,23 +31,35 @@ const getDeepCategory = (contentModel, path) => {
   return _recurse(contentModel.subtree.collections, path.split('/'))
 }
 
+const deleteAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(fileName => {
+    const filePath = join(parentAbsolutePath, fileName)
+    return rm(filePath)
+  })
+}
+
+const uploadAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(file => {
+    const dest = join(parentAbsolutePath, file.originalname)
+    return writeFile(dest, file.buffer)
+  })
+}
+
 const createCategoryModel = ({ getSettings, getContentModel }) => {
-  const createCategory = async ({
-    taxonomyPath,
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const createCategory = async (data, attachments) => {
     const opts = {
-      taxonomyPath: taxonomyPath || [],
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || 'md',
-      metadata: metadata || {}
+      taxonomyPath: data.taxonomyPath || [],
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || 'md',
+      deletedAttachments: data.deletedAttachments || [],
+      metadata: _(data)
+        .omit(['taxonomyPath', 'title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
+
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
@@ -70,27 +83,27 @@ const createCategoryModel = ({ getSettings, getContentModel }) => {
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return writeFile(`${join(unusedPath, 'category')}.${opts.extension}`, fileContent)
+    return Promise.all([
+      writeFile(`${join(unusedPath, 'category')}.${opts.extension}`, fileContent),
+      ...uploadAttachments(attachments, unusedPath)
+    ])
   }
 
-  const updateCategory = async ({
-    path,
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const updateCategory = async (path, data, attachments) => {
     if (!path) {
       throw new Error('path is required')
     }
 
     const opts = {
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || '',
-      metadata: metadata || {}
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || '',
+      deletedAttachments: data.deletedAttachments || [],
+      metadata: _(data)
+        .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
 
     const category = getDeepCategory(getContentModel(), path)
@@ -113,7 +126,7 @@ const createCategoryModel = ({ getSettings, getContentModel }) => {
     const metadataWithTitle = isPathDifferentThanTitle ? {
       ...opts.metadata,
       title: `${opts.title}`
-    } : metadata
+    } : opts.metadata
 
     const fileContent = matter.stringify({
       data: metadataWithTitle,
@@ -123,7 +136,13 @@ const createCategoryModel = ({ getSettings, getContentModel }) => {
 
     const targetPath = join(absolutePath, category.indexFile.name)
 
-    await writeFile(targetPath, fileContent)
+    await Promise.all([
+      writeFile(targetPath, fileContent),
+      (async () => {
+        await Promise.all(deleteAttachments(opts.deletedAttachments, absolutePath))
+        await Promise.all(uploadAttachments(attachments, absolutePath))
+      })()
+    ])
 
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)

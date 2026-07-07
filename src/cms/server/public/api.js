@@ -178,48 +178,36 @@ const api = {
       return response.json()
     },
 
-    create: async (options) => {
+    create: async (formData) => {
       const response = await fetch('/api/collections', {
         method: 'post',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.text()
     },
 
-    update: async (options) => {
-      const response = await fetch('/api/collections', {
+    update: async (path, formData) => {
+      const response = await fetch(`/api/collections?path=${path}`, {
         method: 'put',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.json()
     }
   },
 
   category: {
-    create: async (options) => {
+    create: async (formData) => {
       const response = await fetch('/api/category', {
         method: 'post',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.text()
     },
 
-    update: async (options) => {
-      const response = await fetch('/api/category', {
+    update: async (path, formData) => {
+      const response = await fetch(`/api/category?path=${path}`, {
         method: 'put',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.json()
     }
@@ -254,24 +242,18 @@ const api = {
       return response.json()
     },
 
-    create: async (options) => {
+    create: async (formData) => {
       const response = await fetch('/api/homepage', {
         method: 'post',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.text()
     },
 
-    update: async (options) => {
+    update: async (formData) => {
       const response = await fetch('/api/homepage', {
         method: 'put',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.json()
     }
@@ -290,24 +272,18 @@ const api = {
       return response.json()
     },
 
-    create: async (options) => {
+    create: async (formData) => {
       const response = await fetch('/api/subpage', {
         method: 'post',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.text()
     },
 
-    update: async (options) => {
-      const response = await fetch('/api/subpage', {
+    update: async (path, formData) => {
+      const response = await fetch(`/api/subpage?path=${path}`, {
         method: 'put',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(options)
+        body: formData
       })
       return response.json()
     }

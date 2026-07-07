@@ -1,7 +1,8 @@
 const matter = require('gray-matter')
+const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
-const { writeFile, mkdir, rename } = require('fs/promises')
+const { writeFile, mkdir, rename, rm } = require('fs/promises')
 const { join, dirname, basename, relative } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
@@ -12,25 +13,38 @@ const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
   )
 }
 
+const deleteAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(fileName => {
+    const filePath = join(parentAbsolutePath, fileName)
+    return rm(filePath)
+  })
+}
+
+const uploadAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(file => {
+    const dest = join(parentAbsolutePath, file.originalname)
+    return writeFile(dest, file.buffer)
+  })
+}
+
 const createCollectionsModel = ({ getSettings, getContentModel }) => {
   const getCollections = () => {
     return omitResolvedLinks(getContentModel().subtree.collections)
   }
 
-  const createCollection = async ({
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const createCollection = async (data, attachments) => {
     const opts = {
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || 'md',
-      metadata: metadata || {}
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || 'md',
+      deletedAttachments: data.deletedAttachments || [],
+      metadata: _(data)
+        .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
+
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
@@ -54,27 +68,27 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return writeFile(`${join(unusedPath, 'collection')}.${opts.extension}`, fileContent)
+    return Promise.all([
+      writeFile(`${join(unusedPath, 'collection')}.${opts.extension}`, fileContent),
+      ...uploadAttachments(attachments, unusedPath)
+    ])
   }
 
-  const updateCollection = async ({
-    path,
-    title,
-    content,
-    excerpt,
-    extension,
-    metadata
-  }) => {
+  const updateCollection = async (path, data, attachments) => {
     if (!path) {
       throw new Error('path is required')
     }
 
     const opts = {
-      title: title || 'Untitled',
-      content: content || '',
-      excerpt: excerpt || '',
-      extension: extension || '',
-      metadata: metadata || {}
+      title: data.title || 'Untitled',
+      content: data.content || '',
+      excerpt: data.excerpt || '',
+      extension: data.extension || '',
+      deletedAttachments: data.deletedAttachments || [],
+      metadata: _(data)
+        .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
+        .pickBy(value => (!!value || value === 0))
+        .value()
     }
 
     const collection = getContentModel().subtree.collections.find(c => c.name === path)
@@ -97,7 +111,7 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
     const metadataWithTitle = isPathDifferentThanTitle ? {
       ...opts.metadata,
       title: `${opts.title}`
-    } : metadata
+    } : opts.metadata
 
     const fileContent = matter.stringify({
       data: metadataWithTitle,
@@ -107,7 +121,13 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
 
     const targetPath = join(absolutePath, collection.indexFile.name)
 
-    await writeFile(targetPath, fileContent)
+    await Promise.all([
+      writeFile(targetPath, fileContent),
+      (async () => {
+        await Promise.all(deleteAttachments(opts.deletedAttachments, absolutePath))
+        await Promise.all(uploadAttachments(attachments, absolutePath))
+      })()
+    ])
 
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)

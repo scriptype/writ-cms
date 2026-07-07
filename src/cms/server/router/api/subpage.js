@@ -1,5 +1,7 @@
 const express = require('express')
+const multer = require('multer')
 const skipWatcher = require('../../middleware/skipWatcher')
+const upload = multer()
 
 module.exports = (state) => express.Router()
   .get('/', async (req, res) => {
@@ -13,9 +15,12 @@ module.exports = (state) => express.Router()
       return res.status(500).send(e)
     }
   })
-  .post('/', skipWatcher(state), async (req, res) => {
+  .post('/', skipWatcher(state), upload.array('attachments'), async (req, res) => {
     try {
-      await req.api.subpage.create(req.body)
+      await req.api.subpage.create(
+        JSON.parse(req.body.data),
+        req.files
+      )
       state.setState(
         await req.api.ssg.build(state.getSSGOptions())
       )
@@ -25,9 +30,13 @@ module.exports = (state) => express.Router()
       res.status(500).send(e)
     }
   })
-  .put('/', skipWatcher(state), async (req, res) => {
+  .put('/', skipWatcher(state), upload.array('attachments'), async (req, res) => {
     try {
-      const response = await req.api.subpage.update(req.body)
+      const response = await req.api.subpage.update(
+        req.query.path,
+        JSON.parse(req.body.data),
+        req.files
+      )
       state.setState(
         await req.api.ssg.build(state.getSSGOptions())
       )

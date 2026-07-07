@@ -13,6 +13,20 @@ const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
   )
 }
 
+const deleteAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(fileName => {
+    const filePath = join(parentAbsolutePath, fileName)
+    return rm(filePath)
+  })
+}
+
+const uploadAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(file => {
+    const dest = join(parentAbsolutePath, file.originalname)
+    return writeFile(dest, file.buffer)
+  })
+}
+
 const createPostModel = ({ getSettings, getContentModel }) => {
   const createPost = async (data, attachments) => {
     const opts = {
@@ -53,10 +67,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     } catch {}
     return Promise.all([
       writeFile(`${join(unusedPath, 'post')}${opts.extension}`, fileContent),
-      ...attachments.map(file => {
-        const dest = join(unusedPath, file.originalname)
-        return writeFile(dest, file.buffer)
-      })
+      ...uploadAttachments(attachments, unusedPath)
     ])
   }
 
@@ -116,25 +127,11 @@ const createPostModel = ({ getSettings, getContentModel }) => {
       join(absolutePath, post.indexFile.name) :
       absolutePath
 
-    const deleteAttachments = () => {
-      return opts.deletedAttachments.map(fileName => {
-        const filePath = join(absolutePath, fileName)
-        return rm(filePath)
-      })
-    }
-
-    const uploadAttachments = () => {
-      return attachments.map(file => {
-        const dest = join(absolutePath, file.originalname)
-        return writeFile(dest, file.buffer)
-      })
-    }
-
     await Promise.all([
       writeFile(targetPath, fileContent),
       (async () => {
-        await Promise.all(deleteAttachments())
-        await Promise.all(uploadAttachments())
+        await Promise.all(deleteAttachments(opts.deletedAttachments, absolutePath))
+        await Promise.all(uploadAttachments(attachments, absolutePath))
       })()
     ])
 
