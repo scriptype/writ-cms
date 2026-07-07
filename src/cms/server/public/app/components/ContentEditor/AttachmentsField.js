@@ -215,7 +215,7 @@ class ContentEditorAttachmentsField extends LitElement {
 
     return html`
       <div class="attachment-wrapper">
-        ${attachment.title}<br>(${(attachment.fileSize / 1024).toFixed(1)} KB)<br
+        ${attachment.title}<br>(${(attachment.fileSize / 1024).toFixed(1)} KB)<br>
         <button @click="${this.onDeleteAttachment(attachment)}" class="delete-attachment-btn" type="button">delete</button>
       </div>
     `

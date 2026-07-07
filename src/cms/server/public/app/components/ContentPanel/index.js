@@ -136,8 +136,11 @@ class ContentPanel extends LitElement {
     nodeData.taxonomyPath = this.currentNode.data.path.split('/')
     payload.formData.set('data', JSON.stringify(nodeData))
     console.log('creating entry', payload.formData)
-    await api.post.create(payload.formData)
+    const response = await api.post.create(payload.formData)
     await this.fetchContentTree()
+    const createdNode = this.findNode('entry', response.path)
+    const editor = Dialog.find('content-editor')
+    editor.node = { data: createdNode }
   }
 
   onSubmitUpdateCollection = async (payload) => {

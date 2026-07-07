@@ -219,7 +219,7 @@ const api = {
         method: 'post',
         body: formData
       })
-      return response.text()
+      return response.json()
     },
 
     update: async (path, formData) => {
