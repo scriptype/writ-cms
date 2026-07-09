@@ -27,13 +27,24 @@ const uploadAttachments = (attachments, parentAbsolutePath) => {
   })
 }
 
+const findPage = (contentModel, path) => {
+  return contentModel.subtree.subpages.find(p => p.path === path)
+}
+
+const getRelativePath = async (settings, absolutePath) => {
+  const { rootDirectory, contentDirectory } = settings
+  const root = await contentRootPath(rootDirectory, contentDirectory)
+
+  return relative(root, absolutePath)
+}
+
 const createSubpageModel = ({ getSettings, getContentModel }) => {
   const createSubpage = async (data, attachments) => {
     const opts = {
       title: data.title || 'Untitled',
       content: data.content || '',
       excerpt: data.excerpt || '',
-      extension: data.extension || 'md',
+      extension: data.extension || '.md',
       deletedAttachments: data.deletedAttachments || [],
       metadata: _(data)
         .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
@@ -44,9 +55,14 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     const { rootDirectory, pagesDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
+    const shouldFolder = !!attachments.length
     const sanitizedTitle = filenamify(opts.title)
 
-    const path = join(root, pagesDirectory, sanitizedTitle)
+    const path = join(
+      root,
+      pagesDirectory,
+      shouldFolder ? sanitizedTitle : `${sanitizedTitle}${opts.extension}`
+    )
     const unusedPath = await unusedFilename(path)
 
     const shouldOverrideTitle = (sanitizedTitle !== opts.title) || (unusedPath !== path)
@@ -61,13 +77,22 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
       content: opts.content,
       excerpt: opts.excerpt
     })
-    try {
-      await mkdir(unusedPath, { recursive: true })
-    } catch {}
-    return Promise.all([
-      writeFile(`${join(unusedPath, 'page')}.${opts.extension}`, fileContent),
-      ...uploadAttachments(attachments, unusedPath)
-    ])
+
+    if (attachments.length) {
+      try {
+        await mkdir(unusedPath, { recursive: true })
+      } catch {}
+      await Promise.all([
+        writeFile(join(unusedPath, `page${opts.extension}`), fileContent),
+        ...uploadAttachments(attachments, unusedPath)
+      ])
+    } else {
+      await writeFile(unusedPath, fileContent)
+    }
+
+    return {
+      path: await getRelativePath(getSettings(), unusedPath)
+    }
   }
 
   const updatePage = async (path, data, attachments = []) => {
@@ -79,7 +104,7 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
       title: data.title || 'Untitled',
       content: data.content || '',
       excerpt: data.excerpt || '',
-      extension: data.extension || '',
+      extension: data.extension || '.md',
       deletedAttachments: data.deletedAttachments || [],
       metadata: _(data)
         .omit(['title', 'content', 'excerpt', 'extension', 'deletedAttachments'])
@@ -87,9 +112,18 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
         .value()
     }
 
-    const page = getContentModel().subtree.subpages.find(p => p.path === path)
+    const page = findPage(getContentModel(), path)
 
     const isFoldered = !page.extension
+    const shouldFolder = !!attachments.length || (page.subtree.attachments.length > opts.deletedAttachments.length)
+
+    // When foldering changes, just re-create page and delete the old one
+    if (isFoldered !== shouldFolder) {
+      const result = await createSubpage(data, attachments)
+      await rm(page.absolutePath, { recursive: true, force: true })
+      return result
+    }
+
     const isTitleDifferent = opts.title !== page.title
     let absolutePath = page.absolutePath
     let isPathDifferentThanTitle
@@ -132,11 +166,8 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
       })()
     ])
 
-    const { rootDirectory, contentDirectory } = getSettings()
-    const root = await contentRootPath(rootDirectory, contentDirectory)
-
     return {
-      path: relative(root, absolutePath)
+      path: await getRelativePath(getSettings(), absolutePath)
     }
   }
 
