@@ -1,10 +1,12 @@
+import { getPathSegments } from '../../common.js'
+
 export const getDeepCategory = (contentTree, path) => {
   const _recurse = (container, pathSegments) => {
     const child = container.find(childNode => {
       if (!childNode.path) {
         return false
       }
-      const childPathSegments = childNode.path.split('/')
+      const childPathSegments = getPathSegments(childNode.path)
       return childPathSegments[childPathSegments.length - 1] === pathSegments[0]
     })
     if (pathSegments.length === 1) {
@@ -15,7 +17,7 @@ export const getDeepCategory = (contentTree, path) => {
 
   return _recurse(
     contentTree.filter(n => n.type === 'collection').map(c => c.data),
-    path.split('/')
+    getPathSegments(path)
   )
 }
 

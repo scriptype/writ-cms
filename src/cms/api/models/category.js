@@ -3,7 +3,7 @@ const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename, relative } = require('path')
+const { join, dirname, basename, relative, sep } = require('path')
 const { contentRootPath } = require('../helpers')
 
 const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
@@ -19,7 +19,7 @@ const getDeepCategory = (contentModel, path) => {
       if (!childNode.path) {
         return false
       }
-      const childPathSegments = childNode.path.split('/')
+      const childPathSegments = childNode.path.split(sep)
       return childPathSegments[childPathSegments.length - 1] === pathSegments[0]
     })
     if (pathSegments.length === 1) {
@@ -28,7 +28,7 @@ const getDeepCategory = (contentModel, path) => {
     return _recurse(child.subtree.categories, pathSegments.slice(1))
   }
 
-  return _recurse(contentModel.subtree.collections, path.split('/'))
+  return _recurse(contentModel.subtree.collections, path.split(sep))
 }
 
 const deleteAttachments = (attachments, parentAbsolutePath) => {

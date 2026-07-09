@@ -1,5 +1,5 @@
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename, relative } = require('path')
+const { join, dirname, basename, relative, sep } = require('path')
 const matter = require('gray-matter')
 const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
@@ -28,7 +28,7 @@ const uploadAttachments = (attachments, parentAbsolutePath) => {
 }
 
 const findPost = (contentModel, path) => {
-    const collectionName = path.split('/')[0]
+    const collectionName = path.split(sep)[0]
     const collection = contentModel.subtree.collections.find(c => c.name === collectionName)
     return collection.subtree.posts.find(p => p.path === path)
 }
@@ -123,9 +123,8 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     // When foldering changes, just re-create post and delete the old one
     if (isFoldered !== shouldFolder) {
       const result = await createPost({
-        ..._.omit(data, 'path'),
-        deletedAttachments: [],
-        taxonomyPath: path.split('/').slice(0, -1),
+        ...data,
+        taxonomyPath: path.split(sep).slice(0, -1),
       }, attachments)
       await rm(post.absolutePath, { recursive: true, force: true })
       return result

@@ -11,8 +11,20 @@ const createDOMNodeFromHTML = (html) => {
   return template.content.firstElementChild
 }
 
+const normalizePath = (path) => {
+  return path.replace(/\\/g, '/').replace(/\/+/g, '/')
+}
+
+const getPathSegments = (path) => {
+  return normalizePath(path)
+    .split('/')
+    .filter(Boolean)
+}
+
 export {
   query,
   setIframeSrc,
-  createDOMNodeFromHTML
+  createDOMNodeFromHTML,
+  normalizePath,
+  getPathSegments
 }

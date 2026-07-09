@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit'
 import api from '../../../api.js'
+import { getPathSegments } from '../../common.js'
 import Dialog from '../Dialog.js'
 import '../ContentEditor/index.js'
 import './ContentActions.js'
@@ -133,7 +134,7 @@ class ContentPanel extends LitElement {
 
   onSubmitCreateEntry = async (payload) => {
     const nodeData = JSON.parse(payload.formData.get('data'))
-    nodeData.taxonomyPath = this.currentNode.data.path.split('/')
+    nodeData.taxonomyPath = getPathSegments(this.currentNode.data.path)
     payload.formData.set('data', JSON.stringify(nodeData))
     console.log('creating entry', payload.formData)
     const response = await api.post.create(payload.formData)
@@ -171,7 +172,7 @@ class ContentPanel extends LitElement {
 
   onSubmitCreateCategory = async (payload) => {
     const nodeData = JSON.parse(payload.formData.get('data'))
-    nodeData.taxonomyPath = this.currentNode.data.path.split('/')
+    nodeData.taxonomyPath = getPathSegments(this.currentNode.data.path)
     payload.formData.set('data', JSON.stringify(nodeData))
     console.log('creating category', payload.formData)
     await api.category.create(payload.formData)
