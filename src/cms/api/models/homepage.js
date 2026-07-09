@@ -1,8 +1,29 @@
 const matter = require('gray-matter')
 const _ = require('lodash')
-const { writeFile, rm } = require('fs/promises')
-const { join } = require('path')
+const { writeFile, mkdir, rm } = require('fs/promises')
+const { join, relative } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
+
+const deleteAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(fileName => {
+    const filePath = join(parentAbsolutePath, fileName)
+    return rm(filePath)
+  })
+}
+
+const uploadAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(file => {
+    const dest = join(parentAbsolutePath, file.originalname)
+    return writeFile(dest, file.buffer)
+  })
+}
+
+const getRelativePath = async (settings, absolutePath) => {
+  const { rootDirectory, contentDirectory } = settings
+  const root = await contentRootPath(rootDirectory, contentDirectory)
+
+  return relative(root, absolutePath)
+}
 
 const createHomepageModel = ({ getSettings, getContentModel }) => {
   const createHomepage = async (data, attachments) => {
@@ -21,13 +42,34 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
-    const path = join(root, 'home')
+    const metadataWithTitle = opts.title === 'Untitled' ? opts.metadata : {
+      ...opts.metadata,
+      title: `${opts.title}`
+    }
+
     const fileContent = matter.stringify({
-      data: opts.metadata,
+      data: metadataWithTitle,
       content: opts.content,
       excerpt: opts.excerpt
     })
-    return writeFile(`${path}.${opts.extension}`, fileContent)
+
+    const path = join(root, 'home')
+
+    if (attachments.length) {
+      try {
+        await mkdir(path, { recursive: true })
+      } catch {}
+      await Promise.all([
+        writeFile(join(path, `index${opts.extension}`), fileContent),
+        ...uploadAttachments(attachments, path)
+      ])
+    } else {
+      await writeFile(`${path}${opts.extension}`, fileContent)
+    }
+
+    return {
+      path: await getRelativePath(getSettings(), path)
+    }
   }
 
   const updateHomepage = async (data, attachments) => {
@@ -45,7 +87,20 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
 
     const homepage = getContentModel().subtree.homepage
 
-    const metadataWithTitle = {
+    const isSystemGenerated = !homepage.path
+    const isFoldered = !homepage.extension
+    const shouldFolder = !!attachments.length || (homepage.subtree.attachments.length > opts.deletedAttachments.length)
+
+    // When foldering changes, just re-create page and delete the old one
+    if (isSystemGenerated || (isFoldered !== shouldFolder)) {
+      const result = await createHomepage(data, attachments)
+      if (!isSystemGenerated) {
+        await rm(homepage.absolutePath, { recursive: true, force: true })
+      }
+      return result
+    }
+
+    const metadataWithTitle = opts.title === 'Untitled' ? opts.metadata : {
       ...opts.metadata,
       title: `${opts.title}`
     }
@@ -56,23 +111,23 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
       excerpt: opts.excerpt
     })
 
-    // system-generated home
-    if (!homepage.path) {
-      const { rootDirectory, contentDirectory } = getSettings()
-      const root = await contentRootPath(rootDirectory, contentDirectory)
-      const targetPath = join(root, `home${opts.extension}`)
-      await writeFile(targetPath, fileContent)
-      return {}
-    }
+    const absolutePath = homepage.absolutePath
 
-    const isFoldered = !homepage.extension
     const targetPath = isFoldered ?
-      join(homepage.absolutePath, homepage.indexFile.name) :
-      homepage.absolutePath
+      join(absolutePath, homepage.indexFile.name) :
+      absolutePath
 
-    await writeFile(targetPath, fileContent)
+    await Promise.all([
+      writeFile(targetPath, fileContent),
+      (async () => {
+        await Promise.all(deleteAttachments(opts.deletedAttachments, absolutePath))
+        await Promise.all(uploadAttachments(attachments, absolutePath))
+      })()
+    ])
 
-    return {}
+    return {
+      path: await getRelativePath(getSettings(), absolutePath)
+    }
   }
 
   const getHomepage = () => {
