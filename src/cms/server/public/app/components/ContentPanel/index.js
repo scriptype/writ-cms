@@ -54,6 +54,7 @@ class ContentPanel extends LitElement {
     }
     Dialog.html(`<content-editor></content-editor>`)
     const editor = Dialog.find('content-editor')
+    editor.onClickBack = this.goBackFromEditor
     editor.node = node
     editor.settings = this.settings
     editor.addEventListener('submit', (e) => {
@@ -92,6 +93,14 @@ class ContentPanel extends LitElement {
 
   traverseUp = () => {
     this.path = this.path.slice(0, -1)
+  }
+
+  goBackFromEditor = () => {
+    Dialog.html(`<content-panel></content-panel>`)
+    const contentPanel = Dialog.find('content-panel')
+    contentPanel.settings = this.settings
+    contentPanel.path = this.path
+    contentPanel.contentTree = this.contentTree
   }
 
   findNode = (nodeType, path) => {

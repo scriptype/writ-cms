@@ -9,12 +9,14 @@ class ContentEditor extends LitElement {
   static properties = {
     node: { type: Object },
     settings: { type: Object },
+    onClickBack: { type: Function },
     _deletedAttachments: { type: Array, state: true }
   }
 
   constructor() {
     super()
     this.node = null
+    this.onClickBack = _=>_
     this._deletedAttachments = []
   }
 
@@ -76,6 +78,7 @@ class ContentEditor extends LitElement {
 
   render() {
     return html`
+      <button @click="${this.onClickBack}" type="button">Back</button>
       <form @submit="${this.onSubmitForm}">
 
         <content-editor-text-field
