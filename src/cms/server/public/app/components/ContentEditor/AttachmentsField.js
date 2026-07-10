@@ -117,7 +117,7 @@ class ContentEditorAttachmentsField extends LitElement {
   }
 
   onDeleteAttachment = (attachment) => () => {
-    if (confirm(`Delete ${attachment.title}?`)) {
+    if (confirm(`Delete "${attachment.title}"?`)) {
       this._deletedAttachments = [...this._deletedAttachments, attachment.title]
       this.dispatchEvent(new CustomEvent('delete-attachment', {
         detail: {
