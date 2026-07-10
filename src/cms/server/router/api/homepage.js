@@ -44,3 +44,18 @@ module.exports = (state) => express.Router()
       res.status(500).send(e)
     }
   })
+  .delete('/', skipWatcher(state), async (req, res) => {
+    try {
+      await req.api.homepage.delete()
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.sendStatus(204)
+    } catch (e) {
+      if (e.message === 'home not found') {
+        return res.status(404).send(e)
+      }
+      console.log('Error deleting homepage', e)
+      res.status(500).send(e)
+    }
+  })

@@ -3,7 +3,7 @@ const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename, relative } = require('path')
+const { join, dirname, basename, relative, isAbsolute } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
@@ -25,6 +25,24 @@ const uploadAttachments = (attachments, parentAbsolutePath) => {
     const dest = join(parentAbsolutePath, file.originalname)
     return writeFile(dest, file.buffer)
   })
+}
+
+const getRelativePath = async (settings, absolutePath) => {
+  const { rootDirectory, contentDirectory } = settings
+  const root = await contentRootPath(rootDirectory, contentDirectory)
+
+  return relative(root, absolutePath)
+}
+
+const validatePath = async (settings, path) => {
+  const relativePath = await getRelativePath(settings, path)
+  const isOutsideRoot = (
+    relativePath.startsWith('..') ||
+    relativePath.startsWith('..\\') ||
+    isAbsolute(relativePath)
+  )
+  const isRootItself = relativePath === ''
+  return !isOutsideRoot && !isRootItself
 }
 
 const createCollectionsModel = ({ getSettings, getContentModel }) => {
@@ -137,10 +155,30 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
     }
   }
 
+  const deleteCollection = async (path) => {
+    if (!path) {
+      throw new Error('path is required')
+    }
+
+    const collection = getContentModel().subtree.collections.find(c => c.name === path)
+
+    if (!collection) {
+      throw new Error('collection not found')
+    }
+
+    const isPagePathValid = await validatePath(getSettings(), collection.absolutePath)
+    if (!isPagePathValid) {
+      throw new Error('invalid collection path')
+    }
+
+    await rm(collection.absolutePath, { recursive: true, force: true })
+  }
+
   return {
     get: getCollections,
     create: createCollection,
-    update: updateCollection
+    update: updateCollection,
+    delete: deleteCollection
   }
 }
 

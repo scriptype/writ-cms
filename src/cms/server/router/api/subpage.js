@@ -46,3 +46,18 @@ module.exports = (state) => express.Router()
       res.status(500).send(e)
     }
   })
+  .delete('/', skipWatcher(state), async (req, res) => {
+    try {
+      await req.api.subpage.delete(req.query.path)
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.sendStatus(204)
+    } catch (e) {
+      if (e.message === 'page not found') {
+        return res.status(404).send(e)
+      }
+      console.log('Error deleting page', e)
+      res.status(500).send(e)
+    }
+  })

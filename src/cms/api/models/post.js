@@ -1,5 +1,5 @@
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename, relative, sep } = require('path')
+const { join, dirname, basename, relative, sep, isAbsolute } = require('path')
 const matter = require('gray-matter')
 const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
@@ -38,6 +38,17 @@ const getRelativePath = async (settings, absolutePath) => {
   const root = await contentRootPath(rootDirectory, contentDirectory)
 
   return relative(root, absolutePath)
+}
+
+const validatePath = async (settings, path) => {
+  const relativePath = await getRelativePath(settings, path)
+  const isOutsideRoot = (
+    relativePath.startsWith('..') ||
+    relativePath.startsWith('..\\') ||
+    isAbsolute(relativePath)
+  )
+  const isRootItself = relativePath === ''
+  return !isOutsideRoot && !isRootItself
 }
 
 const createPostModel = ({ getSettings, getContentModel }) => {
@@ -177,9 +188,29 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     }
   }
 
+  const deletePost = async (path) => {
+    if (!path) {
+      throw new Error('path is required')
+    }
+
+    const post = findPost(getContentModel(), path)
+
+    if (!post) {
+      throw new Error('post not found')
+    }
+
+    const isPostPathValid = await validatePath(getSettings(), post.absolutePath)
+    if (!isPostPathValid) {
+      throw new Error('invalid post path')
+    }
+
+    await rm(post.absolutePath, { recursive: true, force: true })
+  }
+
   return {
     create: createPost,
-    update: updatePost
+    update: updatePost,
+    delete: deletePost
   }
 }
 

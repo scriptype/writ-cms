@@ -3,7 +3,7 @@ const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename, relative } = require('path')
+const { join, dirname, basename, relative, isAbsolute } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
@@ -36,6 +36,17 @@ const getRelativePath = async (settings, absolutePath) => {
   const root = await contentRootPath(rootDirectory, contentDirectory)
 
   return relative(root, absolutePath)
+}
+
+const validatePath = async (settings, path) => {
+  const relativePath = await getRelativePath(settings, path)
+  const isOutsideRoot = (
+    relativePath.startsWith('..') ||
+    relativePath.startsWith('..\\') ||
+    isAbsolute(relativePath)
+  )
+  const isRootItself = relativePath === ''
+  return !isOutsideRoot && !isRootItself
 }
 
 const createSubpageModel = ({ getSettings, getContentModel }) => {
@@ -176,10 +187,30 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     return subpages.find(p => p.title === title)
   }
 
+  const deletePage = async (path) => {
+    if (!path) {
+      throw new Error('path is required')
+    }
+
+    const page = findPage(getContentModel(), path)
+
+    if (!page) {
+      throw new Error('page not found')
+    }
+
+    const isPagePathValid = await validatePath(getSettings(), page.absolutePath)
+    if (!isPagePathValid) {
+      throw new Error('invalid page path')
+    }
+
+    await rm(page.absolutePath, { recursive: true, force: true })
+  }
+
   return {
     create: createSubpage,
     update: updatePage,
-    get: getSubpage
+    get: getSubpage,
+    delete: deletePage
   }
 }
 

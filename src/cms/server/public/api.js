@@ -192,6 +192,13 @@ const api = {
         body: formData
       })
       return response.json()
+    },
+
+    delete: async (path) => {
+      const response = await fetch(`/api/collections?path=${path}`, {
+        method: 'delete'
+      })
+      return response.text()
     }
   },
 
@@ -210,6 +217,13 @@ const api = {
         body: formData
       })
       return response.json()
+    },
+
+    delete: async (path) => {
+      const response = await fetch(`/api/category?path=${path}`, {
+        method: 'delete'
+      })
+      return response.text()
     }
   },
 
@@ -228,6 +242,13 @@ const api = {
         body: formData
       })
       return response.json()
+    },
+
+    delete: async (path) => {
+      const response = await fetch(`/api/post?path=${path}`, {
+        method: 'delete'
+      })
+      return response.text()
     }
   },
 
@@ -256,6 +277,13 @@ const api = {
         body: formData
       })
       return response.json()
+    },
+
+    delete: async () => {
+      const response = await fetch('/api/homepage', {
+        method: 'delete'
+      })
+      return response.text()
     }
   },
 
@@ -286,6 +314,13 @@ const api = {
         body: formData
       })
       return response.json()
+    },
+
+    delete: async (path) => {
+      const response = await fetch(`/api/subpage?path=${path}`, {
+        method: 'delete'
+      })
+      return response.text()
     }
   },
 

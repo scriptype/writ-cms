@@ -1,7 +1,7 @@
 const matter = require('gray-matter')
 const _ = require('lodash')
 const { writeFile, mkdir, rm } = require('fs/promises')
-const { join, relative } = require('path')
+const { join, relative, isAbsolute } = require('path')
 const { contentRootPath, omitResolvedLinks } = require('../helpers')
 
 const deleteAttachments = (attachments, parentAbsolutePath) => {
@@ -23,6 +23,17 @@ const getRelativePath = async (settings, absolutePath) => {
   const root = await contentRootPath(rootDirectory, contentDirectory)
 
   return relative(root, absolutePath)
+}
+
+const validatePath = async (settings, path) => {
+  const relativePath = await getRelativePath(settings, path)
+  const isOutsideRoot = (
+    relativePath.startsWith('..') ||
+    relativePath.startsWith('..\\') ||
+    isAbsolute(relativePath)
+  )
+  const isRootItself = relativePath === ''
+  return !isOutsideRoot && !isRootItself
 }
 
 const createHomepageModel = ({ getSettings, getContentModel }) => {
@@ -134,10 +145,26 @@ const createHomepageModel = ({ getSettings, getContentModel }) => {
     return omitResolvedLinks(getContentModel().subtree.homepage)
   }
 
+  const deleteHomepage = async () => {
+    const homepage = getContentModel().subtree.homepage
+
+    if (!homepage) {
+      throw new Error('home not found')
+    }
+
+    const isPagePathValid = await validatePath(getSettings(), homepage.absolutePath)
+    if (!isPagePathValid) {
+      throw new Error('invalid home path')
+    }
+
+    await rm(homepage.absolutePath, { recursive: true, force: true })
+  }
+
   return {
     create: createHomepage,
     update: updateHomepage,
-    get: getHomepage
+    get: getHomepage,
+    delete: deleteHomepage
   }
 }
 

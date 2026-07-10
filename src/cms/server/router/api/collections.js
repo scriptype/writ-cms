@@ -45,3 +45,18 @@ module.exports = (state) => express.Router()
       res.status(500).send(e)
     }
   })
+  .delete('/', skipWatcher(state), async (req, res) => {
+    try {
+      await req.api.collections.delete(req.query.path)
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.sendStatus(204)
+    } catch (e) {
+      if (e.message === 'collection not found') {
+        return res.status(404).send(e)
+      }
+      console.log('Error deleting collection', e)
+      res.status(500).send(e)
+    }
+  })

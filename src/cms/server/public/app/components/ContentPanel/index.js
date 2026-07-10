@@ -68,6 +68,28 @@ class ContentPanel extends LitElement {
     Dialog.show()
   }
 
+  delete = async (nodeIndex, node) => {
+    console.log('delete', node)
+    switch (node.type) {
+      case 'collection':
+        await api.collections.delete(node.data.path)
+        break
+      case 'category':
+        await api.category.delete(node.data.path)
+        break
+      case 'home':
+        await api.homepage.delete()
+        break
+      case 'page':
+        await api.subpage.delete(node.data.path)
+        break
+      case 'entry':
+        await api.post.delete(node.data.path)
+        break
+    }
+    await this.fetchContentTree()
+  }
+
   traverseUp = () => {
     this.path = this.path.slice(0, -1)
   }
@@ -274,6 +296,7 @@ class ContentPanel extends LitElement {
             .contentTree=${this.contentTree}
             .nodes=${this.currentNode.children}
             .onDrill=${this.drill}
+            .onDelete=${this.delete}
           ></content-drill>
           ${this.currentNode.type === 'collection' ? html`
             <content-editor

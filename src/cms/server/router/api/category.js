@@ -35,3 +35,18 @@ module.exports = (state) => express.Router()
       res.status(500).send(e)
     }
   })
+  .delete('/', skipWatcher(state), async (req, res) => {
+    try {
+      await req.api.category.delete(req.query.path)
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.sendStatus(204)
+    } catch (e) {
+      if (e.message === 'category not found') {
+        return res.status(404).send(e)
+      }
+      console.log('Error deleting category', e)
+      res.status(500).send(e)
+    }
+  })
