@@ -3,50 +3,19 @@ const _ = require('lodash')
 const { ['default']: filenamify } = require('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
-const { join, dirname, basename, relative, isAbsolute } = require('path')
-const { contentRootPath, omitResolvedLinks } = require('../helpers')
-
-const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
-  return join(
-    dirname(oldAbsolutePath),
-    basename(newAbsolutePath)
-  )
-}
-
-const deleteAttachments = (attachments, parentAbsolutePath) => {
-  return attachments.map(fileName => {
-    const filePath = join(parentAbsolutePath, fileName)
-    return rm(filePath)
-  })
-}
-
-const uploadAttachments = (attachments, parentAbsolutePath) => {
-  return attachments.map(file => {
-    const dest = join(parentAbsolutePath, file.originalname)
-    return writeFile(dest, file.buffer)
-  })
-}
+const { join } = require('path')
+const {
+  contentRootPath,
+  omitResolvedLinks,
+  replaceFilename,
+  uploadAttachments,
+  deleteAttachments,
+  getRelativePath,
+  validatePath
+} = require('../helpers')
 
 const findPage = (contentModel, path) => {
   return contentModel.subtree.subpages.find(p => p.path === path)
-}
-
-const getRelativePath = async (settings, absolutePath) => {
-  const { rootDirectory, contentDirectory } = settings
-  const root = await contentRootPath(rootDirectory, contentDirectory)
-
-  return relative(root, absolutePath)
-}
-
-const validatePath = async (settings, path) => {
-  const relativePath = await getRelativePath(settings, path)
-  const isOutsideRoot = (
-    relativePath.startsWith('..') ||
-    relativePath.startsWith('..\\') ||
-    isAbsolute(relativePath)
-  )
-  const isRootItself = relativePath === ''
-  return !isOutsideRoot && !isRootItself
 }
 
 const createSubpageModel = ({ getSettings, getContentModel }) => {

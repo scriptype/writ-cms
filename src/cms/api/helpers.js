@@ -1,5 +1,5 @@
-const { readdir, readFile } = require('fs/promises')
-const { join } = require('path')
+const { readdir, readFile, writeFile, rm } = require('fs/promises')
+const { join, dirname, basename, isAbsolute, relative } = require('path')
 
 const contentRootPath = async (rootDirectory, contentDirectory) => {
   if (!rootDirectory) {
@@ -27,8 +27,51 @@ const omitResolvedLinks = (data) => {
   }))
 }
 
+const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
+  return join(
+    dirname(oldAbsolutePath),
+    basename(newAbsolutePath)
+  )
+}
+
+const getRelativePath = async (settings, absolutePath) => {
+  const { rootDirectory, contentDirectory } = settings
+  const root = await contentRootPath(rootDirectory, contentDirectory)
+  return relative(root, absolutePath)
+}
+
+const validatePath = async (settings, path) => {
+  const relativePath = await getRelativePath(settings, path)
+  const isOutsideRoot = (
+    relativePath.startsWith('..') ||
+    relativePath.startsWith('..\\') ||
+    isAbsolute(relativePath)
+  )
+  const isRootItself = relativePath === ''
+  return !isOutsideRoot && !isRootItself
+}
+
+const deleteAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(fileName => {
+    const filePath = join(parentAbsolutePath, fileName)
+    return rm(filePath)
+  })
+}
+
+const uploadAttachments = (attachments, parentAbsolutePath) => {
+  return attachments.map(file => {
+    const dest = join(parentAbsolutePath, file.originalname)
+    return writeFile(dest, file.buffer)
+  })
+}
+
 module.exports = {
   contentRootPath,
   readFileContent,
-  omitResolvedLinks
+  omitResolvedLinks,
+  replaceFilename,
+  getRelativePath,
+  validatePath,
+  deleteAttachments,
+  uploadAttachments
 }

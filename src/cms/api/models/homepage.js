@@ -1,40 +1,15 @@
 const matter = require('gray-matter')
 const _ = require('lodash')
 const { writeFile, mkdir, rm } = require('fs/promises')
-const { join, relative, isAbsolute } = require('path')
-const { contentRootPath, omitResolvedLinks } = require('../helpers')
-
-const deleteAttachments = (attachments, parentAbsolutePath) => {
-  return attachments.map(fileName => {
-    const filePath = join(parentAbsolutePath, fileName)
-    return rm(filePath)
-  })
-}
-
-const uploadAttachments = (attachments, parentAbsolutePath) => {
-  return attachments.map(file => {
-    const dest = join(parentAbsolutePath, file.originalname)
-    return writeFile(dest, file.buffer)
-  })
-}
-
-const getRelativePath = async (settings, absolutePath) => {
-  const { rootDirectory, contentDirectory } = settings
-  const root = await contentRootPath(rootDirectory, contentDirectory)
-
-  return relative(root, absolutePath)
-}
-
-const validatePath = async (settings, path) => {
-  const relativePath = await getRelativePath(settings, path)
-  const isOutsideRoot = (
-    relativePath.startsWith('..') ||
-    relativePath.startsWith('..\\') ||
-    isAbsolute(relativePath)
-  )
-  const isRootItself = relativePath === ''
-  return !isOutsideRoot && !isRootItself
-}
+const { join } = require('path')
+const {
+  contentRootPath,
+  omitResolvedLinks,
+  uploadAttachments,
+  deleteAttachments,
+  getRelativePath,
+  validatePath
+} = require('../helpers')
 
 const createHomepageModel = ({ getSettings, getContentModel }) => {
   const createHomepage = async (data, attachments) => {
