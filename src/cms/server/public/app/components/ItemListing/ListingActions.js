@@ -1,6 +1,6 @@
 import { LitElement, html, nothing } from 'lit'
 
-class ContentActions extends LitElement {
+class ListingActions extends LitElement {
   static properties = {
     actions: { type: Array },
     isRoot: { type: Boolean },
@@ -16,7 +16,7 @@ class ContentActions extends LitElement {
 
   render() {
     return html`
-      <div id="content-actions">
+      <div id="listing-actions">
         ${this.isRoot ? nothing : html`
           <button type="button" @click="${this.onTraverseUp}">Back</button>
         `}
@@ -30,6 +30,6 @@ class ContentActions extends LitElement {
   }
 }
 
-customElements.define('content-actions', ContentActions)
+customElements.define('listing-actions', ListingActions)
 
-export default ContentActions
+export default ListingActions

@@ -3,8 +3,7 @@ import api from '../../../api.js'
 import { getPathSegments } from '../../common.js'
 import Dialog from '../Dialog.js'
 import '../ContentEditor/index.js'
-import './ContentActions.js'
-import './ContentDrill.js'
+import '../ItemListing/index.js'
 import { getDeepCategory, flattenSubtree } from './helpers.js'
 
 class ContentPanel extends LitElement {
@@ -14,12 +13,7 @@ class ContentPanel extends LitElement {
     path: { type: Array }
   }
 
-  static styles = css`
-    .columns {
-      display: grid;
-      grid-template-columns: auto min-content;
-    }
-  `
+  static styles = css``
 
   get currentNode() {
     let currentNode = { type: 'root', children: this.contentTree }
@@ -288,6 +282,30 @@ class ContentPanel extends LitElement {
     }
   }
 
+  nodeToDrillItem = (node) => {
+    return {
+      ...node,
+      name: `${node.name} (${node.type})`
+    }
+  }
+
+  renderListingAside = () => {
+    const onSubmitMap = {
+      collection: e => this.onSubmitUpdateCollection(e.detail),
+      category: e => this.onSubmitUpdateCollection(e.detail)
+    }
+    const currentNodeType = this.currentNode.type
+    if (currentNodeType === 'collection' || currentNodeType === 'category') {
+      return html`
+        <content-editor
+          .node="${this.currentNode}"
+          .settings="${this.settings}"
+          @submit="${onSubmitMap[this.currentNode.type]}"
+        ></content-editor>
+      `
+    }
+  }
+
   render() {
     const actions = this.getNodeActions(this.currentNode)
     console.log('path', this.path)
@@ -295,33 +313,15 @@ class ContentPanel extends LitElement {
     console.log('actions', actions)
     return html`
       <div id="content-panel">
-        <content-actions
+        <item-listing
           .actions=${actions}
           .isRoot=${!this.path.length}
           .onTraverseUp=${this.traverseUp}
-        ></content-actions>
-        <div class="columns">
-          <content-drill
-            .contentTree=${this.contentTree}
-            .nodes=${this.currentNode.children}
-            .onDrill=${this.drill}
-            .onDelete=${this.delete}
-          ></content-drill>
-          ${this.currentNode.type === 'collection' ? html`
-            <content-editor
-              .node="${this.currentNode}"
-              .settings="${this.settings}"
-              @submit="${e => this.onSubmitUpdateCollection(e.detail)}"
-            ></content-editor>
-          ` : ''}
-          ${this.currentNode.type === 'category' ? html`
-            <content-editor
-              .node="${this.currentNode}"
-              .settings="${this.settings}"
-              @submit="${e => this.onSubmitUpdateCategory(e.detail)}"
-            ></content-editor>
-          ` : ''}
-        </div>
+          .items=${this.currentNode.children.map(this.nodeToDrillItem)}
+          .onDrill=${this.drill}
+          .onDelete=${this.delete}
+          .aside=${this.renderListingAside()}
+        ></item-listing>
       </div>
     `
   }
