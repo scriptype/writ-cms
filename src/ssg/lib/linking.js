@@ -63,22 +63,21 @@ function findClosestNode(sourceNode, candidates) {
 
 function addLinkBack(sourceNode, targetNode, key) {
   if (sourceNode.schema) {
-    Object.keys(sourceNode.schema.attributes || {}).forEach(schemaKey => {
-      const schemaValue = sourceNode.schema.attributes[schemaKey]
-      const isSchemaValueArray = Array.isArray(schemaValue)
+    ;(sourceNode.schema.attributes || []).forEach(attribute => {
+      const isBucketType = Array.isArray(attribute.type)
       const re = new RegExp(`^\\+(${targetNode.contentType}|):${key}$`)
-      const match = isSchemaValueArray ?
-        schemaValue.find(v => re.test(v)) :
-        re.test(schemaValue)
+      const match = isBucketType ?
+        attribute.type.find(v => re.test(v)) :
+        re.test(attribute.type)
       if (match) {
-        if (isSchemaValueArray) {
-          // console.log('linking', targetNode.title, 'to', schemaKey, 'field of', sourceNode.title)
+        if (isBucketType) {
+          // console.log('linking', targetNode.title, 'to', attribute.key, 'field of', sourceNode.title)
           const existingCount = sourceNode.getLinks().filter(link => {
-            return link.keyPath.length === 2 && link.keyPath[0] === schemaKey
+            return link.keyPath.length === 2 && link.keyPath[0] === attribute.key
           }).length
-          sourceNode.addLink([schemaKey, existingCount], targetNode.clone())
+          sourceNode.addLink([attribute.key, existingCount], targetNode.clone())
         } else {
-          sourceNode.addLink([schemaKey], targetNode.clone())
+          sourceNode.addLink([attribute.key], targetNode.clone())
         }
       }
     })

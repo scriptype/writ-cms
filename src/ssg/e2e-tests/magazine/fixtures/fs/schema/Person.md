@@ -1,9 +1,22 @@
 ---
 name: Person
 attributes:
-  articles: [+Article:author]
-  demos: [+Demo:maker]
-  events: [+Event:organizers, +Event:participants]
-  books: [+Book:author]
-  twin: +Person:twin
+  - key: avatar
+    type: ImageAttachment
+    description: An image that represents the person
+  - key: twin
+    type: +Person:twin
+    description: Twin of the person
+  - key: articles
+    type: [+Article:author]
+    description: List of articles the person has authored
+  - key: demos
+    label: Demos & stuff
+    type: [+Demo:maker]
+    description: List of demos the person has created
+  - key: events
+    type: [+Event:organizers, +Event:participants]
+  - key: books
+    type: [+Book:author]
 ---
+Schema for a person entry

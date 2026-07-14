@@ -234,9 +234,10 @@ test('addLinkBack', t => {
       slug: 'alice',
       contentType: 'Person',
       schema: {
-        attributes: {
-          twin: '+Person:twin'
-        }
+        attributes: [{
+          key: 'twin',
+          type:'+Person:twin'
+        }]
       }
     })
     const target = makeNode({
@@ -265,9 +266,10 @@ test('addLinkBack', t => {
       slug: 'alice',
       contentType: 'Person',
       schema: {
-        attributes: {
-          articles: ['+Article:author']
-        }
+        attributes: [{
+          key: 'articles',
+          type: ['+Article:author']
+        }]
       }
     })
     const targetA = makeNode({ slug: 'first-post', contentType: 'Article' })
@@ -295,9 +297,10 @@ test('addLinkBack', t => {
       slug: 'alice',
       contentType: 'Person',
       schema: {
-        attributes: {
-          articles: ['+Article:author']
-        }
+        attributes: [{
+          key: 'articles',
+          type: ['+Article:author']
+        }]
       }
     })
     const target = makeNode({
