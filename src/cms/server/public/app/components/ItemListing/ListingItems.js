@@ -1,10 +1,10 @@
 import { LitElement, html, css } from 'lit'
 
-class ListingDrill extends LitElement {
+class ListingItems extends LitElement {
   static styles = css`
     ::host {}
 
-    .listing-drill-inner  {
+    .listing-items-inner  {
       padding: 0 1em;
     }
 
@@ -29,20 +29,20 @@ class ListingDrill extends LitElement {
 
   static properties = {
     items: { type: Array },
-    onDrill: { type: Function },
+    onSelect: { type: Function },
     onDelete: { type: Function }
   }
 
   constructor() {
     super()
     this.items = []
-    this.onDrill = _=>_
+    this.onSelect = _=>_
     this.onDelete = _=>_
   }
 
   onKeydown = (index, item, e) => {
     if (e.code === 'Enter' || e.code === 'Space') {
-      this.onDrill(index, item)
+      this.onSelect(index, item)
     }
   }
 
@@ -58,15 +58,15 @@ class ListingDrill extends LitElement {
   }
 
   render() {
-    console.log('listing drill', this.items)
+    console.log('listing items', this.items)
     return html`
-      <div class="listing-drill">
+      <div class="listing-items">
         ${!this.items.length ? html`Loading…` : html`
-          <ul class="listing-drill-inner">
+          <ul class="listing-items-inner">
             ${this.items.map((item, index) => html`
               <li
-                class="listing-item listing-item--drillable" tabindex="0"
-                @click="${() => this.onDrill(index, item)}"
+                class="listing-item listing-item--selectable" tabindex="0"
+                @click="${() => this.onSelect(index, item)}"
                 @keydown="${this.onKeydown.bind(this, index, item)}"
               >
                 ${item.name}
@@ -85,6 +85,6 @@ class ListingDrill extends LitElement {
   }
 }
 
-customElements.define('listing-drill', ListingDrill)
+customElements.define('listing-items', ListingItems)
 
-export default ListingDrill
+export default ListingItems

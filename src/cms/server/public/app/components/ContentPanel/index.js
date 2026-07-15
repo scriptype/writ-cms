@@ -282,7 +282,7 @@ class ContentPanel extends LitElement {
     }
   }
 
-  nodeToDrillItem = (node) => {
+  nodeToListingItem = (node) => {
     return {
       ...node,
       name: `${node.name} (${node.type})`
@@ -317,8 +317,8 @@ class ContentPanel extends LitElement {
           .actions=${actions}
           .isRoot=${!this.path.length}
           .onTraverseUp=${this.traverseUp}
-          .items=${this.currentNode.children.map(this.nodeToDrillItem)}
-          .onDrill=${this.drill}
+          .items=${this.currentNode.children.map(this.nodeToListingItem)}
+          .onSelect=${this.drill}
           .onDelete=${this.delete}
           .aside=${this.renderListingAside()}
         ></item-listing>

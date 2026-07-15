@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit'
 import './ListingActions.js'
-import './ListingDrill.js'
+import './ListingItems.js'
 
 class ItemListing extends LitElement {
   static properties = {
@@ -8,7 +8,7 @@ class ItemListing extends LitElement {
     isRoot: { type: Boolean },
     onTraverseUp: { type: Function },
     items: { type: Array },
-    onDrill: { type: Function },
+    onSelect: { type: Function },
     onDelete: { type: Function },
     aside: { type: Object }
   }
@@ -26,7 +26,7 @@ class ItemListing extends LitElement {
     this.isRoot = true
     this.onTraverseUp = _=>_
     this.items = []
-    this.onDrill = _=>_
+    this.onSelect = _=>_
     this.onDelete = _=>_
     this.aside = null
   }
@@ -44,11 +44,11 @@ class ItemListing extends LitElement {
           .onTraverseUp=${this.onTraverseUp}
         ></listing-actions>
         <div class="columns">
-          <listing-drill
+          <listing-items
             .items=${this.items}
-            .onDrill=${this.onDrill}
+            .onSelect=${this.onSelect}
             .onDelete=${this.onDelete}
-          ></listing-drill>
+          ></listing-items>
           ${this.aside || nothing}
         </div>
       </div>
