@@ -2,10 +2,16 @@ import api from '../api.js'
 import { query, setIframeSrc } from './common.js'
 import Toolbar from './components/Toolbar.js'
 import './components/ContentPanel/index.js'
+import './components/SchemaPanel/index.js'
 import Dialog from './components/Dialog.js'
 
 const initToolbar = ({ settings }) => {
-  const renderContent = () => {
+  const renderSchemaPanel = () => {
+    Dialog.html('<schema-panel></schema-panel>')
+    Dialog.show()
+  }
+
+  const renderContentPanel = () => {
     Dialog.html('<content-panel></content-panel>')
     Dialog.find('content-panel').settings = settings
     Dialog.show()
@@ -14,10 +20,16 @@ const initToolbar = ({ settings }) => {
   const { $el: $toolbar } = Toolbar({
     tools: [
       {
+        name: 'schema',
+        icon: '<span style="text-shadow: 0 0 0 black;">🕸️</span>',
+        label: 'Schema',
+        action: renderSchemaPanel
+      },
+      {
         name: 'content',
         icon: '📋',
         label: 'Content',
-        action: renderContent
+        action: renderContentPanel
       }
     ]
   })
