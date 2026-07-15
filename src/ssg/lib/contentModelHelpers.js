@@ -1,6 +1,4 @@
-const _ = require('lodash')
 const marked = require('marked')
-const slug = require('slug')
 
 const templateExtensions = [
   '.hbs',
@@ -25,13 +23,6 @@ const makePermalink = (...parts) => {
     return parts[0] + parts.slice(1).join('/')
   }
   return parts.filter(Boolean).join('/')
-}
-
-const removeExtension = (fileName) => {
-  if (fileName.lastIndexOf('.') > 0) {
-    return fileName.replace(/(\.[^.]+)?$/, '')
-  }
-  return fileName
 }
 
 const Markdown = {
@@ -100,7 +91,6 @@ module.exports = {
   isTemplateFile,
   isDataFile,
   makePermalink,
-  removeExtension,
   Markdown,
   makeDateSlug,
   sort,

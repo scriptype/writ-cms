@@ -1,14 +1,8 @@
-const { join, resolve } = require('path')
+const { resolve } = require('path')
 const makeSlug = require('slug')
-const _ = require('lodash')
+const { removeExtension } = require('../../../helpers')
 const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
-const {
-  removeExtension,
-  isTemplateFile,
-  makePermalink,
-  safeStringify,
-  sort
-} = require('../../../lib/contentModelHelpers')
+const { makePermalink, safeStringify, sort } = require('../../../lib/contentModelHelpers')
 
 const matcha = require('../../../lib/matcha')
 

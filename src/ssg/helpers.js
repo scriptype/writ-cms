@@ -14,9 +14,17 @@ const curry = (fn) => {
   return (...args) => fn.bind(null, ...args)
 }
 
+const removeExtension = (fileName) => {
+  if (fileName.lastIndexOf('.') > 0) {
+    return fileName.replace(/(\.[^.]+)?$/, '')
+  }
+  return fileName
+}
+
 module.exports = {
   pipe,
   pipeSync,
   rightPad,
-  curry
+  curry,
+  removeExtension
 }

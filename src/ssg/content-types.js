@@ -3,6 +3,7 @@ const { join } = require('path')
 const matter = require('gray-matter')
 const marked = require('marked')
 const { readFileContent } = require('./lib/fileSystemHelpers')
+const { removeExtension } = require('./helpers')
 
 const defaultSettings = {
   rootDirectory: '.',
@@ -29,7 +30,9 @@ const readContentTypesDirectory = async (dir) => {
       const { attributes, content } = await readFile(join(dir, path))
       return {
         ...attributes,
-        description: content
+        path,
+        name: attributes.name || removeExtension(path),
+        description: attributes.description || content
       }
     })
   )

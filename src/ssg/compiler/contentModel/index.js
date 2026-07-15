@@ -1,7 +1,6 @@
 const { resolve } = require('path')
 const _ = require('lodash')
 const ImmutableStack = require('../../lib/ImmutableStack')
-const { removeExtension } = require('../../lib/contentModelHelpers')
 const ContentModelEntryNode = require('../../lib/ContentModelEntryNode')
 const matcha = require('../../lib/matcha')
 

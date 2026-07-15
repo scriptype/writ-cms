@@ -1,7 +1,8 @@
 const _ = require('lodash')
 const matter = require('gray-matter')
 const slug = require('slug')
-const { removeExtension, Markdown } = require('./contentModelHelpers')
+const { removeExtension } = require('../helpers')
+const { Markdown } = require('./contentModelHelpers')
 
 const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
 

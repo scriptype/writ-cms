@@ -1,5 +1,11 @@
 const test = require('tape')
-const { pipe, pipeSync, rightPad, curry } = require('./helpers')
+const {
+  pipe,
+  pipeSync,
+  rightPad,
+  curry,
+  removeExtension
+} = require('./helpers')
 
 test('pipe with async functions', async (t) => {
   const times2 = (x) => Promise.resolve(x * 2)
@@ -297,6 +303,52 @@ test('curry returns function', (t) => {
     typeof partial,
     'function',
     'returns a function when partially applied'
+  )
+
+  t.end()
+})
+
+test('removeExtension', t => {
+  t.equal(
+    removeExtension('file.txt'),
+    'file',
+    'removes single extension'
+  )
+
+  t.equal(
+    removeExtension('document.md'),
+    'document',
+    'removes .md extension'
+  )
+
+  t.equal(
+    removeExtension('archive.tar.gz'),
+    'archive.tar',
+    'removes only last extension'
+  )
+
+  t.equal(
+    removeExtension('README'),
+    'README',
+    'returns unchanged if no extension'
+  )
+
+  t.equal(
+    removeExtension('.hidden'),
+    '.hidden',
+    'does not remove leading dot file'
+  )
+
+  t.equal(
+    removeExtension(''),
+    '',
+    'handles empty string'
+  )
+
+  t.equal(
+    removeExtension('file.'),
+    'file.',
+    'does not remove if extension is only dot'
   )
 
   t.end()

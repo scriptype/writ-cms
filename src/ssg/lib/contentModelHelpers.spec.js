@@ -3,7 +3,6 @@ const {
   templateExtensions,
   isTemplateFile,
   isDataFile,
-  removeExtension,
   makePermalink,
   makeDateSlug,
   sort,
@@ -133,52 +132,6 @@ test('isDataFile', t => {
   t.notOk(
     isDataFile({ extension: '' }),
     'does not recognize empty extension'
-  )
-
-  t.end()
-})
-
-test('removeExtension', t => {
-  t.equal(
-    removeExtension('file.txt'),
-    'file',
-    'removes single extension'
-  )
-
-  t.equal(
-    removeExtension('document.md'),
-    'document',
-    'removes .md extension'
-  )
-
-  t.equal(
-    removeExtension('archive.tar.gz'),
-    'archive.tar',
-    'removes only last extension'
-  )
-
-  t.equal(
-    removeExtension('README'),
-    'README',
-    'returns unchanged if no extension'
-  )
-
-  t.equal(
-    removeExtension('.hidden'),
-    '.hidden',
-    'does not remove leading dot file'
-  )
-
-  t.equal(
-    removeExtension(''),
-    '',
-    'handles empty string'
-  )
-
-  t.equal(
-    removeExtension('file.'),
-    'file.',
-    'does not remove if extension is only dot'
   )
 
   t.end()
