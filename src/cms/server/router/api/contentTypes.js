@@ -1,7 +1,8 @@
 const express = require('express')
+const skipWatcher = require('../../middleware/skipWatcher')
 
-module.exports = express.Router()
-  .get('/', async (req, res, next) => {
+module.exports = (state) => express.Router()
+  .get('/', async (req, res) => {
     try {
       res.status(200).json(
         await req.api.contentTypes.get()
@@ -11,7 +12,7 @@ module.exports = express.Router()
       return res.status(500).send(e)
     }
   })
-  .post('/', async (req, res, next) => {
+  .post('/', async (req, res) => {
     try {
       res.status(200).json(
         await req.api.contentTypes.create(req.body)
@@ -19,5 +20,20 @@ module.exports = express.Router()
     } catch (e) {
       console.log('Error creating contentType', e)
       return res.status(500).send(e)
+    }
+  })
+  .delete('/', skipWatcher(state), async (req, res) => {
+    try {
+      await req.api.contentTypes.delete(req.query.path)
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.sendStatus(204)
+    } catch (e) {
+      if (e.message === 'content type not found') {
+        return res.status(404).send(e)
+      }
+      console.log('Error deleting content type', e)
+      res.status(500).send(e)
     }
   })

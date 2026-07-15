@@ -140,6 +140,13 @@ const api = {
         body: JSON.stringify(options)
       })
       return response.json()
+    },
+
+    delete: async (path) => {
+      const response = await fetch(`/api/contentTypes?path=${path}`, {
+        method: 'delete',
+      })
+      return response.text()
     }
   },
 

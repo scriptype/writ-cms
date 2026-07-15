@@ -34,14 +34,16 @@ const replaceFilename = (oldAbsolutePath, newAbsolutePath) => {
   )
 }
 
-const getRelativePath = async (settings, absolutePath) => {
+const getRelativePath = async (settings, absolutePath, isOutsideContentDirectory) => {
   const { rootDirectory, contentDirectory } = settings
-  const root = await contentRootPath(rootDirectory, contentDirectory)
+  const root = isOutsideContentDirectory ?
+    rootDirectory :
+    await contentRootPath(rootDirectory, contentDirectory)
   return relative(root, absolutePath)
 }
 
-const validatePath = async (settings, path) => {
-  const relativePath = await getRelativePath(settings, path)
+const validatePath = async (settings, path, { rootChild } = { rootChild: false }) => {
+  const relativePath = await getRelativePath(settings, path, rootChild)
   const isOutsideRoot = (
     relativePath.startsWith('..') ||
     relativePath.startsWith('..\\') ||
