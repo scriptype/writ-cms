@@ -142,6 +142,19 @@ const api = {
       return response.json()
     },
 
+    update: async (path, formData) => {
+      const response = await fetch(`/api/contentTypes?path=${path}`, {
+        method: 'put',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: formData.get('data')
+        })
+      })
+      return response.json()
+    },
+
     delete: async (path) => {
       const response = await fetch(`/api/contentTypes?path=${path}`, {
         method: 'delete',

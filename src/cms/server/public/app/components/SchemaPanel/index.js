@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit'
 import api from '../../../api.js'
 import Dialog from '../Dialog.js'
+import './ContentTypeEditor.js'
 
 class SchemaPanel extends LitElement {
   static properties = {
@@ -30,20 +31,39 @@ class SchemaPanel extends LitElement {
     }
   }
 
+  goBackFromEditor = () => {
+    Dialog.html(`<schema-panel></schema-panel>`)
+    const schemaPanel = Dialog.find('schema-panel')
+    schemaPanel.contentTypes = this.contentTypes
+  }
+
+  findContentType = (path) => {
+    return this.contentTypes.find(ct => ct.path === path)
+  }
+
   openEditor = (index, item) => {
     const contentType = item.data
     console.log('openEditor', contentType)
-    /*
-     *Dialog.html(`<content-type-editor></content-type-editor>`)
-     *const editor = Dialog.find('content-type-editor')
-     *editor.onClickBack = this.goBackFromEditor
-     *editor.contentType = contentType
-     *editor.addEventListener('submit', (e) => {
-     *  console.log('submit', e.detail)
-     *  this.onSubmitUpdateHome(e.detail)
-     *})
-     *Dialog.show()
-     */
+    Dialog.html(`<content-type-editor></content-type-editor>`)
+    const editor = Dialog.find('content-type-editor')
+    editor.contentType = contentType
+    editor.onClickBack = this.goBackFromEditor
+    editor.addEventListener('submit', (e) => {
+      console.log('submit', e.detail)
+      this.onSubmitUpdateContentType(e.detail)
+    })
+    Dialog.show()
+  }
+
+  onSubmitUpdateContentType = async (payload) => {
+    const path = payload.contentType.path
+    console.log('updating content-type', path, payload.formData)
+    const response = await api.contentTypes.update(path, payload.formData)
+    await this.fetchContentTypes()
+    const updatedContentType = this.findContentType(response.path)
+    console.log('updatedContentType', updatedContentType)
+    const editor = Dialog.find('content-type-editor')
+    editor.contentType = updatedContentType
   }
 
   delete = async (index, item) => {

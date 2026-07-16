@@ -28,13 +28,15 @@ const readContentTypesDirectory = async (dir) => {
   return Promise.all(
     paths.map(async path => {
       const absolutePath = join(dir, path)
-      const { attributes, content } = await readFile(absolutePath)
+      const { attributes, contentRaw } = await readFile(absolutePath)
+      const pathName = removeExtension(path)
       return {
         ...attributes,
         path,
         absolutePath,
-        name: attributes.name || removeExtension(path),
-        description: attributes.description || content
+        name: attributes.name || pathName,
+        pathName,
+        description: attributes.description || contentRaw
       }
     })
   )
@@ -48,7 +50,8 @@ const readFile = async (path) => {
   )
   return {
     attributes,
-    content
+    content,
+    contentRaw: body
   }
 }
 

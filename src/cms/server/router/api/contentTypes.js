@@ -22,6 +22,21 @@ module.exports = (state) => express.Router()
       return res.status(500).send(e)
     }
   })
+  .put('/', skipWatcher(state), async (req, res) => {
+    try {
+      const response = await req.api.contentTypes.update(
+        req.query.path,
+        JSON.parse(req.body.data)
+      )
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.status(200).send(response)
+    } catch (e) {
+      console.log('Error updating content-type', e)
+      res.status(500).send(e)
+    }
+  })
   .delete('/', skipWatcher(state), async (req, res) => {
     try {
       await req.api.contentTypes.delete(req.query.path)
