@@ -2,8 +2,8 @@ import { LitElement, html, css } from 'lit'
 import api from '../../../api.js'
 import { getPathSegments } from '../../common.js'
 import Dialog from '../Dialog.js'
-import '../ContentEditor/index.js'
 import '../ItemListing/index.js'
+import './ContentEditor/index.js'
 import { getDeepCategory, flattenSubtree } from './helpers.js'
 
 class ContentPanel extends LitElement {
