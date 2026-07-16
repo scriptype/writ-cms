@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit'
 
-class ContentEditorAttachmentsField extends LitElement {
+class AttachmentsField extends LitElement {
   static styles = css`
     .attachments {
       display: flex;
@@ -223,7 +223,7 @@ class ContentEditorAttachmentsField extends LitElement {
 
   render() {
     return html`
-      <div class="content-editor-field">
+      <div class="form-field">
         <p>${this.label}</p>
         <div class="attachments">
           ${this.attachments.map(this.renderAttachment)}
@@ -240,6 +240,6 @@ class ContentEditorAttachmentsField extends LitElement {
   }
 }
 
-customElements.define('content-editor-attachments-field', ContentEditorAttachmentsField)
+customElements.define('attachments-field', AttachmentsField)
 
-export default ContentEditorAttachmentsField
+export default AttachmentsField

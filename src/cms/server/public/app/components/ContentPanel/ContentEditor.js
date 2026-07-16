@@ -1,9 +1,9 @@
 import { LitElement, html } from 'lit'
-import './TextField.js'
-import './BasicTextEditorField.js'
-import './FullTextEditorField.js'
-import './BooleanField.js'
-import './AttachmentsField.js'
+import '../TextField.js'
+import '../BasicTextEditorField.js'
+import '../FullTextEditorField.js'
+import '../BooleanField.js'
+import '../AttachmentsField.js'
 
 class ContentEditor extends LitElement {
   static properties = {
@@ -64,7 +64,7 @@ class ContentEditor extends LitElement {
       composed: true
     }))
 
-    const attachmentsField = this.shadowRoot.querySelector('content-editor-attachments-field')
+    const attachmentsField = this.shadowRoot.querySelector('attachments-field')
     if (attachmentsField) {
       attachmentsField.clearFiles()
       attachmentsField.clearDeletedAttachments()
@@ -81,55 +81,55 @@ class ContentEditor extends LitElement {
       <button @click="${this.onClickBack}" type="button">Back</button>
       <form @submit="${this.onSubmitForm}">
 
-        <content-editor-text-field
+        <text-field
           name="title"
           label="Title"
           .value="${this.node?.data?.title || ''}">
-        </content-editor-text-field>
+        </text-field>
 
-        <content-editor-text-field
+        <text-field
           name="contentType"
           label="Content type"
           .value="${this.node?.data?.contentType || ''}">
-        </content-editor-text-field>
+        </text-field>
 
-        <content-editor-text-field
+        <text-field
           name="template"
           label="Template"
           .value="${this.node?.data?.template || ''}">
-        </content-editor-text-field>
+        </text-field>
 
-        <content-editor-text-field
+        <text-field
           name="slug"
           label="Slug"
           .value="${this.node?.data?.slug || ''}">
-        </content-editor-text-field>
+        </text-field>
 
-        <content-editor-basic-text-editor-field
+        <basic-text-editor-field
           name="excerpt"
           label="Excerpt"
           .value="${this.node?.data?.excerptRaw || ''}">
-        </content-editor-basic-text-editor-field>
+        </basic-text-editor-field>
 
-        <content-editor-full-text-editor-field
+        <full-text-editor-field
           name="content"
           label="Content"
           .value="${this.node?.data?.contentRaw || ''}">
-        </content-editor-full-text-editor-field>
+        </full-text-editor-field>
 
-        <content-editor-boolean-field
+        <boolean-field
           name="draft"
           label="Draft?"
           .checked="${!!this.node?.data?.draft}">
-        </content-editor-boolean-field>
+        </boolean-field>
 
-        <content-editor-attachments-field
+        <attachments-field
           name="attachments"
           label="Attachments"
           @delete-attachment="${this.onDeleteAttachment}"
           .settings="${this.settings}"
           .attachments="${this.node?.data?.subtree?.attachments || []}">
-        </content-editor-attachments-field>
+        </attachments-field>
 
         <button>${this.node ? 'Save' : 'Create'}</button>
 

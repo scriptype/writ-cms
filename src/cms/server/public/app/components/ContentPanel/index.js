@@ -3,7 +3,7 @@ import api from '../../../api.js'
 import { getPathSegments } from '../../common.js'
 import Dialog from '../Dialog.js'
 import '../ItemListing/index.js'
-import './ContentEditor/index.js'
+import './ContentEditor.js'
 import { getDeepCategory, flattenSubtree } from './helpers.js'
 
 class ContentPanel extends LitElement {

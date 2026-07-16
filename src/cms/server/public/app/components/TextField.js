@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit'
 
-class ContentEditorFullTextEditorField extends LitElement {
+class TextField extends LitElement {
   static formAssociated = true
 
   static properties = {
@@ -14,9 +14,10 @@ class ContentEditorFullTextEditorField extends LitElement {
     super()
     this.internals = this.attachInternals()
     this.value = ''
-    this.label = 'Full editor'
-    this.name = `full-text-editor-${Date.now()}`
+    this.label = 'Text'
+    this.name = `text-field-${Date.now()}`
     this.placeholder = ''
+    this.addEventListener('keydown', this.onKeyDown)
   }
 
   updated(changedProps) {
@@ -28,15 +29,27 @@ class ContentEditorFullTextEditorField extends LitElement {
   onInput(e) {
     this.value = e.target.value
     this.internals.setFormValue(this.value)
+    this.dispatchEvent(new CustomEvent('change', {
+      detail: { value: this.value },
+      bubbles: true,
+      composed: true
+    }))
+  }
+
+  onKeyDown(e) {
+    if (e.key === 'Enter') {
+      this.internals.form?.requestSubmit()
+    }
   }
 
   render() {
     return html`
-      <div class="content-editor-field">
+      <div class="form-field">
         <label for="${this.name}-field">
           ${this.label}
         </label>
-        <textarea
+        <input
+          type="text"
           @input="${this.onInput}"
           .value="${this.value}"
           placeholder="${this.placeholder}"
@@ -47,6 +60,6 @@ class ContentEditorFullTextEditorField extends LitElement {
   }
 }
 
-customElements.define('content-editor-full-text-editor-field', ContentEditorFullTextEditorField)
+customElements.define('text-field', TextField)
 
-export default ContentEditorFullTextEditorField
+export default TextField

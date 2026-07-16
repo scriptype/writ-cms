@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit'
 
-class ContentEditorBasicTextEditorField extends LitElement {
+class BasicTextEditorField extends LitElement {
   static formAssociated = true
 
   static properties = {
@@ -14,7 +14,7 @@ class ContentEditorBasicTextEditorField extends LitElement {
     super()
     this.internals = this.attachInternals()
     this.value = ''
-    this.label = 'Basic editor'
+    this.label = 'Basic text editor'
     this.name = `basic-text-editor-${Date.now()}`
     this.placeholder = ''
   }
@@ -32,7 +32,7 @@ class ContentEditorBasicTextEditorField extends LitElement {
 
   render() {
     return html`
-      <div class="content-editor-field">
+      <div class="form-field">
         <label for="${this.name}-field">
           ${this.label}
         </label>
@@ -47,6 +47,6 @@ class ContentEditorBasicTextEditorField extends LitElement {
   }
 }
 
-customElements.define('content-editor-basic-text-editor-field', ContentEditorBasicTextEditorField)
+customElements.define('basic-text-editor-field', BasicTextEditorField)
 
-export default ContentEditorBasicTextEditorField
+export default BasicTextEditorField

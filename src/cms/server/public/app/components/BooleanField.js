@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit'
 
-class ContentEditorBooleanField extends LitElement {
+class BooleanField extends LitElement {
   static formAssociated = true
 
   static properties = {
@@ -30,7 +30,7 @@ class ContentEditorBooleanField extends LitElement {
 
   render() {
     return html`
-      <div class="content-editor-field">
+      <div class="form-field">
         <label for="${this.name}-field">
           ${this.label}
         </label>
@@ -45,6 +45,6 @@ class ContentEditorBooleanField extends LitElement {
   }
 }
 
-customElements.define('content-editor-boolean-field', ContentEditorBooleanField)
+customElements.define('boolean-field', BooleanField)
 
-export default ContentEditorBooleanField
+export default BooleanField
