@@ -15,14 +15,31 @@ class SelectField extends LitElement {
     super()
     this.internals = this.attachInternals()
     this.value = ''
+    this.options = []
     this.label = 'Select'
     this.name = `select-field-${Date.now()}`
     this.placeholder = ''
   }
 
   updated(changedProps) {
-    if (changedProps.has('value')) {
-      this.internals.setFormValue(this.value)
+    if (changedProps.has('options') || changedProps.has('value')) {
+      const selectedOption = this.options.find(option => {
+        return option.value === this.value
+      })
+      const selectedValue = selectedOption
+        ? this.value
+        : this.options[0]?.value
+
+      if (selectedValue === undefined) {
+        this.internals.setFormValue(null)
+        return
+      }
+
+      if (this.value !== selectedValue) {
+        this.value = selectedValue
+      }
+
+      this.internals.setFormValue(selectedValue)
     }
   }
 

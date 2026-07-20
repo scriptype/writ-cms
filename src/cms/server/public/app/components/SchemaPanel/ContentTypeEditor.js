@@ -134,7 +134,7 @@ class ContentTypeEditor extends LitElement {
   }
 
   get modelConfig() {
-    return modelConfig[this.model]
+    return this.model ? modelConfig[this.model] : []
   }
 
   processFormData(rawFormData) {

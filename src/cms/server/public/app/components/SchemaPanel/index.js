@@ -20,6 +20,23 @@ class SchemaPanel extends LitElement {
     this.fetchContentTypes()
   }
 
+  get actions() {
+    return [{
+      label: 'Create content type',
+      handler: () => {
+        console.log('create content-type')
+        Dialog.html(`<content-type-editor></content-type-editor>`)
+        const editor = Dialog.find('content-type-editor')
+        editor.onClickBack = this.goBackFromEditor
+        editor.addEventListener('submit', (e) => {
+          console.log('submit', e.detail)
+          this.onSubmitCreateContentType(e.detail)
+        })
+        Dialog.show()
+      }
+    }]
+  }
+
   async fetchContentTypes() {
     this.contentTypes = await api.contentTypes.get()
   }
@@ -66,6 +83,16 @@ class SchemaPanel extends LitElement {
     editor.contentType = updatedContentType
   }
 
+  onSubmitCreateContentType = async (payload) => {
+    console.log('creating content-type', payload.formData)
+    const response = await api.contentTypes.create(payload.formData)
+    await this.fetchContentTypes()
+    const createdContentType = this.findContentType(response.path)
+    console.log('createdContentType', createdContentType)
+    const editor = Dialog.find('content-type-editor')
+    editor.contentType = createdContentType
+  }
+
   delete = async (index, item) => {
     const contentType = item.data
     console.log('delete', contentType)
@@ -78,6 +105,7 @@ class SchemaPanel extends LitElement {
     return html`
       <div id="schema-panel">
         <item-listing
+          .actions=${this.actions}
           .items=${this.contentTypes.map(this.contentTypeToListItem)}
           .onSelect=${this.openEditor}
           .onDelete=${this.delete}

@@ -12,11 +12,15 @@ module.exports = (state) => express.Router()
       return res.status(500).send(e)
     }
   })
-  .post('/', async (req, res) => {
+  .post('/', skipWatcher(state), async (req, res) => {
     try {
-      res.status(200).json(
-        await req.api.contentTypes.create(req.body)
+      const response = await req.api.contentTypes.create(
+        JSON.parse(req.body.data)
       )
+      state.setState(
+        await req.api.ssg.build(state.getSSGOptions())
+      )
+      res.status(200).send(response)
     } catch (e) {
       console.log('Error creating contentType', e)
       return res.status(500).send(e)

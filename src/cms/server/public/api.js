@@ -131,13 +131,15 @@ const api = {
       return response.json()
     },
 
-    create: async (options) => {
+    create: async (formData) => {
       const response = await fetch('/api/contentTypes', {
         method: 'post',
         headers: {
           'content-type': 'application/json'
         },
-        body: JSON.stringify(options)
+        body: JSON.stringify({
+          data: formData.get('data')
+        })
       })
       return response.json()
     },
