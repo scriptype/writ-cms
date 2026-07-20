@@ -212,7 +212,9 @@ class ContentPanel extends LitElement {
           handler: () => {
             console.log('create page')
             Dialog.html(`<content-editor></content-editor>`)
-            Dialog.find('content-editor').addEventListener('submit', (e) => {
+            const editor = Dialog.find('content-editor')
+            editor.onClickBack = this.goBackFromEditor
+            editor.addEventListener('submit', (e) => {
               this.onSubmitCreatePage(e.detail)
             })
             Dialog.show()
@@ -222,7 +224,9 @@ class ContentPanel extends LitElement {
           handler: () => {
             console.log('create collection')
             Dialog.html(`<content-editor></content-editor>`)
-            Dialog.find('content-editor').addEventListener('submit', (e) => {
+            const editor = Dialog.find('content-editor')
+            editor.onClickBack = this.goBackFromEditor
+            editor.addEventListener('submit', (e) => {
               this.onSubmitCreateCollection(e.detail)
             })
             Dialog.show()
@@ -235,7 +239,9 @@ class ContentPanel extends LitElement {
           handler: () => {
             console.log('create category')
             Dialog.html(`<content-editor></content-editor>`)
-            Dialog.find('content-editor').addEventListener('submit', (e) => {
+            const editor = Dialog.find('content-editor')
+            editor.onClickBack = this.goBackFromEditor
+            editor.addEventListener('submit', (e) => {
               this.onSubmitCreateCategory(e.detail)
             })
             Dialog.show()
@@ -246,6 +252,7 @@ class ContentPanel extends LitElement {
             console.log('create entry')
             Dialog.html(`<content-editor></content-editor>`)
             const editor = Dialog.find('content-editor')
+            editor.onClickBack = this.goBackFromEditor
             editor.settings = this.settings
             editor.addEventListener('submit', (e) => {
               this.onSubmitCreateEntry(e.detail)
@@ -261,7 +268,9 @@ class ContentPanel extends LitElement {
           handler: () => {
             console.log('create category')
             Dialog.html(`<content-editor></content-editor>`)
-            Dialog.find('content-editor').addEventListener('submit', (e) => {
+            const editor = Dialog.find('content-editor')
+            editor.onClickBack = this.goBackFromEditor
+            editor.addEventListener('submit', (e) => {
               this.onSubmitCreateCategory(e.detail)
             })
             Dialog.show()
@@ -272,6 +281,7 @@ class ContentPanel extends LitElement {
             console.log('create entry')
             Dialog.html(`<content-editor></content-editor>`)
             const editor = Dialog.find('content-editor')
+            editor.onClickBack = this.goBackFromEditor
             editor.settings = this.settings
             editor.addEventListener('submit', (e) => {
               this.onSubmitCreateEntry(e.detail)
