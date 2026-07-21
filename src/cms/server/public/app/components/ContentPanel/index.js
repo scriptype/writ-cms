@@ -204,91 +204,42 @@ class ContentPanel extends LitElement {
     await this.fetchContentTree()
   }
 
+  createAction(label, handler) {
+    return {
+      label,
+      handler: () => {
+        console.log(label)
+        Dialog.html(`<content-editor></content-editor>`)
+        const editor = Dialog.find('content-editor')
+        editor.onClickBack = this.goBackFromEditor
+        editor.addEventListener('submit', (e) => {
+          handler(e.detail)
+          this.onSubmitCreatePage(e.detail)
+        })
+        Dialog.show()
+      }
+    }
+  }
+
   getNodeActions(node) {
     switch (node.type) {
       case 'root':
-        return [{
-          label: 'Create page',
-          handler: () => {
-            console.log('create page')
-            Dialog.html(`<content-editor></content-editor>`)
-            const editor = Dialog.find('content-editor')
-            editor.onClickBack = this.goBackFromEditor
-            editor.addEventListener('submit', (e) => {
-              this.onSubmitCreatePage(e.detail)
-            })
-            Dialog.show()
-          }
-        }, {
-          label: 'Create collection',
-          handler: () => {
-            console.log('create collection')
-            Dialog.html(`<content-editor></content-editor>`)
-            const editor = Dialog.find('content-editor')
-            editor.onClickBack = this.goBackFromEditor
-            editor.addEventListener('submit', (e) => {
-              this.onSubmitCreateCollection(e.detail)
-            })
-            Dialog.show()
-          }
-        }]
+        return [
+          this.createAction('Create page', this.onSubmitCreatePage),
+          this.createAction('Create collection', this.onSubmitCreateCollection)
+        ]
 
       case 'collection':
-        return [{
-          label: 'Create category',
-          handler: () => {
-            console.log('create category')
-            Dialog.html(`<content-editor></content-editor>`)
-            const editor = Dialog.find('content-editor')
-            editor.onClickBack = this.goBackFromEditor
-            editor.addEventListener('submit', (e) => {
-              this.onSubmitCreateCategory(e.detail)
-            })
-            Dialog.show()
-          }
-        }, {
-          label: 'Create entry',
-          handler: () => {
-            console.log('create entry')
-            Dialog.html(`<content-editor></content-editor>`)
-            const editor = Dialog.find('content-editor')
-            editor.onClickBack = this.goBackFromEditor
-            editor.settings = this.settings
-            editor.addEventListener('submit', (e) => {
-              this.onSubmitCreateEntry(e.detail)
-            })
-            Dialog.show()
-          }
-
-        }]
+        return [
+          this.createAction('Create category', this.onSubmitCreateCategory),
+          this.createAction('Create entry', this.onSubmitCreateEntry)
+        ]
 
       case 'category':
-        return [{
-          label: 'Create sub-category',
-          handler: () => {
-            console.log('create category')
-            Dialog.html(`<content-editor></content-editor>`)
-            const editor = Dialog.find('content-editor')
-            editor.onClickBack = this.goBackFromEditor
-            editor.addEventListener('submit', (e) => {
-              this.onSubmitCreateCategory(e.detail)
-            })
-            Dialog.show()
-          }
-        }, {
-          label: 'Create entry',
-          handler: () => {
-            console.log('create entry')
-            Dialog.html(`<content-editor></content-editor>`)
-            const editor = Dialog.find('content-editor')
-            editor.onClickBack = this.goBackFromEditor
-            editor.settings = this.settings
-            editor.addEventListener('submit', (e) => {
-              this.onSubmitCreateEntry(e.detail)
-            })
-            Dialog.show()
-          }
-        }]
+        return [
+          this.createAction('Create sub-category', this.onSubmitCreateCategory),
+          this.createAction('Create entry', this.onSubmitCreateEntry)
+        ]
     }
   }
 
