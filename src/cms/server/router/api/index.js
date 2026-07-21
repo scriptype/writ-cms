@@ -1,6 +1,8 @@
 const express = require('express')
+const morgan = require('morgan')
 
 module.exports = (state) => express.Router()
+  .use(morgan(':method :url :status :res[content-length] - :response-time ms'))
   .use('/category', require('./category')(state))
   .use('/collections', require('./collections')(state))
   .use('/contentModel', require('./contentModel'))
