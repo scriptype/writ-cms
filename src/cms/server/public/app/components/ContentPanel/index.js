@@ -9,16 +9,16 @@ import { getDeepCategory, flattenSubtree } from './helpers.js'
 class ContentPanel extends LitElement {
   static properties = {
     settings: { type: Object },
-    contentTree: { type: Array },
-    path: { type: Array }
+    _path: { type: Array, state: true },
+    _contentTree: { type: Array, state: true }
   }
 
   static styles = css``
 
   get currentNode() {
-    let currentNode = { type: 'root', children: this.contentTree }
-    let nodes = this.contentTree
-    for (const step of this.path) {
+    let currentNode = { type: 'root', children: this._contentTree }
+    let nodes = this._contentTree
+    for (const step of this._path) {
       currentNode = nodes[step.index]
       nodes = currentNode.children || []
     }
@@ -27,8 +27,8 @@ class ContentPanel extends LitElement {
 
   constructor() {
     super()
-    this.contentTree = []
-    this.path = []
+    this._contentTree = []
+    this._path = []
   }
 
   connectedCallback() {
@@ -37,13 +37,13 @@ class ContentPanel extends LitElement {
   }
 
   async fetchContentTree() {
-    this.contentTree = flattenSubtree(await api.contentModel.get())
+    this._contentTree = flattenSubtree(await api.contentModel.get())
   }
 
   drill = (nodeIndex, node) => {
     console.log('drill', node)
     if (node.type === 'collection' || node.type === 'category') {
-      this.path = [...this.path, { index: nodeIndex, name: node.name }]
+      this._path = [...this._path, { index: nodeIndex, name: node.name }]
       return
     }
     Dialog.html(`<content-editor></content-editor>`)
@@ -86,15 +86,15 @@ class ContentPanel extends LitElement {
   }
 
   traverseUp = () => {
-    this.path = this.path.slice(0, -1)
+    this._path = this._path.slice(0, -1)
   }
 
   goBackFromEditor = () => {
     Dialog.html(`<content-panel></content-panel>`)
     const contentPanel = Dialog.find('content-panel')
     contentPanel.settings = this.settings
-    contentPanel.path = this.path
-    contentPanel.contentTree = this.contentTree
+    contentPanel._path = this._path
+    contentPanel._contentTree = this._contentTree
   }
 
   findNode = (nodeType, path) => {
@@ -112,12 +112,12 @@ class ContentPanel extends LitElement {
       })
     }
     if (nodeType === 'collection') {
-      return this.contentTree.find(node => {
+      return this._contentTree.find(node => {
         return node.type === 'collection' && node.data.path === path
       })
     }
     if (nodeType === 'category') {
-      return getDeepCategory(this.contentTree, path)
+      return getDeepCategory(this._contentTree, path)
     }
   }
 
@@ -318,14 +318,14 @@ class ContentPanel extends LitElement {
 
   render() {
     const actions = this.getNodeActions(this.currentNode)
-    console.log('path', this.path)
+    console.log('path', this._path)
     console.log('currentNode', this.currentNode)
     console.log('actions', actions)
     return html`
       <div id="content-panel">
         <item-listing
           .actions=${actions}
-          .isRoot=${!this.path.length}
+          .isRoot=${!this._path.length}
           .onTraverseUp=${this.traverseUp}
           .items=${this.currentNode.children.map(this.nodeToListingItem)}
           .onSelect=${this.drill}
