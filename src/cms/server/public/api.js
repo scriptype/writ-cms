@@ -145,7 +145,8 @@ const api = {
     },
 
     update: async (path, formData) => {
-      const response = await fetch(`/api/contentTypes?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/contentTypes?path=${safePath}`, {
         method: 'put',
         headers: {
           'content-type': 'application/json'
@@ -158,7 +159,8 @@ const api = {
     },
 
     delete: async (path) => {
-      const response = await fetch(`/api/contentTypes?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/contentTypes?path=${safePath}`, {
         method: 'delete',
       })
       return response.text()
@@ -209,7 +211,8 @@ const api = {
     },
 
     update: async (path, formData) => {
-      const response = await fetch(`/api/collections?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/collections?path=${safePath}`, {
         method: 'put',
         body: formData
       })
@@ -217,7 +220,8 @@ const api = {
     },
 
     delete: async (path) => {
-      const response = await fetch(`/api/collections?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/collections?path=${safePath}`, {
         method: 'delete'
       })
       return response.text()
@@ -234,7 +238,8 @@ const api = {
     },
 
     update: async (path, formData) => {
-      const response = await fetch(`/api/category?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/category?path=${safePath}`, {
         method: 'put',
         body: formData
       })
@@ -242,7 +247,8 @@ const api = {
     },
 
     delete: async (path) => {
-      const response = await fetch(`/api/category?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/category?path=${safePath}`, {
         method: 'delete'
       })
       return response.text()
@@ -259,7 +265,8 @@ const api = {
     },
 
     update: async (path, formData) => {
-      const response = await fetch(`/api/post?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/post?path=${safePath}`, {
         method: 'put',
         body: formData
       })
@@ -267,7 +274,8 @@ const api = {
     },
 
     delete: async (path) => {
-      const response = await fetch(`/api/post?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/post?path=${safePath}`, {
         method: 'delete'
       })
       return response.text()
@@ -331,7 +339,8 @@ const api = {
     },
 
     update: async (path, formData) => {
-      const response = await fetch(`/api/subpage?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/subpage?path=${safePath}`, {
         method: 'put',
         body: formData
       })
@@ -339,7 +348,8 @@ const api = {
     },
 
     delete: async (path) => {
-      const response = await fetch(`/api/subpage?path=${path}`, {
+      const safePath = encodeURIComponent(path)
+      const response = await fetch(`/api/subpage?path=${safePath}`, {
         method: 'delete'
       })
       return response.text()
