@@ -214,7 +214,6 @@ class ContentPanel extends LitElement {
         editor.onClickBack = this.goBackFromEditor
         editor.addEventListener('submit', (e) => {
           handler(e.detail)
-          this.onSubmitCreatePage(e.detail)
         })
         Dialog.show()
       }
