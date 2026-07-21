@@ -51,38 +51,16 @@ class ContentPanel extends LitElement {
     editor.onClickBack = this.goBackFromEditor
     editor.node = node
     editor.settings = this.settings
-    editor.addEventListener('submit', (e) => {
+    editor.addEventListener('update', (e) => {
       if (node.type === 'entry') {
-        this.onSubmitUpdateEntry(e.detail)
+        this.updateNode('entry', api.post.update, e.detail)
       } else if (node.type === 'page') {
-        this.onSubmitUpdatePage(e.detail)
+        this.updateNode('page', api.subpage.update, e.detail)
       } else if (node.type === 'home') {
-        this.onSubmitUpdateHome(e.detail)
+        this.updateNode('home', api.homepage.update, e.detail)
       }
     })
     Dialog.show()
-  }
-
-  delete = async (nodeIndex, node) => {
-    console.log('delete', node)
-    switch (node.type) {
-      case 'collection':
-        await api.collections.delete(node.data.path)
-        break
-      case 'category':
-        await api.category.delete(node.data.path)
-        break
-      case 'home':
-        await api.homepage.delete()
-        break
-      case 'page':
-        await api.subpage.delete(node.data.path)
-        break
-      case 'entry':
-        await api.post.delete(node.data.path)
-        break
-    }
-    await this.fetchContentTree()
   }
 
   traverseUp = () => {
@@ -107,9 +85,11 @@ class ContentPanel extends LitElement {
       })
     }
     if (nodeType === 'entry') {
-      return this.currentNode.data.subtree.levelPosts.find(entry => {
-        return entry.path === path
-      })
+      return {
+        data: this.currentNode.data.subtree.levelPosts.find(entry => {
+          return entry.path === path
+        })
+      }
     }
     if (nodeType === 'collection') {
       return this._contentTree.find(node => {
@@ -117,94 +97,72 @@ class ContentPanel extends LitElement {
       })
     }
     if (nodeType === 'category') {
-      return getDeepCategory(this._contentTree, path)
+      return {
+        data: getDeepCategory(this._contentTree, path)
+      }
     }
   }
 
-  onSubmitUpdateHome = async (payload) => {
-    console.log('updating home', payload)
-    await api.homepage.update(payload.formData)
+  findEditor = (nodeType) => {
+    let editorInAside
+    if (nodeType === 'collection' || nodeType === 'category') {
+      const listing = this.shadowRoot.querySelector('item-listing')
+      editorInAside = listing.shadowRoot.querySelector('content-editor')
+    }
+    return editorInAside || Dialog.find('content-editor')
+  }
+
+  createNode = async (nodeType, apiCall, payload) => {
+    console.log(`creating ${nodeType}`, payload.formData)
+    const response = await apiCall(payload.formData)
     await this.fetchContentTree()
-    const updatedNode = this.findNode('home')
+    const createdNode = this.findNode(nodeType, response.path)
     const editor = Dialog.find('content-editor')
-    console.log('updatedNode', updatedNode)
+    console.log('editor', editor)
+    console.log('createdNode', createdNode)
+    editor.node = createdNode
+    editor.settings = this.settings
+  }
+
+  updateNode = async (nodeType, apiCall, payload) => {
+    let response
+    if (nodeType === 'home') {
+      console.log(`updating ${nodeType}`, payload.formData)
+      response = await apiCall(payload.formData)
+    } else {
+      const path = payload.node.data.path
+      console.log(`updating ${nodeType}`, path, payload.formData)
+      response = await apiCall(path, payload.formData)
+    }
+    await this.fetchContentTree()
+    const updatedNode = this.findNode(nodeType, response.path)
+    const editor = this.findEditor(nodeType)
     editor.node = updatedNode
   }
 
-  onSubmitUpdatePage = async (payload) => {
-    const path = payload.node.data.path
-    console.log('updating page', path, payload.formData)
-    const response = await api.subpage.update(path, payload.formData)
-    await this.fetchContentTree()
-    const updatedNode = this.findNode('page', response.path)
-    const editor = Dialog.find('content-editor')
-    editor.node = updatedNode
-  }
-
-  onSubmitCreatePage = async (payload) => {
-    console.log('creating page', payload)
-    await api.subpage.create(payload.formData)
-    await this.fetchContentTree()
-  }
-
-  onSubmitUpdateEntry = async (payload) => {
-    const path = payload.node.data.path
-    console.log('updating entry', path, payload.formData)
-    const response = await api.post.update(path, payload.formData)
-    await this.fetchContentTree()
-    const updatedNode = this.findNode('entry', response.path)
-    const editor = Dialog.find('content-editor')
-    editor.node = { data: updatedNode }
-  }
-
-  onSubmitCreateEntry = async (payload) => {
-    const nodeData = JSON.parse(payload.formData.get('data'))
-    nodeData.taxonomyPath = getPathSegments(this.currentNode.data.path)
-    payload.formData.set('data', JSON.stringify(nodeData))
-    console.log('creating entry', payload.formData)
-    const response = await api.post.create(payload.formData)
-    await this.fetchContentTree()
-    const createdNode = this.findNode('entry', response.path)
-    const editor = Dialog.find('content-editor')
-    editor.node = { data: createdNode }
-  }
-
-  onSubmitUpdateCollection = async (payload) => {
-    const path = payload.node.data.path
-    console.log('updating collection', path, payload.formData)
-    const response = await api.collections.update(path, payload.formData)
-    await this.fetchContentTree()
-    const updatedNode = this.findNode('collection', response.path)
-    const editor = this.shadowRoot.querySelector('content-editor')
-    editor.node = updatedNode
-  }
-
-  onSubmitCreateCollection = async (payload) => {
-    console.log('creating collection', payload)
-    await api.collections.create(payload.formData)
+  deleteNode = async (nodeIndex, node) => {
+    console.log('delete', node)
+    switch (node.type) {
+      case 'collection':
+        await api.collections.delete(node.data.path)
+        break
+      case 'category':
+        await api.category.delete(node.data.path)
+        break
+      case 'home':
+        await api.homepage.delete()
+        break
+      case 'page':
+        await api.subpage.delete(node.data.path)
+        break
+      case 'entry':
+        await api.post.delete(node.data.path)
+        break
+    }
     await this.fetchContentTree()
   }
 
-  onSubmitUpdateCategory = async (payload) => {
-    const path = payload.node.data.path
-    console.log('updating category', path, payload.formData)
-    const response = await api.category.update(path, payload.formData)
-    await this.fetchContentTree()
-    const updatedNode = this.findNode('category', response.path)
-    const editor = this.shadowRoot.querySelector('content-editor')
-    editor.node = { data: updatedNode }
-  }
-
-  onSubmitCreateCategory = async (payload) => {
-    const nodeData = JSON.parse(payload.formData.get('data'))
-    nodeData.taxonomyPath = getPathSegments(this.currentNode.data.path)
-    payload.formData.set('data', JSON.stringify(nodeData))
-    console.log('creating category', payload.formData)
-    await api.category.create(payload.formData)
-    await this.fetchContentTree()
-  }
-
-  createAction(label, handler) {
+  createAction(label, handlers) {
     return {
       label,
       handler: () => {
@@ -212,9 +170,8 @@ class ContentPanel extends LitElement {
         Dialog.html(`<content-editor></content-editor>`)
         const editor = Dialog.find('content-editor')
         editor.onClickBack = this.goBackFromEditor
-        editor.addEventListener('submit', (e) => {
-          handler(e.detail)
-        })
+        editor.addEventListener('create', handlers.create)
+        editor.addEventListener('update', handlers.update)
         Dialog.show()
       }
     }
@@ -224,22 +181,47 @@ class ContentPanel extends LitElement {
     switch (node.type) {
       case 'root':
         return [
-          this.createAction('Create page', this.onSubmitCreatePage),
-          this.createAction('Create collection', this.onSubmitCreateCollection)
+          this.createAction('Create page', {
+            create: e => this.createNode('page', api.subpage.create, e.detail),
+            update: e => this.updateNode('page', api.subpage.update, e.detail)
+          }),
+          this.createAction('Create collection', {
+            create: e => this.createNode('collection', api.collections.create, e.detail),
+            update: e => this.updateNode('collection', api.collections.update, e.detail)
+          })
         ]
 
       case 'collection':
         return [
-          this.createAction('Create category', this.onSubmitCreateCategory),
-          this.createAction('Create entry', this.onSubmitCreateEntry)
+          this.createAction('Create category', {
+            create: e => this.createNode('category', api.category.create, this.withTaxonomyPath(e.detail)),
+            update: e => this.updateNode('category', api.category.update, e.detail),
+          }),
+          this.createAction('Create entry', {
+            create: e => this.createNode('entry', api.post.create, this.withTaxonomyPath(e.detail)),
+            update: e => this.updateNode('entry', api.post.update, e.detail)
+          })
         ]
 
       case 'category':
         return [
-          this.createAction('Create sub-category', this.onSubmitCreateCategory),
-          this.createAction('Create entry', this.onSubmitCreateEntry)
+          this.createAction('Create sub-category', {
+            create: e => this.createNode('category', api.category.create, this.withTaxonomyPath(e.detail)),
+            update: e => this.updateNode('category', api.category.update, e.detail),
+          }),
+          this.createAction('Create entry', {
+            create: e => this.createNode('entry', api.post.create, this.withTaxonomyPath(e.detail)),
+            update: e => this.updateNode('entry', api.post.update, e.detail),
+          })
         ]
     }
+  }
+
+  withTaxonomyPath = (payload) => {
+    const nodeData = JSON.parse(payload.formData.get('data'))
+    nodeData.taxonomyPath = getPathSegments(this.currentNode.data.path)
+    payload.formData.set('data', JSON.stringify(nodeData))
+    return payload
   }
 
   nodeToListingItem = (node) => {
@@ -251,8 +233,8 @@ class ContentPanel extends LitElement {
 
   renderListingAside = () => {
     const onSubmitMap = {
-      collection: e => this.onSubmitUpdateCollection(e.detail),
-      category: e => this.onSubmitUpdateCollection(e.detail)
+      collection: e => this.updateNode('collection', api.collections.update, e.detail),
+      category: e => this.updateNode('category', api.category.update, e.detail),
     }
     const currentNodeType = this.currentNode.type
     if (currentNodeType === 'collection' || currentNodeType === 'category') {
@@ -260,7 +242,7 @@ class ContentPanel extends LitElement {
         <content-editor
           .node="${this.currentNode}"
           .settings="${this.settings}"
-          @submit="${onSubmitMap[this.currentNode.type]}"
+          @update="${onSubmitMap[this.currentNode.type]}"
         ></content-editor>
       `
     }
@@ -279,7 +261,7 @@ class ContentPanel extends LitElement {
           .onTraverseUp=${this.traverseUp}
           .items=${this.currentNode.children.map(this.nodeToListingItem)}
           .onSelect=${this.drill}
-          .onDelete=${this.delete}
+          .onDelete=${this.deleteNode}
           .aside=${this.renderListingAside()}
         ></item-listing>
       </div>

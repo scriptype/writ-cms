@@ -65,13 +65,20 @@ const createCategoryModel = ({ getSettings, getContentModel }) => {
       content: opts.content,
       excerpt: opts.excerpt
     })
+
+    const targetPath = join(unusedPath, `category.${opts.extension}`)
+
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return Promise.all([
-      writeFile(`${join(unusedPath, 'category')}.${opts.extension}`, fileContent),
+    await Promise.all([
+      writeFile(targetPath, fileContent),
       ...uploadAttachments(attachments, unusedPath)
     ])
+
+    return {
+      path: relative(root, unusedPath)
+    }
   }
 
   const updateCategory = async (path, data, attachments) => {

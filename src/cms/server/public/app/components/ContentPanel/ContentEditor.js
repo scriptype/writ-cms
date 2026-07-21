@@ -55,7 +55,8 @@ class ContentEditor extends LitElement {
     const finalFormData = this.processFormData(rawFormData)
     console.log('finalFormData', finalFormData)
 
-    this.dispatchEvent(new CustomEvent('submit', {
+    const eventType = this.node ? 'update' : 'create'
+    this.dispatchEvent(new CustomEvent(eventType, {
       detail: {
         formData: finalFormData,
         node: this.node

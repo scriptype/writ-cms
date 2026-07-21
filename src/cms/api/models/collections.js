@@ -54,10 +54,14 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
     try {
       await mkdir(unusedPath, { recursive: true })
     } catch {}
-    return Promise.all([
+    await Promise.all([
       writeFile(`${join(unusedPath, 'collection')}.${opts.extension}`, fileContent),
       ...uploadAttachments(attachments, unusedPath)
     ])
+
+    return {
+      path: relative(root, unusedPath)
+    }
   }
 
   const updateCollection = async (path, data, attachments) => {
