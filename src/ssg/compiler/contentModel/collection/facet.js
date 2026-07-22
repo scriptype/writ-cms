@@ -162,7 +162,7 @@ function Facet() {
       }
     },
 
-    afterEffects: (contentModel, facet) => {},
+    afterEffects: (/*contentModel, facet*/) => {},
 
     render: (renderer, facets, { contentModel, settings, debug }) => {
       const presentationFacets = facets.map(serialize)
