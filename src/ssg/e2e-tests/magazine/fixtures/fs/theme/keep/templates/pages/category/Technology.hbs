@@ -18,14 +18,14 @@
   <header class="category-header">
     <h2><a data-title href="{{technology.permalink}}">{{technology.title}}</a></h2>
 
-    {{#if technology.facets.length}}
+    {{#if technology.__facets__.length}}
     <div class="category-facets">
       {{#if (is technology.permalink '/')}}
       <a data-facet-browse-link href="by">by</a>:
       {{else}}
       <a data-facet-browse-link href="{{technology.permalink}}/by">by</a>:
       {{/if}}
-      {{#each technology.facets as |facet|}}
+      {{#each technology.__facets__ as |facet|}}
       <a data-facet-link href="{{facet.permalink}}">{{facet.title}}</a>
       {{/each}}
     </div>

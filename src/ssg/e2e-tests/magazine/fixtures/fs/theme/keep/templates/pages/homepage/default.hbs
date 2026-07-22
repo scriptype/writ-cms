@@ -41,10 +41,10 @@
     <header class="collection-header">
       <h3><a data-collection-link href="{{collection.permalink}}">{{collection.title}}</a></h3>
 
-      {{#if collection.facets.length}}
+      {{#if collection.__facets__.length}}
       <div class="collection-facets">
         <a data-facet-browse-link href="{{collection.permalink}}/by">by</a>:
-        {{#each collection.facets as |facet|}}
+        {{#each collection.__facets__ as |facet|}}
         <a data-facet-name-link href="{{facet.permalink}}">{{facet.title}}</a>
         {{/each}}
       </div>

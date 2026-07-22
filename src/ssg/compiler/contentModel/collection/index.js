@@ -45,7 +45,7 @@ class Collection extends ContentModelEntryNode {
     const data = {
       ...collection,
       ...collection.serializeLinks(),
-      facets: collection.facets.map(models.facet().serialize),
+      __facets__: collection.__facets__.map(models.facet().serialize),
       categories: collection.subtree.categories.map(models.Category.serialize),
       posts: collection.subtree.posts.map(models.Post.serialize),
       levelPosts: collection.subtree.levelPosts.map(models.Post.serialize),
@@ -53,13 +53,13 @@ class Collection extends ContentModelEntryNode {
     }
 
     // Alias for posts key in collection
-    const entriesAlias = collection.entriesAlias || collection.schema?.entriesAlias
+    const entriesAlias = collection.__schema__.entriesAlias
     if (entriesAlias) {
       data[entriesAlias] = data.posts
     }
 
     // Alias for categories key in collection
-    const categoriesAlias = collection.categoriesAlias || collection.schema?.categoriesAlias
+    const categoriesAlias = collection.__schema__.categoriesAlias
     if (categoriesAlias) {
       data[categoriesAlias] = data.categories
     }
@@ -69,7 +69,7 @@ class Collection extends ContentModelEntryNode {
 
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
-    this.schema = this.getSchema()
+    this.__schema__ = this.getSchema()
     this.contextKey = 'collection'
     this.subtreeConfig = this.getSubtreeConfig()
     this.subtree = this.parseSubtree({
@@ -106,24 +106,30 @@ class Collection extends ContentModelEntryNode {
     const collectionFSName = this.indexFile ?
       removeExtension(this.indexFile.name) :
       this.fsNode.name
-    return this.settings.contentTypes
+
+    const contentType = this.settings.contentTypes
       .filter(ct => ct.model === 'collection')
       .find(ct => ct.collectionAlias === collectionFSName)
+
+    return {
+      ...(contentType || {}),
+      ...this.__schema__
+    }
   }
 
   getSubtreeConfig() {
     const settings = {
       category: {
         mode: this.settings.mode,
-        defaultCategoryName: this.defaultCategoryName || this.schema?.defaultCategoryName || this.settings.defaultCategoryName,
+        defaultCategoryName: this.__schema__.defaultCategoryName || this.settings.defaultCategoryName,
         contentTypes: this.settings.contentTypes,
-        entryContentType: this.entryContentType || this.schema?.entryContentType,
-        categoryContentType: this.categoryContentType || this.schema?.categoryContentType,
-        entryAlias: this.entryAlias || this.schema?.entryAlias,
-        categoryAlias: this.categoryAlias || this.schema?.categoryAlias,
-        entriesAlias: this.entriesAlias || this.schema?.entriesAlias,
-        categoriesAlias: this.categoriesAlias || this.schema?.categoriesAlias,
-        facetKeys: this.facets || this.schema?.facets || [],
+        entryContentType: this.__schema__.entryContentType,
+        categoryContentType: this.__schema__.categoryContentType,
+        entryAlias: this.__schema__.entryAlias,
+        categoryAlias: this.__schema__.categoryAlias,
+        entriesAlias: this.__schema__.entriesAlias,
+        categoriesAlias: this.__schema__.categoriesAlias,
+        facetKeys: this.__schema__.facets || [],
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
         level: 1,
@@ -135,7 +141,7 @@ class Collection extends ContentModelEntryNode {
 
     const postMatcher = matcha.folderable({
       nameOptions: {
-        index: [this.entryAlias, this.schema?.entryAlias, 'post', 'index']
+        index: [this.__schema__.entryAlias, 'post', 'index']
       }
     })
 
@@ -177,14 +183,14 @@ class Collection extends ContentModelEntryNode {
     if (!defaultCategory) {
       const defaultCategorySettings = {
         mode: this.settings.mode,
-        defaultCategoryName: this.defaultCategoryName || this.schema?.defaultCategoryName || this.settings.defaultCategoryName,
-        categoryAlias: this.categoryAlias || this.schema?.categoryAlias,
-        entryAlias: this.entryAlias || this.schema?.entryAlias,
-        entriesAlias: this.entriesAlias || this.schema?.entriesAlias,
-        categoriesAlias: this.categoriesAlias || this.schema?.categoriesAlias,
-        entryContentType: this.entryContentType || this.schema?.entryContentType,
-        categoryContentType: this.categoryContentType || this.schema?.categoryContentType,
-        facetKeys: this.facets || this.schema?.facets || [],
+        defaultCategoryName: this.__schema__.defaultCategoryName || this.settings.defaultCategoryName,
+        categoryAlias: this.__schema__.categoryAlias,
+        entryAlias: this.__schema__.entryAlias,
+        entriesAlias: this.__schema__.entriesAlias,
+        categoriesAlias: this.__schema__.categoriesAlias,
+        entryContentType: this.__schema__.entryContentType,
+        categoryContentType: this.__schema__.categoryContentType,
+        facetKeys: this.__schema__.facets || [],
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
         contentTypes: this.settings.contentTypes,
@@ -206,10 +212,10 @@ class Collection extends ContentModelEntryNode {
     })
     const uncategorizedPostSettings = {
       mode: this.settings.mode,
-      entryAlias: this.entryAlias || this.schema?.entryAlias,
-      entryContentType: this.entryContentType || this.schema?.entryContentType,
+      entryAlias: this.__schema__.entryAlias,
+      entryContentType: this.__schema__.entryContentType,
       contentTypes: this.settings.contentTypes,
-      facetKeys: this.facets || this.schema?.facets || [],
+      facetKeys: this.__schema__.facets || [],
     }
     const uncategorizedPost = new models.Post(
       childNode || postData,
@@ -240,11 +246,11 @@ class Collection extends ContentModelEntryNode {
     sort(this.subtree.posts, sortBy, sortOrder)
     Collection.locatePinnedEntries(this.subtree.posts)
 
-    // this.facets was front-matter property. store it as facetKeys
-    const facetKeys = this.facets || this.schema?.facets || []
+    // store the schema.facets as facetKeys
+    const facetKeys = this.__schema__.facets || []
 
-    // this.facets now becomes instances of facet model
-    this.facets = []
+    // store instances of facet model
+    this.__facets__ = []
 
     if (facetKeys.length) {
       const childContext = this.context.push({
@@ -255,7 +261,7 @@ class Collection extends ContentModelEntryNode {
         key: 'collection'
       })
 
-      this.facets = models.facet().collectFacets(
+      this.__facets__ = models.facet().collectFacets(
         this.subtree.posts.map(post => ({
           ...post,
           ...post.serializeLinks()
@@ -266,18 +272,18 @@ class Collection extends ContentModelEntryNode {
     }
 
     this.subtree.categories.forEach(category => {
-      category.afterEffects(contentModel, this.facets)
+      category.afterEffects(contentModel, this.__facets__)
     })
 
     this.subtree.posts.forEach(post => {
-      post.afterEffects(contentModel, this.facets)
+      post.afterEffects(contentModel, this.__facets__)
     })
 
     this.subtree.attachments.forEach(attachment => {
       attachment.afterEffects(contentModel)
     })
 
-    this.facets.forEach(facet => {
+    this.__facets__.forEach(facet => {
       models.facet().afterEffects(contentModel, facet)
     })
   }
@@ -300,17 +306,17 @@ class Collection extends ContentModelEntryNode {
           }
 
           // Alias for the current collection
-          if (this.schema?.collectionAlias) {
-            data[this.schema.collectionAlias] = data.collection
+          if (this.__schema__.collectionAlias) {
+            data[this.__schema__.collectionAlias] = data.collection
           }
 
           // Alias for the paginated 'posts'
-          const entriesAlias = this.entriesAlias || this.schema?.entriesAlias
+          const entriesAlias = this.__schema__.entriesAlias
           if (entriesAlias) {
             data[entriesAlias] = data.posts
           }
 
-          const contentType = this.contentType || this.schema?.name
+          const contentType = this.contentType || this.__schema__.name
 
           return renderer.render({
             templates: [
@@ -373,7 +379,7 @@ class Collection extends ContentModelEntryNode {
 
     const renderFacets = () => {
       return models.facet().render(
-        renderer, this.facets, { contentModel, settings, debug }
+        renderer, this.__facets__, { contentModel, settings, debug }
       )
     }
 

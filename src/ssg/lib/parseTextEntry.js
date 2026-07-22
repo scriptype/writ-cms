@@ -6,6 +6,18 @@ const { Markdown } = require('./contentModelHelpers')
 
 const LINKED_FIELD_SYNTAX = /^\+[^ ]+$/
 
+const schemaFields = [
+  'defaultCategoryName',
+  'collectionAlias',
+  'categoryContentType',
+  'categoryAlias',
+  'categoriesAlias',
+  'entryContentType',
+  'entryAlias',
+  'entriesAlias',
+  'facets'
+]
+
 const parseLinkValue = (value) => {
   return value.replace(/^\+/g, '').split('/').filter(Boolean)
 }
@@ -63,7 +75,8 @@ const parseFlatData = (data) => {
     title,
     slug: data.slug || slug(title),
     contentRaw,
-    content
+    content,
+    __schema__: {}
   }
 }
 
@@ -94,14 +107,17 @@ const parseTextEntry = (fsNode, indexNode, isFlatData) => {
     excerpt = parseContent(indexNode, excerptRaw.replace(/\n$/, ''))
   }
 
+  const attributesSansSchema = _.omit(attributes, schemaFields)
+
   return {
     ..._.omit(fsNode, 'children'),
-    ...attributes,
-    ...parseLinkedFields(attributes),
+    ...attributesSansSchema,
+    ...parseLinkedFields(attributesSansSchema),
     __originalAttributes__: attributes,
+    __schema__: _.pick(attributes, schemaFields),
     hasIndex,
-    title: attributes.title || entryName,
-    slug: attributes.slug || slug(entryName),
+    title: attributesSansSchema.title || entryName,
+    slug: attributesSansSchema.slug || slug(entryName),
     contentRaw,
     content,
     excerptRaw,

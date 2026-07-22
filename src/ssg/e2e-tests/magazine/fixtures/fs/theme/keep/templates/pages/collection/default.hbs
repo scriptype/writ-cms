@@ -18,14 +18,14 @@
   <header class="collection-header">
     <h2><a data-title href="{{collection.permalink}}">{{collection.title}}</a></h2>
 
-    {{#if collection.facets.length}}
+    {{#if collection.__facets__.length}}
     <div class="collection-facets">
       {{#if (is collection.permalink '/')}}
       <a data-facet-browse-link href="by">by</a>:
       {{else}}
       <a data-facet-browse-link href="{{collection.permalink}}/by">by</a>:
       {{/if}}
-      {{#each collection.facets as |facet|}}
+      {{#each collection.__facets__ as |facet|}}
       <a data-facet-name-link href="{{facet.permalink}}">{{facet.title}}</a>
       {{/each}}
     </div>

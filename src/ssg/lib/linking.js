@@ -62,8 +62,8 @@ function findClosestNode(sourceNode, candidates) {
 }
 
 function addLinkBack(sourceNode, targetNode, key) {
-  if (sourceNode.schema) {
-    ;(sourceNode.schema.attributes || []).forEach(attribute => {
+  if (sourceNode.__schema__) {
+    ;(sourceNode.__schema__.attributes || []).forEach(attribute => {
       const isBucketType = Array.isArray(attribute.type)
       const re = new RegExp(`^\\+(${targetNode.contentType}|):${key}$`)
       const match = isBucketType ?

@@ -36,7 +36,7 @@ class Post extends ContentModelEntryNode {
     super(fsNode, context, settings)
 
     this.contentType = this.contentType || this.settings.entryContentType
-    this.schema = this.settings.contentTypes.find(ct => ct.name === this.contentType)
+    this.__schema__ = this.getSchema()
 
     this.contextKey = 'post'
     this.subtreeConfig = this.getSubtreeConfig()
@@ -51,6 +51,17 @@ class Post extends ContentModelEntryNode {
         nameOptions: [this.settings.entryAlias, 'post', 'index']
       })
     ) || this.fsNode
+  }
+
+  getSchema() {
+    const contentType = this.settings.contentTypes.find(ct => {
+      return ct.name === this.contentType
+    })
+
+    return {
+      ...(contentType || {}),
+      ...this.__schema__
+    }
   }
 
   getSubtreeConfig() {

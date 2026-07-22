@@ -43,7 +43,7 @@ class Category extends ContentModelEntryNode {
     const data = {
       ...category,
       ...category.serializeLinks(),
-      facets: category.facets.map(models.facet().serialize),
+      __facets__: category.__facets__.map(models.facet().serialize),
       posts: category.subtree.posts.map(models.Post.serialize),
       levelPosts: category.subtree.levelPosts.map(models.Post.serialize),
       categories: category.subtree.categories.map(Category.serialize),
@@ -51,13 +51,13 @@ class Category extends ContentModelEntryNode {
     }
 
     // Alias for the posts key in category
-    const entriesAlias = category.entriesAlias || category.settings.entriesAlias
+    const entriesAlias = category.__schema__.entriesAlias || category.settings.entriesAlias
     if (entriesAlias) {
       data[entriesAlias] = data.posts
     }
 
     // Alias for the categories key in category
-    const categoriesAlias = category.categoriesAlias || category.settings.categoriesAlias
+    const categoriesAlias = category.__schema__.categoriesAlias || category.settings.categoriesAlias
     if (categoriesAlias) {
       data[categoriesAlias] = data.categories
     }
@@ -68,7 +68,7 @@ class Category extends ContentModelEntryNode {
   constructor(fsNode, context, settings = defaultSettings) {
     super(fsNode, context, settings)
 
-    this.facets = []
+    this.__facets__ = []
     this.contextKey = this.settings.level === 1 ?
       'category' :
       `subCategory${this.settings.level - 1}`
@@ -127,20 +127,20 @@ class Category extends ContentModelEntryNode {
     const settings = {
       post: {
         mode: this.settings.mode,
-        entryAlias: this.entryAlias || this.settings.entryAlias,
-        entryContentType: this.entryContentType || this.settings.entryContentType,
+        entryAlias: this.__schema__.entryAlias || this.settings.entryAlias,
+        entryContentType: this.__schema__.entryContentType || this.settings.entryContentType,
         contentTypes: this.settings.contentTypes,
         facetKeys: this.settings.facetKeys
       },
       subCategory: {
         mode: this.settings.mode,
         contentTypes: this.settings.contentTypes,
-        entryContentType: this.entryContentType || this.settings.entryContentType,
-        categoryContentType: this.categoryContentType || this.settings.categoryContentType,
-        entryAlias: this.entryAlias || this.settings.entryAlias,
-        categoryAlias: this.categoryAlias || this.settings.categoryAlias,
-        entriesAlias: this.entriesAlias || this.settings.entriesAlias,
-        categoriesAlias: this.categoriesAlias || this.settings.categoriesAlias,
+        entryContentType: this.__schema__.entryContentType || this.settings.entryContentType,
+        categoryContentType: this.__schema__.categoryContentType || this.settings.categoryContentType,
+        entryAlias: this.__schema__.entryAlias || this.settings.entryAlias,
+        categoryAlias: this.__schema__.categoryAlias || this.settings.categoryAlias,
+        entriesAlias: this.__schema__.entriesAlias || this.settings.entriesAlias,
+        categoriesAlias: this.__schema__.categoriesAlias || this.settings.categoriesAlias,
         sortBy: this.sortBy || this.settings.sortBy,
         sortOrder: this.sortOrder || this.settings.sortOrder,
         facetKeys: this.settings.facetKeys,
@@ -190,7 +190,7 @@ class Category extends ContentModelEntryNode {
         key: this.contextKey
       })
 
-      this.facets = models.facet().collectFacets(
+      this.__facets__ = models.facet().collectFacets(
         this.subtree.posts.map(post => ({
           ...post,
           ...post.serializeLinks()
@@ -237,7 +237,7 @@ class Category extends ContentModelEntryNode {
           }
 
           // Alias for the paginated 'posts'
-          const entriesAlias = this.entriesAlias || this.settings.entriesAlias
+          const entriesAlias = this.__schema__.entriesAlias || this.settings.entriesAlias
           if (entriesAlias) {
             data[entriesAlias] = data.posts
           }
@@ -282,11 +282,11 @@ class Category extends ContentModelEntryNode {
     }
 
     const renderFacets = () => {
-      if (!this.facets?.length) {
+      if (!this.__facets__?.length) {
         return
       }
       return models.facet().render(
-        renderer, this.facets, { contentModel, settings, debug }
+        renderer, this.__facets__, { contentModel, settings, debug }
       )
     }
 

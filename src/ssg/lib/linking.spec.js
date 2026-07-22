@@ -233,7 +233,7 @@ test('addLinkBack', t => {
     const source = makeNode({
       slug: 'alice',
       contentType: 'Person',
-      schema: {
+      __schema__: {
         attributes: [{
           key: 'twin',
           type:'+Person:twin'
@@ -265,7 +265,7 @@ test('addLinkBack', t => {
     const source = makeNode({
       slug: 'alice',
       contentType: 'Person',
-      schema: {
+      __schema__: {
         attributes: [{
           key: 'articles',
           type: ['+Article:author']
@@ -296,7 +296,7 @@ test('addLinkBack', t => {
     const source = makeNode({
       slug: 'alice',
       contentType: 'Person',
-      schema: {
+      __schema__: {
         attributes: [{
           key: 'articles',
           type: ['+Article:author']
