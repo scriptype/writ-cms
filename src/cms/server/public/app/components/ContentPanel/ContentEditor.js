@@ -16,7 +16,7 @@ class ContentEditor extends LitElement {
   constructor() {
     super()
     this.node = null
-    this.onClickBack = _=>_
+    this.onClickBack = null
     this._deletedAttachments = []
   }
 
@@ -79,7 +79,9 @@ class ContentEditor extends LitElement {
 
   render() {
     return html`
-      <button @click="${this.onClickBack}" type="button">Back</button>
+      ${this.onClickBack ? html`
+        <button @click="${this.onClickBack}" type="button">Back</button>
+      ` : ''}
       <form @submit="${this.onSubmitForm}">
 
         <text-field
