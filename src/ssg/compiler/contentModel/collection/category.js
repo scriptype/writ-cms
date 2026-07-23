@@ -1,4 +1,5 @@
 const makeSlug = require('slug')
+const _ = require('lodash')
 const ContentModelEntryNode = require('../../../lib/ContentModelEntryNode')
 const { makePermalink, sort } = require('../../../lib/contentModelHelpers')
 const matcha = require('../../../lib/matcha')
@@ -10,10 +11,6 @@ const models = {
 }
 
 const defaultSettings = {
-  categoryAlias: undefined,
-  entryAlias: undefined,
-  categoriesAlias: undefined,
-  entriesAlias: undefined,
   mode: 'start',
   level: 1,
   contentTypes: [],
@@ -51,13 +48,13 @@ class Category extends ContentModelEntryNode {
     }
 
     // Alias for the posts key in category
-    const entriesAlias = category.__schema__.entriesAlias || category.settings.entriesAlias
+    const entriesAlias = category.__schema__.entriesAlias || category.__parentSchema__.entriesAlias
     if (entriesAlias) {
       data[entriesAlias] = data.posts
     }
 
     // Alias for the categories key in category
-    const categoriesAlias = category.__schema__.categoriesAlias || category.settings.categoriesAlias
+    const categoriesAlias = category.__schema__.categoriesAlias || category.__parentSchema__.categoriesAlias
     if (categoriesAlias) {
       data[categoriesAlias] = data.categories
     }
@@ -65,9 +62,10 @@ class Category extends ContentModelEntryNode {
     return data
   }
 
-  constructor(fsNode, context, settings = defaultSettings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = defaultSettings) {
+    super(fsNode, context, schema, settings)
 
+    this.__schema__ = this.getSchema(schema)
     this.__facets__ = []
     this.contextKey = this.settings.level === 1 ?
       'category' :
@@ -86,8 +84,38 @@ class Category extends ContentModelEntryNode {
     })
   }
 
+  getSchema(parentSchema) {
+    const contentType = this.settings.contentTypes.find(ct => {
+      return ct.model === 'category' && (
+        ct.name === this.contentType ||
+        ct.name === parentSchema.categoryContentType
+      )
+    })
+
+    return {
+      ...(contentType || {}),
+      ...this.__schema__
+    }
+  }
+
+  getInheritedSchema() {
+    return {
+      ...this.__parentSchema__,
+      ...this.__schema__
+    }
+  }
+
+  getInheritedSettings() {
+    return {
+      mode: this.settings.mode,
+      sortBy: this.sortBy || this.settings.sortBy,
+      sortOrder: this.sortOrder || this.settings.sortOrder,
+      contentTypes: this.settings.contentTypes
+    }
+  }
+
   makeDefaultCategory() {
-    const title = this.settings.defaultCategoryName
+    const title = this.__parentSchema__.defaultCategoryName
 
     return Object.assign(this, {
       facets: [],
@@ -108,7 +136,7 @@ class Category extends ContentModelEntryNode {
   getIndexFile() {
     return this.fsNode.children?.find(
       matcha.templateFile({
-        nameOptions: [this.settings.categoryAlias, 'category']
+        nameOptions: [this.__parentSchema__.categoryAlias, 'category']
       })
     ) || this.fsNode
   }
@@ -124,36 +152,9 @@ class Category extends ContentModelEntryNode {
   }
 
   getSubtreeConfig() {
-    const settings = {
-      post: {
-        mode: this.settings.mode,
-        entryAlias: this.__schema__.entryAlias || this.settings.entryAlias,
-        entryContentType: this.__schema__.entryContentType || this.settings.entryContentType,
-        contentTypes: this.settings.contentTypes,
-        facetKeys: this.settings.facetKeys
-      },
-      subCategory: {
-        mode: this.settings.mode,
-        contentTypes: this.settings.contentTypes,
-        entryContentType: this.__schema__.entryContentType || this.settings.entryContentType,
-        categoryContentType: this.__schema__.categoryContentType || this.settings.categoryContentType,
-        entryAlias: this.__schema__.entryAlias || this.settings.entryAlias,
-        categoryAlias: this.__schema__.categoryAlias || this.settings.categoryAlias,
-        entriesAlias: this.__schema__.entriesAlias || this.settings.entriesAlias,
-        categoriesAlias: this.__schema__.categoriesAlias || this.settings.categoriesAlias,
-        sortBy: this.sortBy || this.settings.sortBy,
-        sortOrder: this.sortOrder || this.settings.sortOrder,
-        facetKeys: this.settings.facetKeys,
-        level: this.settings.level + 1
-      },
-      attachment: {
-        mode: this.settings.mode
-      }
-    }
-
     const postMatcher = matcha.folderable({
       nameOptions: {
-        index: [this.settings.entryAlias, 'post', 'index']
+        index: [this.getInheritedSchema().entryAlias, 'post', 'index']
       }
     })
 
@@ -162,7 +163,15 @@ class Category extends ContentModelEntryNode {
       model: models.Post,
       matcher: postMatcher,
       sideEffect: (tree, entry) => tree.levelPosts.push(entry),
-      settings: settings.post
+      schema: _.pick(this.getInheritedSchema(), [
+        'entryAlias',
+        'entryContentType',
+        'facetKeys'
+      ]),
+      settings: _.pick(this.getInheritedSettings(), [
+        'mode',
+        'contentTypes'
+      ])
     }, {
       key: 'categories',
       model: Category,
@@ -171,17 +180,22 @@ class Category extends ContentModelEntryNode {
         children: [ postMatcher ]
       }),
       sideEffect: (tree, entry) => tree.posts.push(...entry.subtree.posts),
-      settings: settings.subCategory
+      schema: this.getInheritedSchema(),
+      settings: {
+        ...this.getInheritedSettings(),
+        level: this.settings.level + 1
+      }
     }, {
       key: 'attachments',
       model: models.Attachment,
       matcher: matcha.true(),
-      settings: settings.attachment
+      schema: {},
+      settings: _.pick(this.getInheritedSettings(), ['mode'])
     }]
   }
 
   afterEffects(contentModel, collectionFacets) {
-    if (this.settings.facetKeys.length) {
+    if (this.__parentSchema__.facetKeys.length) {
       const childContext = this.context.push({
         title: this.title,
         slug: this.slug,
@@ -195,7 +209,7 @@ class Category extends ContentModelEntryNode {
           ...post,
           ...post.serializeLinks()
         })),
-        this.settings.facetKeys,
+        this.__parentSchema__.facetKeys,
         childContext
       )
     }
@@ -232,17 +246,17 @@ class Category extends ContentModelEntryNode {
           }
 
           // Alias for the current category
-          if (this.settings.categoryAlias) {
-            data[this.settings.categoryAlias] = data.category
+          if (this.__parentSchema__.categoryAlias) {
+            data[this.__parentSchema__.categoryAlias] = data.category
           }
 
           // Alias for the paginated 'posts'
-          const entriesAlias = this.__schema__.entriesAlias || this.settings.entriesAlias
+          const entriesAlias = this.getInheritedSchema().entriesAlias
           if (entriesAlias) {
             data[entriesAlias] = data.posts
           }
 
-          const contentType = this.contentType || this.settings.categoryContentType
+          const contentType = this.contentType || this.__parentSchema__.categoryContentType
           return renderer.render({
             templates: [
               `pages/${this.template}`,

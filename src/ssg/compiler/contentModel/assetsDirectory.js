@@ -15,8 +15,8 @@ class AssetsDirectory extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, context, settings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings) {
+    super(fsNode, context, schema, settings)
     this.subtreeConfig = this.getSubtreeConfig()
     this.subtree = this.parseSubtree({
       assets: []
@@ -32,6 +32,7 @@ class AssetsDirectory extends ContentModelEntryNode {
       key: 'assets',
       model: models.Asset,
       matcher: matcha.true(),
+      schema: {},
       settings: {
         mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory

@@ -10,8 +10,8 @@ class Asset extends ContentModelResourceNode {
     return asset
   }
 
-  constructor(fsNode, context, settings = defaultSettings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = defaultSettings) {
+    super(fsNode, context, schema, settings)
   }
 
   getPermalink() {

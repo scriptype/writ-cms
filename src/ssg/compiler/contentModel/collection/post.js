@@ -8,10 +8,8 @@ const models = {
 }
 
 const defaultSettings = {
-  entryContentType: undefined,
-  entryAlias: undefined,
+  mode: 'start',
   contentTypes: [],
-  facetKeys: []
 }
 class Post extends ContentModelEntryNode {
   static serialize(post) {
@@ -23,7 +21,7 @@ class Post extends ContentModelEntryNode {
     models.facet().linkWithEntryFields(
       postWithSerializedLinks,
       post.collectionFacets,
-      post.settings.facetKeys
+      post.__parentSchema__.facetKeys
     )
 
     return {
@@ -32,11 +30,11 @@ class Post extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, context, settings = defaultSettings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = defaultSettings) {
+    super(fsNode, context, schema, settings)
 
-    this.contentType = this.contentType || this.settings.entryContentType
-    this.__schema__ = this.getSchema()
+    this.contentType = this.contentType || schema.entryContentType
+    this.__schema__ = this.getSchema(schema)
 
     this.contextKey = 'post'
     this.subtreeConfig = this.getSubtreeConfig()
@@ -48,14 +46,17 @@ class Post extends ContentModelEntryNode {
   getIndexFile() {
     return this.fsNode.children?.find(
       matcha.templateFile({
-        nameOptions: [this.settings.entryAlias, 'post', 'index']
+        nameOptions: [this.__parentSchema__.entryAlias, 'post', 'index']
       })
     ) || this.fsNode
   }
 
-  getSchema() {
+  getSchema(parentSchema) {
     const contentType = this.settings.contentTypes.find(ct => {
-      return ct.name === this.contentType
+      return ct.model === 'entry' && (
+        ct.name === this.contentType ||
+        ct.name === parentSchema.entryContentType
+      )
     })
 
     return {
@@ -64,10 +65,18 @@ class Post extends ContentModelEntryNode {
     }
   }
 
+  getInheritedSchema() {
+    return {
+      ...this.__parentSchema__,
+      ...this.__schema__
+    }
+  }
+
   getSubtreeConfig() {
     return [{
       key: 'attachments',
       model: models.Attachment,
+      schema: {},
       matcher: matcha.true()
     }]
   }
@@ -87,14 +96,17 @@ class Post extends ContentModelEntryNode {
         settings,
         debug
       }
-      if (this.settings.entryAlias) {
-        data[this.settings.entryAlias] = data.post
+
+      const inheritedSchema = this.getInheritedSchema()
+
+      if (inheritedSchema.entryAlias) {
+        data[inheritedSchema.entryAlias] = data.post
       }
 
       return renderer.render({
         templates: [
           `pages/${this.template}`,
-          `pages/post/${this.settings.entryAlias}`,
+          `pages/post/${inheritedSchema.entryAlias}`,
           `pages/post/${this.contentType}`,
           `pages/post/default`
         ],

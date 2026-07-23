@@ -20,8 +20,8 @@ class PagesDirectory extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, context, settings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings) {
+    super(fsNode, context, schema, settings)
     this.subtreeConfig = this.getSubtreeConfig()
     this.subtree = this.parseSubtree({
       subpages: [],
@@ -37,6 +37,7 @@ class PagesDirectory extends ContentModelEntryNode {
     return [{
       key: 'subpages',
       model: models.Subpage,
+      schema: {},
       settings: {
         mode: this.settings.mode,
         pagesDirectory: this.settings.pagesDirectory
@@ -49,6 +50,7 @@ class PagesDirectory extends ContentModelEntryNode {
     }, {
       key: 'assets',
       model: models.Asset,
+      schema: {},
       settings: {
         mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory

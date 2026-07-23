@@ -39,7 +39,7 @@ class ContentModel extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, contentModelSettings, contentTypes) {
+  constructor(fsNode, contentModelSettings, schema, contentTypes) {
     const settings = {
       ...defaultSettings,
       ...contentModelSettings
@@ -51,7 +51,7 @@ class ContentModel extends ContentModelEntryNode {
       permalink: settings.permalinkPrefix
     }])
 
-    super(fsNode, context, settings)
+    super(fsNode, context, schema, settings)
 
     this.contentTypes = contentTypes
 
@@ -61,6 +61,7 @@ class ContentModel extends ContentModelEntryNode {
       homepage: new models.Homepage(
         { name: 'index', extension: 'md', content: '' },
         this.context,
+        {},
         { homepageDirectory: this.settings.homepageDirectory }
       ),
       pagesDirectory: [],
@@ -89,7 +90,8 @@ class ContentModel extends ContentModelEntryNode {
 
     return [
       ...collectionAliasesFromContentTypes,
-      ...collectionAliasesFromFrontMatter
+      ...collectionAliasesFromFrontMatter,
+      'collection'
     ]
   }
 
@@ -111,6 +113,7 @@ class ContentModel extends ContentModelEntryNode {
           standalone: ['homepage', 'home', 'index']
         }
       }),
+      schema: {},
       settings: {
         mode: this.settings.mode,
         homepageDirectory: this.settings.homepageDirectory
@@ -123,6 +126,7 @@ class ContentModel extends ContentModelEntryNode {
           index: ['page', 'index']
         }
       }),
+      schema: {},
       settings: {
         mode: this.settings.mode,
         pagesDirectory: this.settings.pagesDirectory
@@ -134,6 +138,7 @@ class ContentModel extends ContentModelEntryNode {
       matcher: matcha.directory({
         nameOptions: [this.settings.pagesDirectory, 'subpages', 'pages']
       }),
+      schema: {},
       settings: {
         mode: this.settings.mode,
         pagesDirectory: this.settings.pagesDirectory,
@@ -150,16 +155,18 @@ class ContentModel extends ContentModelEntryNode {
       matcher: matcha.directory({
         children: matcha.either(
           matcha.templateFile({
-            nameOptions: collectionAliases.concat('collection')
+            nameOptions: collectionAliases
           }),
           matcha.dataFile({
             nameOptions: (fsNode) => ([fsNode.name])
           }),
         )
       }),
-      settings: {
+      schema: {
         defaultCategoryName: this.settings.defaultCategoryName,
-        collectionAliases,
+        collectionAliases
+      },
+      settings: {
         mode: this.settings.mode,
         contentTypes: this.contentTypes,
         sortBy: 'date',
@@ -172,6 +179,7 @@ class ContentModel extends ContentModelEntryNode {
       matcher: matcha.directory({
         nameOptions: [this.settings.assetsDirectory, 'assets']
       }),
+      schema: {},
       settings: {
         mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory
@@ -183,6 +191,7 @@ class ContentModel extends ContentModelEntryNode {
       key: 'assets',
       model: models.Asset,
       matcher: matcha.true(),
+      schema: {},
       settings: {
         mode: this.settings.mode,
         assetsDirectory: this.settings.assetsDirectory

@@ -1,6 +1,6 @@
 ---
 model: collection
-name: Blog
+description: A collection of blog posts.
 collectionAlias: blog
 categoryContentType: BlogTopic
 categoryAlias: topic
@@ -10,4 +10,3 @@ entryAlias: article
 entriesAlias: articles
 facets: [tags, date, author, resources]
 ---
-A collection of blog posts.

@@ -1,5 +1,6 @@
 ---
-name: Person
+model: entry
+description: Schema for a person entry
 attributes:
   - key: avatar
     type: ImageAttachment
@@ -19,4 +20,3 @@ attributes:
   - key: books
     type: [+Book:author]
 ---
-Schema for a person entry

@@ -1,7 +1,8 @@
 class ContentModelNode {
-  constructor(fsNode, context, settings = {}) {
+  constructor(fsNode, context, schema, settings = {}) {
     this.fsNode = fsNode
     this.context = context
+    this.__parentSchema__ = schema
     this.settings = settings
     this.title = this.fsNode.name
     this.date = new Date(this.fsNode.stats?.birthtime || Date.now())

@@ -5,8 +5,8 @@ class Attachment extends ContentModelResourceNode {
     return attachment
   }
 
-  constructor(fsNode, context, settings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings) {
+    super(fsNode, context, schema, settings)
   }
 
   render(renderer) {

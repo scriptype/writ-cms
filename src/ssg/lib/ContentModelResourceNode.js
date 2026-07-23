@@ -5,8 +5,8 @@ const ContentModelNode = require('./ContentModelNode')
 const { addLinkBack, serializeLinks, resolveLinks } = require('./linking')
 
 class ContentModelResourceNode extends ContentModelNode {
-  constructor(fsNode, context, settings = {}) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = {}) {
+    super(fsNode, context, schema, settings)
     this.slug = this.title
     this.fileType = this.fsNode.fileType
     this.fileSize = this.fsNode.stats.size
@@ -55,9 +55,9 @@ class ContentModelResourceNode extends ContentModelNode {
     return serializeLinks(this)
   }
 
-  afterEffects(contentModel) {}
+  afterEffects(/*contentModel*/) {}
 
-  render(renderer) {}
+  render(/*renderer*/) {}
 }
 
 module.exports = ContentModelResourceNode

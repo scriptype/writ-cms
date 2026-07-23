@@ -18,8 +18,8 @@ class Homepage extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, context, settings = defaultSettings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = defaultSettings) {
+    super(fsNode, context, schema, settings)
     this.contextKey = 'homepage'
     this.subtreeConfig = this.getSubtreeConfig()
     this.subtree = this.parseSubtree({
@@ -47,7 +47,8 @@ class Homepage extends ContentModelEntryNode {
     return [{
       key: 'attachments',
       model: models.Attachment,
-      matcher: matcha.true()
+      matcher: matcha.true(),
+      schema: {}
     }]
   }
 

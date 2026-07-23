@@ -5,8 +5,8 @@ const { addLinkBack, serializeLinks, resolveLinks } = require('./linking')
 const ContentModelNode = require('./ContentModelNode')
 
 class ContentModelEntryNode extends ContentModelNode {
-  constructor(fsNode, context, settings = {}) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = {}) {
+    super(fsNode, context, schema, settings)
 
     this.__links = []
     this.indexFile = this.getIndexFile()
@@ -81,7 +81,7 @@ class ContentModelEntryNode extends ContentModelNode {
           continue configLoop
         }
         if (config.model) {
-          const childModel = new config.model(childNode, childContext, config.settings)
+          const childModel = new config.model(childNode, childContext, config.schema, config.settings)
           if (!this.draftCheck(childModel)) {
             // entry is draft, move on to next childNode
             continue childNodeLoop
@@ -128,9 +128,9 @@ class ContentModelEntryNode extends ContentModelNode {
     return serializeLinks(this)
   }
 
-  afterEffects(contentModel) {}
+  afterEffects(/*contentModel*/) {}
 
-  render(renderer) {}
+  render(/*renderer*/) {}
 }
 
 module.exports = ContentModelEntryNode

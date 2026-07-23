@@ -18,8 +18,8 @@ class Subpage extends ContentModelEntryNode {
     }
   }
 
-  constructor(fsNode, context, settings = defaultSettings) {
-    super(fsNode, context, settings)
+  constructor(fsNode, context, schema, settings = defaultSettings) {
+    super(fsNode, context, schema, settings)
     this.contextKey = 'page'
     this.subtreeConfig = this.getSubtreeConfig()
     this.subtree = this.parseSubtree({
@@ -39,6 +39,7 @@ class Subpage extends ContentModelEntryNode {
     return [{
       key: 'attachments',
       model: models.Attachment,
+      schema: {},
       matcher: matcha.true()
     }]
   }

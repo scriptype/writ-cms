@@ -32,6 +32,7 @@ module.exports = class Compiler {
     const contentModel = new this.ContentModel(
       { children: fileSystemTree },
       this.settings.contentModel,
+      {},
       contentTypes
     )
 
