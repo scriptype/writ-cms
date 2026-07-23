@@ -30,7 +30,8 @@ class ListingItems extends LitElement {
   static properties = {
     items: { type: Array },
     onSelect: { type: Function },
-    onDelete: { type: Function }
+    onDelete: { type: Function },
+    loading: { type: Boolean }
   }
 
   constructor() {
@@ -38,6 +39,7 @@ class ListingItems extends LitElement {
     this.items = []
     this.onSelect = _=>_
     this.onDelete = _=>_
+    this.loading = false
   }
 
   onKeydown = (index, item, e) => {
@@ -61,7 +63,7 @@ class ListingItems extends LitElement {
     console.log('listing items', this.items)
     return html`
       <div class="listing-items">
-        ${!this.items.length ? html`Loading…` : html`
+        ${this.loading ? html`Loading…` : html`
           <ul class="listing-items-inner">
             ${this.items.map((item, index) => html`
               <li

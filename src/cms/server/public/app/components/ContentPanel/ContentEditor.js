@@ -10,6 +10,7 @@ class ContentEditor extends LitElement {
     node: { type: Object },
     settings: { type: Object },
     onClickBack: { type: Function },
+    contentType: { type: Object },
     _deletedAttachments: { type: Array, state: true }
   }
 
@@ -17,6 +18,7 @@ class ContentEditor extends LitElement {
     super()
     this.node = null
     this.onClickBack = null
+    this.contentType = null
     this._deletedAttachments = []
   }
 

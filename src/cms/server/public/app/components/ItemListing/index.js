@@ -7,6 +7,7 @@ class ItemListing extends LitElement {
     actions: { type: Array },
     isRoot: { type: Boolean },
     onTraverseUp: { type: Function },
+    loading: { type: Boolean },
     items: { type: Array },
     onSelect: { type: Function },
     onDelete: { type: Function },
@@ -25,6 +26,7 @@ class ItemListing extends LitElement {
     this.actions = []
     this.isRoot = true
     this.onTraverseUp = _=>_
+    this.loading = false
     this.items = []
     this.onSelect = _=>_
     this.onDelete = _=>_
@@ -45,6 +47,7 @@ class ItemListing extends LitElement {
         ></listing-actions>
         <div class="columns">
           <listing-items
+            .loading=${this.loading}
             .items=${this.items}
             .onSelect=${this.onSelect}
             .onDelete=${this.onDelete}

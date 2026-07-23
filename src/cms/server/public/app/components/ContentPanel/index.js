@@ -10,7 +10,10 @@ class ContentPanel extends LitElement {
   static properties = {
     settings: { type: Object },
     _path: { type: Array, state: true },
-    _contentTree: { type: Array, state: true }
+    _contentTree: { type: Array, state: true },
+    _contentTypes: { type: Array, state: true },
+    _loadingContent: { type: Boolean, state: true },
+    _loadingTypes: { type: Boolean, state: true }
   }
 
   static styles = css``
@@ -27,17 +30,29 @@ class ContentPanel extends LitElement {
 
   constructor() {
     super()
-    this._contentTree = []
     this._path = []
+    this._contentTree = []
+    this._contentTypes = []
+    this._loadingContent = false
+    this._loadingTypes = false
   }
 
   connectedCallback() {
     super.connectedCallback()
     this.fetchContentTree()
+    this.fetchContentTypes()
   }
 
   async fetchContentTree() {
+    this._loadingContent = true
     this._contentTree = flattenSubtree(await api.contentModel.get())
+    this._loadingContent = false
+  }
+
+  async fetchContentTypes() {
+    this._loadingTypes = true
+    this._contentTypes = await api.contentTypes.get()
+    this._loadingTypes = false
   }
 
   drill = (nodeIndex, node) => {
@@ -162,13 +177,14 @@ class ContentPanel extends LitElement {
     await this.fetchContentTree()
   }
 
-  createAction(label, handlers) {
+  createAction(label, handlers, contentType) {
     return {
       label,
       handler: () => {
         console.log(label)
         Dialog.html(`<content-editor></content-editor>`)
         const editor = Dialog.find('content-editor')
+        editor.contentType = contentType
         editor.onClickBack = this.goBackFromEditor
         editor.addEventListener('create', handlers.create)
         editor.addEventListener('update', handlers.update)
@@ -178,43 +194,141 @@ class ContentPanel extends LitElement {
   }
 
   getNodeActions(node) {
-    switch (node.type) {
-      case 'root':
-        return [
-          this.createAction('Create page', {
-            create: e => this.createNode('page', api.subpage.create, e.detail),
-            update: e => this.updateNode('page', api.subpage.update, e.detail)
-          }),
-          this.createAction('Create collection', {
-            create: e => this.createNode('collection', api.collections.create, e.detail),
-            update: e => this.updateNode('collection', api.collections.update, e.detail)
-          })
-        ]
+    const actions = {
+      root: () => ([
+        this.createAction('New page', {
+          create: e => this.createNode('page', api.subpage.create, e.detail),
+          update: e => this.updateNode('page', api.subpage.update, e.detail)
+        }),
+        ...this._contentTypes
+          .filter(ct => ct.model === 'page')
+          .map(contentType => (
+            this.createAction(`New ${contentType.name}`, {
+              create: e => this.createNode('page', api.subpage.create, e.detail),
+              update: e => this.updateNode('page', api.subpage.update, e.detail)
+            }, contentType)
+          )),
 
-      case 'collection':
-        return [
-          this.createAction('Create category', {
+        this.createAction('New collection', {
+          create: e => this.createNode('collection', api.collections.create, e.detail),
+          update: e => this.updateNode('collection', api.collections.update, e.detail)
+        }),
+        ...this._contentTypes
+          .filter(ct => ct.model === 'collection')
+          .map(contentType => (
+            this.createAction(`New ${contentType.name}`, {
+              create: e => this.createNode('collection', api.subpage.create, e.detail),
+              update: e => this.updateNode('collection', api.subpage.update, e.detail)
+            }, contentType)
+          ))
+      ]),
+
+      collection: () => {
+        const { categoryAlias, categoryContentType } = node.data.__schema__
+        const categoryActionKey = categoryAlias || categoryContentType
+        const categoryAction = categoryActionKey ?
+          this.createAction(
+            `New ${categoryActionKey}`,
+            {
+              create: e => this.createNode('category', api.category.create, e.detail),
+              update: e => this.updateNode('category', api.category.update, e.detail)
+            },
+            categoryContentType ?
+              this._contentTypes.find(
+                ct => ct.model === 'category' && ct.name === categoryContentType
+              ) :
+              undefined
+          ) :
+          this.createAction('New category', {
             create: e => this.createNode('category', api.category.create, this.withTaxonomyPath(e.detail)),
-            update: e => this.updateNode('category', api.category.update, e.detail),
-          }),
-          this.createAction('Create entry', {
+            update: e => this.updateNode('category', api.category.update, e.detail)
+          })
+
+        const { entryAlias, entryContentType } = node.data.__schema__
+        const entryActionKey = entryAlias || entryContentType
+        const entryAction = entryActionKey ?
+          this.createAction(
+            `New ${entryActionKey}`,
+            {
+              create: e => this.createNode('entry', api.post.create, e.detail),
+              update: e => this.updateNode('entry', api.post.update, e.detail)
+            },
+            entryContentType ?
+              this._contentTypes.find(
+                ct => ct.model === 'entry' && ct.name === entryContentType
+              ) :
+              undefined
+          ) :
+          this.createAction('New entry', {
             create: e => this.createNode('entry', api.post.create, this.withTaxonomyPath(e.detail)),
             update: e => this.updateNode('entry', api.post.update, e.detail)
           })
-        ]
 
-      case 'category':
         return [
-          this.createAction('Create sub-category', {
-            create: e => this.createNode('category', api.category.create, this.withTaxonomyPath(e.detail)),
-            update: e => this.updateNode('category', api.category.update, e.detail),
-          }),
-          this.createAction('Create entry', {
-            create: e => this.createNode('entry', api.post.create, this.withTaxonomyPath(e.detail)),
-            update: e => this.updateNode('entry', api.post.update, e.detail),
-          })
+          categoryAction,
+          entryAction
         ]
+      },
+
+      category: () => {
+        const { categoryAlias, categoryContentType } = node.data.__schema__
+        const {
+          categoryAlias: parentCategoryAlias,
+          categoryContentType: parentCategoryContentType
+        } = node.data.__parentSchema__
+        const categoryActionKey = categoryAlias || categoryContentType || parentCategoryAlias || parentCategoryContentType
+        const categoryAction = categoryActionKey ?
+          this.createAction(
+            `New ${categoryActionKey}`,
+            {
+              create: e => this.createNode('category', api.category.create, e.detail),
+              update: e => this.updateNode('category', api.category.update, e.detail)
+            },
+            categoryContentType ?
+              this._contentTypes.find(
+                ct => ct.model === 'category' && ct.name === categoryContentType
+              ) :
+              undefined
+          ) :
+          this.createAction('New category', {
+            create: e => this.createNode('category', api.category.create, this.withTaxonomyPath(e.detail)),
+            update: e => this.updateNode('category', api.category.update, e.detail)
+          })
+
+        const { entryAlias, entryContentType } = node.data.__schema__
+        const {
+          entryAlias: parentEntryAlias,
+          entryContentType: parentEntryContentType
+        } = node.data.__parentSchema__
+        const entryActionKey = entryAlias || entryContentType || parentEntryAlias || parentEntryContentType
+        const entryAction = entryActionKey ?
+          this.createAction(
+            `New ${entryActionKey}`,
+            {
+              create: e => this.createNode('entry', api.post.create, e.detail),
+              update: e => this.updateNode('entry', api.post.update, e.detail)
+            },
+            entryContentType ?
+              this._contentTypes.find(
+                ct => ct.model === 'entry' && ct.name === entryContentType
+              ) :
+              undefined
+          ) :
+          this.createAction('New entry', {
+            create: e => this.createNode('entry', api.post.create, this.withTaxonomyPath(e.detail)),
+            update: e => this.updateNode('entry', api.post.update, e.detail)
+          })
+
+        return [
+          categoryAction,
+          entryAction
+        ]
+      }
     }
+    if (actions[node.type]) {
+      return actions[node.type]()
+    }
+    return []
   }
 
   withTaxonomyPath = (payload) => {
@@ -225,9 +339,30 @@ class ContentPanel extends LitElement {
   }
 
   nodeToListingItem = (node) => {
+    let nodeType = node.type
+    switch (node.type) {
+      case 'collection':
+        nodeType = node.data.__schema__.collectionAlias ||
+          node.data.__schema__.name ||
+          node.data.contentType ||
+          nodeType
+        break
+      case 'category':
+        nodeType = node.data.__parentSchema__.categoryAlias ||
+          node.data.__parentSchema__.categoryContentType ||
+          node.data.contentType ||
+          nodeType
+        break
+      case 'entry':
+        nodeType = node.data.__parentSchema__.entryAlias ||
+          node.data.__parentSchema__.entryContentType ||
+          node.data.contentType ||
+          nodeType
+        break
+    }
     return {
       ...node,
-      name: `${node.name} (${node.type})`
+      name: `${node.name} (${nodeType})`
     }
   }
 
@@ -259,6 +394,7 @@ class ContentPanel extends LitElement {
           .actions=${actions}
           .isRoot=${!this._path.length}
           .onTraverseUp=${this.traverseUp}
+          .loading=${this._loadingContent || this._loadingTypes}
           .items=${this.currentNode.children.map(this.nodeToListingItem)}
           .onSelect=${this.drill}
           .onDelete=${this.deleteNode}
