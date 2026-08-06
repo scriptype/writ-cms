@@ -1,6 +1,6 @@
 const matter = require('gray-matter')
 const _ = require('lodash')
-const { ['default']: filenamify } = require('filenamify')
+const filenamifyPromise = import('filenamify')
 const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
 const { join, relative } = require('path')
@@ -34,6 +34,7 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
     const { rootDirectory, contentDirectory } = getSettings()
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
+    const filenamify = (await filenamifyPromise).default
     const sanitizedTitle = filenamify(opts.title)
 
     const path = join(root, sanitizedTitle)
@@ -88,6 +89,7 @@ const createCollectionsModel = ({ getSettings, getContentModel }) => {
     let isPathDifferentThanTitle
 
     if (isTitleDifferent) {
+      const filenamify = (await filenamifyPromise).default
       const sanitizedTitle = filenamify(opts.title)
       const sanitizedPath = replaceFilename(collection.absolutePath, sanitizedTitle)
       const unusedPath = await unusedFilename(sanitizedPath)

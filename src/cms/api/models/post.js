@@ -2,7 +2,7 @@ const { writeFile, mkdir, rename, rm } = require('fs/promises')
 const { join, sep } = require('path')
 const matter = require('gray-matter')
 const _ = require('lodash')
-const { ['default']: filenamify } = require('filenamify')
+const filenamifyPromise = import('filenamify')
 const { unusedFilename } = require('unused-filename')
 const {
   contentRootPath,
@@ -38,6 +38,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
     const shouldFolder = !!attachments.length
+    const filenamify = (await filenamifyPromise).default
     const sanitizedTitle = filenamify(opts.title)
 
     const path = join(...[
@@ -114,6 +115,7 @@ const createPostModel = ({ getSettings, getContentModel }) => {
     let isPathDifferentThanTitle
 
     if (isTitleDifferent) {
+      const filenamify = (await filenamifyPromise).default
       const sanitizedTitle = filenamify(opts.title)
       const sanitizedPath = replaceFilename(post.absolutePath, sanitizedTitle)
       const unusedPath = await unusedFilename(sanitizedPath)
