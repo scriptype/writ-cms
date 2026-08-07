@@ -1,10 +1,13 @@
 const matter = require('gray-matter')
 const _ = require('lodash')
-const filenamifyPromise = import('filenamify')
-const { unusedFilename } = require('unused-filename')
 const { join, basename } = require('path')
 const { writeFile, rm } = require('fs/promises')
-const { replaceFilename, validatePath } = require('../helpers')
+const {
+  replaceFilename,
+  validatePath,
+  filenamify,
+  unusedFilename
+} = require('../helpers')
 
 const findContentType = (contentTypes, path) => {
   return contentTypes.find(ct => ct.path === path)
@@ -24,8 +27,7 @@ const createContentTypesModel = ({ getSettings, getContentTypes }) => {
     const { rootDirectory, contentTypesDirectory } = getSettings()
     const schemaDirectory = join(rootDirectory, contentTypesDirectory)
 
-    const filenamify = (await filenamifyPromise).default
-    const sanitizedName = filenamify(opts.name)
+    const sanitizedName = await filenamify(opts.name)
     const path = join(schemaDirectory, `${sanitizedName}${opts.extension}`)
     const unusedPath = await unusedFilename(path)
 
@@ -85,8 +87,7 @@ const createContentTypesModel = ({ getSettings, getContentTypes }) => {
     let isPathDifferentThanTitle
 
     if (isTitleDifferent) {
-      const filenamify = (await filenamifyPromise).default
-      const sanitizedTitle = filenamify(opts.title)
+      const sanitizedTitle = await filenamify(opts.title)
       const sanitizedPath = replaceFilename(contentType.absolutePath, sanitizedTitle)
       const unusedPath = await unusedFilename(sanitizedPath)
 

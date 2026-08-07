@@ -1,5 +1,7 @@
 const { readdir, readFile, writeFile, rm } = require('fs/promises')
 const { join, dirname, basename, isAbsolute, relative } = require('path')
+const filenamifyPromise = import('filenamify')
+const unusedFilenamePromise = import('unused-filename')
 
 const contentRootPath = async (rootDirectory, contentDirectory) => {
   if (!rootDirectory) {
@@ -67,6 +69,16 @@ const uploadAttachments = (attachments, parentAbsolutePath) => {
   })
 }
 
+const filenamify = async (...args) => {
+  const filenamifyModule = (await filenamifyPromise).default
+  return filenamifyModule(...args)
+}
+
+const unusedFilename = async (...args) => {
+  const unusedFilenameModule = (await unusedFilenamePromise).unusedFilename
+  return unusedFilenameModule(...args)
+}
+
 module.exports = {
   contentRootPath,
   readFileContent,
@@ -75,5 +87,7 @@ module.exports = {
   getRelativePath,
   validatePath,
   deleteAttachments,
-  uploadAttachments
+  uploadAttachments,
+  filenamify,
+  unusedFilename
 }

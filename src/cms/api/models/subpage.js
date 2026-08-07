@@ -1,7 +1,5 @@
 const matter = require('gray-matter')
 const _ = require('lodash')
-const filenamifyPromise = import('filenamify')
-const { unusedFilename } = require('unused-filename')
 const { writeFile, mkdir, rename, rm } = require('fs/promises')
 const { join } = require('path')
 const {
@@ -11,7 +9,9 @@ const {
   uploadAttachments,
   deleteAttachments,
   getRelativePath,
-  validatePath
+  validatePath,
+  filenamify,
+  unusedFilename
 } = require('../helpers')
 
 const findPage = (contentModel, path) => {
@@ -36,8 +36,7 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     const root = await contentRootPath(rootDirectory, contentDirectory)
 
     const shouldFolder = !!attachments.length
-    const filenamify = (await filenamifyPromise).default
-    const sanitizedTitle = filenamify(opts.title)
+    const sanitizedTitle = await filenamify(opts.title)
 
     const path = join(
       root,
@@ -110,8 +109,7 @@ const createSubpageModel = ({ getSettings, getContentModel }) => {
     let isPathDifferentThanTitle
 
     if (isTitleDifferent) {
-      const filenamify = (await filenamifyPromise).default
-      const sanitizedTitle = filenamify(opts.title)
+      const sanitizedTitle = await filenamify(opts.title)
       const sanitizedPath = replaceFilename(page.absolutePath, sanitizedTitle)
       const unusedPath = await unusedFilename(sanitizedPath)
 
